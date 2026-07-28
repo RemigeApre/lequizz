@@ -9,15 +9,16 @@
   function loadAttempt() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return { data: {}, sectionIndex: 0, doneGroups: {} };
+      if (!raw) return { data: {}, sectionIndex: 0, doneGroups: {}, toTest: {} };
       var parsed = JSON.parse(raw);
       return {
         data: parsed.data || {},
         sectionIndex: parsed.sectionIndex || 0,
         doneGroups: parsed.doneGroups || {},
+        toTest: parsed.toTest || {},
       };
     } catch (e) {
-      return { data: {}, sectionIndex: 0, doneGroups: {} };
+      return { data: {}, sectionIndex: 0, doneGroups: {}, toTest: {} };
     }
   }
 
@@ -56,8 +57,16 @@
     return html;
   }
 
-  function renderItemCard(item, i, existingMatrix) {
-    var html = '<div class="item-card"><div class="item-name">' + item + "</div>";
+  function renderItemCard(item, i, existingMatrix, sectionKey) {
+    var itemKey = sectionKey + ":" + i;
+    var toTest = !!state.toTest[itemKey];
+    var html = '<div class="item-card">';
+    html += '<div class="item-header">';
+    html += '<button type="button" class="test-toggle' + (toTest ? " active" : "") +
+      '" data-item-key="' + itemKey + '" title="Marquer comme decouverte a tester">' +
+      (toTest ? "★" : "☆") + " decouverte a tester</button>";
+    html += '<span class="item-name">' + item + "</span>";
+    html += "</div>";
     config.levels.forEach(function (lvl) {
       var existingVal = existingMatrix[i] ? Number(existingMatrix[i][lvl.key]) : 1;
       var fieldName = "m_" + i + "_" + lvl.key;
@@ -121,7 +130,7 @@
       group.items.forEach(function (item) {
         var i = globalIndex;
         globalIndex += 1;
-        html += renderItemCard(item, i, existingMatrix);
+        html += renderItemCard(item, i, existingMatrix, section.key);
       });
 
       html += "</div></details>";
@@ -257,17 +266,38 @@
     return html;
   }
 
+  function renderToTestList() {
+    var keys = Object.keys(state.toTest).filter(function (k) { return state.toTest[k]; });
+    if (!keys.length) return "";
+
+    var html = '<div class="result-section"><h2>Tes decouvertes a tester (' + keys.length + ")</h2><ul class=\"answer-list\">";
+    keys.forEach(function (key) {
+      var parts = key.split(":");
+      var sectionKey = parts[0];
+      var itemIdx = Number(parts[1]);
+      var section = config.sections.find(function (s) { return s.key === sectionKey; });
+      if (!section) return;
+      var items = window.Scoring.flattenItems(section);
+      var label = items[itemIdx];
+      if (label === undefined) return;
+      html += "<li><span>" + label + " <em>(" + section.title + ")</em></span></li>";
+    });
+    html += "</ul></div>";
+    return html;
+  }
+
   function renderResult(scores) {
     var history = saveHistory(scores);
     var html = "<h1>Merci, voici ton resultat</h1>";
     config.sections.forEach(function (section) {
       html += renderResultRow(section, scores.sections[section.key]);
     });
+    html += renderToTestList();
     html += renderHistory(history);
     html += '<button type="button" id="restart-btn">Refaire le quiz</button>';
     app.innerHTML = html;
     document.getElementById("restart-btn").addEventListener("click", function () {
-      state = { data: {}, sectionIndex: 0, doneGroups: {} };
+      state = { data: {}, sectionIndex: 0, doneGroups: {}, toTest: {} };
       persist();
       renderSection(0);
     });
@@ -290,7 +320,7 @@
       renderSection(idx);
     });
     document.getElementById("restart-fresh-btn").addEventListener("click", function () {
-      state = { data: {}, sectionIndex: 0, doneGroups: {} };
+      state = { data: {}, sectionIndex: 0, doneGroups: {}, toTest: {} };
       persist();
       renderSection(0);
     });
@@ -374,8 +404,19 @@
     });
   }
 
-  // Delegated click handler for pill buttons — attached once, survives re-renders.
+  // Delegated click handler for pills + "decouverte a tester" — attached once, survives re-renders.
   app.addEventListener("click", function (e) {
+    var testBtn = e.target.closest(".test-toggle");
+    if (testBtn) {
+      var itemKey = testBtn.dataset.itemKey;
+      var isOn = !state.toTest[itemKey];
+      state.toTest[itemKey] = isOn;
+      persist();
+      testBtn.classList.toggle("active", isOn);
+      testBtn.textContent = (isOn ? "★" : "☆") + " decouverte a tester";
+      return;
+    }
+
     var btn = e.target.closest(".pill");
     if (!btn) return;
     var group = btn.closest(".pill-group");
