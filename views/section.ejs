@@ -1,19 +1,16 @@
 <%- include('partials/head', { title: section.title + ' — ' + config.title }) %>
 <main class="container wide">
   <%- include('partials/top-nav', { config: config }) %>
-  <p class="progress">Etape <%= idx + 1 %> / <%= total %></p>
-  <h1><%= section.title %></h1>
+  <h1 class="section-title-h1"><%= section.title %></h1>
   <% if (section.intro) { %><p class="intro"><%= section.intro %></p><% } %>
+
+  <%
+    var LEVEL_COLORS = { a: "#6c8ebf", b: "#9b6cbf", c: "#4fa5a0", d: "#d9932f", e: "#c0455a" };
+  %>
 
   <form method="POST" action="/section/<%= idx %>">
     <% if (section.type === "matrix") { %>
       <% var multiGroup = section.groups.length > 1; %>
-      <% if (multiGroup) { %>
-        <div class="fold-controls">
-          <button type="button" class="link-button" data-fold-action="open">Tout deplier</button>
-          <button type="button" class="link-button" data-fold-action="close">Tout replier</button>
-        </div>
-      <% } %>
 
       <%
         var globalIndex = 0;
@@ -25,45 +22,42 @@
         <details class="matrix-group<%= isDone ? ' done' : '' %>" <%= (!multiGroup || gi === 0) && !isDone ? "open" : "" %> data-group-index="<%= gi %>">
           <summary>
             <span class="group-title-text"><%= group.title || "Toutes les pratiques" %> (<%= group.items.length %>)</span>
-            <label class="group-done-toggle">
-              <input type="checkbox" class="group-done-checkbox" name="done_<%= gi %>_visible" <%= isDone ? "checked" : "" %> /> OK, termine
-            </label>
+            <button type="button" class="group-done-toggle<%= isDone ? ' active' : '' %>">
+              <%= isDone ? "&#10003; Complet" : "Complet" %>
+            </button>
             <input type="hidden" name="done_<%= gi %>" class="group-done-hidden" value="<%= isDone ? 1 : 0 %>" />
           </summary>
           <div class="item-cards">
             <% group.items.forEach(function (item) { %>
               <% var i = globalIndex; globalIndex += 1; %>
-              <% var levelsForItem = existingMatrix[i] || {}; %>
-              <% var maxVal = config.scaleLabels.length; %>
-              <% var isAdored = Object.keys(levelsForItem).some(function (k) { return Number(levelsForItem[k]) === maxVal; }); %>
               <% var itemKey = section.key + ":" + i; %>
               <% var toTest = !!bookmarks.toTest[itemKey]; %>
               <% var disliked = !!bookmarks.dislike[itemKey]; %>
+              <% var flagClass = toTest ? "flag-test" : (disliked ? "flag-dislike" : ""); %>
               <% var firstLevelKey = config.levels[0].key; %>
               <% var firstVal = existingMatrix[i] ? Number(existingMatrix[i][firstLevelKey]) : 1; %>
               <div class="item-card">
                 <div class="item-header">
                   <div class="item-title-row">
-                    <span class="fire-icon" <%= isAdored ? "" : 'style="display:none"' %>>&#128293;</span>
                     <span class="item-name"><%= item %></span>
-                  </div>
-                  <div class="item-toggles">
-                    <button type="button" class="test-toggle<%= toTest ? ' active' : '' %>" title="Marquer comme decouverte a tester">
-                      <%= toTest ? "&#9733;" : "&#9734;" %> decouverte a tester
-                    </button>
-                    <button type="button" class="dislike-toggle<%= disliked ? ' active' : '' %>" title="Marquer comme aime pas">
-                      <%= disliked ? "&#128078;" : "&#129293;" %> aime pas
-                    </button>
+                    <details class="item-flag">
+                      <summary class="item-flag-summary <%= flagClass %>" title="Marquer">!</summary>
+                      <div class="item-flag-menu">
+                        <button type="button" class="item-flag-option" data-flag="test">A tester</button>
+                        <button type="button" class="item-flag-option" data-flag="dislike">Aime pas</button>
+                        <button type="button" class="item-flag-option" data-flag="none">Aucun</button>
+                      </div>
+                    </details>
                     <input type="hidden" name="test_<%= i %>" class="test-hidden" value="<%= toTest ? 1 : 0 %>" />
                     <input type="hidden" name="dislike_<%= i %>" class="dislike-hidden" value="<%= disliked ? 1 : 0 %>" />
                   </div>
                 </div>
 
                 <div class="level-picker" data-item-index="<%= i %>">
-                  <select class="level-select<%= firstVal > 1 ? ' level-answered' : '' %>">
+                  <select class="level-select" style="border-left-color: <%= LEVEL_COLORS[firstLevelKey] %>">
                     <% config.levels.forEach(function (lvl) { %>
                       <% var v = existingMatrix[i] ? Number(existingMatrix[i][lvl.key]) : 1; %>
-                      <option value="<%= lvl.key %>"><%= lvl.label %> (<%= config.scaleLabels[v - 1] %>)</option>
+                      <option value="<%= lvl.key %>" style="background-color: <%= LEVEL_COLORS[lvl.key] %>; color: #fff;"><%= lvl.label %> (<%= config.scaleLabels[v - 1] %>)</option>
                     <% }) %>
                   </select>
                   <select class="freq-select freq-val-<%= firstVal %>">

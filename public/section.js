@@ -1,12 +1,13 @@
 (function () {
+  var LEVEL_COLORS = { a: "#6c8ebf", b: "#9b6cbf", c: "#4fa5a0", d: "#d9932f", e: "#c0455a" };
+
   function setFreqClass(select, value) {
     select.className = select.className.replace(/\bfreq-val-\d+\b/g, "").trim();
     select.classList.add("freq-val-" + value);
   }
 
   function levelOptionLabel(select, levelKey) {
-    var opt = select.querySelector('option[value="' + levelKey + '"]');
-    return opt;
+    return select.querySelector('option[value="' + levelKey + '"]');
   }
 
   document.querySelectorAll(".level-picker").forEach(function (picker) {
@@ -17,16 +18,6 @@
 
     function hiddenFor(levelKey) {
       return itemCard.querySelector('input[type="hidden"][name="m_' + itemIndex + "_" + levelKey + '"]');
-    }
-
-    function updateFireIcon() {
-      var maxValText = freqSelect.options[freqSelect.options.length - 1].value;
-      var hiddenInputs = itemCard.querySelectorAll('input[type="hidden"][name^="m_' + itemIndex + '_"]');
-      var hasMax = Array.prototype.some.call(hiddenInputs, function (inp) {
-        return inp.value === maxValText;
-      });
-      var fire = itemCard.querySelector(".fire-icon");
-      if (fire) fire.style.display = hasMax ? "" : "none";
     }
 
     freqSelect.addEventListener("change", function () {
@@ -40,8 +31,6 @@
         opt.textContent = baseLabel + " (" + freqLabel + ")";
       }
       setFreqClass(freqSelect, freqSelect.value);
-      levelSelect.classList.toggle("level-answered", Number(freqSelect.value) > 1);
-      updateFireIcon();
     });
 
     levelSelect.addEventListener("change", function () {
@@ -50,52 +39,42 @@
       var v = hidden ? hidden.value : "1";
       freqSelect.value = v;
       setFreqClass(freqSelect, v);
-      levelSelect.classList.toggle("level-answered", Number(v) > 1);
+      levelSelect.style.borderLeftColor = LEVEL_COLORS[levelKey] || "";
     });
   });
 
-  document.querySelectorAll(".test-toggle").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      var hidden = btn.parentElement.querySelector(".test-hidden");
-      var isOn = hidden.value !== "1";
-      hidden.value = isOn ? "1" : "0";
-      btn.classList.toggle("active", isOn);
-      btn.innerHTML = (isOn ? "&#9733;" : "&#9734;") + " decouverte a tester";
-    });
-  });
+  document.querySelectorAll(".item-flag").forEach(function (details) {
+    var summary = details.querySelector(".item-flag-summary");
+    var itemCard = details.closest(".item-card");
+    var testHidden = itemCard.querySelector(".test-hidden");
+    var dislikeHidden = itemCard.querySelector(".dislike-hidden");
 
-  document.querySelectorAll(".dislike-toggle").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      var hidden = btn.parentElement.querySelector(".dislike-hidden");
-      var isOn = hidden.value !== "1";
-      hidden.value = isOn ? "1" : "0";
-      btn.classList.toggle("active", isOn);
-      btn.innerHTML = (isOn ? "&#128078;" : "&#129293;") + " aime pas";
-    });
-  });
-
-  document.querySelectorAll(".group-done-checkbox").forEach(function (checkbox) {
-    checkbox.addEventListener("click", function (e) {
-      e.stopPropagation();
-    });
-    checkbox.addEventListener("change", function () {
-      var details = checkbox.closest("details.matrix-group");
-      var hidden = details.querySelector(".group-done-hidden");
-      if (hidden) hidden.value = checkbox.checked ? "1" : "0";
-      details.classList.toggle("done", checkbox.checked);
-      if (checkbox.checked) details.open = false;
-    });
-  });
-
-  var foldControls = document.querySelector(".fold-controls");
-  if (foldControls) {
-    foldControls.addEventListener("click", function (e) {
-      var btn = e.target.closest("button[data-fold-action]");
-      if (!btn) return;
-      var open = btn.dataset.foldAction === "open";
-      document.querySelectorAll("details.matrix-group").forEach(function (d) {
-        d.open = open;
+    details.querySelectorAll(".item-flag-option").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var flag = btn.dataset.flag;
+        testHidden.value = flag === "test" ? "1" : "0";
+        dislikeHidden.value = flag === "dislike" ? "1" : "0";
+        summary.classList.remove("flag-test", "flag-dislike");
+        if (flag === "test") summary.classList.add("flag-test");
+        if (flag === "dislike") summary.classList.add("flag-dislike");
+        details.open = false;
+        testHidden.dispatchEvent(new Event("change", { bubbles: true }));
       });
     });
-  }
+  });
+
+  document.querySelectorAll(".group-done-toggle").forEach(function (btn) {
+    btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var details = btn.closest("details.matrix-group");
+      var hidden = details.querySelector(".group-done-hidden");
+      var isDone = hidden.value !== "1";
+      hidden.value = isDone ? "1" : "0";
+      btn.classList.toggle("active", isDone);
+      btn.innerHTML = isDone ? "&#10003; Complet" : "Complet";
+      details.classList.toggle("done", isDone);
+      if (isDone) details.open = false;
+      hidden.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+  });
 })();
