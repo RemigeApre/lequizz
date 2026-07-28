@@ -7,6 +7,9 @@ const session = require("express-session");
 
 const buildQuizRouter = require("./routes/quiz");
 const buildAdminRouter = require("./routes/admin");
+const { createThrottle } = require("./loginThrottle");
+
+const gateThrottle = createThrottle();
 
 const config = JSON.parse(
   fs.readFileSync(path.join(__dirname, "..", "docs", "questions.json"), "utf8")
@@ -15,7 +18,11 @@ const config = JSON.parse(
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.set("trust proxy", 1);
+// Pas de "trust proxy" ici : ce deploiement expose l'app directement
+// (IP:port, sans nginx devant). L'activer sans proxy reel permettrait a
+// n'importe qui de falsifier son IP via un en-tete et de contourner le
+// ralentissement anti-brute-force. A reactiver seulement si un reverse
+// proxy (nginx, etc.) est effectivement place devant l'app.
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "..", "views"));
 
@@ -43,10 +50,19 @@ app.get("/gate", (req, res) => {
 });
 
 app.post("/gate", (req, res) => {
+  const key = req.ip;
+  const wait = gateThrottle.secondsToWait(key);
+  if (wait > 0) {
+    return res.render("gate", { error: `Trop de tentatives. Reessaie dans ${wait}s.` });
+  }
+
   if (process.env.SITE_PASSWORD && req.body.password === process.env.SITE_PASSWORD) {
+    gateThrottle.recordSuccess(key);
     req.session.siteUnlocked = true;
     return res.redirect("/");
   }
+
+  gateThrottle.recordFailure(key);
   res.render("gate", { error: "Mot de passe incorrect" });
 });
 
