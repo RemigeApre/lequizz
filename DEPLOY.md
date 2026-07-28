@@ -438,8 +438,12 @@ Ajoute/modifie :
 ```
 TLS_CERT_PATH=/app/certs/cert.pem
 TLS_KEY_PATH=/app/certs/key.pem
-FORCE_SECURE_COOKIE=true
 ```
+
+(Rien d'autre a regler : des que ces deux fichiers existent, l'app bascule
+seule en HTTPS et le cookie de session passe "secure" avec, au meme
+endroit du code — plus jamais de desynchronisation possible entre "le
+site sert du HTTPS" et "le cookie l'exige".)
 
 ### 3. Relancer
 

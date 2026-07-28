@@ -18,6 +18,16 @@ const config = JSON.parse(
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Source unique de verite pour savoir si le site tourne en HTTPS : le
+// cookie de session doit etre "secure" si et seulement si le serveur sert
+// reellement du HTTPS. Aucun flag manuel a part qui pourrait se
+// desynchroniser (c'est exactement ce qui causait la boucle de connexion).
+const certPath = process.env.TLS_CERT_PATH;
+const keyPath = process.env.TLS_KEY_PATH;
+const usingHttps = Boolean(
+  certPath && keyPath && fs.existsSync(certPath) && fs.existsSync(keyPath)
+);
+
 // Pas de "trust proxy" ici : ce deploiement expose l'app directement
 // (IP:port, sans nginx devant). L'activer sans proxy reel permettrait a
 // n'importe qui de falsifier son IP via un en-tete et de contourner le
@@ -37,9 +47,7 @@ app.use(
     cookie: {
       httpOnly: true,
       sameSite: "lax",
-      // Pas de HTTPS sur ce deploiement (IP directe, pas de certificat) :
-      // un cookie "secure" serait tout simplement ignore par le navigateur.
-      secure: process.env.FORCE_SECURE_COOKIE === "true",
+      secure: usingHttps,
       maxAge: 1000 * 60 * 60 * 24 * 90,
     },
   })
@@ -74,10 +82,7 @@ app.use((req, res, next) => {
 app.use("/", buildQuizRouter(config));
 app.use("/admin", buildAdminRouter(config));
 
-const certPath = process.env.TLS_CERT_PATH;
-const keyPath = process.env.TLS_KEY_PATH;
-
-if (certPath && keyPath && fs.existsSync(certPath) && fs.existsSync(keyPath)) {
+if (usingHttps) {
   https
     .createServer(
       {
