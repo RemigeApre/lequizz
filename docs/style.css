@@ -78,16 +78,48 @@ body {
 .matrix-group summary {
   font-weight: 600;
   cursor: pointer;
-  padding: 0.25rem 0;
   user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--card);
+  padding: 0.6rem 0.75rem;
+  margin: -1rem -1rem 0;
+  border-bottom: 1px solid transparent;
+}
+
+.matrix-group[open] summary {
+  margin-bottom: 0.75rem;
+  border-bottom-color: var(--border);
 }
 
 .matrix-group summary:hover {
   color: var(--accent);
 }
 
-.matrix-group[open] summary {
-  margin-bottom: 0.75rem;
+.group-done-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 400;
+  font-size: 0.85rem;
+  color: var(--muted);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.matrix-group.done summary {
+  background: color-mix(in srgb, var(--accent) 15%, var(--card));
+}
+
+.matrix-group.done .group-title-text::after {
+  content: " \2713";
+  color: var(--accent);
+  font-weight: 700;
 }
 
 .fold-controls {

@@ -9,11 +9,15 @@
   function loadAttempt() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return { data: {}, sectionIndex: 0 };
+      if (!raw) return { data: {}, sectionIndex: 0, doneGroups: {} };
       var parsed = JSON.parse(raw);
-      return { data: parsed.data || {}, sectionIndex: parsed.sectionIndex || 0 };
+      return {
+        data: parsed.data || {},
+        sectionIndex: parsed.sectionIndex || 0,
+        doneGroups: parsed.doneGroups || {},
+      };
     } catch (e) {
-      return { data: {}, sectionIndex: 0 };
+      return { data: {}, sectionIndex: 0, doneGroups: {} };
     }
   }
 
@@ -91,9 +95,14 @@
     var existingMatrix = (existingData && existingData.matrix) || {};
 
     section.groups.forEach(function (group, gi) {
-      var openAttr = !multiGroup || gi === 0 ? " open" : "";
-      html += '<details class="matrix-group"' + openAttr + '><summary>' +
-        (group.title || "Toutes les pratiques") + " (" + group.items.length + ")</summary>";
+      var groupKey = section.key + ":" + gi;
+      var isDone = !!state.doneGroups[groupKey];
+      var openAttr = (!multiGroup || gi === 0) && !isDone ? " open" : "";
+      html += '<details class="matrix-group' + (isDone ? " done" : "") + '"' + openAttr +
+        ' data-group-key="' + groupKey + '"><summary>' +
+        '<span class="group-title-text">' + (group.title || "Toutes les pratiques") + " (" + group.items.length + ")</span>" +
+        '<label class="group-done-toggle"><input type="checkbox" class="group-done-checkbox"' +
+        (isDone ? " checked" : "") + " /> OK, termine</label></summary>";
       html += '<div class="item-cards">';
 
       group.items.forEach(function (item) {
@@ -230,7 +239,7 @@
     html += '<button type="button" id="restart-btn">Refaire le quiz</button>';
     app.innerHTML = html;
     document.getElementById("restart-btn").addEventListener("click", function () {
-      state = { data: {}, sectionIndex: 0 };
+      state = { data: {}, sectionIndex: 0, doneGroups: {} };
       persist();
       renderSection(0);
     });
@@ -253,7 +262,7 @@
       renderSection(idx);
     });
     document.getElementById("restart-fresh-btn").addEventListener("click", function () {
-      state = { data: {}, sectionIndex: 0 };
+      state = { data: {}, sectionIndex: 0, doneGroups: {} };
       persist();
       renderSection(0);
     });
@@ -315,6 +324,20 @@
         });
       });
     }
+
+    document.querySelectorAll(".group-done-checkbox").forEach(function (checkbox) {
+      checkbox.addEventListener("click", function (e) {
+        e.stopPropagation();
+      });
+      checkbox.addEventListener("change", function () {
+        var details = checkbox.closest("details.matrix-group");
+        var groupKey = details.dataset.groupKey;
+        state.doneGroups[groupKey] = checkbox.checked;
+        persist();
+        details.classList.toggle("done", checkbox.checked);
+        if (checkbox.checked) details.open = false;
+      });
+    });
   }
 
   // Delegated click handler for pill buttons — attached once, survives re-renders.
