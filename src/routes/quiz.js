@@ -103,7 +103,7 @@ function buildQuizRouter(config) {
       idx,
       total: config.sections.length,
       existing,
-      bookmarks: attempt.data.__bookmarks || { toTest: {}, dislike: {} },
+      bookmarks: Object.assign({ toTest: {}, dislike: {}, favorite: {} }, attempt.data.__bookmarks || {}),
       doneGroups: attempt.data.__doneGroups || {},
     });
   });
@@ -132,7 +132,10 @@ function buildQuizRouter(config) {
 
     attempt.data[section.key] = parseSectionSubmission(config, section, req.body);
 
-    attempt.data.__bookmarks = attempt.data.__bookmarks || { toTest: {}, dislike: {} };
+    attempt.data.__bookmarks = Object.assign(
+      { toTest: {}, dislike: {}, favorite: {} },
+      attempt.data.__bookmarks || {}
+    );
     attempt.data.__doneGroups = attempt.data.__doneGroups || {};
 
     if (section.type === "matrix") {
@@ -143,6 +146,8 @@ function buildQuizRouter(config) {
         else delete attempt.data.__bookmarks.toTest[key];
         if (req.body[`dislike_${i}`] === "1") attempt.data.__bookmarks.dislike[key] = true;
         else delete attempt.data.__bookmarks.dislike[key];
+        if (req.body[`fav_${i}`] === "1") attempt.data.__bookmarks.favorite[key] = true;
+        else delete attempt.data.__bookmarks.favorite[key];
       });
       section.groups.forEach((group, gi) => {
         const gkey = `${section.key}:${gi}`;

@@ -63,6 +63,17 @@
     });
   });
 
+  document.querySelectorAll(".item-fav-toggle").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var hidden = btn.parentElement.querySelector(".fav-hidden");
+      var isOn = hidden.value !== "1";
+      hidden.value = isOn ? "1" : "0";
+      btn.classList.toggle("active", isOn);
+      btn.innerHTML = isOn ? "&#9733;" : "&#9734;";
+      hidden.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+  });
+
   document.querySelectorAll(".group-done-toggle").forEach(function (btn) {
     btn.addEventListener("click", function (e) {
       e.stopPropagation();

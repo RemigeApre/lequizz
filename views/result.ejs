@@ -77,7 +77,7 @@
   <% }) %>
 
   <%
-    var bookmarks = (answers && answers.__bookmarks) || { toTest: {}, dislike: {} };
+    var bookmarks = (answers && answers.__bookmarks) || { toTest: {}, dislike: {}, favorite: {} };
     function bookmarkRows(map) {
       var rows = [];
       Object.keys(map || {}).forEach(function (key) {
@@ -92,9 +92,20 @@
       });
       return rows;
     }
+    var favoriteRows = bookmarkRows(bookmarks.favorite);
     var toTestRows = bookmarkRows(bookmarks.toTest);
     var dislikeRows = bookmarkRows(bookmarks.dislike);
   %>
+  <% if (favoriteRows.length) { %>
+    <div class="result-section">
+      <h2>Tes favoris (<%= favoriteRows.length %>)</h2>
+      <ul class="answer-list">
+        <% favoriteRows.forEach(function (row) { %>
+          <li><span><%= row.label %> <em>(<%= row.sectionTitle %>)</em></span></li>
+        <% }) %>
+      </ul>
+    </div>
+  <% } %>
   <% if (toTestRows.length) { %>
     <div class="result-section">
       <h2>Tes decouvertes a tester (<%= toTestRows.length %>)</h2>

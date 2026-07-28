@@ -475,6 +475,34 @@ body {
   background: var(--bg);
 }
 
+.item-fav-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  border-radius: 999px;
+  border: 2px solid var(--border);
+  background: none;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.item-fav-toggle:hover {
+  border-color: #d9a441;
+  color: #d9a441;
+}
+
+.item-fav-toggle.active {
+  border-color: #d9a441;
+  background: #d9a441;
+  color: #fff;
+}
+
 .level-picker {
   display: flex;
   flex-direction: column;

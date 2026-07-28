@@ -36,6 +36,7 @@
               <% var itemKey = section.key + ":" + i; %>
               <% var toTest = !!bookmarks.toTest[itemKey]; %>
               <% var disliked = !!bookmarks.dislike[itemKey]; %>
+              <% var favorited = !!bookmarks.favorite[itemKey]; %>
               <% var flagClass = toTest ? "flag-test" : (disliked ? "flag-dislike" : ""); %>
               <% var firstLevelKey = config.levels[0].key; %>
               <% var firstVal = existingMatrix[i] ? Number(existingMatrix[i][firstLevelKey]) : 1; %>
@@ -51,8 +52,12 @@
                         <button type="button" class="item-flag-option" data-flag="none">Aucun</button>
                       </div>
                     </details>
+                    <button type="button" class="item-fav-toggle<%= favorited ? ' active' : '' %>" title="Favori">
+                      <%= favorited ? "&#9733;" : "&#9734;" %>
+                    </button>
                     <input type="hidden" name="test_<%= i %>" class="test-hidden" value="<%= toTest ? 1 : 0 %>" />
                     <input type="hidden" name="dislike_<%= i %>" class="dislike-hidden" value="<%= disliked ? 1 : 0 %>" />
+                    <input type="hidden" name="fav_<%= i %>" class="fav-hidden" value="<%= favorited ? 1 : 0 %>" />
                   </div>
                 </div>
 
