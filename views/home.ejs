@@ -1,0 +1,16 @@
+<%- include('partials/head', { title: config.title }) %>
+<main class="container wide">
+  <%- include('partials/top-nav', { config: config }) %>
+
+  <p class="home-message"><%= config.intro %></p>
+
+  <div class="section-cards">
+    <% config.sections.forEach(function (s, i) { %>
+      <a class="section-card" href="/section/<%= i %>" style="--card-color: <%= s.color || 'var(--accent)' %>">
+        <span class="section-card-number"><%= i + 1 %></span>
+        <span class="section-card-title"><%= s.title %></span>
+      </a>
+    <% }) %>
+  </div>
+</main>
+<%- include('partials/foot') %>

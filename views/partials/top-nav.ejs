@@ -1,0 +1,15 @@
+<div class="top-nav">
+  <a href="/" class="top-nav-brand"><%= config.title %></a>
+  <div class="top-nav-actions">
+    <details class="nav-menu">
+      <summary title="Menu">&#9776;</summary>
+      <nav class="nav-menu-list">
+        <a href="/">Accueil</a>
+        <% config.sections.forEach(function (s, i) { %>
+          <a href="/section/<%= i %>" style="border-left-color: <%= s.color || 'var(--accent)' %>"><%= s.title %></a>
+        <% }) %>
+      </nav>
+    </details>
+    <a href="/results" class="top-nav-results" title="Resultats" aria-label="Resultats">&#128273;</a>
+  </div>
+</div>

@@ -1,6 +1,6 @@
 {
-  "title": "Quizz",
-  "intro": "Reponds honnetement a chaque etape, il n'y a pas de bonne ou mauvaise reponse. Tu peux fermer et reprendre plus tard, ta progression est enregistree. Ton resultat s'affiche a la fin de chaque grande section.",
+  "title": "Confidences",
+  "intro": "Bonjour toi. Ce petit Quizz vise a mieux te connaitre et nous explorer. Tu pourras y revenir de temps en temps pour modifier des reponses si tu le souhaites. Sache que tu peux tout faire dans l'ordre que tu souhaites, tout en restant honnete. Sache que je t'aime.",
   "scaleLabels": [
     "Jamais",
     "Une fois",
@@ -206,7 +206,8 @@
             "Toujours spontane"
           ]
         }
-      ]
+      ],
+      "color": "#6b5b95"
     },
     {
       "key": "corps",
@@ -276,7 +277,8 @@
             "Métis"
           ]
         }
-      ]
+      ],
+      "color": "#d17a6f"
     },
     {
       "key": "objets",
@@ -380,7 +382,8 @@
           },
           "checkable": true
         }
-      ]
+      ],
+      "color": "#2f9e8f"
     },
     {
       "key": "fetichisme",
@@ -442,7 +445,8 @@
             "anonymat"
           ]
         }
-      ]
+      ],
+      "color": "#c99a3e"
     },
     {
       "key": "jeuxderole",
@@ -522,7 +526,8 @@
             "perte de contrôle mental simulée (hypnose, lavage de cerveau, perte d'identité)"
           ]
         }
-      ]
+      ],
+      "color": "#4f6d9a"
     },
     {
       "key": "bdsm",
@@ -611,7 +616,8 @@
             "Aftercare tres tendre / prolonge"
           ]
         }
-      ]
+      ],
+      "color": "#8e3b46"
     },
     {
       "key": "autrehard",
@@ -675,7 +681,8 @@
           },
           "checkable": true
         }
-      ]
+      ],
+      "color": "#4a4a4a"
     }
   ]
 }

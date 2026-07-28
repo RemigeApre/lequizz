@@ -265,6 +265,7 @@ Et remplis :
 PORT=3000
 NODE_ENV=production
 SESSION_SECRET=<la sortie de openssl rand -hex 32>
+SITE_PASSWORD=<le mot de passe d'acces au site, choisi par toi>
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD_HASH=<le hash colle depuis l'etape precedente>
 ```
@@ -375,27 +376,30 @@ sudo bash -c "cd /home/quizz && git pull && docker compose up -d --build"
 
 ---
 
-## Continuite entre appareils et sauvegarde en temps reel
+## Acces, continuite entre appareils et sauvegarde en temps reel
 
 Cette version serveur (pas la version GitHub Pages statique) gere ca :
 
-- **Code de reprise** : a la premiere visite, un code court (6 caracteres,
-  ex. `K7XPQ2`) est genere et affiche en haut de chaque page. Ce code
-  identifie la progression en base (table `attempts`), pas le navigateur.
-  Pour continuer sur un autre appareil (ton telephone, le sien, un autre
-  PC), il suffit de taper ce meme code dans le champ "Charger ce code" en
-  haut de la page — la progression se poursuit exactement ou elle en etait,
-  peu importe l'appareil.
+- **Mot de passe unique du site** (`SITE_PASSWORD` dans `.env`) : une
+  barriere devant tout le site (page `/gate`). Une fois entre, l'acces est
+  memorise ~90 jours via un cookie de session. Il n'y a pas de compte par
+  personne : tout le monde qui connait le mot de passe partage la meme
+  progression (une seule ligne dans la table `attempts`, cle fixe
+  `"shared"`) — adapte a un usage a deux, pas a plusieurs repondants
+  distincts.
+- **Continuite entre appareils** : comme la progression est unique et
+  stockee cote serveur (pas dans le navigateur), se connecter depuis
+  n'importe quel appareil (PC, telephone, le sien, le tien) donne acces
+  exactement aux memes reponses, sans code ni identifiant a saisir.
 - **CSV en temps reel** : en plus de la base SQLite (`data/quizz.db`), chaque
   section validee est immediatement ajoutee a `data/log.csv` (colonnes :
-  `timestamp,event,code,section_key,section_index,payload_json`). C'est un
-  filet de securite en texte brut, lisible avec n'importe quel tableur,
-  independant de la base — si jamais la base a un souci, l'historique brut
-  reste dans ce fichier.
-- Ni le code de reprise ni `data/log.csv` ne remplacent le compte admin :
-  le code sert seulement a continuer une reponse en cours ; une fois le
-  quiz termine, la reponse est rangee dans `submissions` et consultable
-  via `/admin`.
+  `timestamp,event,code,section_key,section_index,payload_json` — `code`
+  vaut toujours `shared`). C'est un filet de securite en texte brut, lisible
+  avec n'importe quel tableur, independant de la base.
+- Terminer le quiz jusqu'au bout n'efface plus rien : un instantane du
+  score est range dans `submissions` (consultable via `/admin`), mais la
+  progression reste modifiable a volonte ensuite (page d'accueil ->
+  n'importe quelle section).
 - `data/log.csv` n'est jamais commite dans Git (`.gitignore`), comme
   `data/quizz.db` — pense a inclure `data/` dans tes propres sauvegardes
   manuelles du VPS si tu en fais.

@@ -1,13 +1,8 @@
 <%- include('partials/head', { title: section.title + ' — ' + config.title }) %>
 <main class="container wide">
-  <div class="top-nav">
-    <span class="top-nav-brand"><%= config.title %></span>
-    <a href="/results" class="top-nav-results">Resultats</a>
-  </div>
-  <%- include('partials/code-banner', { code: code }) %>
+  <%- include('partials/top-nav', { config: config }) %>
   <p class="progress">Etape <%= idx + 1 %> / <%= total %></p>
   <h1><%= section.title %></h1>
-  <% if (idx === 0 && config.intro) { %><p class="intro"><%= config.intro %></p><% } %>
   <% if (section.intro) { %><p class="intro"><%= section.intro %></p><% } %>
 
   <form method="POST" action="/section/<%= idx %>">

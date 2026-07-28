@@ -1,50 +1,15 @@
-const crypto = require("crypto");
 const express = require("express");
 const { flattenItems, computeScores } = require("../scoring");
 const {
   insertSubmission,
   getAttempt,
   saveAttempt,
-  deleteAttempt,
 } = require("../db");
 const csvLog = require("../csvLog");
 
-const COOKIE_NAME = "attempt";
-const COOKIE_MAX_AGE = 1000 * 60 * 60 * 24 * 365;
-const CODE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; // no 0/O/1/I/L, easier to type
-
-function generateCode() {
-  let code = "";
-  for (let i = 0; i < 6; i++) {
-    code += CODE_CHARS[crypto.randomInt(CODE_CHARS.length)];
-  }
-  return code;
-}
-
-function setCodeCookie(res, code) {
-  res.cookie(COOKIE_NAME, code, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    maxAge: COOKIE_MAX_AGE,
-  });
-}
-
-function ensureToken(req, res) {
-  const rawRequested = typeof req.query.code === "string" ? req.query.code : "";
-  const requested = rawRequested.trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
-  if (requested) {
-    setCodeCookie(res, requested);
-    return requested;
-  }
-
-  let code = req.cookies[COOKIE_NAME];
-  if (!code) {
-    code = generateCode();
-    setCodeCookie(res, code);
-  }
-  return code;
-}
+// Un seul jeu de reponses partage (pas de compte, pas de code par visiteur) :
+// tout le monde qui passe la barriere de mot de passe lit/ecrit la meme progression.
+const SHARED_TOKEN = "shared";
 
 function parseSectionSubmission(config, section, body) {
   if (section.type === "matrix") {
@@ -112,9 +77,7 @@ function buildQuizRouter(config) {
   const router = express.Router();
 
   router.get("/", (req, res) => {
-    const code = ensureToken(req, res);
-    const attempt = getAttempt(code) || { data: {}, nextSection: 0 };
-    res.redirect(`/section/${attempt.nextSection}`);
+    res.render("home", { config });
   });
 
   router.get("/section/:idx", (req, res) => {
@@ -123,8 +86,7 @@ function buildQuizRouter(config) {
       return res.redirect("/");
     }
 
-    const code = ensureToken(req, res);
-    const attempt = getAttempt(code) || { data: {}, nextSection: 0 };
+    const attempt = getAttempt(SHARED_TOKEN) || { data: {}, nextSection: 0 };
     const section = config.sections[idx];
     const existing = attempt.data[section.key] || null;
 
@@ -134,22 +96,19 @@ function buildQuizRouter(config) {
       idx,
       total: config.sections.length,
       existing,
-      code,
       bookmarks: attempt.data.__bookmarks || { toTest: {}, dislike: {} },
       doneGroups: attempt.data.__doneGroups || {},
     });
   });
 
   router.get("/results", (req, res) => {
-    const code = ensureToken(req, res);
-    const attempt = getAttempt(code) || { data: {}, nextSection: 0 };
+    const attempt = getAttempt(SHARED_TOKEN) || { data: {}, nextSection: 0 };
     const scores = computeScores(config, attempt.data);
     res.render("result", {
       config,
       scores,
       answers: attempt.data,
       flattenItems,
-      code,
       isFinal: false,
       resumeIdx: Math.min(Math.max(attempt.nextSection, 0), config.sections.length - 1),
     });
@@ -161,8 +120,7 @@ function buildQuizRouter(config) {
       return res.redirect("/");
     }
 
-    const code = ensureToken(req, res);
-    const attempt = getAttempt(code) || { data: {}, nextSection: 0 };
+    const attempt = getAttempt(SHARED_TOKEN) || { data: {}, nextSection: 0 };
     const section = config.sections[idx];
 
     attempt.data[section.key] = parseSectionSubmission(config, section, req.body);
@@ -188,20 +146,21 @@ function buildQuizRouter(config) {
 
     // Safety net: append every section save to a plain CSV log, independent
     // of the SQLite write below, in case that ever fails or the process dies.
-    csvLog.append("section_save", code, section.key, idx, attempt.data[section.key]);
+    csvLog.append("section_save", SHARED_TOKEN, section.key, idx, attempt.data[section.key]);
 
     const nextIdx = idx + 1;
+    attempt.nextSection = Math.max(attempt.nextSection, Math.min(nextIdx, config.sections.length - 1));
+    saveAttempt(SHARED_TOKEN, attempt.data, attempt.nextSection);
 
     if (nextIdx >= config.sections.length) {
+      // On garde la progression (elle reste modifiable a volonte), on
+      // enregistre juste un instantane du score dans l'historique.
       const scores = computeScores(config, attempt.data);
       insertSubmission(attempt.data, scores);
-      csvLog.append("complete", code, section.key, idx, { answers: attempt.data, scores });
-      deleteAttempt(code);
-      return res.render("result", { config, scores, answers: attempt.data, flattenItems, code, isFinal: true });
+      csvLog.append("complete", SHARED_TOKEN, section.key, idx, { answers: attempt.data, scores });
+      return res.render("result", { config, scores, answers: attempt.data, flattenItems, isFinal: true });
     }
 
-    attempt.nextSection = Math.max(attempt.nextSection, nextIdx);
-    saveAttempt(code, attempt.data, attempt.nextSection);
     res.redirect(`/section/${nextIdx}`);
   });
 

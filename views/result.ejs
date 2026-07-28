@@ -1,9 +1,6 @@
 <%- include('partials/head', { title: 'Ton resultat' }) %>
 <main class="container">
-  <div class="top-nav">
-    <span class="top-nav-brand"><%= config.title %></span>
-    <a href="/results" class="top-nav-results">Resultats</a>
-  </div>
+  <%- include('partials/top-nav', { config: config }) %>
 
   <h1><%= isFinal ? "Merci, voici ton resultat" : "Tes resultats jusqu'ici" %></h1>
   <% if (!isFinal) { %>

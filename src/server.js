@@ -3,7 +3,6 @@ const path = require("path");
 const fs = require("fs");
 const express = require("express");
 const session = require("express-session");
-const cookieParser = require("cookie-parser");
 
 const buildQuizRouter = require("./routes/quiz");
 const buildAdminRouter = require("./routes/admin");
@@ -20,7 +19,6 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "..", "views"));
 
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "..", "public")));
 
 app.use(
@@ -32,10 +30,27 @@ app.use(
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
-      maxAge: 1000 * 60 * 60 * 8,
+      maxAge: 1000 * 60 * 60 * 24 * 90,
     },
   })
 );
+
+app.get("/gate", (req, res) => {
+  res.render("gate", { error: null });
+});
+
+app.post("/gate", (req, res) => {
+  if (process.env.SITE_PASSWORD && req.body.password === process.env.SITE_PASSWORD) {
+    req.session.siteUnlocked = true;
+    return res.redirect("/");
+  }
+  res.render("gate", { error: "Mot de passe incorrect" });
+});
+
+app.use((req, res, next) => {
+  if (req.path === "/gate" || req.session.siteUnlocked) return next();
+  res.redirect("/gate");
+});
 
 app.use("/", buildQuizRouter(config));
 app.use("/admin", buildAdminRouter(config));
