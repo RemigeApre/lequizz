@@ -1,6 +1,14 @@
 <%- include('partials/head', { title: 'Ton resultat' }) %>
 <main class="container">
-  <h1>Merci, voici ton resultat</h1>
+  <div class="top-nav">
+    <span class="top-nav-brand"><%= config.title %></span>
+    <a href="/results" class="top-nav-results">Resultats</a>
+  </div>
+
+  <h1><%= isFinal ? "Merci, voici ton resultat" : "Tes resultats jusqu'ici" %></h1>
+  <% if (!isFinal) { %>
+    <p class="intro">Le quiz n'est pas termine : voici les resultats bases sur ce que tu as deja rempli.</p>
+  <% } %>
 
   <% config.sections.forEach(function (section) { %>
     <% var s = scores.sections[section.key]; %>
@@ -65,6 +73,50 @@
     </div>
   <% }) %>
 
-  <a class="link" href="/">Refaire le quiz</a>
+  <%
+    var bookmarks = (answers && answers.__bookmarks) || { toTest: {}, dislike: {} };
+    function bookmarkRows(map) {
+      var rows = [];
+      Object.keys(map || {}).forEach(function (key) {
+        if (!map[key]) return;
+        var parts = key.split(":");
+        var sec = config.sections.find(function (s) { return s.key === parts[0]; });
+        if (!sec) return;
+        var its = flattenItems(sec);
+        var label = its[Number(parts[1])];
+        if (label === undefined) return;
+        rows.push({ label: label, sectionTitle: sec.title });
+      });
+      return rows;
+    }
+    var toTestRows = bookmarkRows(bookmarks.toTest);
+    var dislikeRows = bookmarkRows(bookmarks.dislike);
+  %>
+  <% if (toTestRows.length) { %>
+    <div class="result-section">
+      <h2>Tes decouvertes a tester (<%= toTestRows.length %>)</h2>
+      <ul class="answer-list">
+        <% toTestRows.forEach(function (row) { %>
+          <li><span><%= row.label %> <em>(<%= row.sectionTitle %>)</em></span></li>
+        <% }) %>
+      </ul>
+    </div>
+  <% } %>
+  <% if (dislikeRows.length) { %>
+    <div class="result-section">
+      <h2>Ce que tu n'aimes pas (<%= dislikeRows.length %>)</h2>
+      <ul class="answer-list">
+        <% dislikeRows.forEach(function (row) { %>
+          <li><span><%= row.label %> <em>(<%= row.sectionTitle %>)</em></span></li>
+        <% }) %>
+      </ul>
+    </div>
+  <% } %>
+
+  <% if (isFinal) { %>
+    <a class="link" href="/">Refaire le quiz</a>
+  <% } else { %>
+    <a class="link" href="/section/<%= resumeIdx %>">Continuer le quiz</a>
+  <% } %>
 </main>
 <%- include('partials/foot') %>

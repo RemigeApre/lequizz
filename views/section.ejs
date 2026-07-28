@@ -1,5 +1,9 @@
 <%- include('partials/head', { title: section.title + ' — ' + config.title }) %>
 <main class="container wide">
+  <div class="top-nav">
+    <span class="top-nav-brand"><%= config.title %></span>
+    <a href="/results" class="top-nav-results">Resultats</a>
+  </div>
   <%- include('partials/code-banner', { code: code }) %>
   <p class="progress">Etape <%= idx + 1 %> / <%= total %></p>
   <h1><%= section.title %></h1>
@@ -8,50 +12,80 @@
 
   <form method="POST" action="/section/<%= idx %>">
     <% if (section.type === "matrix") { %>
-      <div class="legend">
-        <% config.levels.forEach(function (lvl) { %>
-          <span><strong><%= lvl.key %></strong> = <%= lvl.label %></span>
-        <% }) %>
-      </div>
+      <% var multiGroup = section.groups.length > 1; %>
+      <% if (multiGroup) { %>
+        <div class="fold-controls">
+          <button type="button" class="link-button" data-fold-action="open">Tout deplier</button>
+          <button type="button" class="link-button" data-fold-action="close">Tout replier</button>
+        </div>
+      <% } %>
 
       <%
         var globalIndex = 0;
         var existingMatrix = (existing && existing.matrix) || {};
       %>
-      <% section.groups.forEach(function (group) { %>
-        <fieldset class="matrix-group">
-          <% if (group.title) { %><legend><%= group.title %></legend><% } %>
-          <div class="table-scroll">
-            <table class="matrix-table">
-              <thead>
-                <tr>
-                  <th class="item-col">Pratique</th>
-                  <% config.levels.forEach(function (lvl) { %>
-                    <th title="<%= lvl.label %>"><%= lvl.key %></th>
-                  <% }) %>
-                </tr>
-              </thead>
-              <tbody>
-                <% group.items.forEach(function (item) { %>
-                  <% var i = globalIndex; globalIndex += 1; %>
-                  <tr>
-                    <td class="item-col"><%= item %></td>
+      <% section.groups.forEach(function (group, gi) { %>
+        <% var groupKey = section.key + ":" + gi; %>
+        <% var isDone = !!doneGroups[groupKey]; %>
+        <details class="matrix-group<%= isDone ? ' done' : '' %>" <%= (!multiGroup || gi === 0) && !isDone ? "open" : "" %> data-group-index="<%= gi %>">
+          <summary>
+            <span class="group-title-text"><%= group.title || "Toutes les pratiques" %> (<%= group.items.length %>)</span>
+            <label class="group-done-toggle">
+              <input type="checkbox" class="group-done-checkbox" name="done_<%= gi %>_visible" <%= isDone ? "checked" : "" %> /> OK, termine
+            </label>
+            <input type="hidden" name="done_<%= gi %>" class="group-done-hidden" value="<%= isDone ? 1 : 0 %>" />
+          </summary>
+          <div class="item-cards">
+            <% group.items.forEach(function (item) { %>
+              <% var i = globalIndex; globalIndex += 1; %>
+              <% var levelsForItem = existingMatrix[i] || {}; %>
+              <% var maxVal = config.scaleLabels.length; %>
+              <% var isAdored = Object.keys(levelsForItem).some(function (k) { return Number(levelsForItem[k]) === maxVal; }); %>
+              <% var itemKey = section.key + ":" + i; %>
+              <% var toTest = !!bookmarks.toTest[itemKey]; %>
+              <% var disliked = !!bookmarks.dislike[itemKey]; %>
+              <% var firstLevelKey = config.levels[0].key; %>
+              <% var firstVal = existingMatrix[i] ? Number(existingMatrix[i][firstLevelKey]) : 1; %>
+              <div class="item-card">
+                <div class="item-header">
+                  <div class="item-title-row">
+                    <span class="fire-icon" <%= isAdored ? "" : 'style="display:none"' %>>&#128293;</span>
+                    <span class="item-name"><%= item %></span>
+                  </div>
+                  <div class="item-toggles">
+                    <button type="button" class="test-toggle<%= toTest ? ' active' : '' %>" title="Marquer comme decouverte a tester">
+                      <%= toTest ? "&#9733;" : "&#9734;" %> decouverte a tester
+                    </button>
+                    <button type="button" class="dislike-toggle<%= disliked ? ' active' : '' %>" title="Marquer comme aime pas">
+                      <%= disliked ? "&#128078;" : "&#129293;" %> aime pas
+                    </button>
+                    <input type="hidden" name="test_<%= i %>" class="test-hidden" value="<%= toTest ? 1 : 0 %>" />
+                    <input type="hidden" name="dislike_<%= i %>" class="dislike-hidden" value="<%= disliked ? 1 : 0 %>" />
+                  </div>
+                </div>
+
+                <div class="level-picker" data-item-index="<%= i %>">
+                  <select class="level-select<%= firstVal > 1 ? ' level-answered' : '' %>">
                     <% config.levels.forEach(function (lvl) { %>
-                      <% var existingVal = existingMatrix[i] ? Number(existingMatrix[i][lvl.key]) : 1; %>
-                      <td>
-                        <select name="m_<%= i %>_<%= lvl.key %>">
-                          <% config.scaleLabels.forEach(function (label, li) { %>
-                            <option value="<%= li + 1 %>" <%= existingVal === (li + 1) ? "selected" : "" %>><%= label %></option>
-                          <% }) %>
-                        </select>
-                      </td>
+                      <% var v = existingMatrix[i] ? Number(existingMatrix[i][lvl.key]) : 1; %>
+                      <option value="<%= lvl.key %>"><%= lvl.label %> (<%= config.scaleLabels[v - 1] %>)</option>
                     <% }) %>
-                  </tr>
+                  </select>
+                  <select class="freq-select freq-val-<%= firstVal %>">
+                    <% config.scaleLabels.forEach(function (label, li) { %>
+                      <option value="<%= li + 1 %>" <%= firstVal === (li + 1) ? "selected" : "" %>><%= label %></option>
+                    <% }) %>
+                  </select>
+                </div>
+
+                <% config.levels.forEach(function (lvl) { %>
+                  <% var existingVal = existingMatrix[i] ? Number(existingMatrix[i][lvl.key]) : 1; %>
+                  <input type="hidden" name="m_<%= i %>_<%= lvl.key %>" value="<%= existingVal %>" />
                 <% }) %>
-              </tbody>
-            </table>
+              </div>
+            <% }) %>
           </div>
-        </fieldset>
+        </details>
       <% }) %>
 
       <% (section.rankings || []).forEach(function (r) { %>
@@ -135,8 +169,12 @@
       <% }) %>
     <% } %>
 
-    <button type="submit"><%= idx + 1 >= total ? "Voir mon resultat" : "Section suivante" %></button>
+    <div class="form-actions">
+      <% if (idx > 0) { %><a href="/section/<%= idx - 1 %>" class="link-button">&larr; Section precedente</a><% } %>
+      <button type="submit"><%= idx + 1 >= total ? "Voir mon resultat" : "Section suivante" %></button>
+    </div>
   </form>
 </main>
 <script src="/quiz.js"></script>
+<script src="/section.js"></script>
 <%- include('partials/foot') %>

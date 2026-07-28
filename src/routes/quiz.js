@@ -135,6 +135,23 @@ function buildQuizRouter(config) {
       total: config.sections.length,
       existing,
       code,
+      bookmarks: attempt.data.__bookmarks || { toTest: {}, dislike: {} },
+      doneGroups: attempt.data.__doneGroups || {},
+    });
+  });
+
+  router.get("/results", (req, res) => {
+    const code = ensureToken(req, res);
+    const attempt = getAttempt(code) || { data: {}, nextSection: 0 };
+    const scores = computeScores(config, attempt.data);
+    res.render("result", {
+      config,
+      scores,
+      answers: attempt.data,
+      flattenItems,
+      code,
+      isFinal: false,
+      resumeIdx: Math.min(Math.max(attempt.nextSection, 0), config.sections.length - 1),
     });
   });
 
@@ -150,6 +167,25 @@ function buildQuizRouter(config) {
 
     attempt.data[section.key] = parseSectionSubmission(config, section, req.body);
 
+    attempt.data.__bookmarks = attempt.data.__bookmarks || { toTest: {}, dislike: {} };
+    attempt.data.__doneGroups = attempt.data.__doneGroups || {};
+
+    if (section.type === "matrix") {
+      const items = flattenItems(section);
+      items.forEach((_, i) => {
+        const key = `${section.key}:${i}`;
+        if (req.body[`test_${i}`] === "1") attempt.data.__bookmarks.toTest[key] = true;
+        else delete attempt.data.__bookmarks.toTest[key];
+        if (req.body[`dislike_${i}`] === "1") attempt.data.__bookmarks.dislike[key] = true;
+        else delete attempt.data.__bookmarks.dislike[key];
+      });
+      section.groups.forEach((group, gi) => {
+        const gkey = `${section.key}:${gi}`;
+        if (req.body[`done_${gi}`] === "1") attempt.data.__doneGroups[gkey] = true;
+        else delete attempt.data.__doneGroups[gkey];
+      });
+    }
+
     // Safety net: append every section save to a plain CSV log, independent
     // of the SQLite write below, in case that ever fails or the process dies.
     csvLog.append("section_save", code, section.key, idx, attempt.data[section.key]);
@@ -161,7 +197,7 @@ function buildQuizRouter(config) {
       insertSubmission(attempt.data, scores);
       csvLog.append("complete", code, section.key, idx, { answers: attempt.data, scores });
       deleteAttempt(code);
-      return res.render("result", { config, scores, answers: attempt.data, flattenItems, code });
+      return res.render("result", { config, scores, answers: attempt.data, flattenItems, code, isFinal: true });
     }
 
     attempt.nextSection = Math.max(attempt.nextSection, nextIdx);
