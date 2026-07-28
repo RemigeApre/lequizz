@@ -31,6 +31,11 @@ function labelRanking(ranking, order) {
   return order.map((i) => ranking.items[i]).filter((v) => v !== undefined);
 }
 
+function labelSpectrum(spectrum, value) {
+  const idx = Number(value);
+  return spectrum.scaleLabels[idx - 1] || null;
+}
+
 function computeScores(config, answers) {
   const sections = {};
 
@@ -45,7 +50,13 @@ function computeScores(config, answers) {
           rankings[r.id] = labelRanking(r, (sectionData.rankings || {})[r.id]);
         }
       }
-      sections[section.key] = { type: "matrix", ...score, rankings };
+      const spectrums = {};
+      if (section.spectrums) {
+        for (const sp of section.spectrums) {
+          spectrums[sp.id] = labelSpectrum(sp, (sectionData.spectrums || {})[sp.id]);
+        }
+      }
+      sections[section.key] = { type: "matrix", ...score, rankings, spectrums };
     } else if (section.type === "profile") {
       const fields = {};
       for (const f of section.fields) {

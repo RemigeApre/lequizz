@@ -53,6 +53,10 @@
         <% Object.keys(s.rankings || {}).forEach(function (rid) { %>
           <p class="ranking-result"><strong>Classement :</strong> <%= s.rankings[rid].join(" > ") %></p>
         <% }) %>
+        <% Object.keys(s.spectrums || {}).forEach(function (spid) { %>
+          <% var sp = section.spectrums.find(function (x) { return x.id === spid; }); %>
+          <p class="ranking-result"><strong><%= sp ? sp.label : spid %> :</strong> <%= s.spectrums[spid] %></p>
+        <% }) %>
       <% } else if (section.type === "profile") { %>
         <% var s = submission.scores.sections[section.key]; %>
         <ul class="answer-list">

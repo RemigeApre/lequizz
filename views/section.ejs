@@ -67,6 +67,21 @@
           <input type="hidden" name="ranking_<%= r.id %>" class="ranking-order" />
         </fieldset>
       <% }) %>
+
+      <% (section.spectrums || []).forEach(function (sp) { %>
+        <fieldset class="question">
+          <legend><%= sp.label %></legend>
+          <% var existingSpectrumVal = (existing && existing.spectrums && existing.spectrums[sp.id]) || 3; %>
+          <div class="choices">
+            <% sp.scaleLabels.forEach(function (label, li) { %>
+              <label class="choice">
+                <input type="radio" name="spectrum_<%= sp.id %>" value="<%= li + 1 %>" <%= existingSpectrumVal === (li + 1) ? "checked" : "" %> />
+                <%= label %>
+              </label>
+            <% }) %>
+          </div>
+        </fieldset>
+      <% }) %>
     <% } else if (section.type === "profile") { %>
       <% var existingFields = (existing && existing.fields) || {}; %>
       <% section.fields.forEach(function (f) { %>
@@ -75,7 +90,7 @@
           <div class="choices">
             <% f.options.forEach(function (opt, optIndex) { %>
               <label class="choice">
-                <input type="radio" name="field_<%= f.id %>" value="<%= optIndex %>" <%= String(existingFields[f.id]) === String(optIndex) ? "checked" : "" %> required />
+                <input type="radio" name="field_<%= f.id %>" value="<%= optIndex %>" <%= String(existingFields[f.id]) === String(optIndex) ? "checked" : "" %> />
                 <%= opt %>
               </label>
             <% }) %>

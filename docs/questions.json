@@ -75,22 +75,13 @@
             "Rapport très verbal",
             "Rapport entièrement dans le noir",
             "Rapport face à un miroir",
-            "Rapport avec préservatif",
-            "Rapport sans préservatif",
             "Rapport interrompu avant éjaculation",
             "Rapport sans éjaculation",
             "Orgasme simultané",
             "Faire jouir sans être soi-même stimulé",
             "Être stimulé sans rendre la pareille",
-            "Plusieurs rapports successifs",
-            "Rapport très court",
-            "Rapport prolongé",
-            "Sexe au réveil",
-            "Sexe avant de dormir",
-            "Sexe spontané",
-            "Sexe planifié",
-            "Sexe pendant les règles",
-            "Sexe pendant une grossesse"
+            "Duree du rapport (tres court, prolonge, ou plusieurs fois de suite)",
+            "Sexe pendant les règles"
           ]
         },
         {
@@ -98,26 +89,18 @@
           "items": [
             "Éjaculation vaginale",
             "Éjaculation anale",
-            "Éjaculation dans la bouche",
-            "Avaler",
             "Éjaculation sur le visage",
             "Éjaculation sur une autre partie du corps (seins, fesses, ventre, dos, mains, pieds, cheveux...)",
             "Sur les vêtements",
             "Dans les sous-vêtements",
             "Conserver ou porter les vêtements tachés",
             "Embrasser après une éjaculation dans la bouche",
-            "Mélanger les fluides des partenaires",
             "Regarder le sperme couler ou ressortir",
             "Jouer avec les traces après le rapport",
             "Dans un récipient",
             "Utiliser du faux sperme",
-            "Utiliser le sperme comme lubrifiant",
             "Plusieurs éjaculations sur la même personne",
             "Éjaculations de plusieurs partenaires",
-            "Choisir précisément l’endroit où le partenaire éjacule",
-            "Ne pas savoir où le partenaire va éjaculer, dans un cadre consenti",
-            "Nettoyer immédiatement",
-            "Rester taché après le rapport",
             "Faire nettoyer par le partenaire"
           ]
         },
@@ -175,6 +158,50 @@
             "lac / mer",
             "salle de sport",
             "Cinéma/théâtre"
+          ]
+        }
+      ],
+      "rankings": [
+        {
+          "id": "moment_journee",
+          "label": "Classe ces moments de la journee du plus au moins propice pour toi",
+          "items": [
+            "Au reveil",
+            "Dans la journee",
+            "Le soir / avant de dormir"
+          ]
+        },
+        {
+          "id": "contraception",
+          "label": "Classe ces methodes par preference",
+          "items": [
+            "Preservatif",
+            "Contraception hormonale (pilule, sterilet...)",
+            "Sans contraception"
+          ]
+        }
+      ],
+      "spectrums": [
+        {
+          "id": "ejac_buccale",
+          "label": "Ejaculation buccale : jusqu'ou",
+          "scaleLabels": [
+            "Jamais",
+            "Une fois",
+            "Parfois",
+            "Souvent",
+            "Avaler"
+          ]
+        },
+        {
+          "id": "spontane_planifie",
+          "label": "Sexe spontane ou planifie : ta tendance generale",
+          "scaleLabels": [
+            "Toujours planifie",
+            "Plutot planifie",
+            "Un melange des deux",
+            "Plutot spontane",
+            "Toujours spontane"
           ]
         }
       ]

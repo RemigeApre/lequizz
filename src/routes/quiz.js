@@ -44,7 +44,13 @@ function parseSectionSubmission(config, section, body) {
         : r.items.map((_, i) => i);
     }
 
-    return { matrix, rankings };
+    const spectrums = {};
+    for (const sp of section.spectrums || []) {
+      const v = Number(body[`spectrum_${sp.id}`]);
+      spectrums[sp.id] = Number.isNaN(v) ? 3 : v;
+    }
+
+    return { matrix, rankings, spectrums };
   }
 
   if (section.type === "profile") {

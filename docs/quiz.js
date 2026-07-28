@@ -7,6 +7,7 @@ function initRankingLists() {
       return li.dataset.index;
     });
     input.value = order.join(",");
+    input.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
   function getDragAfterElement(list, y) {

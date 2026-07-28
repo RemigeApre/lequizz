@@ -76,6 +76,19 @@
     return html;
   }
 
+  function renderSpectrum(sp, existingValue) {
+    var current = existingValue ? Number(existingValue) : 3;
+    var html = '<fieldset class="question"><legend>' + sp.label + "</legend>";
+    html += '<div class="pill-group" data-name="spectrum_' + sp.id + '">';
+    sp.scaleLabels.forEach(function (label, li) {
+      var active = current === li + 1 ? " active" : "";
+      html += '<button type="button" class="pill' + active + '" data-value="' + (li + 1) + '">' + label + "</button>";
+    });
+    html += "</div>";
+    html += '<input type="hidden" name="spectrum_' + sp.id + '" value="' + current + '" /></fieldset>';
+    return html;
+  }
+
   function renderMatrixSection(section, existingData) {
     var html = '<div class="legend">';
     config.levels.forEach(function (lvl) {
@@ -119,6 +132,11 @@
       html += renderRanking(r, existingOrder);
     });
 
+    (section.spectrums || []).forEach(function (sp) {
+      var existingValue = existingData && existingData.spectrums && existingData.spectrums[sp.id];
+      html += renderSpectrum(sp, existingValue);
+    });
+
     return html;
   }
 
@@ -132,7 +150,7 @@
         var checked = String(existingFields[f.id]) === String(optIndex) ? " checked" : "";
         html +=
           '<label class="choice"><input type="radio" name="field_' + f.id + '" value="' + optIndex + '"' +
-          checked + " required /> " + opt + "</label>";
+          checked + " /> " + opt + "</label>";
       });
       html += "</div></fieldset>";
     });
@@ -167,7 +185,13 @@
         rankings[r.id] = raw ? String(raw).split(",").map(Number) : r.items.map(function (_, i) { return i; });
       });
 
-      return { matrix: matrix, rankings: rankings };
+      var spectrums = {};
+      (section.spectrums || []).forEach(function (sp) {
+        var v = Number(formData.get("spectrum_" + sp.id));
+        spectrums[sp.id] = Number.isNaN(v) ? 3 : v;
+      });
+
+      return { matrix: matrix, rankings: rankings, spectrums: spectrums };
     }
 
     if (section.type === "profile") {
@@ -195,6 +219,10 @@
         s.percentage + '%"></div></div></div>';
       Object.keys(s.rankings || {}).forEach(function (rid) {
         html += '<p class="ranking-result"><strong>Classement :</strong> ' + s.rankings[rid].join(" > ") + "</p>";
+      });
+      Object.keys(s.spectrums || {}).forEach(function (spid) {
+        var sp = section.spectrums.find(function (x) { return x.id === spid; });
+        html += '<p class="ranking-result"><strong>' + (sp ? sp.label : spid) + " :</strong> " + s.spectrums[spid] + "</p>";
       });
     } else if (s.type === "profile") {
       html += '<ul class="answer-list">';
@@ -288,7 +316,13 @@
     app.innerHTML = html;
     window.initRankingLists();
 
-    document.getElementById("quiz-form").addEventListener("submit", function (e) {
+    var quizForm = document.getElementById("quiz-form");
+    quizForm.addEventListener("change", function () {
+      state.data[section.key] = parseSection(section, idx);
+      persist();
+    });
+
+    quizForm.addEventListener("submit", function (e) {
       e.preventDefault();
       state.data[section.key] = parseSection(section, idx);
       var nextIdx = idx + 1;
@@ -346,7 +380,10 @@
     if (!btn) return;
     var group = btn.closest(".pill-group");
     var input = group.parentElement.querySelector('input[type="hidden"][name="' + group.dataset.name + '"]');
-    if (input) input.value = btn.dataset.value;
+    if (input) {
+      input.value = btn.dataset.value;
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    }
     Array.prototype.forEach.call(group.querySelectorAll(".pill"), function (p) {
       p.classList.remove("active");
     });

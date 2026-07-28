@@ -150,6 +150,32 @@
     container.appendChild(block);
   }
 
+  function renderSpectrumEditor(container, spectrum, rerenderAll) {
+    var block = document.createElement("div");
+    block.className = "group-block";
+
+    var labelInput = document.createElement("input");
+    labelInput.type = "text";
+    labelInput.value = spectrum.label;
+    labelInput.style.width = "100%";
+    labelInput.style.marginBottom = "0.5rem";
+    labelInput.addEventListener("input", function () {
+      spectrum.label = labelInput.value;
+    });
+
+    var h = document.createElement("div");
+    h.innerHTML = "<strong>Echelle personnalisee (une seule reponse, non comptee dans le score) :</strong>";
+
+    block.appendChild(h);
+    block.appendChild(labelInput);
+
+    var listDiv = document.createElement("div");
+    renderItemList(listDiv, spectrum.scaleLabels, rerenderAll);
+    block.appendChild(listDiv);
+
+    container.appendChild(block);
+  }
+
   function renderMatrixEditor(section) {
     sectionPanel.innerHTML = "";
 
@@ -206,6 +232,15 @@
       sectionPanel.appendChild(h2);
       section.rankings.forEach(function (r) {
         renderRankingEditor(sectionPanel, r, rerender);
+      });
+    }
+
+    if (section.spectrums && section.spectrums.length) {
+      var h3 = document.createElement("h2");
+      h3.textContent = "Questions a echelle personnalisee";
+      sectionPanel.appendChild(h3);
+      section.spectrums.forEach(function (sp) {
+        renderSpectrumEditor(sectionPanel, sp, rerender);
       });
     }
   }
