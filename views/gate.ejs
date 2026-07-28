@@ -1,18 +1,12 @@
-<%- include('partials/head', { title: 'Acces' }) %>
+<%- include('partials/head', { title: 'Connexion' }) %>
 <main class="container narrow gate-page">
-  <h1>Acces prive</h1>
-  <p class="intro">Ce site est reserve. Entre le mot de passe pour continuer.</p>
-
   <% if (error) { %>
-    <p class="error"><%= error %></p>
+    <p class="error gate-error"><%= error %></p>
   <% } %>
 
-  <form method="POST" action="/gate">
-    <label>
-      Mot de passe
-      <input type="password" name="password" required autofocus />
-    </label>
-    <button type="submit">Entrer</button>
+  <form method="POST" action="/gate" class="gate-form">
+    <input type="password" name="password" placeholder="mot de passe" required autofocus />
+    <button type="submit" aria-label="Entrer" title="Entrer">&#8594;</button>
   </form>
 </main>
 <%- include('partials/foot') %>
