@@ -54,27 +54,17 @@
         {
           "title": "Pratiques manuelles et orales",
           "items": [
-            "Masturbation solitaire",
             "Masturbation mutuelle",
-            "Stimulation manuelle donnée",
-            "Stimulation manuelle reçue",
-            "sexe oral subit",
-            "Sexe oral donné",
+            "Stimulation manuelle",
+            "Sexe oral",
             "Frottement habillé",
             "Sexe intercrural, entre les cuisses",
-            "Anulingus donné",
-            "Anulingus reçu"
+            "Anulingus"
           ]
         },
         {
           "title": "Ambiance et rythme du rapport",
           "items": [
-            "Rapport lent et tendre",
-            "Rapport intense ou brutal",
-            "Rapport silencieux",
-            "Rapport très verbal",
-            "Rapport entièrement dans le noir",
-            "Rapport face à un miroir",
             "Rapport interrompu avant éjaculation",
             "Rapport sans éjaculation",
             "Orgasme simultané",
@@ -87,8 +77,6 @@
         {
           "title": "Sperme",
           "items": [
-            "Adore le sperme",
-            "Veut apprendre a adorer le sperme",
             "Éjaculation vaginale",
             "Éjaculation anale",
             "Éjaculation sur le visage",
@@ -205,9 +193,88 @@
             "Plutot spontane",
             "Toujours spontane"
           ]
+        },
+        {
+          "id": "stim_manuelle_pref",
+          "label": "Stimulation manuelle : preference",
+          "scaleLabels": [
+            "Toujours donner",
+            "Plutot donner",
+            "Autant les deux",
+            "Plutot recevoir",
+            "Toujours recevoir"
+          ]
+        },
+        {
+          "id": "sexe_oral_pref",
+          "label": "Sexe oral : preference",
+          "scaleLabels": [
+            "Toujours donner",
+            "Plutot donner",
+            "Autant les deux",
+            "Plutot recevoir",
+            "Toujours recevoir"
+          ]
+        },
+        {
+          "id": "anulingus_pref",
+          "label": "Anulingus : preference",
+          "scaleLabels": [
+            "Toujours donner",
+            "Plutot donner",
+            "Autant les deux",
+            "Plutot recevoir",
+            "Toujours recevoir"
+          ]
+        },
+        {
+          "id": "intensite_rapport",
+          "label": "Intensite du rapport",
+          "scaleLabels": [
+            "Lent et tendre",
+            "Doux",
+            "Equilibre",
+            "Intense",
+            "Brutal, bestial"
+          ]
+        },
+        {
+          "id": "rapport_sperme",
+          "label": "Rapport au sperme",
+          "scaleLabels": [
+            "N'aime pas",
+            "Plutot pas fan",
+            "Neutre",
+            "Veut apprendre a adorer",
+            "Adore"
+          ]
         }
       ],
-      "color": "#6b5b95"
+      "color": "#6b5b95",
+      "multiselects": [
+        {
+          "id": "bruit",
+          "label": "Ambiance sonore que tu apprecies (plusieurs choix possibles)",
+          "options": [
+            "Silencieux",
+            "Calme",
+            "Mots romantiques",
+            "Cris",
+            "Insultes",
+            "Mots possessifs"
+          ]
+        },
+        {
+          "id": "vision",
+          "label": "Conditions visuelles que tu apprecies (plusieurs choix possibles)",
+          "options": [
+            "A la lumiere",
+            "Miroir",
+            "Dans le noir",
+            "Masque(e)"
+          ]
+        }
+      ]
     },
     {
       "key": "corps",

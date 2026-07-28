@@ -119,6 +119,21 @@
           </div>
         </fieldset>
       <% }) %>
+
+      <% (section.multiselects || []).forEach(function (ms) { %>
+        <fieldset class="question">
+          <legend><%= ms.label %></legend>
+          <% var existingSelected = (existing && existing.multiselects && existing.multiselects[ms.id]) || []; %>
+          <div class="choices">
+            <% ms.options.forEach(function (opt, optIndex) { %>
+              <label class="choice">
+                <input type="checkbox" name="ms_<%= ms.id %>_<%= optIndex %>" <%= existingSelected.indexOf(optIndex) !== -1 ? "checked" : "" %> />
+                <%= opt %>
+              </label>
+            <% }) %>
+          </div>
+        </fieldset>
+      <% }) %>
     <% } else if (section.type === "profile") { %>
       <% var existingFields = (existing && existing.fields) || {}; %>
       <% section.fields.forEach(function (f) { %>

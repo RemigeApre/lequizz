@@ -40,6 +40,11 @@ function labelSpectrum(spectrum, value) {
   return spectrum.scaleLabels[idx - 1] || null;
 }
 
+function labelMultiselect(multiselect, selected) {
+  const indices = Array.isArray(selected) ? selected : [];
+  return indices.map((i) => multiselect.options[i]).filter((v) => v !== undefined);
+}
+
 function conditionMet(section, sectionData, condition) {
   if (!condition) return true;
   const items = flattenItems(section);
@@ -74,7 +79,13 @@ function computeScores(config, answers) {
           spectrums[sp.id] = labelSpectrum(sp, (sectionData.spectrums || {})[sp.id]);
         }
       }
-      sections[section.key] = { type: "matrix", ...score, rankings, spectrums };
+      const multiselects = {};
+      if (section.multiselects) {
+        for (const ms of section.multiselects) {
+          multiselects[ms.id] = labelMultiselect(ms, (sectionData.multiselects || {})[ms.id]);
+        }
+      }
+      sections[section.key] = { type: "matrix", ...score, rankings, spectrums, multiselects };
     } else if (section.type === "profile") {
       const fields = {};
       for (const f of section.fields) {

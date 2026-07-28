@@ -29,6 +29,12 @@
           <% var sp = section.spectrums.find(function (x) { return x.id === spid; }); %>
           <p class="ranking-result"><strong><%= sp ? sp.label : spid %> :</strong> <%= s.spectrums[spid] %></p>
         <% }) %>
+        <% Object.keys(s.multiselects || {}).forEach(function (msid) { %>
+          <% if (s.multiselects[msid].length) { %>
+            <% var ms = section.multiselects.find(function (x) { return x.id === msid; }); %>
+            <p class="ranking-result"><strong><%= ms ? ms.label : msid %> :</strong> <%= s.multiselects[msid].join(", ") %></p>
+          <% } %>
+        <% }) %>
 
         <%
           var sectionData = (answers && answers[section.key]) || {};

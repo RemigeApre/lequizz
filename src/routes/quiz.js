@@ -45,7 +45,14 @@ function parseSectionSubmission(config, section, body) {
       spectrums[sp.id] = Number.isNaN(v) ? 3 : v;
     }
 
-    return { matrix, rankings, rankingsChecked, spectrums };
+    const multiselects = {};
+    for (const ms of section.multiselects || []) {
+      multiselects[ms.id] = ms.options
+        .map((_, i) => i)
+        .filter((i) => body[`ms_${ms.id}_${i}`] === "on" || body[`ms_${ms.id}_${i}`] === "1");
+    }
+
+    return { matrix, rankings, rankingsChecked, spectrums, multiselects };
   }
 
   if (section.type === "profile") {
