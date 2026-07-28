@@ -75,7 +75,12 @@
   }
 
   function levelOptionText(lvl, valueNum) {
-    return lvl.key + " — " + lvl.label + " (" + config.scaleLabels[valueNum - 1] + ")";
+    return lvl.label + " (" + config.scaleLabels[valueNum - 1] + ")";
+  }
+
+  function setFreqClass(select, value) {
+    select.className = select.className.replace(/\bfreq-val-\d+\b/g, "").trim();
+    select.classList.add("freq-val-" + value);
   }
 
   function renderItemCard(item, i, existingMatrix, sectionKey) {
@@ -93,13 +98,13 @@
     var firstVal = existingMatrix[i] ? Number(existingMatrix[i][firstLevelKey]) : 1;
 
     html += '<div class="level-picker" data-item-index="' + i + '">';
-    html += '<select class="level-select">';
+    html += '<select class="level-select' + (firstVal > 1 ? " level-answered" : "") + '">';
     config.levels.forEach(function (lvl) {
       var v = existingMatrix[i] ? Number(existingMatrix[i][lvl.key]) : 1;
       html += '<option value="' + lvl.key + '">' + levelOptionText(lvl, v) + "</option>";
     });
     html += '</select>';
-    html += '<select class="freq-select">';
+    html += '<select class="freq-select freq-val-' + firstVal + '">';
     config.scaleLabels.forEach(function (label, li) {
       var sel = firstVal === li + 1 ? " selected" : "";
       html += '<option value="' + (li + 1) + '"' + sel + ">" + label + "</option>";
@@ -129,11 +134,7 @@
   }
 
   function renderMatrixSection(section, existingData) {
-    var html = '<div class="legend">';
-    config.levels.forEach(function (lvl) {
-      html += '<span><strong>' + lvl.key + '</strong> = ' + lvl.label + '</span>';
-    });
-    html += '</div>';
+    var html = "";
 
     var multiGroup = section.groups.length > 1;
     if (multiGroup) {
@@ -407,9 +408,12 @@
         var hidden = picker.parentElement.querySelector(
           'input[type="hidden"][name="m_' + itemIndex + "_" + levelKey + '"]'
         );
+        var v = Number(freqSelect.value);
         if (hidden) hidden.value = freqSelect.value;
         var opt = levelSelect.querySelector('option[value="' + levelKey + '"]');
-        if (opt && lvl) opt.textContent = levelOptionText(lvl, Number(freqSelect.value));
+        if (opt && lvl) opt.textContent = levelOptionText(lvl, v);
+        setFreqClass(freqSelect, v);
+        levelSelect.classList.toggle("level-answered", v > 1);
       }
 
       var levelSelectChanged = e.target.closest(".level-select");
@@ -421,7 +425,10 @@
         var hidden2 = picker2.parentElement.querySelector(
           'input[type="hidden"][name="m_' + itemIndex2 + "_" + levelKey2 + '"]'
         );
-        freqSelect2.value = hidden2 ? hidden2.value : "1";
+        var v2 = hidden2 ? Number(hidden2.value) : 1;
+        freqSelect2.value = String(v2);
+        setFreqClass(freqSelect2, v2);
+        levelSelectChanged.classList.toggle("level-answered", v2 > 1);
       }
 
       state.data[section.key] = parseSection(section, idx);
