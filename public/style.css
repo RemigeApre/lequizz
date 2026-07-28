@@ -59,31 +59,13 @@ body {
 }
 
 .top-nav-brand {
+  font-family: Georgia, "Times New Roman", serif;
   font-weight: 700;
-  font-size: 1.05rem;
-  letter-spacing: 0.02em;
+  font-style: italic;
+  font-size: 1.3rem;
+  letter-spacing: 0.03em;
   color: var(--fg);
   text-decoration: none;
-}
-
-.top-nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.top-nav-results {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  font-size: 1.2rem;
-  background: var(--accent);
-  color: #fff;
-  border-radius: 999px;
-  text-decoration: none;
-  line-height: 1;
 }
 
 .nav-menu {
@@ -109,41 +91,75 @@ body {
   display: none;
 }
 
+.nav-menu[open] summary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
 .nav-menu-list {
   position: absolute;
   right: 0;
-  top: calc(100% + 0.5rem);
+  top: calc(100% + 0.6rem);
   display: flex;
   flex-direction: column;
-  min-width: 220px;
+  width: max(260px, 70vw);
+  max-width: calc(100vw - 2.5rem);
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
   overflow: hidden;
   z-index: 20;
+  padding: 0.4rem;
 }
 
-.nav-menu-list a {
-  padding: 0.65rem 0.9rem;
+.nav-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.75rem 0.75rem;
+  border-radius: 8px;
   color: var(--fg);
   text-decoration: none;
-  font-size: 0.9rem;
-  border-left: 4px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  font-size: 0.95rem;
 }
 
-.nav-menu-list a:last-child {
-  border-bottom: none;
-}
-
-.nav-menu-list a:hover {
+.nav-menu-item:hover {
   background: var(--bg);
+}
+
+.nav-menu-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.65rem;
+  height: 0.65rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  font-size: 0;
+}
+
+.nav-menu-dot-home,
+.nav-menu-dot-key {
+  width: auto;
+  height: auto;
+  background: none;
+  font-size: 1rem;
+}
+
+.nav-menu-divider {
+  height: 1px;
+  margin: 0.4rem 0.5rem;
+  background: var(--border);
 }
 
 .home-message {
   font-size: 1.1rem;
   line-height: 1.7;
+  text-align: justify;
+  hyphens: auto;
   color: var(--fg);
   background: var(--card);
   border: 1px solid var(--border);
