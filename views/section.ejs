@@ -44,17 +44,20 @@
                 <div class="item-header">
                   <div class="item-title-row">
                     <span class="item-name"><%= item %></span>
-                    <details class="item-flag">
-                      <summary class="item-flag-summary <%= flagClass %>" title="Marquer">!</summary>
-                      <div class="item-flag-menu">
-                        <button type="button" class="item-flag-option" data-flag="test">A tester</button>
-                        <button type="button" class="item-flag-option" data-flag="dislike">Aime pas</button>
-                        <button type="button" class="item-flag-option" data-flag="none">Aucun</button>
-                      </div>
-                    </details>
-                    <button type="button" class="item-fav-toggle<%= favorited ? ' active' : '' %>" title="Favori">
-                      <%- favorited ? "&#9733;" : "&#9734;" %>
-                    </button>
+                    <div class="item-actions">
+                      <button type="button" class="item-help-toggle" title="Bientot : explication de la pratique" disabled>?</button>
+                      <details class="item-flag">
+                        <summary class="item-flag-summary <%= flagClass %>" title="Marquer">!</summary>
+                        <div class="item-flag-menu">
+                          <button type="button" class="item-flag-option" data-flag="test">A tester</button>
+                          <button type="button" class="item-flag-option" data-flag="dislike">Aime pas</button>
+                          <button type="button" class="item-flag-option" data-flag="none">Aucun</button>
+                        </div>
+                      </details>
+                      <button type="button" class="item-fav-toggle<%= favorited ? ' active' : '' %>" title="Favori">
+                        <%- favorited ? "&#9733;" : "&#9734;" %>
+                      </button>
+                    </div>
                     <input type="hidden" name="test_<%= i %>" class="test-hidden" value="<%= toTest ? 1 : 0 %>" />
                     <input type="hidden" name="dislike_<%= i %>" class="dislike-hidden" value="<%= disliked ? 1 : 0 %>" />
                     <input type="hidden" name="fav_<%= i %>" class="fav-hidden" value="<%= favorited ? 1 : 0 %>" />
