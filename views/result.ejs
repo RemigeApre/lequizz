@@ -39,16 +39,28 @@
         <%
           var sectionData = (answers && answers[section.key]) || {};
           var matrix = sectionData.matrix || {};
-          var items = flattenItems(section);
+          var rawItems = flattenItemsRaw(section);
           var answeredRows = [];
-          items.forEach(function (item, i) {
-            var levels = matrix[i] || {};
-            var parts = [];
-            config.levels.forEach(function (lvl) {
-              var v = Number(levels[lvl.key]) || 1;
-              if (v > 1) parts.push(lvl.label + " : " + config.scaleLabels[v - 1]);
-            });
-            if (parts.length) answeredRows.push({ item: item, parts: parts.join(" · ") });
+          rawItems.forEach(function (item, i) {
+            if (item.variants) {
+              item.variants.forEach(function (variantLabel, vi) {
+                var levels = (matrix[i] && matrix[i][vi]) || {};
+                var parts = [];
+                config.levels.forEach(function (lvl) {
+                  var v = Number(levels[lvl.key]) || 1;
+                  if (v > 1) parts.push(lvl.label + " : " + config.scaleLabels[v - 1]);
+                });
+                if (parts.length) answeredRows.push({ item: item.text + " (" + variantLabel + ")", parts: parts.join(" · ") });
+              });
+            } else {
+              var levels = matrix[i] || {};
+              var parts = [];
+              config.levels.forEach(function (lvl) {
+                var v = Number(levels[lvl.key]) || 1;
+                if (v > 1) parts.push(lvl.label + " : " + config.scaleLabels[v - 1]);
+              });
+              if (parts.length) answeredRows.push({ item: item.text, parts: parts.join(" · ") });
+            }
           });
         %>
         <% if (answeredRows.length) { %>

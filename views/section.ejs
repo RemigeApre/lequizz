@@ -8,13 +8,14 @@
     var LEVEL_COLORS = { a: "#6c8ebf", b: "#9b6cbf", c: "#4fa5a0", d: "#d9932f", e: "#c0455a" };
   %>
 
-  <form method="POST" action="/section/<%= idx %>">
+  <form method="POST" action="/section/<%= idx %>" style="--section-color: <%= section.color || '' %>;">
     <% if (section.type === "matrix") { %>
       <% var multiGroup = section.groups.length > 1; %>
 
       <%
         var globalIndex = 0;
         var existingMatrix = (existing && existing.matrix) || {};
+        var rawItems = flattenItemsRaw(section);
       %>
       <% section.groups.forEach(function (group, gi) { %>
         <% var groupKey = section.key + ":" + gi; %>
@@ -31,19 +32,19 @@
             <input type="hidden" name="done_<%= gi %>" class="group-done-hidden" value="<%= isDone ? 1 : 0 %>" />
           </summary>
           <div class="item-cards">
-            <% group.items.forEach(function (item) { %>
+            <% group.items.forEach(function () { %>
               <% var i = globalIndex; globalIndex += 1; %>
+              <% var item = rawItems[i]; %>
               <% var itemKey = section.key + ":" + i; %>
               <% var toTest = !!bookmarks.toTest[itemKey]; %>
               <% var disliked = !!bookmarks.dislike[itemKey]; %>
               <% var favorited = !!bookmarks.favorite[itemKey]; %>
               <% var flagClass = toTest ? "flag-test" : (disliked ? "flag-dislike" : ""); %>
               <% var firstLevelKey = config.levels[0].key; %>
-              <% var firstVal = existingMatrix[i] ? Number(existingMatrix[i][firstLevelKey]) : 1; %>
               <div class="item-card">
                 <div class="item-header">
                   <div class="item-title-row">
-                    <span class="item-name"><%= item %></span>
+                    <span class="item-name"><%= item.text %></span>
                     <div class="item-actions">
                       <%# Icone "?" reservee pour plus tard : n'apparaitra que si un lien wiki existe pour cette pratique. %>
                       <details class="item-flag">
@@ -64,123 +65,116 @@
                   </div>
                 </div>
 
-                <div class="level-picker" data-item-index="<%= i %>">
-                  <select class="level-select" style="border-left-color: <%= LEVEL_COLORS[firstLevelKey] %>">
-                    <% config.levels.forEach(function (lvl) { %>
-                      <% var v = existingMatrix[i] ? Number(existingMatrix[i][lvl.key]) : 1; %>
-                      <option value="<%= lvl.key %>" style="background-color: <%= LEVEL_COLORS[lvl.key] %>; color: #fff;"><%= lvl.label %> (<%= config.scaleLabels[v - 1] %>)</option>
+                <% if (item.variants) { %>
+                  <div class="variant-pickers">
+                    <% item.variants.forEach(function (variantLabel, vi) { %>
+                      <% var variantExisting = (existingMatrix[i] && existingMatrix[i][vi]) || null; %>
+                      <% var vFirstVal = variantExisting ? Number(variantExisting[firstLevelKey]) : 1; %>
+                      <div class="variant-block">
+                        <span class="variant-label"><%= variantLabel %></span>
+                        <div class="level-picker" data-item-index="<%= i %>" data-variant-index="<%= vi %>">
+                          <select class="level-select" style="border-left-color: <%= LEVEL_COLORS[firstLevelKey] %>">
+                            <% config.levels.forEach(function (lvl) { %>
+                              <% var v = variantExisting ? Number(variantExisting[lvl.key]) : 1; %>
+                              <option value="<%= lvl.key %>" style="background-color: <%= LEVEL_COLORS[lvl.key] %>; color: #fff;"><%= lvl.label %> (<%= config.scaleLabels[v - 1] %>)</option>
+                            <% }) %>
+                          </select>
+                          <select class="freq-select freq-val-<%= vFirstVal %>">
+                            <% config.scaleLabels.forEach(function (label, li) { %>
+                              <option value="<%= li + 1 %>" <%= vFirstVal === (li + 1) ? "selected" : "" %>><%= label %></option>
+                            <% }) %>
+                          </select>
+                        </div>
+                        <% config.levels.forEach(function (lvl) { %>
+                          <% var existingVal = variantExisting ? Number(variantExisting[lvl.key]) : 1; %>
+                          <input type="hidden" name="m_<%= i %>_<%= vi %>_<%= lvl.key %>" value="<%= existingVal %>" />
+                        <% }) %>
+                      </div>
                     <% }) %>
-                  </select>
-                  <select class="freq-select freq-val-<%= firstVal %>">
-                    <% config.scaleLabels.forEach(function (label, li) { %>
-                      <option value="<%= li + 1 %>" <%= firstVal === (li + 1) ? "selected" : "" %>><%= label %></option>
-                    <% }) %>
-                  </select>
-                </div>
+                  </div>
+                <% } else { %>
+                  <% var firstVal = existingMatrix[i] ? Number(existingMatrix[i][firstLevelKey]) : 1; %>
+                  <div class="level-picker" data-item-index="<%= i %>">
+                    <select class="level-select" style="border-left-color: <%= LEVEL_COLORS[firstLevelKey] %>">
+                      <% config.levels.forEach(function (lvl) { %>
+                        <% var v = existingMatrix[i] ? Number(existingMatrix[i][lvl.key]) : 1; %>
+                        <option value="<%= lvl.key %>" style="background-color: <%= LEVEL_COLORS[lvl.key] %>; color: #fff;"><%= lvl.label %> (<%= config.scaleLabels[v - 1] %>)</option>
+                      <% }) %>
+                    </select>
+                    <select class="freq-select freq-val-<%= firstVal %>">
+                      <% config.scaleLabels.forEach(function (label, li) { %>
+                        <option value="<%= li + 1 %>" <%= firstVal === (li + 1) ? "selected" : "" %>><%= label %></option>
+                      <% }) %>
+                    </select>
+                  </div>
 
-                <% config.levels.forEach(function (lvl) { %>
-                  <% var existingVal = existingMatrix[i] ? Number(existingMatrix[i][lvl.key]) : 1; %>
-                  <input type="hidden" name="m_<%= i %>_<%= lvl.key %>" value="<%= existingVal %>" />
-                <% }) %>
+                  <% config.levels.forEach(function (lvl) { %>
+                    <% var existingVal = existingMatrix[i] ? Number(existingMatrix[i][lvl.key]) : 1; %>
+                    <input type="hidden" name="m_<%= i %>_<%= lvl.key %>" value="<%= existingVal %>" />
+                  <% }) %>
+                <% } %>
               </div>
             <% }) %>
           </div>
+
+          <%
+            var extrasHere = [];
+            (section.rankings || []).forEach(function (r) { if (r.groupIndex === gi) extrasHere.push({ type: "ranking", data: r }); });
+            (section.spectrums || []).forEach(function (sp) { if (sp.groupIndex === gi) extrasHere.push({ type: "spectrum", data: sp }); });
+            (section.multiselects || []).forEach(function (ms) { if (ms.groupIndex === gi) extrasHere.push({ type: "multiselect", data: ms }); });
+          %>
+          <% if (extrasHere.length) { %>
+            <div class="extra-cards">
+              <% extrasHere.forEach(function (ex) { %>
+                <% if (ex.type === "ranking") { %>
+                  <%- include('partials/extra-ranking', { r: ex.data }) %>
+                <% } else if (ex.type === "spectrum") { %>
+                  <%- include('partials/extra-spectrum', { sp: ex.data }) %>
+                <% } else { %>
+                  <%- include('partials/extra-multiselect', { ms: ex.data }) %>
+                <% } %>
+              <% }) %>
+            </div>
+          <% } %>
         </details>
       <% }) %>
 
-      <% (section.rankings || []).forEach(function (r) { %>
-        <fieldset class="question" data-ranking-id="<%= r.id %>">
-          <legend><%= r.label %></legend>
-          <%
-            var existingOrder = (existing && existing.rankings && existing.rankings[r.id]) || r.items.map(function (_, i) { return i; });
-            var existingChecked = (existing && existing.rankingsChecked && existing.rankingsChecked[r.id]) || [];
-            var checkedSet = {};
-            existingChecked.forEach(function (idx) { checkedSet[idx] = true; });
-          %>
-          <ul class="ranking-list<%= r.checkable ? ' ranking-checkable' : '' %>" data-question-id="ranking_<%= r.id %>">
-            <% existingOrder.forEach(function (itemIdx) { %>
-              <% var isChecked = !r.checkable || !!checkedSet[itemIdx]; %>
-              <li draggable="true" data-index="<%= itemIdx %>" <%= (r.checkable && !isChecked) ? 'class="unchecked"' : '' %>>
-                <% if (r.checkable) { %><input type="checkbox" class="ranking-check" <%= isChecked ? 'checked' : '' %> /> <% } %>
-                <span class="handle">&#8942;&#8942;</span> <%= r.items[itemIdx] %>
-              </li>
-            <% }) %>
-          </ul>
-          <input type="hidden" name="ranking_<%= r.id %>" class="ranking-order" />
-          <% if (r.checkable) { %>
-            <input type="hidden" name="ranking_<%= r.id %>_checked" class="ranking-checked" />
-          <% } %>
-        </fieldset>
-      <% }) %>
-
-      <% (section.spectrums || []).forEach(function (sp) { %>
-        <fieldset class="question">
-          <legend><%= sp.label %></legend>
-          <% var existingSpectrumVal = (existing && existing.spectrums && existing.spectrums[sp.id]) || 3; %>
-          <div class="choices">
-            <% sp.scaleLabels.forEach(function (label, li) { %>
-              <label class="choice">
-                <input type="radio" name="spectrum_<%= sp.id %>" value="<%= li + 1 %>" <%= existingSpectrumVal === (li + 1) ? "checked" : "" %> />
-                <%= label %>
-              </label>
-            <% }) %>
-          </div>
-        </fieldset>
-      <% }) %>
-
-      <% (section.multiselects || []).forEach(function (ms) { %>
-        <fieldset class="question">
-          <legend><%= ms.label %></legend>
-          <% var existingSelected = (existing && existing.multiselects && existing.multiselects[ms.id]) || []; %>
-          <div class="choices">
-            <% ms.options.forEach(function (opt, optIndex) { %>
-              <label class="choice">
-                <input type="checkbox" name="ms_<%= ms.id %>_<%= optIndex %>" <%= existingSelected.indexOf(optIndex) !== -1 ? "checked" : "" %> />
-                <%= opt %>
-              </label>
-            <% }) %>
-          </div>
-        </fieldset>
-      <% }) %>
+      <%
+        var leftoverRankings = (section.rankings || []).filter(function (r) { return r.groupIndex === undefined || r.groupIndex === null; });
+        var leftoverSpectrums = (section.spectrums || []).filter(function (sp) { return sp.groupIndex === undefined || sp.groupIndex === null; });
+        var leftoverMultiselects = (section.multiselects || []).filter(function (ms) { return ms.groupIndex === undefined || ms.groupIndex === null; });
+      %>
+      <% if (leftoverRankings.length || leftoverSpectrums.length || leftoverMultiselects.length) { %>
+        <div class="extra-cards">
+          <% leftoverRankings.forEach(function (r) { %>
+            <%- include('partials/extra-ranking', { r: r }) %>
+          <% }) %>
+          <% leftoverSpectrums.forEach(function (sp) { %>
+            <%- include('partials/extra-spectrum', { sp: sp }) %>
+          <% }) %>
+          <% leftoverMultiselects.forEach(function (ms) { %>
+            <%- include('partials/extra-multiselect', { ms: ms }) %>
+          <% }) %>
+        </div>
+      <% } %>
     <% } else if (section.type === "profile") { %>
       <% var existingFields = (existing && existing.fields) || {}; %>
       <% section.fields.forEach(function (f) { %>
-        <fieldset class="question">
-          <legend><%= f.label %></legend>
-          <div class="choices">
+        <div class="extra-card">
+          <p class="extra-card-title"><%= f.label %></p>
+          <div class="multiselect-options">
             <% f.options.forEach(function (opt, optIndex) { %>
-              <label class="choice">
+              <label class="chip-option">
                 <input type="radio" name="field_<%= f.id %>" value="<%= optIndex %>" <%= String(existingFields[f.id]) === String(optIndex) ? "checked" : "" %> />
-                <%= opt %>
+                <span><%= opt %></span>
               </label>
             <% }) %>
           </div>
-        </fieldset>
+        </div>
       <% }) %>
 
       <% (section.rankings || []).forEach(function (r) { %>
-        <fieldset class="question" data-ranking-id="<%= r.id %>">
-          <legend><%= r.label %></legend>
-          <%
-            var existingOrder = (existing && existing.rankings && existing.rankings[r.id]) || r.items.map(function (_, i) { return i; });
-            var existingChecked = (existing && existing.rankingsChecked && existing.rankingsChecked[r.id]) || [];
-            var checkedSet = {};
-            existingChecked.forEach(function (idx) { checkedSet[idx] = true; });
-          %>
-          <ul class="ranking-list<%= r.checkable ? ' ranking-checkable' : '' %>" data-question-id="ranking_<%= r.id %>">
-            <% existingOrder.forEach(function (itemIdx) { %>
-              <% var isChecked = !r.checkable || !!checkedSet[itemIdx]; %>
-              <li draggable="true" data-index="<%= itemIdx %>" <%= (r.checkable && !isChecked) ? 'class="unchecked"' : '' %>>
-                <% if (r.checkable) { %><input type="checkbox" class="ranking-check" <%= isChecked ? 'checked' : '' %> /> <% } %>
-                <span class="handle">&#8942;&#8942;</span> <%= r.items[itemIdx] %>
-              </li>
-            <% }) %>
-          </ul>
-          <input type="hidden" name="ranking_<%= r.id %>" class="ranking-order" />
-          <% if (r.checkable) { %>
-            <input type="hidden" name="ranking_<%= r.id %>_checked" class="ranking-checked" />
-          <% } %>
-        </fieldset>
+        <%- include('partials/extra-ranking', { r: r }) %>
       <% }) %>
     <% } %>
 

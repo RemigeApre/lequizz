@@ -46,7 +46,10 @@
             "cow girl inversé",
             "anal",
             "69",
-            "Positions moins conventionnelles (debout, assises, acrobatiques)",
+            "Assis face à face",
+            "Assis de dos",
+            "Debout",
+            "Portée",
             "Double pénétration manuelle ou avec objets",
             "Cuillère"
           ]
@@ -55,22 +58,20 @@
           "title": "Pratiques manuelles et orales",
           "items": [
             "Masturbation mutuelle",
-            "Stimulation manuelle",
-            "Sexe oral",
+            { "text": "Stimulation manuelle", "variants": ["Donné", "Reçu"] },
+            { "text": "Sexe oral", "variants": ["Donné", "Reçu"] },
             "Frottement habillé",
             "Sexe intercrural, entre les cuisses",
-            "Anulingus"
+            { "text": "Anulingus", "variants": ["Donné", "Reçu"] }
           ]
         },
         {
           "title": "Ambiance et rythme du rapport",
           "items": [
-            "Rapport interrompu avant éjaculation",
-            "Rapport sans éjaculation",
+            "Rapport avec jouissance contenue",
             "Orgasme simultané",
             "Faire jouir sans être soi-même stimulé",
             "Être stimulé sans rendre la pareille",
-            "Duree du rapport (tres court, prolonge, ou plusieurs fois de suite)",
             "Sexe pendant les règles"
           ]
         },
@@ -159,7 +160,8 @@
             "Au reveil",
             "Dans la journee",
             "Le soir / avant de dormir"
-          ]
+          ],
+          "groupIndex": 2
         },
         {
           "id": "contraception",
@@ -168,7 +170,8 @@
             "Preservatif",
             "Contraception hormonale (pilule, sterilet...)",
             "Sans contraception"
-          ]
+          ],
+          "groupIndex": 3
         }
       ],
       "spectrums": [
@@ -181,7 +184,8 @@
             "Parfois",
             "Souvent",
             "Avaler"
-          ]
+          ],
+          "groupIndex": 3
         },
         {
           "id": "spontane_planifie",
@@ -192,40 +196,8 @@
             "Un melange des deux",
             "Plutot spontane",
             "Toujours spontane"
-          ]
-        },
-        {
-          "id": "stim_manuelle_pref",
-          "label": "Stimulation manuelle : preference",
-          "scaleLabels": [
-            "Toujours donner",
-            "Plutot donner",
-            "Autant les deux",
-            "Plutot recevoir",
-            "Toujours recevoir"
-          ]
-        },
-        {
-          "id": "sexe_oral_pref",
-          "label": "Sexe oral : preference",
-          "scaleLabels": [
-            "Toujours donner",
-            "Plutot donner",
-            "Autant les deux",
-            "Plutot recevoir",
-            "Toujours recevoir"
-          ]
-        },
-        {
-          "id": "anulingus_pref",
-          "label": "Anulingus : preference",
-          "scaleLabels": [
-            "Toujours donner",
-            "Plutot donner",
-            "Autant les deux",
-            "Plutot recevoir",
-            "Toujours recevoir"
-          ]
+          ],
+          "groupIndex": 2
         },
         {
           "id": "intensite_rapport",
@@ -236,7 +208,8 @@
             "Equilibre",
             "Intense",
             "Brutal, bestial"
-          ]
+          ],
+          "groupIndex": 2
         },
         {
           "id": "rapport_sperme",
@@ -247,7 +220,8 @@
             "Neutre",
             "Veut apprendre a adorer",
             "Adore"
-          ]
+          ],
+          "groupIndex": 3
         }
       ],
       "color": "#6b5b95",
@@ -262,7 +236,8 @@
             "Cris",
             "Insultes",
             "Mots possessifs"
-          ]
+          ],
+          "groupIndex": 2
         },
         {
           "id": "vision",
@@ -272,7 +247,8 @@
             "Miroir",
             "Dans le noir",
             "Masque(e)"
-          ]
+          ],
+          "groupIndex": 2
         }
       ]
     },
@@ -411,7 +387,8 @@
           ],
           "condition": {
             "itemText": "Godes ethniques"
-          }
+          },
+          "groupIndex": 0
         },
         {
           "id": "objets_quotidien",
@@ -431,7 +408,8 @@
             "Ceinture",
             "Cravate",
             "Collier"
-          ]
+          ],
+          "groupIndex": 0
         },
         {
           "id": "godes_animaux",
@@ -447,7 +425,8 @@
           "condition": {
             "itemText": "Godes animaux"
           },
-          "checkable": true
+          "checkable": true,
+          "groupIndex": 0
         }
       ],
       "color": "#2f9e8f"
@@ -746,7 +725,8 @@
           "condition": {
             "itemText": "Fantasmes de bestialité, uniquement sous forme fictive, dessinée, écrite ou avec accessoires"
           },
-          "checkable": true
+          "checkable": true,
+          "groupIndex": 0
         }
       ],
       "color": "#4a4a4a"

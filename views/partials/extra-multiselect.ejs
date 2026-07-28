@@ -1,0 +1,12 @@
+<% var existingSelected = (existing && existing.multiselects && existing.multiselects[ms.id]) || []; %>
+<div class="extra-card">
+  <p class="extra-card-title"><%= ms.label %></p>
+  <div class="multiselect-options">
+    <% ms.options.forEach(function (opt, optIndex) { %>
+      <label class="chip-option">
+        <input type="checkbox" name="ms_<%= ms.id %>_<%= optIndex %>" <%= existingSelected.indexOf(optIndex) !== -1 ? "checked" : "" %> />
+        <span><%= opt %></span>
+      </label>
+    <% }) %>
+  </div>
+</div>

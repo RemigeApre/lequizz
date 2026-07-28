@@ -1,0 +1,12 @@
+<% var existingSpectrumVal = (existing && existing.spectrums && existing.spectrums[sp.id]) || 3; %>
+<div class="extra-card">
+  <p class="extra-card-title"><%= sp.label %></p>
+  <div class="spectrum-scale">
+    <% sp.scaleLabels.forEach(function (label, li) { %>
+      <label class="spectrum-option spectrum-pos-<%= li + 1 %>">
+        <input type="radio" name="spectrum_<%= sp.id %>" value="<%= li + 1 %>" <%= existingSpectrumVal === (li + 1) ? "checked" : "" %> />
+        <span><%= label %></span>
+      </label>
+    <% }) %>
+  </div>
+</div>

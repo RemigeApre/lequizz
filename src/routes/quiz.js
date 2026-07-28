@@ -1,5 +1,5 @@
 const express = require("express");
-const { flattenItems, computeScores } = require("../scoring");
+const { flattenItems, flattenItemsRaw, computeScores } = require("../scoring");
 const {
   insertSubmission,
   getAttempt,
@@ -13,15 +13,27 @@ const SHARED_TOKEN = "shared";
 
 function parseSectionSubmission(config, section, body) {
   if (section.type === "matrix") {
-    const items = flattenItems(section);
+    const rawItems = flattenItemsRaw(section);
     const matrix = {};
-    items.forEach((_, i) => {
-      const levels = {};
-      config.levels.forEach((lvl) => {
-        const v = Number(body[`m_${i}_${lvl.key}`]);
-        levels[lvl.key] = Number.isNaN(v) ? 1 : v;
-      });
-      matrix[i] = levels;
+    rawItems.forEach((item, i) => {
+      if (item.variants) {
+        matrix[i] = {};
+        item.variants.forEach((_, vi) => {
+          const levels = {};
+          config.levels.forEach((lvl) => {
+            const v = Number(body[`m_${i}_${vi}_${lvl.key}`]);
+            levels[lvl.key] = Number.isNaN(v) ? 1 : v;
+          });
+          matrix[i][vi] = levels;
+        });
+      } else {
+        const levels = {};
+        config.levels.forEach((lvl) => {
+          const v = Number(body[`m_${i}_${lvl.key}`]);
+          levels[lvl.key] = Number.isNaN(v) ? 1 : v;
+        });
+        matrix[i] = levels;
+      }
     });
 
     const rankings = {};
@@ -100,6 +112,7 @@ function buildQuizRouter(config) {
     res.render("section", {
       config,
       section,
+      flattenItemsRaw,
       idx,
       total: config.sections.length,
       existing,
@@ -116,6 +129,7 @@ function buildQuizRouter(config) {
       scores,
       answers: attempt.data,
       flattenItems,
+      flattenItemsRaw,
       isFinal: false,
       resumeIdx: Math.min(Math.max(attempt.nextSection, 0), config.sections.length - 1),
     });
@@ -170,7 +184,7 @@ function buildQuizRouter(config) {
       const scores = computeScores(config, attempt.data);
       insertSubmission(attempt.data, scores);
       csvLog.append("complete", SHARED_TOKEN, section.key, idx, { answers: attempt.data, scores });
-      return res.render("result", { config, scores, answers: attempt.data, flattenItems, isFinal: true });
+      return res.render("result", { config, scores, answers: attempt.data, flattenItems, flattenItemsRaw, isFinal: true });
     }
 
     res.redirect(`/section/${nextIdx}`);

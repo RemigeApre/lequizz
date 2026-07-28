@@ -625,34 +625,138 @@ h2 { font-size: 1.1rem; margin-top: 2rem; }
 
 .intro { color: var(--muted); margin-bottom: 2rem; }
 
-.question {
+.extra-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+}
+
+.extra-card {
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1.25rem;
+  border-left: 4px solid var(--section-color, var(--accent));
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
   background: var(--card);
 }
 
-.question legend {
-  padding: 0 0.4rem;
+.extra-card-title {
+  margin: 0 0 0.65rem;
   font-weight: 600;
+  font-size: 0.95rem;
 }
 
-.scale {
+.spectrum-scale {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
 
-.scale-input { flex: 1; }
-
-.choices { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem; }
-
-.choice {
+.spectrum-option {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 5.5rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
+  text-align: center;
+  gap: 0;
+  margin-bottom: 0;
+  padding: 0.55rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
   cursor: pointer;
+  transition: transform 0.1s ease, border-color 0.1s ease;
+}
+
+.spectrum-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.spectrum-option:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.spectrum-option:has(input:checked) {
+  border-color: transparent;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.spectrum-pos-1:has(input:checked) { background: color-mix(in srgb, var(--accent) 35%, var(--bg)); }
+.spectrum-pos-2:has(input:checked) { background: color-mix(in srgb, var(--accent) 55%, var(--bg)); }
+.spectrum-pos-3:has(input:checked) { background: color-mix(in srgb, var(--accent) 70%, var(--bg)); }
+.spectrum-pos-4:has(input:checked) { background: color-mix(in srgb, var(--accent) 85%, var(--bg)); }
+.spectrum-pos-5:has(input:checked) { background: var(--accent); }
+
+.multiselect-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chip-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 0;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.1s ease;
+}
+
+.chip-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chip-option:hover {
+  border-color: var(--accent);
+}
+
+.chip-option:has(input:checked) {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.variant-pickers {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.variant-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.6rem 0.7rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+
+.variant-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
 }
 
 .ranking-list {

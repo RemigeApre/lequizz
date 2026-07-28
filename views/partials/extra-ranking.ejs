@@ -1,0 +1,22 @@
+<%
+  var existingOrder = (existing && existing.rankings && existing.rankings[r.id]) || r.items.map(function (_, i) { return i; });
+  var existingChecked = (existing && existing.rankingsChecked && existing.rankingsChecked[r.id]) || [];
+  var checkedSet = {};
+  existingChecked.forEach(function (idx) { checkedSet[idx] = true; });
+%>
+<div class="extra-card" data-ranking-id="<%= r.id %>">
+  <p class="extra-card-title"><%= r.label %></p>
+  <ul class="ranking-list<%= r.checkable ? ' ranking-checkable' : '' %>" data-question-id="ranking_<%= r.id %>">
+    <% existingOrder.forEach(function (itemIdx) { %>
+      <% var isChecked = !r.checkable || !!checkedSet[itemIdx]; %>
+      <li draggable="true" data-index="<%= itemIdx %>" <%= (r.checkable && !isChecked) ? 'class="unchecked"' : '' %>>
+        <% if (r.checkable) { %><input type="checkbox" class="ranking-check" <%= isChecked ? 'checked' : '' %> /> <% } %>
+        <span class="handle">&#8942;&#8942;</span> <%= r.items[itemIdx] %>
+      </li>
+    <% }) %>
+  </ul>
+  <input type="hidden" name="ranking_<%= r.id %>" class="ranking-order" />
+  <% if (r.checkable) { %>
+    <input type="hidden" name="ranking_<%= r.id %>_checked" class="ranking-checked" />
+  <% } %>
+</div>

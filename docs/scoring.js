@@ -1,29 +1,53 @@
-function flattenItems(section) {
+function normalizeItem(item) {
+  if (typeof item === "string") return { text: item, variants: null };
+  return { text: item.text, variants: item.variants || null };
+}
+
+function flattenItemsRaw(section) {
   const items = [];
-  for (const group of section.groups) items.push(...group.items);
+  for (const group of section.groups) {
+    for (const item of group.items) items.push(normalizeItem(item));
+  }
   return items;
 }
 
+function flattenItems(section) {
+  return flattenItemsRaw(section).map((it) => it.text);
+}
+
 function computeMatrixScore(config, section, sectionData) {
-  const items = flattenItems(section);
+  const rawItems = flattenItemsRaw(section);
   const matrix = (sectionData && sectionData.matrix) || {};
   const scaleMax = config.scaleLabels.length;
   const levelCount = config.levels.length;
   const maxPerItem = scaleMax * levelCount;
 
   let raw = 0;
-  items.forEach((_, i) => {
-    const levels = matrix[i] || {};
-    for (const lvl of config.levels) {
-      const v = Number(levels[lvl.key]);
-      if (!Number.isNaN(v)) raw += v;
+  let units = 0;
+  rawItems.forEach((item, i) => {
+    if (item.variants) {
+      item.variants.forEach((_, vi) => {
+        const levels = (matrix[i] && matrix[i][vi]) || {};
+        for (const lvl of config.levels) {
+          const v = Number(levels[lvl.key]);
+          if (!Number.isNaN(v)) raw += v;
+        }
+        units += 1;
+      });
+    } else {
+      const levels = matrix[i] || {};
+      for (const lvl of config.levels) {
+        const v = Number(levels[lvl.key]);
+        if (!Number.isNaN(v)) raw += v;
+      }
+      units += 1;
     }
   });
 
-  const max = items.length * maxPerItem;
+  const max = units * maxPerItem;
   const percentage = max ? Math.round((raw / max) * 1000) / 10 : 0;
 
-  return { raw, max, percentage, itemCount: items.length };
+  return { raw, max, percentage, itemCount: rawItems.length };
 }
 
 function labelRanking(ranking, order, checked) {
@@ -107,4 +131,4 @@ function computeScores(config, answers) {
   return { sections };
 }
 
-window.Scoring = { flattenItems, computeScores };
+window.Scoring = { flattenItems, flattenItemsRaw, computeScores };
