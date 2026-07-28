@@ -29,7 +29,9 @@ app.use(
     cookie: {
       httpOnly: true,
       sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
+      // Pas de HTTPS sur ce deploiement (IP directe, pas de certificat) :
+      // un cookie "secure" serait tout simplement ignore par le navigateur.
+      secure: process.env.FORCE_SECURE_COOKIE === "true",
       maxAge: 1000 * 60 * 60 * 24 * 90,
     },
   })
