@@ -26,7 +26,7 @@
               <span class="group-count-badge"><%= group.items.length %></span>
             </span>
             <button type="button" class="group-done-toggle<%= isDone ? ' active' : '' %>">
-              <%= isDone ? "&#10003; Complet" : "Complet" %>
+              <%- isDone ? "&#10003; Complet" : "Complet" %>
             </button>
             <input type="hidden" name="done_<%= gi %>" class="group-done-hidden" value="<%= isDone ? 1 : 0 %>" />
           </summary>
@@ -53,7 +53,7 @@
                       </div>
                     </details>
                     <button type="button" class="item-fav-toggle<%= favorited ? ' active' : '' %>" title="Favori">
-                      <%= favorited ? "&#9733;" : "&#9734;" %>
+                      <%- favorited ? "&#9733;" : "&#9734;" %>
                     </button>
                     <input type="hidden" name="test_<%= i %>" class="test-hidden" value="<%= toTest ? 1 : 0 %>" />
                     <input type="hidden" name="dislike_<%= i %>" class="dislike-hidden" value="<%= disliked ? 1 : 0 %>" />
