@@ -372,3 +372,30 @@ sudo bash -c "cd /home/quizz && git pull && docker compose up -d --build"
 
 `.env` et `data/quizz.db` restent intacts : ils ne sont pas dans Git, donc
 `git pull` ne les touche jamais.
+
+---
+
+## Continuite entre appareils et sauvegarde en temps reel
+
+Cette version serveur (pas la version GitHub Pages statique) gere ca :
+
+- **Code de reprise** : a la premiere visite, un code court (6 caracteres,
+  ex. `K7XPQ2`) est genere et affiche en haut de chaque page. Ce code
+  identifie la progression en base (table `attempts`), pas le navigateur.
+  Pour continuer sur un autre appareil (ton telephone, le sien, un autre
+  PC), il suffit de taper ce meme code dans le champ "Charger ce code" en
+  haut de la page — la progression se poursuit exactement ou elle en etait,
+  peu importe l'appareil.
+- **CSV en temps reel** : en plus de la base SQLite (`data/quizz.db`), chaque
+  section validee est immediatement ajoutee a `data/log.csv` (colonnes :
+  `timestamp,event,code,section_key,section_index,payload_json`). C'est un
+  filet de securite en texte brut, lisible avec n'importe quel tableur,
+  independant de la base — si jamais la base a un souci, l'historique brut
+  reste dans ce fichier.
+- Ni le code de reprise ni `data/log.csv` ne remplacent le compte admin :
+  le code sert seulement a continuer une reponse en cours ; une fois le
+  quiz termine, la reponse est rangee dans `submissions` et consultable
+  via `/admin`.
+- `data/log.csv` n'est jamais commite dans Git (`.gitignore`), comme
+  `data/quizz.db` — pense a inclure `data/` dans tes propres sauvegardes
+  manuelles du VPS si tu en fais.

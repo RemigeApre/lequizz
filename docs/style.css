@@ -156,10 +156,15 @@ body {
 
 .item-header {
   display: flex;
-  flex-direction: column-reverse;
-  align-items: flex-start;
+  flex-direction: column;
   gap: 0.5rem;
   margin-bottom: 0.75rem;
+}
+
+.item-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .item-name {
@@ -167,7 +172,18 @@ body {
   font-size: 1.05rem;
 }
 
-.test-toggle {
+.fire-icon {
+  font-size: 1.1rem;
+}
+
+.item-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.test-toggle,
+.dislike-toggle {
   background: var(--card);
   color: var(--muted);
   border: 1px solid var(--border);
@@ -186,6 +202,17 @@ body {
 .test-toggle.active {
   background: var(--accent);
   border-color: var(--accent);
+  color: #fff;
+}
+
+.dislike-toggle:hover {
+  border-color: #c0392b;
+  color: #c0392b;
+}
+
+.dislike-toggle.active {
+  background: #c0392b;
+  border-color: #c0392b;
   color: #fff;
 }
 
@@ -407,6 +434,14 @@ h2 { font-size: 1.1rem; margin-top: 2rem; }
 }
 
 .ranking-list li.dragging { opacity: 0.4; }
+
+.ranking-list li.unchecked {
+  opacity: 0.45;
+}
+
+.ranking-check {
+  margin-right: 0.5rem;
+}
 
 .handle { color: var(--muted); margin-right: 0.4rem; }
 

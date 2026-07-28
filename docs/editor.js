@@ -143,6 +143,9 @@
       h.innerHTML += ' <span style="color:var(--muted);font-weight:400;">(affiche seulement si "' +
         ranking.condition.itemText + '" n\'est pas reste sur Jamais)</span>';
     }
+    if (ranking.checkable) {
+      h.innerHTML += ' <span style="color:var(--muted);font-weight:400;">(a cocher, puis a classer)</span>';
+    }
 
     block.appendChild(h);
     block.appendChild(labelInput);

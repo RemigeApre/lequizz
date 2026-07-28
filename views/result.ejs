@@ -16,12 +16,42 @@
           <div class="bar"><div class="bar-fill" style="width: <%= s.percentage %>%"></div></div>
         </div>
         <% Object.keys(s.rankings || {}).forEach(function (rid) { %>
-          <p class="ranking-result"><strong>Classement :</strong> <%= s.rankings[rid].join(" > ") %></p>
+          <% if (s.rankings[rid].length) { %>
+            <p class="ranking-result"><strong>Classement :</strong> <%= s.rankings[rid].join(" > ") %></p>
+          <% } %>
         <% }) %>
         <% Object.keys(s.spectrums || {}).forEach(function (spid) { %>
           <% var sp = section.spectrums.find(function (x) { return x.id === spid; }); %>
           <p class="ranking-result"><strong><%= sp ? sp.label : spid %> :</strong> <%= s.spectrums[spid] %></p>
         <% }) %>
+
+        <%
+          var sectionData = (answers && answers[section.key]) || {};
+          var matrix = sectionData.matrix || {};
+          var items = flattenItems(section);
+          var answeredRows = [];
+          items.forEach(function (item, i) {
+            var levels = matrix[i] || {};
+            var parts = [];
+            config.levels.forEach(function (lvl) {
+              var v = Number(levels[lvl.key]) || 1;
+              if (v > 1) parts.push(lvl.label + " : " + config.scaleLabels[v - 1]);
+            });
+            if (parts.length) answeredRows.push({ item: item, parts: parts.join(" · ") });
+          });
+        %>
+        <% if (answeredRows.length) { %>
+          <details class="matrix-group">
+            <summary><span class="group-title-text">Detail des reponses (<%= answeredRows.length %>)</span></summary>
+            <ul class="answer-list">
+              <% answeredRows.forEach(function (row) { %>
+                <li><strong><%= row.item %></strong><br /><span><%= row.parts %></span></li>
+              <% }) %>
+            </ul>
+          </details>
+        <% } else { %>
+          <p class="intro">Aucune reponse au-dessus de "Jamais" pour l'instant dans cette section.</p>
+        <% } %>
       <% } else if (s.type === "profile") { %>
         <ul class="answer-list">
           <% section.fields.forEach(function (f) { %>

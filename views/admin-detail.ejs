@@ -51,7 +51,9 @@
         <% }) %>
 
         <% Object.keys(s.rankings || {}).forEach(function (rid) { %>
-          <p class="ranking-result"><strong>Classement :</strong> <%= s.rankings[rid].join(" > ") %></p>
+          <% if (s.rankings[rid].length) { %>
+            <p class="ranking-result"><strong>Classement :</strong> <%= s.rankings[rid].join(" > ") %></p>
+          <% } %>
         <% }) %>
         <% Object.keys(s.spectrums || {}).forEach(function (spid) { %>
           <% var sp = section.spectrums.find(function (x) { return x.id === spid; }); %>

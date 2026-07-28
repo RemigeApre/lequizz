@@ -87,6 +87,8 @@
         {
           "title": "Sperme",
           "items": [
+            "Adore le sperme",
+            "Veut apprendre a adorer le sperme",
             "Éjaculation vaginale",
             "Éjaculation anale",
             "Éjaculation sur le visage",
@@ -364,7 +366,7 @@
         },
         {
           "id": "godes_animaux",
-          "label": "Classe ces animaux par preference",
+          "label": "Coche les animaux qui t'interessent, puis classe-les par preference",
           "items": [
             "Loup",
             "Cheval",
@@ -375,7 +377,8 @@
           ],
           "condition": {
             "itemText": "Godes animaux"
-          }
+          },
+          "checkable": true
         }
       ]
     },
@@ -653,6 +656,24 @@
             "Fantasmes de bestialité, uniquement sous forme fictive, dessinée, écrite ou avec accessoires",
             "Transformation animale ou créature anthropomorphe"
           ]
+        }
+      ],
+      "rankings": [
+        {
+          "id": "animaux_bestialite",
+          "label": "Coche les animaux qui t'interessent, puis classe-les par preference",
+          "items": [
+            "Loup",
+            "Cheval",
+            "Chien",
+            "Chat",
+            "Dauphin",
+            "Serpent"
+          ],
+          "condition": {
+            "itemText": "Fantasmes de bestialité, uniquement sous forme fictive, dessinée, écrite ou avec accessoires"
+          },
+          "checkable": true
         }
       ]
     }

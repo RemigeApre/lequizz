@@ -7,20 +7,43 @@ const {
   saveAttempt,
   deleteAttempt,
 } = require("../db");
+const csvLog = require("../csvLog");
 
 const COOKIE_NAME = "attempt";
-const COOKIE_MAX_AGE = 1000 * 60 * 60 * 24 * 90;
+const COOKIE_MAX_AGE = 1000 * 60 * 60 * 24 * 365;
+const CODE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; // no 0/O/1/I/L, easier to type
 
-function ensureToken(req, res) {
-  let token = req.cookies[COOKIE_NAME];
-  if (!token) token = crypto.randomUUID();
-  res.cookie(COOKIE_NAME, token, {
+function generateCode() {
+  let code = "";
+  for (let i = 0; i < 6; i++) {
+    code += CODE_CHARS[crypto.randomInt(CODE_CHARS.length)];
+  }
+  return code;
+}
+
+function setCodeCookie(res, code) {
+  res.cookie(COOKIE_NAME, code, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     maxAge: COOKIE_MAX_AGE,
   });
-  return token;
+}
+
+function ensureToken(req, res) {
+  const rawRequested = typeof req.query.code === "string" ? req.query.code : "";
+  const requested = rawRequested.trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
+  if (requested) {
+    setCodeCookie(res, requested);
+    return requested;
+  }
+
+  let code = req.cookies[COOKIE_NAME];
+  if (!code) {
+    code = generateCode();
+    setCodeCookie(res, code);
+  }
+  return code;
 }
 
 function parseSectionSubmission(config, section, body) {
@@ -37,11 +60,18 @@ function parseSectionSubmission(config, section, body) {
     });
 
     const rankings = {};
+    const rankingsChecked = {};
     for (const r of section.rankings || []) {
       const raw = body[`ranking_${r.id}`];
       rankings[r.id] = raw
         ? String(raw).split(",").map(Number)
         : r.items.map((_, i) => i);
+      if (r.checkable) {
+        const rawChecked = body[`ranking_${r.id}_checked`];
+        rankingsChecked[r.id] = rawChecked
+          ? String(rawChecked).split(",").filter(Boolean).map(Number)
+          : [];
+      }
     }
 
     const spectrums = {};
@@ -50,7 +80,7 @@ function parseSectionSubmission(config, section, body) {
       spectrums[sp.id] = Number.isNaN(v) ? 3 : v;
     }
 
-    return { matrix, rankings, spectrums };
+    return { matrix, rankings, rankingsChecked, spectrums };
   }
 
   if (section.type === "profile") {
@@ -59,13 +89,20 @@ function parseSectionSubmission(config, section, body) {
       fields[f.id] = body[`field_${f.id}`];
     }
     const rankings = {};
+    const rankingsChecked = {};
     for (const r of section.rankings || []) {
       const raw = body[`ranking_${r.id}`];
       rankings[r.id] = raw
         ? String(raw).split(",").map(Number)
         : r.items.map((_, i) => i);
+      if (r.checkable) {
+        const rawChecked = body[`ranking_${r.id}_checked`];
+        rankingsChecked[r.id] = rawChecked
+          ? String(rawChecked).split(",").filter(Boolean).map(Number)
+          : [];
+      }
     }
-    return { fields, rankings };
+    return { fields, rankings, rankingsChecked };
   }
 
   return {};
@@ -75,8 +112,8 @@ function buildQuizRouter(config) {
   const router = express.Router();
 
   router.get("/", (req, res) => {
-    const token = ensureToken(req, res);
-    const attempt = getAttempt(token) || { data: {}, nextSection: 0 };
+    const code = ensureToken(req, res);
+    const attempt = getAttempt(code) || { data: {}, nextSection: 0 };
     res.redirect(`/section/${attempt.nextSection}`);
   });
 
@@ -86,8 +123,8 @@ function buildQuizRouter(config) {
       return res.redirect("/");
     }
 
-    const token = ensureToken(req, res);
-    const attempt = getAttempt(token) || { data: {}, nextSection: 0 };
+    const code = ensureToken(req, res);
+    const attempt = getAttempt(code) || { data: {}, nextSection: 0 };
     const section = config.sections[idx];
     const existing = attempt.data[section.key] || null;
 
@@ -97,6 +134,7 @@ function buildQuizRouter(config) {
       idx,
       total: config.sections.length,
       existing,
+      code,
     });
   });
 
@@ -106,24 +144,28 @@ function buildQuizRouter(config) {
       return res.redirect("/");
     }
 
-    const token = ensureToken(req, res);
-    const attempt = getAttempt(token) || { data: {}, nextSection: 0 };
+    const code = ensureToken(req, res);
+    const attempt = getAttempt(code) || { data: {}, nextSection: 0 };
     const section = config.sections[idx];
 
     attempt.data[section.key] = parseSectionSubmission(config, section, req.body);
+
+    // Safety net: append every section save to a plain CSV log, independent
+    // of the SQLite write below, in case that ever fails or the process dies.
+    csvLog.append("section_save", code, section.key, idx, attempt.data[section.key]);
 
     const nextIdx = idx + 1;
 
     if (nextIdx >= config.sections.length) {
       const scores = computeScores(config, attempt.data);
       insertSubmission(attempt.data, scores);
-      deleteAttempt(token);
-      res.clearCookie(COOKIE_NAME);
-      return res.render("result", { config, scores });
+      csvLog.append("complete", code, section.key, idx, { answers: attempt.data, scores });
+      deleteAttempt(code);
+      return res.render("result", { config, scores, answers: attempt.data, flattenItems, code });
     }
 
     attempt.nextSection = Math.max(attempt.nextSection, nextIdx);
-    saveAttempt(token, attempt.data, attempt.nextSection);
+    saveAttempt(code, attempt.data, attempt.nextSection);
     res.redirect(`/section/${nextIdx}`);
   });
 

@@ -26,9 +26,13 @@ function computeMatrixScore(config, section, sectionData) {
   return { raw, max, percentage, itemCount: items.length };
 }
 
-function labelRanking(ranking, order) {
-  if (!Array.isArray(order)) return ranking.items.slice();
-  return order.map((i) => ranking.items[i]).filter((v) => v !== undefined);
+function labelRanking(ranking, order, checked) {
+  const itemsOrder = Array.isArray(order) ? order : ranking.items.map((_, i) => i);
+  if (ranking.checkable) {
+    const checkedSet = new Set(checked || []);
+    return itemsOrder.filter((i) => checkedSet.has(i)).map((i) => ranking.items[i]).filter((v) => v !== undefined);
+  }
+  return itemsOrder.map((i) => ranking.items[i]).filter((v) => v !== undefined);
 }
 
 function labelSpectrum(spectrum, value) {
@@ -57,7 +61,11 @@ function computeScores(config, answers) {
       if (section.rankings) {
         for (const r of section.rankings) {
           if (!conditionMet(section, sectionData, r.condition)) continue;
-          rankings[r.id] = labelRanking(r, (sectionData.rankings || {})[r.id]);
+          rankings[r.id] = labelRanking(
+            r,
+            (sectionData.rankings || {})[r.id],
+            (sectionData.rankingsChecked || {})[r.id]
+          );
         }
       }
       const spectrums = {};
@@ -75,7 +83,11 @@ function computeScores(config, answers) {
       }
       const rankings = {};
       for (const r of section.rankings || []) {
-        rankings[r.id] = labelRanking(r, (sectionData.rankings || {})[r.id]);
+        rankings[r.id] = labelRanking(
+          r,
+          (sectionData.rankings || {})[r.id],
+          (sectionData.rankingsChecked || {})[r.id]
+        );
       }
       sections[section.key] = { type: "profile", fields, rankings };
     }

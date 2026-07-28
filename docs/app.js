@@ -9,16 +9,17 @@
   function loadAttempt() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return { data: {}, sectionIndex: 0, doneGroups: {}, toTest: {} };
+      if (!raw) return { data: {}, sectionIndex: 0, doneGroups: {}, toTest: {}, dislike: {} };
       var parsed = JSON.parse(raw);
       return {
         data: parsed.data || {},
         sectionIndex: parsed.sectionIndex || 0,
         doneGroups: parsed.doneGroups || {},
         toTest: parsed.toTest || {},
+        dislike: parsed.dislike || {},
       };
     } catch (e) {
-      return { data: {}, sectionIndex: 0, doneGroups: {}, toTest: {} };
+      return { data: {}, sectionIndex: 0, doneGroups: {}, toTest: {}, dislike: {} };
     }
   }
 
@@ -42,15 +43,28 @@
     return history;
   }
 
-  function renderRanking(r, existingOrder) {
+  function renderRanking(r, existingOrder, existingChecked) {
     var order = Array.isArray(existingOrder) ? existingOrder : r.items.map(function (_, i) { return i; });
+    var checkedSet = {};
+    (existingChecked || []).forEach(function (idx) { checkedSet[idx] = true; });
+
     var html = '<fieldset class="question" data-ranking-id="' + r.id + '">';
     html += "<legend>" + r.label + "</legend>";
-    html += '<ul class="ranking-list" data-question-id="ranking_' + r.id + '">';
+    html += '<ul class="ranking-list' + (r.checkable ? " ranking-checkable" : "") + '" data-question-id="ranking_' + r.id + '">';
     order.forEach(function (itemIdx) {
-      html += '<li draggable="true" data-index="' + itemIdx + '"><span class="handle">&#8942;&#8942;</span> ' + r.items[itemIdx] + '</li>';
+      var isChecked = !r.checkable || !!checkedSet[itemIdx];
+      html += '<li draggable="true" data-index="' + itemIdx + '"' +
+        (r.checkable && !isChecked ? ' class="unchecked"' : "") + ">";
+      if (r.checkable) {
+        html += '<input type="checkbox" class="ranking-check"' + (isChecked ? " checked" : "") + " /> ";
+      }
+      html += '<span class="handle">&#8942;&#8942;</span> ' + r.items[itemIdx] + "</li>";
     });
-    html += '</ul><input type="hidden" name="ranking_' + r.id + '" class="ranking-order" /></fieldset>';
+    html += '</ul><input type="hidden" name="ranking_' + r.id + '" class="ranking-order" />';
+    if (r.checkable) {
+      html += '<input type="hidden" name="ranking_' + r.id + '_checked" class="ranking-checked" />';
+    }
+    html += "</fieldset>";
     return html;
   }
 
@@ -83,15 +97,38 @@
     select.classList.add("freq-val-" + value);
   }
 
+  function updateFireIcon(itemCard) {
+    var maxVal = config.scaleLabels.length;
+    var hiddenInputs = itemCard.querySelectorAll('input[type="hidden"][name^="m_"]');
+    var hasMax = Array.prototype.some.call(hiddenInputs, function (inp) {
+      return Number(inp.value) === maxVal;
+    });
+    var fire = itemCard.querySelector(".fire-icon");
+    if (fire) fire.style.display = hasMax ? "" : "none";
+  }
+
   function renderItemCard(item, i, existingMatrix, sectionKey) {
     var itemKey = sectionKey + ":" + i;
     var toTest = !!state.toTest[itemKey];
+    var disliked = !!state.dislike[itemKey];
+    var maxVal = config.scaleLabels.length;
+    var levelsForItem = existingMatrix[i] || {};
+    var isAdored = Object.keys(levelsForItem).some(function (k) { return Number(levelsForItem[k]) === maxVal; });
+
     var html = '<div class="item-card">';
     html += '<div class="item-header">';
+    html += '<div class="item-title-row">';
+    html += '<span class="fire-icon"' + (isAdored ? "" : ' style="display:none"') + '>🔥</span>';
+    html += '<span class="item-name">' + item + "</span>";
+    html += "</div>";
+    html += '<div class="item-toggles">';
     html += '<button type="button" class="test-toggle' + (toTest ? " active" : "") +
       '" data-item-key="' + itemKey + '" title="Marquer comme decouverte a tester">' +
       (toTest ? "★" : "☆") + " decouverte a tester</button>";
-    html += '<span class="item-name">' + item + "</span>";
+    html += '<button type="button" class="dislike-toggle' + (disliked ? " active" : "") +
+      '" data-item-key="' + itemKey + '" title="Marquer comme aime pas">' +
+      (disliked ? "👎" : "🤍") + " aime pas</button>";
+    html += "</div>";
     html += "</div>";
 
     var firstLevelKey = config.levels[0].key;
@@ -169,7 +206,8 @@
 
     (section.rankings || []).forEach(function (r) {
       var existingOrder = existingData && existingData.rankings && existingData.rankings[r.id];
-      html += renderRanking(r, existingOrder);
+      var existingChecked = existingData && existingData.rankingsChecked && existingData.rankingsChecked[r.id];
+      html += renderRanking(r, existingOrder, existingChecked);
     });
 
     (section.spectrums || []).forEach(function (sp) {
@@ -197,7 +235,8 @@
 
     (section.rankings || []).forEach(function (r) {
       var existingOrder = existingData && existingData.rankings && existingData.rankings[r.id];
-      html += renderRanking(r, existingOrder);
+      var existingChecked = existingData && existingData.rankingsChecked && existingData.rankingsChecked[r.id];
+      html += renderRanking(r, existingOrder, existingChecked);
     });
 
     return html;
@@ -220,9 +259,14 @@
       });
 
       var rankings = {};
+      var rankingsChecked = {};
       (section.rankings || []).forEach(function (r) {
         var raw = formData.get("ranking_" + r.id);
         rankings[r.id] = raw ? String(raw).split(",").map(Number) : r.items.map(function (_, i) { return i; });
+        if (r.checkable) {
+          var rawChecked = formData.get("ranking_" + r.id + "_checked");
+          rankingsChecked[r.id] = rawChecked ? String(rawChecked).split(",").filter(Boolean).map(Number) : [];
+        }
       });
 
       var spectrums = {};
@@ -231,7 +275,7 @@
         spectrums[sp.id] = Number.isNaN(v) ? 3 : v;
       });
 
-      return { matrix: matrix, rankings: rankings, spectrums: spectrums };
+      return { matrix: matrix, rankings: rankings, rankingsChecked: rankingsChecked, spectrums: spectrums };
     }
 
     if (section.type === "profile") {
@@ -240,17 +284,47 @@
         fields[f.id] = formData.get("field_" + f.id);
       });
       var rankings2 = {};
+      var rankingsChecked2 = {};
       (section.rankings || []).forEach(function (r) {
         var raw2 = formData.get("ranking_" + r.id);
         rankings2[r.id] = raw2 ? String(raw2).split(",").map(Number) : r.items.map(function (_, i) { return i; });
+        if (r.checkable) {
+          var rawChecked2 = formData.get("ranking_" + r.id + "_checked");
+          rankingsChecked2[r.id] = rawChecked2 ? String(rawChecked2).split(",").filter(Boolean).map(Number) : [];
+        }
       });
-      return { fields: fields, rankings: rankings2 };
+      return { fields: fields, rankings: rankings2, rankingsChecked: rankingsChecked2 };
     }
 
     return {};
   }
 
-  function renderResultRow(section, s) {
+  function renderAnsweredItems(section, sectionData) {
+    var matrix = (sectionData && sectionData.matrix) || {};
+    var items = window.Scoring.flattenItems(section);
+    var rows = [];
+
+    items.forEach(function (item, i) {
+      var levels = matrix[i] || {};
+      var parts = [];
+      config.levels.forEach(function (lvl) {
+        var v = Number(levels[lvl.key]) || 1;
+        if (v > 1) parts.push(lvl.label + " : " + config.scaleLabels[v - 1]);
+      });
+      if (parts.length) {
+        rows.push("<li><strong>" + item + "</strong><br /><span>" + parts.join(" · ") + "</span></li>");
+      }
+    });
+
+    if (!rows.length) {
+      return '<p class="intro">Aucune reponse au-dessus de "Jamais" pour l\'instant dans cette section.</p>';
+    }
+
+    return '<details class="matrix-group"><summary><span class="group-title-text">Detail des reponses (' +
+      rows.length + ')</span></summary><ul class="answer-list">' + rows.join("") + "</ul></details>";
+  }
+
+  function renderResultRow(section, s, sectionData) {
     var html = '<div class="result-section"><h2>' + section.title + "</h2>";
 
     if (s.type === "matrix") {
@@ -258,12 +332,14 @@
         s.percentage + '%</span></div><div class="bar"><div class="bar-fill" style="width:' +
         s.percentage + '%"></div></div></div>';
       Object.keys(s.rankings || {}).forEach(function (rid) {
+        if (!s.rankings[rid].length) return;
         html += '<p class="ranking-result"><strong>Classement :</strong> ' + s.rankings[rid].join(" > ") + "</p>";
       });
       Object.keys(s.spectrums || {}).forEach(function (spid) {
         var sp = section.spectrums.find(function (x) { return x.id === spid; });
         html += '<p class="ranking-result"><strong>' + (sp ? sp.label : spid) + " :</strong> " + s.spectrums[spid] + "</p>";
       });
+      html += renderAnsweredItems(section, sectionData);
     } else if (s.type === "profile") {
       html += '<ul class="answer-list">';
       section.fields.forEach(function (f) {
@@ -297,11 +373,11 @@
     return html;
   }
 
-  function renderToTestList() {
-    var keys = Object.keys(state.toTest).filter(function (k) { return state.toTest[k]; });
+  function renderBookmarkList(map, title) {
+    var keys = Object.keys(map).filter(function (k) { return map[k]; });
     if (!keys.length) return "";
 
-    var html = '<div class="result-section"><h2>Tes decouvertes a tester (' + keys.length + ")</h2><ul class=\"answer-list\">";
+    var html = '<div class="result-section"><h2>' + title + " (" + keys.length + ")</h2><ul class=\"answer-list\">";
     keys.forEach(function (key) {
       var parts = key.split(":");
       var sectionKey = parts[0];
@@ -341,9 +417,10 @@
       html += '<p class="intro">Le quiz n\'est pas termine : voici les resultats bases sur ce que tu as deja rempli.</p>';
     }
     config.sections.forEach(function (section) {
-      html += renderResultRow(section, scores.sections[section.key]);
+      html += renderResultRow(section, scores.sections[section.key], state.data[section.key]);
     });
-    html += renderToTestList();
+    html += renderBookmarkList(state.toTest, "Tes decouvertes a tester");
+    html += renderBookmarkList(state.dislike, "Ce que tu n'aimes pas");
 
     if (isFinal) {
       html += renderHistory(saveHistory(scores));
@@ -362,7 +439,7 @@
 
     if (isFinal) {
       document.getElementById("restart-btn").addEventListener("click", function () {
-        state = { data: {}, sectionIndex: 0, doneGroups: {}, toTest: {} };
+        state = { data: {}, sectionIndex: 0, doneGroups: {}, toTest: {}, dislike: {} };
         persist();
         renderSection(0);
       });
@@ -414,6 +491,7 @@
         if (opt && lvl) opt.textContent = levelOptionText(lvl, v);
         setFreqClass(freqSelect, v);
         levelSelect.classList.toggle("level-answered", v > 1);
+        updateFireIcon(picker.parentElement);
       }
 
       var levelSelectChanged = e.target.closest(".level-select");
@@ -488,7 +566,7 @@
     });
   }
 
-  // Delegated click handler for pills + "decouverte a tester" — attached once, survives re-renders.
+  // Delegated click handler for pills + "decouverte a tester" / "aime pas" — attached once, survives re-renders.
   app.addEventListener("click", function (e) {
     var testBtn = e.target.closest(".test-toggle");
     if (testBtn) {
@@ -498,6 +576,17 @@
       persist();
       testBtn.classList.toggle("active", isOn);
       testBtn.textContent = (isOn ? "★" : "☆") + " decouverte a tester";
+      return;
+    }
+
+    var dislikeBtn = e.target.closest(".dislike-toggle");
+    if (dislikeBtn) {
+      var dislikeKey = dislikeBtn.dataset.itemKey;
+      var isDisliked = !state.dislike[dislikeKey];
+      state.dislike[dislikeKey] = isDisliked;
+      persist();
+      dislikeBtn.classList.toggle("active", isDisliked);
+      dislikeBtn.textContent = (isDisliked ? "👎" : "🤍") + " aime pas";
       return;
     }
 
