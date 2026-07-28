@@ -75,6 +75,91 @@ body {
   font-weight: 600;
 }
 
+.matrix-group summary {
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.25rem 0;
+  user-select: none;
+}
+
+.matrix-group summary:hover {
+  color: var(--accent);
+}
+
+.matrix-group[open] summary {
+  margin-bottom: 0.75rem;
+}
+
+.fold-controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.item-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.item-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  background: var(--bg);
+}
+
+.item-name {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.level-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding: 0.3rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.level-row:first-of-type {
+  border-top: none;
+}
+
+.level-label {
+  flex: 1 1 260px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.pill-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.pill {
+  background: var(--card);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+.pill:hover {
+  border-color: var(--accent);
+}
+
+.pill.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
 .table-scroll {
   overflow-x: auto;
 }

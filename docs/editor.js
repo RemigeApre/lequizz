@@ -276,4 +276,82 @@
       saveStatus.textContent = "JSON copie dans le presse-papier.";
     });
   });
+
+  // --- Enregistrement direct sur GitHub via l'API Contents ---
+  var GH_TOKEN_KEY = "lequizz_gh_token";
+
+  var ghTokenInput = document.getElementById("gh-token");
+  var ghRememberInput = document.getElementById("gh-remember");
+  var ghStatus = document.getElementById("gh-status");
+
+  var rememberedToken = localStorage.getItem(GH_TOKEN_KEY);
+  if (rememberedToken) {
+    ghTokenInput.value = rememberedToken;
+    ghRememberInput.checked = true;
+  }
+
+  function utf8ToBase64(str) {
+    return btoa(unescape(encodeURIComponent(str)));
+  }
+
+  document.getElementById("gh-save-btn").addEventListener("click", function () {
+    var repo = document.getElementById("gh-repo").value.trim();
+    var branch = document.getElementById("gh-branch").value.trim() || "main";
+    var path = document.getElementById("gh-path").value.trim();
+    var token = ghTokenInput.value.trim();
+
+    if (!config) {
+      ghStatus.textContent = "Charge d'abord un questions.json.";
+      return;
+    }
+    if (!repo || !path || !token) {
+      ghStatus.textContent = "Depot, chemin et token sont obligatoires.";
+      return;
+    }
+
+    if (ghRememberInput.checked) {
+      localStorage.setItem(GH_TOKEN_KEY, token);
+    } else {
+      localStorage.removeItem(GH_TOKEN_KEY);
+    }
+
+    var apiUrl = "https://api.github.com/repos/" + repo + "/contents/" + path;
+    var headers = {
+      Authorization: "Bearer " + token,
+      Accept: "application/vnd.github+json",
+    };
+
+    ghStatus.textContent = "Recuperation du fichier actuel sur GitHub...";
+
+    fetch(apiUrl + "?ref=" + encodeURIComponent(branch), { headers: headers })
+      .then(function (r) {
+        if (!r.ok) throw new Error("Lecture impossible (HTTP " + r.status + "). Verifie le depot/chemin/token.");
+        return r.json();
+      })
+      .then(function (current) {
+        ghStatus.textContent = "Envoi de la mise a jour...";
+        var body = {
+          message: "Mise a jour de questions.json via l'editeur",
+          content: utf8ToBase64(JSON.stringify(config, null, 2)),
+          sha: current.sha,
+          branch: branch,
+        };
+        return fetch(apiUrl, {
+          method: "PUT",
+          headers: Object.assign({ "Content-Type": "application/json" }, headers),
+          body: JSON.stringify(body),
+        });
+      })
+      .then(function (r) {
+        if (!r.ok) {
+          return r.json().then(function (err) {
+            throw new Error(err.message || "Echec de l'ecriture (HTTP " + r.status + ")");
+          });
+        }
+        ghStatus.textContent = "Enregistre sur GitHub. Le site se republie automatiquement dans 1-2 minutes.";
+      })
+      .catch(function (err) {
+        ghStatus.textContent = "Erreur : " + err.message;
+      });
+  });
 })();

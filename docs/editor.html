@@ -41,6 +41,43 @@
         <button type="button" id="copy-btn" class="link-button">Copier le JSON dans le presse-papier</button>
         <p id="save-status" class="intro"></p>
       </div>
+
+      <div class="matrix-group">
+        <h2>Enregistrer directement sur GitHub (optionnel)</h2>
+        <p class="intro">
+          Colle un token GitHub qui n'a le droit d'ecrire que sur ce depot,
+          et le bouton ci-dessous committe directement <code>docs/questions.json</code>
+          sans passer par le telechargement/upload manuel. Le token reste
+          uniquement dans ton navigateur (localStorage), il n'est jamais
+          envoye ailleurs qu'a l'API GitHub.
+          <br />
+          Cree-le sur
+          <code>github.com/settings/personal-access-tokens/new</code> :
+          type "Fine-grained", "Only select repositories" -> ce depot
+          uniquement, permission "Contents" -> "Read and write".
+        </p>
+        <label>
+          Depot (owner/repo)
+          <input type="text" id="gh-repo" value="RemigeApre/lequizz" />
+        </label>
+        <label>
+          Branche
+          <input type="text" id="gh-branch" value="main" />
+        </label>
+        <label>
+          Chemin du fichier
+          <input type="text" id="gh-path" value="docs/questions.json" />
+        </label>
+        <label>
+          Token GitHub
+          <input type="password" id="gh-token" placeholder="github_pat_..." />
+        </label>
+        <label class="choice">
+          <input type="checkbox" id="gh-remember" /> Se souvenir du token sur cet appareil
+        </label>
+        <button type="button" id="gh-save-btn">Enregistrer sur GitHub</button>
+        <p id="gh-status" class="intro"></p>
+      </div>
     </div>
   </main>
 

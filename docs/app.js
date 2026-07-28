@@ -25,6 +25,10 @@
     localStorage.removeItem(STORAGE_KEY);
   }
 
+  function hasProgress(attempt) {
+    return attempt.sectionIndex > 0 || Object.keys(attempt.data || {}).length > 0;
+  }
+
   function saveHistory(scores) {
     var history = [];
     try {
@@ -48,6 +52,26 @@
     return html;
   }
 
+  function renderItemCard(item, i, existingMatrix) {
+    var html = '<div class="item-card"><div class="item-name">' + item + "</div>";
+    config.levels.forEach(function (lvl) {
+      var existingVal = existingMatrix[i] ? Number(existingMatrix[i][lvl.key]) : 1;
+      var fieldName = "m_" + i + "_" + lvl.key;
+      html += '<div class="level-row">';
+      html += '<span class="level-label"><strong>' + lvl.key + "</strong> — " + lvl.label + "</span>";
+      html += '<div class="pill-group" data-name="' + fieldName + '">';
+      config.scaleLabels.forEach(function (label, li) {
+        var active = existingVal === li + 1 ? " active" : "";
+        html += '<button type="button" class="pill' + active + '" data-value="' + (li + 1) + '">' + label + "</button>";
+      });
+      html += "</div>";
+      html += '<input type="hidden" name="' + fieldName + '" value="' + existingVal + '" />';
+      html += "</div>";
+    });
+    html += "</div>";
+    return html;
+  }
+
   function renderMatrixSection(section, existingData) {
     var html = '<div class="legend">';
     config.levels.forEach(function (lvl) {
@@ -55,35 +79,30 @@
     });
     html += '</div>';
 
+    var multiGroup = section.groups.length > 1;
+    if (multiGroup) {
+      html += '<div class="fold-controls">' +
+        '<button type="button" class="link-button" data-fold-action="open">Tout deplier</button>' +
+        '<button type="button" class="link-button" data-fold-action="close">Tout replier</button>' +
+        '</div>';
+    }
+
     var globalIndex = 0;
     var existingMatrix = (existingData && existingData.matrix) || {};
 
-    section.groups.forEach(function (group) {
-      html += '<fieldset class="matrix-group">';
-      if (group.title) html += '<legend>' + group.title + '</legend>';
-      html += '<div class="table-scroll"><table class="matrix-table"><thead><tr><th class="item-col">Pratique</th>';
-      config.levels.forEach(function (lvl) {
-        html += '<th title="' + lvl.label + '">' + lvl.key + '</th>';
-      });
-      html += '</tr></thead><tbody>';
+    section.groups.forEach(function (group, gi) {
+      var openAttr = !multiGroup || gi === 0 ? " open" : "";
+      html += '<details class="matrix-group"' + openAttr + '><summary>' +
+        (group.title || "Toutes les pratiques") + " (" + group.items.length + ")</summary>";
+      html += '<div class="item-cards">';
 
       group.items.forEach(function (item) {
         var i = globalIndex;
         globalIndex += 1;
-        html += '<tr><td class="item-col">' + item + '</td>';
-        config.levels.forEach(function (lvl) {
-          var existingVal = existingMatrix[i] ? Number(existingMatrix[i][lvl.key]) : 1;
-          html += '<td><select name="m_' + i + '_' + lvl.key + '">';
-          config.scaleLabels.forEach(function (label, li) {
-            var sel = existingVal === li + 1 ? " selected" : "";
-            html += '<option value="' + (li + 1) + '"' + sel + ">" + label + "</option>";
-          });
-          html += "</select></td>";
-        });
-        html += "</tr>";
+        html += renderItemCard(item, i, existingMatrix);
       });
 
-      html += "</tbody></table></div></fieldset>";
+      html += "</div></details>";
     });
 
     (section.rankings || []).forEach(function (r) {
@@ -217,6 +236,29 @@
     });
   }
 
+  function renderResumePrompt(savedAttempt) {
+    var idx = Math.min(Math.max(savedAttempt.sectionIndex, 0), config.sections.length - 1);
+    var html = "<h1>Reprendre le quiz ?</h1>";
+    html += '<p class="intro">Une progression a ete trouvee sur ce navigateur, arrivee a la section "' +
+      config.sections[idx].title + '". Si c\'est une autre personne qui repond maintenant, choisis ' +
+      '"Recommencer a zero".</p>';
+    html += '<div class="form-actions">';
+    html += '<button type="button" id="resume-btn">Reprendre ou j\'en etais</button>';
+    html += '<button type="button" id="restart-fresh-btn" class="link-button">Recommencer a zero</button>';
+    html += "</div>";
+    app.innerHTML = html;
+
+    document.getElementById("resume-btn").addEventListener("click", function () {
+      state = savedAttempt;
+      renderSection(idx);
+    });
+    document.getElementById("restart-fresh-btn").addEventListener("click", function () {
+      state = { data: {}, sectionIndex: 0 };
+      persist();
+      renderSection(0);
+    });
+  }
+
   function renderSection(idx) {
     var section = config.sections[idx];
     var html = '<p class="progress">Etape ' + (idx + 1) + " / " + config.sections.length + "</p>";
@@ -261,14 +303,43 @@
         renderSection(idx - 1);
       });
     }
+
+    var foldControls = document.querySelector(".fold-controls");
+    if (foldControls) {
+      foldControls.addEventListener("click", function (e) {
+        var btn = e.target.closest("button[data-fold-action]");
+        if (!btn) return;
+        var open = btn.dataset.foldAction === "open";
+        document.querySelectorAll("details.matrix-group").forEach(function (d) {
+          d.open = open;
+        });
+      });
+    }
   }
+
+  // Delegated click handler for pill buttons — attached once, survives re-renders.
+  app.addEventListener("click", function (e) {
+    var btn = e.target.closest(".pill");
+    if (!btn) return;
+    var group = btn.closest(".pill-group");
+    var input = group.parentElement.querySelector('input[type="hidden"][name="' + group.dataset.name + '"]');
+    if (input) input.value = btn.dataset.value;
+    Array.prototype.forEach.call(group.querySelectorAll(".pill"), function (p) {
+      p.classList.remove("active");
+    });
+    btn.classList.add("active");
+  });
 
   fetch("./questions.json")
     .then(function (r) { return r.json(); })
     .then(function (cfg) {
       config = cfg;
-      state = loadAttempt();
-      var idx = Math.min(Math.max(state.sectionIndex, 0), config.sections.length - 1);
-      renderSection(idx);
+      var saved = loadAttempt();
+      if (hasProgress(saved)) {
+        renderResumePrompt(saved);
+      } else {
+        state = saved;
+        renderSection(0);
+      }
     });
 })();
