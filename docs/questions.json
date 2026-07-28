@@ -590,12 +590,22 @@
             "Marques temporaires sur le corps (écriture, suçons, traces de jeu)",
             "dressage",
             "humiliation publique uniquement dans un espace privé ou entre participants consentants",
-            "aftercare tendre",
-            "aftercare minimal",
-            "absence d’aftercare comme élément fantasmé mais non imposé",
             "contrat BDSM",
             "Safeword (feu tricolore)",
             "débriefing après la scène"
+          ]
+        }
+      ],
+      "spectrums": [
+        {
+          "id": "aftercare",
+          "label": "Aftercare souhaite apres une scene",
+          "scaleLabels": [
+            "Aucun aftercare (fantasme assume)",
+            "Aftercare minimal",
+            "Aftercare modere",
+            "Aftercare attentif",
+            "Aftercare tres tendre / prolonge"
           ]
         }
       ]

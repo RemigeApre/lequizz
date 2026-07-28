@@ -6,6 +6,7 @@
   --accent: #5b4fcf;
   --border: #ddd;
   --card: #fff;
+  --topnav-height: 3rem;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -40,6 +41,31 @@ body {
 
 .container.wide {
   max-width: 900px;
+}
+
+.top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: var(--topnav-height);
+  margin: 0 -1.25rem 1.5rem;
+  padding: 0 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.top-nav-brand {
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.top-nav-results {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
 }
 
 .progress {
@@ -84,7 +110,7 @@ body {
   justify-content: space-between;
   gap: 1rem;
   position: sticky;
-  top: 0;
+  top: var(--topnav-height);
   z-index: 5;
   background: var(--card);
   padding: 0.6rem 0.75rem;

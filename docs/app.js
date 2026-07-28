@@ -316,26 +316,66 @@
     return html;
   }
 
-  function renderResult(scores) {
-    var history = saveHistory(scores);
-    var html = "<h1>Merci, voici ton resultat</h1>";
+  function computeCurrentScores() {
+    return window.Scoring.computeScores(config, state.data);
+  }
+
+  function renderTopNav() {
+    return '<div class="top-nav">' +
+      '<span class="top-nav-brand">' + config.title + "</span>" +
+      '<button type="button" id="results-nav-btn" class="top-nav-results">Resultats</button>' +
+      "</div>";
+  }
+
+  function wireTopNav() {
+    document.getElementById("results-nav-btn").addEventListener("click", function () {
+      renderResult(computeCurrentScores(), false);
+    });
+  }
+
+  function renderResult(scores, isFinal) {
+    var html = renderTopNav();
+    html += "<h1>" + (isFinal ? "Merci, voici ton resultat" : "Tes resultats jusqu'ici") + "</h1>";
+    if (!isFinal) {
+      html += '<p class="intro">Le quiz n\'est pas termine : voici les resultats bases sur ce que tu as deja rempli.</p>';
+    }
     config.sections.forEach(function (section) {
       html += renderResultRow(section, scores.sections[section.key]);
     });
     html += renderToTestList();
-    html += renderHistory(history);
-    html += '<button type="button" id="restart-btn">Refaire le quiz</button>';
+
+    if (isFinal) {
+      html += renderHistory(saveHistory(scores));
+    }
+
+    html += '<div class="form-actions">';
+    if (isFinal) {
+      html += '<button type="button" id="restart-btn">Refaire le quiz</button>';
+    } else {
+      html += '<button type="button" id="continue-btn">Continuer le quiz</button>';
+    }
+    html += "</div>";
+
     app.innerHTML = html;
-    document.getElementById("restart-btn").addEventListener("click", function () {
-      state = { data: {}, sectionIndex: 0, doneGroups: {}, toTest: {} };
-      persist();
-      renderSection(0);
-    });
+    wireTopNav();
+
+    if (isFinal) {
+      document.getElementById("restart-btn").addEventListener("click", function () {
+        state = { data: {}, sectionIndex: 0, doneGroups: {}, toTest: {} };
+        persist();
+        renderSection(0);
+      });
+    } else {
+      document.getElementById("continue-btn").addEventListener("click", function () {
+        renderSection(Math.min(Math.max(state.sectionIndex, 0), config.sections.length - 1));
+      });
+    }
   }
 
   function renderSection(idx) {
     var section = config.sections[idx];
-    var html = '<p class="progress">Etape ' + (idx + 1) + " / " + config.sections.length + "</p>";
+    var html = renderTopNav();
+    html += '<p class="progress">Etape ' + (idx + 1) + " / " + config.sections.length + "</p>";
     html += "<h1>" + section.title + "</h1>";
     if (idx === 0 && config.intro) html += '<p class="intro">' + config.intro + "</p>";
     if (section.intro) html += '<p class="intro">' + section.intro + "</p>";
@@ -351,6 +391,7 @@
     html += "</div></form>";
 
     app.innerHTML = html;
+    wireTopNav();
     window.initRankingLists();
     if (section.type === "matrix") updateConditionalRankings(section);
 
@@ -395,7 +436,7 @@
       if (nextIdx >= config.sections.length) {
         var scores = window.Scoring.computeScores(config, state.data);
         clearAttempt();
-        renderResult(scores);
+        renderResult(scores, true);
         return;
       }
       state.sectionIndex = nextIdx;
