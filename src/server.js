@@ -1,6 +1,7 @@
 require("dotenv").config();
 const path = require("path");
 const fs = require("fs");
+const https = require("https");
 const express = require("express");
 const session = require("express-session");
 
@@ -57,6 +58,23 @@ app.use((req, res, next) => {
 app.use("/", buildQuizRouter(config));
 app.use("/admin", buildAdminRouter(config));
 
-app.listen(port, () => {
-  console.log(`lequizz listening on port ${port}`);
-});
+const certPath = process.env.TLS_CERT_PATH;
+const keyPath = process.env.TLS_KEY_PATH;
+
+if (certPath && keyPath && fs.existsSync(certPath) && fs.existsSync(keyPath)) {
+  https
+    .createServer(
+      {
+        cert: fs.readFileSync(certPath),
+        key: fs.readFileSync(keyPath),
+      },
+      app
+    )
+    .listen(port, () => {
+      console.log(`lequizz listening on port ${port} (HTTPS)`);
+    });
+} else {
+  app.listen(port, () => {
+    console.log(`lequizz listening on port ${port} (HTTP)`);
+  });
+}

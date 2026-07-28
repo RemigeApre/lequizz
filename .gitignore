@@ -4,3 +4,4 @@ data/*.db
 data/*.db-*
 data/*.csv
 !data/.gitkeep
+certs/

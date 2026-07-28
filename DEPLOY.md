@@ -403,3 +403,51 @@ Cette version serveur (pas la version GitHub Pages statique) gere ca :
 - `data/log.csv` n'est jamais commite dans Git (`.gitignore`), comme
   `data/quizz.db` — pense a inclure `data/` dans tes propres sauvegardes
   manuelles du VPS si tu en fais.
+
+---
+
+## HTTPS sur IP directe (sans nom de domaine), certificat auto-signe
+
+Le deploiement reel utilise l'IP directe (`http://51.91.158.21:8082`), pas
+`quizz.dhuis.com` + nginx (etapes 9-10 ci-dessus). Sans nom de domaine,
+Let's Encrypt ne peut pas emettre de certificat — la seule option est un
+certificat **auto-signe** : ca chiffre bien la connexion, mais le
+navigateur affiche un avertissement "connexion non securisee" a accepter
+une fois (normal, il ne peut pas verifier ton identite sans autorite de
+certification). Le HTTPS est gere directement par l'appli Node, pas par
+nginx.
+
+### 1. Generer le certificat sur le VPS
+
+```bash
+cd /home/quizz
+mkdir -p certs
+openssl req -x509 -nodes -newkey rsa:2048 -days 825 \
+  -keyout certs/key.pem -out certs/cert.pem \
+  -subj "/CN=51.91.158.21" \
+  -addext "subjectAltName=IP:51.91.158.21"
+```
+
+### 2. Activer dans `.env`
+
+```bash
+sudo nano .env
+```
+
+Ajoute/modifie :
+```
+TLS_CERT_PATH=/app/certs/cert.pem
+TLS_KEY_PATH=/app/certs/key.pem
+FORCE_SECURE_COOKIE=true
+```
+
+### 3. Relancer
+
+```bash
+sudo docker compose up -d --build
+```
+
+Ouvre **https://51.91.158.21:8082** (bien `https`, pas `http`). Le
+navigateur affiche un avertissement la premiere fois ("Avance" /
+"Continuer vers le site") — normal pour un certificat auto-signe, a
+accepter une fois par navigateur/appareil.
