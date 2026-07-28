@@ -1,0 +1,374 @@
+# Deployer lequizz sur quizz.dhuis.com
+
+Contexte confirme avant d'ecrire ce guide :
+- Ton VPS : `51.91.158.21`, utilisateur `debian` (sudo vers root), deja
+  utilise pour d'autres sites (bergfrid, intranet, portfolio) donc nginx
+  y est deja installe.
+- Le DNS (`quizz.dhuis.com` -> ton VPS) est deja fait chez IONOS, donc pas
+  besoin d'y revenir dans ce guide.
+- Le depot Git existe deja : `git@github.com:RemigeApre/lequizz.git`.
+
+**Point de securite important, a traiter en premier :** ce depot GitHub est
+actuellement **public** (verifie via l'API GitHub, sans authentification —
+ca repond). Il ne contient encore que le README, mais des que tu pousses le
+code, le contenu du quiz (liste detaillee de pratiques sexuelles) sera
+visible publiquement, indexable, et lie a ton compte. **Passe le depot en
+prive avant de pousser quoi que ce soit d'autre.**
+
+---
+
+## Etape 0 — Rendre le depot GitHub prive
+
+1. Va sur `https://github.com/RemigeApre/lequizz`.
+2. Onglet **Settings** (en haut du repo, pas les settings de ton compte).
+3. Descends jusqu'a la section **Danger Zone** tout en bas.
+4. Clique **Change visibility** -> **Change to private** -> confirme en
+   tapant le nom du depot demande.
+
+Une fois fait, dis-le-moi et on continue. Sans ca, je ne pousserai rien.
+
+---
+
+## Etape 1 — Comprendre le principe general
+
+Le flux qu'on va mettre en place :
+
+```
+Fedora (ton PC)  --push-->  GitHub (prive)  --clone/pull-->  VPS  --docker-->  quizz.dhuis.com
+```
+
+- Ton PC pousse le code sur GitHub, comme d'habitude.
+- Le VPS ne recoit jamais le code par copie manuelle : il va chercher
+  lui-meme le code sur GitHub (`git clone` puis `git pull` pour les mises
+  a jour). Pour ca, le VPS a besoin de sa **propre cle SSH**, differente de
+  celle de ton PC, autorisee uniquement en lecture sur ce depot precis
+  (une "deploy key"). C'est la methode propre : si cette cle fuite un jour,
+  elle ne donne acces qu'a ce seul depot, en lecture seule.
+- Une fois le code sur le VPS, Docker construit et lance l'application.
+- Nginx, deja installe sur le VPS, sert de "reception" publique : il ecoute
+  sur le port 80/443 (ceux qu'internet utilise) et redirige en interne vers
+  l'application Docker qui, elle, n'ecoute que sur `127.0.0.1:3000` (pas
+  accessible depuis l'exterieur directement — plus sur).
+
+Il y a donc deux connexions SSH distinctes a mettre en place :
+1. **Toi -> VPS** (pour administrer le serveur).
+2. **VPS -> GitHub** (pour que le serveur recupere le code).
+
+---
+
+## Etape 2 — Se connecter au VPS depuis Fedora
+
+### 2.1 Generer une cle SSH dediee a ce VPS
+
+Une cle SSH va par paire : une partie **privee** (jamais partagee, reste
+sur ton PC) et une partie **publique** (que tu donnes au serveur, qui
+l'autorise). On en cree une nouvelle, dediee a ce VPS (ne reutilise pas la
+cle qui te sert deja pour GitHub — une cle par usage, c'est la bonne
+pratique) :
+
+```bash
+ssh-keygen -t ed25519 -C "fedora-vers-vps" -f ~/.ssh/id_ed25519_vps
+```
+
+Ca cree deux fichiers : `~/.ssh/id_ed25519_vps` (privee) et
+`~/.ssh/id_ed25519_vps.pub` (publique). Appuie sur Entree a la question de
+passphrase si tu ne veux pas en taper une a chaque connexion.
+
+### 2.2 Autoriser cette cle sur le VPS
+
+Il faut maintenant dire au VPS "cette cle publique a le droit d'entrer".
+Comment tu fais ca depend de comment tu te connectais avant depuis Windows :
+
+- **Si le mot de passe SSH fonctionne encore** (le plus simple) :
+  ```bash
+  ssh-copy-id -i ~/.ssh/id_ed25519_vps.pub debian@51.91.158.21
+  ```
+  Ca te demande le mot de passe une fois, et ajoute automatiquement la cle
+  au bon endroit sur le serveur (`~/.ssh/authorized_keys`).
+
+- **Si seule l'authentification par cle est acceptee** (pas de mot de
+  passe) : il faut passer par ta session Windows qui, elle, a deja acces.
+  Affiche la cle publique sur Fedora :
+  ```bash
+  cat ~/.ssh/id_ed25519_vps.pub
+  ```
+  Copie la ligne affichee (elle commence par `ssh-ed25519`), connecte-toi
+  au VPS depuis Windows comme d'habitude, puis colle-la a la fin de son
+  fichier d'autorisations :
+  ```bash
+  echo "colle_la_cle_ici" >> ~/.ssh/authorized_keys
+  ```
+
+Dis-moi laquelle des deux situations tu as si tu bloques ici.
+
+### 2.3 Simplifier la connexion avec un alias
+
+Plutot que de retaper l'adresse IP et le nom d'utilisateur a chaque fois,
+on cree un raccourci dans `~/.ssh/config` :
+
+```bash
+cat >> ~/.ssh/config << 'EOF'
+
+Host vps
+    HostName 51.91.158.21
+    User debian
+    IdentityFile ~/.ssh/id_ed25519_vps
+EOF
+```
+
+Maintenant, se connecter au VPS se fait juste avec :
+
+```bash
+ssh vps
+```
+
+Et pour repasser root (comme le faisait ton ancien `connexion.ps1`) :
+
+```bash
+ssh -t vps "sudo -H bash -l"
+```
+
+---
+
+## Etape 3 — Donner au VPS l'acces au depot GitHub prive
+
+Maintenant qu'on est root sur le VPS (`ssh -t vps "sudo -H bash -l"`), on
+genere une cle SSH **sur le VPS lui-meme**, dediee a GitHub :
+
+```bash
+ssh-keygen -t ed25519 -C "vps-lequizz-deploy" -f ~/.ssh/id_ed25519_github -N ""
+cat ~/.ssh/id_ed25519_github.pub
+```
+
+Copie la ligne affichee (commence par `ssh-ed25519`). Puis, sur GitHub :
+
+1. Va sur `https://github.com/RemigeApre/lequizz/settings/keys`.
+2. Clique **Add deploy key**.
+3. Titre : `vps-quizz`. Colle la cle publique. **Ne coche pas** "Allow
+   write access" (le VPS n'a besoin que de lire le code, jamais d'y
+   ecrire).
+4. Valide.
+
+Toujours sur le VPS, dis a SSH d'utiliser cette cle specifiquement pour
+GitHub (sinon il utiliserait la cle par defaut, qui n'existe pas ici) :
+
+```bash
+cat >> ~/.ssh/config << 'EOF'
+
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_ed25519_github
+EOF
+```
+
+Teste la connexion :
+
+```bash
+ssh -T git@github.com
+```
+
+Tu dois voir `Hi RemigeApre/lequizz! You've successfully authenticated...`
+
+---
+
+## Etape 4 — Verifier les prerequis sur le VPS
+
+Toujours sur le VPS :
+
+```bash
+docker --version
+docker compose version
+nginx -v
+certbot --version
+git --version
+```
+
+Si un de ces outils manque (peu probable vu que d'autres sites tournent
+deja dessus, mais on ne sait jamais) :
+
+```bash
+sudo apt update
+# si docker manque :
+sudo apt install -y docker.io docker-compose-plugin
+sudo systemctl enable --now docker
+# si certbot manque :
+sudo apt install -y certbot python3-certbot-nginx
+```
+
+---
+
+## Etape 5 — Cloner le code sur le VPS
+
+```bash
+sudo git clone git@github.com:RemigeApre/lequizz.git /home/quizz
+```
+
+(`/home/quizz` pour rester coherent avec `/home/portfolio` deja utilise
+sur ce serveur pour un site du meme genre.)
+
+---
+
+## Etape 6 — Pousser le code depuis Fedora (une fois le depot passe en prive)
+
+Retour sur ta machine Fedora, a la racine du projet :
+
+```bash
+git add -A
+git commit -m "Ajout du quiz complet, du moteur multi-etapes et du deploiement"
+git push origin main
+```
+
+Puis, sur le VPS, on recupere ce qui vient d'etre pousse :
+
+```bash
+cd /home/quizz && sudo git pull
+```
+
+---
+
+## Etape 7 — Configurer les secrets (`.env`)
+
+Le `.env` contient des mots de passe : il n'est **jamais** dans Git (il est
+dans `.gitignore`), donc il faut le creer a la main, une seule fois, sur le
+VPS :
+
+```bash
+cd /home/quizz
+sudo cp .env.example .env
+```
+
+Genere le hash du mot de passe admin. Comme le VPS n'a pas forcement Node
+installe, on utilise un conteneur Docker jetable qui l'a deja :
+
+```bash
+sudo docker run --rm -v "$PWD":/app -w /app node:20-alpine \
+  sh -c "npm install bcryptjs --no-save --silent && node scripts/hash-password.js 'TON_MOT_DE_PASSE'"
+```
+
+Ca affiche une longue chaine commencant par `$2a$` ou `$2b$` : c'est le
+hash a coller dans `.env`. Genere aussi une clef de session aleatoire :
+
+```bash
+openssl rand -hex 32
+```
+
+Edite le fichier :
+
+```bash
+sudo nano .env
+```
+
+Et remplis :
+
+```
+PORT=3000
+NODE_ENV=production
+SESSION_SECRET=<la sortie de openssl rand -hex 32>
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD_HASH=<le hash colle depuis l'etape precedente>
+```
+
+---
+
+## Etape 8 — Construire et lancer l'application
+
+```bash
+cd /home/quizz
+sudo docker compose up -d --build
+```
+
+`-d` = en arriere-plan, `--build` = reconstruit l'image a partir du
+`Dockerfile`. Verifie que ca tourne :
+
+```bash
+sudo docker compose ps
+sudo docker compose logs -f
+```
+
+(`Ctrl+C` pour sortir des logs sans arreter le conteneur.) L'app n'ecoute
+que sur `127.0.0.1:3000`, donc pas accessible depuis l'exterieur pour
+l'instant — normal, c'est nginx qui va faire le pont :
+
+```bash
+curl -I http://127.0.0.1:3000
+```
+
+Tu dois voir une reponse HTTP (redirection vers `/section/0`).
+
+---
+
+## Etape 9 — Brancher Nginx
+
+On copie la config prete a l'emploi du repo (elle a deja
+`server_name quizz.dhuis.com;`) :
+
+```bash
+sudo cp /home/quizz/nginx.example.conf /etc/nginx/sites-available/quizz.dhuis.com
+sudo ln -s /etc/nginx/sites-available/quizz.dhuis.com /etc/nginx/sites-enabled/
+sudo nginx -t
+```
+
+`nginx -t` verifie que la config est valide sans rien casser. Si "syntax is
+ok" et "test is successful" s'affichent, recharge nginx :
+
+```bash
+sudo systemctl reload nginx
+```
+
+Teste (le DNS IONOS etant deja en place) :
+
+```bash
+curl -I http://quizz.dhuis.com
+```
+
+---
+
+## Etape 10 — Activer le HTTPS
+
+```bash
+sudo certbot --nginx -d quizz.dhuis.com
+```
+
+Certbot verifie que le DNS pointe bien vers ce serveur, obtient un
+certificat gratuit (Let's Encrypt), modifie automatiquement la config
+nginx pour ajouter le HTTPS et rediriger le HTTP dessus, et programme le
+renouvellement automatique tous les ~90 jours.
+
+Teste :
+
+```bash
+curl -I https://quizz.dhuis.com
+```
+
+---
+
+## Etape 11 — Verification finale
+
+- [ ] `https://quizz.dhuis.com` affiche la premiere section du quiz.
+- [ ] `https://quizz.dhuis.com/admin/login` fonctionne avec le mot de passe
+      choisi a l'etape 7.
+- [ ] Remplir une section, fermer l'onglet, revenir : la progression est
+      conservee.
+- [ ] Terminer le quiz : le resultat s'affiche et la reponse apparait dans
+      `/admin`.
+
+---
+
+## Etape 12 — Mettre a jour le site plus tard
+
+A chaque fois que tu modifies le code en local :
+
+```bash
+# sur Fedora
+git add -A
+git commit -m "..."
+git push origin main
+
+# sur le VPS
+ssh vps
+sudo bash -c "cd /home/quizz && git pull && docker compose up -d --build"
+```
+
+`.env` et `data/quizz.db` restent intacts : ils ne sont pas dans Git, donc
+`git pull` ne les touche jamais.

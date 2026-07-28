@@ -1,0 +1,106 @@
+<%- include('partials/head', { title: section.title + ' — ' + config.title }) %>
+<main class="container wide">
+  <p class="progress">Etape <%= idx + 1 %> / <%= total %></p>
+  <h1><%= section.title %></h1>
+  <% if (idx === 0 && config.intro) { %><p class="intro"><%= config.intro %></p><% } %>
+  <% if (section.intro) { %><p class="intro"><%= section.intro %></p><% } %>
+
+  <form method="POST" action="/section/<%= idx %>">
+    <% if (section.type === "matrix") { %>
+      <div class="legend">
+        <% config.levels.forEach(function (lvl) { %>
+          <span><strong><%= lvl.key %></strong> = <%= lvl.label %></span>
+        <% }) %>
+      </div>
+
+      <%
+        var globalIndex = 0;
+        var existingMatrix = (existing && existing.matrix) || {};
+      %>
+      <% section.groups.forEach(function (group) { %>
+        <fieldset class="matrix-group">
+          <% if (group.title) { %><legend><%= group.title %></legend><% } %>
+          <div class="table-scroll">
+            <table class="matrix-table">
+              <thead>
+                <tr>
+                  <th class="item-col">Pratique</th>
+                  <% config.levels.forEach(function (lvl) { %>
+                    <th title="<%= lvl.label %>"><%= lvl.key %></th>
+                  <% }) %>
+                </tr>
+              </thead>
+              <tbody>
+                <% group.items.forEach(function (item) { %>
+                  <% var i = globalIndex; globalIndex += 1; %>
+                  <tr>
+                    <td class="item-col"><%= item %></td>
+                    <% config.levels.forEach(function (lvl) { %>
+                      <% var existingVal = existingMatrix[i] ? Number(existingMatrix[i][lvl.key]) : 1; %>
+                      <td>
+                        <select name="m_<%= i %>_<%= lvl.key %>">
+                          <% config.scaleLabels.forEach(function (label, li) { %>
+                            <option value="<%= li + 1 %>" <%= existingVal === (li + 1) ? "selected" : "" %>><%= label %></option>
+                          <% }) %>
+                        </select>
+                      </td>
+                    <% }) %>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </fieldset>
+      <% }) %>
+
+      <% (section.rankings || []).forEach(function (r) { %>
+        <fieldset class="question">
+          <legend><%= r.label %></legend>
+          <% var existingOrder = (existing && existing.rankings && existing.rankings[r.id]) || r.items.map(function (_, i) { return i; }); %>
+          <ul class="ranking-list" data-question-id="ranking_<%= r.id %>">
+            <% existingOrder.forEach(function (itemIdx) { %>
+              <li draggable="true" data-index="<%= itemIdx %>">
+                <span class="handle">&#8942;&#8942;</span> <%= r.items[itemIdx] %>
+              </li>
+            <% }) %>
+          </ul>
+          <input type="hidden" name="ranking_<%= r.id %>" class="ranking-order" />
+        </fieldset>
+      <% }) %>
+    <% } else if (section.type === "profile") { %>
+      <% var existingFields = (existing && existing.fields) || {}; %>
+      <% section.fields.forEach(function (f) { %>
+        <fieldset class="question">
+          <legend><%= f.label %></legend>
+          <div class="choices">
+            <% f.options.forEach(function (opt, optIndex) { %>
+              <label class="choice">
+                <input type="radio" name="field_<%= f.id %>" value="<%= optIndex %>" <%= String(existingFields[f.id]) === String(optIndex) ? "checked" : "" %> required />
+                <%= opt %>
+              </label>
+            <% }) %>
+          </div>
+        </fieldset>
+      <% }) %>
+
+      <% (section.rankings || []).forEach(function (r) { %>
+        <fieldset class="question">
+          <legend><%= r.label %></legend>
+          <% var existingOrder = (existing && existing.rankings && existing.rankings[r.id]) || r.items.map(function (_, i) { return i; }); %>
+          <ul class="ranking-list" data-question-id="ranking_<%= r.id %>">
+            <% existingOrder.forEach(function (itemIdx) { %>
+              <li draggable="true" data-index="<%= itemIdx %>">
+                <span class="handle">&#8942;&#8942;</span> <%= r.items[itemIdx] %>
+              </li>
+            <% }) %>
+          </ul>
+          <input type="hidden" name="ranking_<%= r.id %>" class="ranking-order" />
+        </fieldset>
+      <% }) %>
+    <% } %>
+
+    <button type="submit"><%= idx + 1 >= total ? "Voir mon resultat" : "Section suivante" %></button>
+  </form>
+</main>
+<script src="/quiz.js"></script>
+<%- include('partials/foot') %>

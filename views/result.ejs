@@ -1,0 +1,36 @@
+<%- include('partials/head', { title: 'Ton resultat' }) %>
+<main class="container">
+  <h1>Merci, voici ton resultat</h1>
+
+  <% config.sections.forEach(function (section) { %>
+    <% var s = scores.sections[section.key]; %>
+    <div class="result-section">
+      <h2><%= section.title %></h2>
+
+      <% if (s.type === "matrix") { %>
+        <div class="result-row">
+          <div class="result-label">
+            <span>Score global</span>
+            <span><%= s.percentage %>%</span>
+          </div>
+          <div class="bar"><div class="bar-fill" style="width: <%= s.percentage %>%"></div></div>
+        </div>
+        <% Object.keys(s.rankings || {}).forEach(function (rid) { %>
+          <p class="ranking-result"><strong>Classement :</strong> <%= s.rankings[rid].join(" > ") %></p>
+        <% }) %>
+      <% } else if (s.type === "profile") { %>
+        <ul class="answer-list">
+          <% section.fields.forEach(function (f) { %>
+            <li><strong><%= f.label %></strong><br /><span><%= s.fields[f.id] %></span></li>
+          <% }) %>
+          <% Object.keys(s.rankings || {}).forEach(function (rid) { %>
+            <li><strong>Classement</strong><br /><span><%= s.rankings[rid].join(" > ") %></span></li>
+          <% }) %>
+        </ul>
+      <% } %>
+    </div>
+  <% }) %>
+
+  <a class="link" href="/">Refaire le quiz</a>
+</main>
+<%- include('partials/foot') %>

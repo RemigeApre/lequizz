@@ -1,0 +1,39 @@
+<%- include('partials/head', { title: 'Admin' }) %>
+<main class="container wide">
+  <div class="admin-header">
+    <h1>Resultats (<%= submissions.length %>)</h1>
+    <form method="POST" action="/admin/logout">
+      <button type="submit" class="link-button">Se deconnecter</button>
+    </form>
+  </div>
+
+  <% var matrixSections = config.sections.filter(function (s) { return s.type === "matrix"; }); %>
+  <div class="table-scroll">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <% matrixSections.forEach(function (s) { %>
+            <th><%= s.title %></th>
+          <% }) %>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% submissions.forEach(function (sub) { %>
+          <tr>
+            <td><%= new Date(sub.createdAt).toLocaleString("fr-FR") %></td>
+            <% matrixSections.forEach(function (s) { %>
+              <td><%= sub.scores.sections[s.key] ? sub.scores.sections[s.key].percentage : "-" %>%</td>
+            <% }) %>
+            <td><a href="/admin/<%= sub.id %>">Detail</a></td>
+          </tr>
+        <% }) %>
+        <% if (submissions.length === 0) { %>
+          <tr><td colspan="<%= matrixSections.length + 2 %>">Aucune reponse pour le moment.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</main>
+<%- include('partials/foot') %>

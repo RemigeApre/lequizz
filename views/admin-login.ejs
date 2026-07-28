@@ -1,0 +1,21 @@
+<%- include('partials/head', { title: 'Connexion admin' }) %>
+<main class="container narrow">
+  <h1>Connexion admin</h1>
+
+  <% if (error) { %>
+    <p class="error"><%= error %></p>
+  <% } %>
+
+  <form method="POST" action="/admin/login">
+    <label>
+      Identifiant
+      <input type="text" name="username" required autofocus />
+    </label>
+    <label>
+      Mot de passe
+      <input type="password" name="password" required />
+    </label>
+    <button type="submit">Se connecter</button>
+  </form>
+</main>
+<%- include('partials/foot') %>

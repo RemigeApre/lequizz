@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Editeur de questions — lequizz</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="editor.css" />
+</head>
+<body>
+  <main class="container wide">
+    <h1>Editeur de questions</h1>
+    <p class="intro">
+      Cette page ne modifie rien en ligne toute seule : elle charge le
+      <code>questions.json</code> actuel, te laisse l'editer, puis tu
+      telecharges le resultat et tu le mets sur GitHub (glisser-deposer le
+      fichier dans le depot, a la place de l'ancien, dans le dossier
+      <code>docs/</code>). Une fois commite, le site se met a jour tout seul.
+    </p>
+
+    <div id="load-panel" class="matrix-group">
+      <p>
+        <button type="button" id="load-remote-btn">Charger le questions.json du site</button>
+        ou choisis un fichier :
+        <input type="file" id="load-file-input" accept="application/json" />
+      </p>
+      <p id="load-status" class="intro"></p>
+    </div>
+
+    <div id="editor-root" style="display:none">
+      <label>
+        Section a editer
+        <select id="section-select"></select>
+      </label>
+      <div id="section-panel"></div>
+
+      <div class="matrix-group">
+        <h2>Publier</h2>
+        <button type="button" id="download-btn">Telecharger questions.json</button>
+        <button type="button" id="copy-btn" class="link-button">Copier le JSON dans le presse-papier</button>
+        <p id="save-status" class="intro"></p>
+      </div>
+    </div>
+  </main>
+
+  <script src="editor.js"></script>
+</body>
+</html>

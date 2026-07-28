@@ -1,0 +1,70 @@
+<%- include('partials/head', { title: 'Reponse #' + submission.id }) %>
+<main class="container wide">
+  <a class="link" href="/admin">&larr; Retour</a>
+  <h1>Reponse #<%= submission.id %></h1>
+  <p><%= new Date(submission.createdAt).toLocaleString("fr-FR") %></p>
+
+  <% config.sections.forEach(function (section) { %>
+    <% var data = submission.answers[section.key] || {}; %>
+    <div class="result-section">
+      <h2><%= section.title %></h2>
+
+      <% if (section.type === "matrix") { %>
+        <% var s = submission.scores.sections[section.key]; %>
+        <div class="result-row">
+          <div class="result-label">
+            <span>Score global</span>
+            <span><%= s.percentage %>%</span>
+          </div>
+          <div class="bar"><div class="bar-fill" style="width: <%= s.percentage %>%"></div></div>
+        </div>
+
+        <% var globalIndex = 0; var matrix = data.matrix || {}; %>
+        <% section.groups.forEach(function (group) { %>
+          <fieldset class="matrix-group">
+            <% if (group.title) { %><legend><%= group.title %></legend><% } %>
+            <div class="table-scroll">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th class="item-col">Pratique</th>
+                    <% config.levels.forEach(function (lvl) { %>
+                      <th title="<%= lvl.label %>"><%= lvl.key %></th>
+                    <% }) %>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% group.items.forEach(function (item) { %>
+                    <% var i = globalIndex; globalIndex += 1; %>
+                    <tr>
+                      <td class="item-col"><%= item %></td>
+                      <% config.levels.forEach(function (lvl) { %>
+                        <% var v = matrix[i] ? Number(matrix[i][lvl.key]) : 1; %>
+                        <td><%= config.scaleLabels[v - 1] %></td>
+                      <% }) %>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </fieldset>
+        <% }) %>
+
+        <% Object.keys(s.rankings || {}).forEach(function (rid) { %>
+          <p class="ranking-result"><strong>Classement :</strong> <%= s.rankings[rid].join(" > ") %></p>
+        <% }) %>
+      <% } else if (section.type === "profile") { %>
+        <% var s = submission.scores.sections[section.key]; %>
+        <ul class="answer-list">
+          <% section.fields.forEach(function (f) { %>
+            <li><strong><%= f.label %></strong><br /><span><%= s.fields[f.id] %></span></li>
+          <% }) %>
+          <% Object.keys(s.rankings || {}).forEach(function (rid) { %>
+            <li><strong>Classement</strong><br /><span><%= s.rankings[rid].join(" > ") %></span></li>
+          <% }) %>
+        </ul>
+      <% } %>
+    </div>
+  <% }) %>
+</main>
+<%- include('partials/foot') %>
