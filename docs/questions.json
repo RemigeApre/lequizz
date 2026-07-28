@@ -337,7 +337,10 @@
             "Latino",
             "Amérindien",
             "Métis"
-          ]
+          ],
+          "condition": {
+            "itemText": "Godes ethniques"
+          }
         },
         {
           "id": "objets_quotidien",
@@ -358,6 +361,21 @@
             "Cravate",
             "Collier"
           ]
+        },
+        {
+          "id": "godes_animaux",
+          "label": "Classe ces animaux par preference",
+          "items": [
+            "Loup",
+            "Cheval",
+            "Chien",
+            "Chat",
+            "Dauphin",
+            "Serpent"
+          ],
+          "condition": {
+            "itemText": "Godes animaux"
+          }
         }
       ]
     },
@@ -369,25 +387,7 @@
         {
           "title": null,
           "items": [
-            "Pieds (fétichisme général)",
-            "Piétinement",
-            "Adorer les pieds",
-            "faire adorer ses pieds",
-            "embrasser les pieds",
-            "lécher les pieds",
-            "sucer les orteils",
-            "sentir les pieds",
-            "massage des pieds",
-            "être piétiné avec prudence",
-            "chaussures",
-            "talons",
-            "bottes",
-            "baskets",
-            "chaussettes",
-            "bas",
-            "collants",
-            "seins",
-            "tétons",
+            "Fetichisme des pieds (adoration, piétinement, embrasser, lécher, sucer les orteils, sentir, masser)",
             "poitrine masculine",
             "fesses",
             "anus",
@@ -397,13 +397,8 @@
             "bouche, lèvres, langue",
             "salive",
             "sperme",
-            "lubrification",
             "sueur / transpiration",
-            "odeur corporelle",
-            "aisselles",
-            "poils d’aisselles",
             "pubis",
-            "pilosité",
             "cheveux",
             "barbe",
             "mains, doigts, ongles",
@@ -413,14 +408,6 @@
             "dos",
             "épaules",
             "muscles, veines apparentes",
-            "graisse corporelle",
-            "rondeurs",
-            "maigreur",
-            "grande taille",
-            "petite taille",
-            "différence de taille",
-            "différence de force",
-            "cicatrices",
             "tatouages",
             "piercings",
             "accessoires visibles sur le visage (lunettes, appareil dentaire)",
@@ -430,7 +417,6 @@
             "sommeil simulé",
             "tenue professionnelle ou uniforme",
             "lingerie portée",
-            "vêtements du partenaire (sales, portés, leur odeur)",
             "matières brillantes et moulantes (latex, cuir, vinyle)",
             "matières douces (dentelle, soie, laine, fourrure synthétique)",
             "tissu mouillé",
@@ -440,17 +426,10 @@
             "griffures reçues",
             "marques ou traces laissées sur le corps (corde, main, morsure...)",
             "crachats consentis",
-            "salissure",
-            "propreté extrême",
-            "douche",
-            "parfum",
             "grossesse (ventre rond)",
             "lactation / allaitement érotique entre adultes",
             "fertilité / insémination fantasmée",
             "transformation corporelle",
-            "prise de poids",
-            "perte de poids",
-            "musculation",
             "féminisation / masculinisation / travestissement",
             "métamorphose animale ou monstrueuse fictive",
             "être transformé en poupée, mannequin ou statue",
@@ -491,8 +470,7 @@
             "photographe et modèle",
             "artiste et muse",
             "célébrité et admirateur",
-            "inconnu rencontré dans un bar",
-            "inconnu masqué",
+            "Inconnu (rencontre dans un bar, ou masque)",
             "cambrioleur ou ravisseur fictif",
             "espion et prisonnier",
             "interrogatoire",

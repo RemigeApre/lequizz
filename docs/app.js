@@ -44,13 +44,34 @@
 
   function renderRanking(r, existingOrder) {
     var order = Array.isArray(existingOrder) ? existingOrder : r.items.map(function (_, i) { return i; });
-    var html = '<fieldset class="question"><legend>' + r.label + '</legend>';
+    var html = '<fieldset class="question" data-ranking-id="' + r.id + '">';
+    html += "<legend>" + r.label + "</legend>";
     html += '<ul class="ranking-list" data-question-id="ranking_' + r.id + '">';
     order.forEach(function (itemIdx) {
       html += '<li draggable="true" data-index="' + itemIdx + '"><span class="handle">&#8942;&#8942;</span> ' + r.items[itemIdx] + '</li>';
     });
     html += '</ul><input type="hidden" name="ranking_' + r.id + '" class="ranking-order" /></fieldset>';
     return html;
+  }
+
+  function conditionMetClient(section, sectionData, condition) {
+    if (!condition) return true;
+    var items = window.Scoring.flattenItems(section);
+    var idx = items.indexOf(condition.itemText);
+    if (idx === -1) return true;
+    var levels = (sectionData.matrix || {})[idx] || {};
+    return Object.keys(levels).some(function (k) { return Number(levels[k]) > 1; });
+  }
+
+  function updateConditionalRankings(section) {
+    if (!section.rankings) return;
+    var sectionData = state.data[section.key] || {};
+    section.rankings.forEach(function (r) {
+      if (!r.condition) return;
+      var fieldset = document.querySelector('[data-ranking-id="' + r.id + '"]');
+      if (!fieldset) return;
+      fieldset.style.display = conditionMetClient(section, sectionData, r.condition) ? "" : "none";
+    });
   }
 
   function levelOptionText(lvl, valueNum) {
@@ -331,6 +352,7 @@
 
     app.innerHTML = html;
     window.initRankingLists();
+    if (section.type === "matrix") updateConditionalRankings(section);
 
     var quizForm = document.getElementById("quiz-form");
     quizForm.addEventListener("change", function (e) {
@@ -363,6 +385,7 @@
 
       state.data[section.key] = parseSection(section, idx);
       persist();
+      if (section.type === "matrix") updateConditionalRankings(section);
     });
 
     quizForm.addEventListener("submit", function (e) {

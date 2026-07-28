@@ -139,6 +139,10 @@
 
     var h = document.createElement("div");
     h.innerHTML = "<strong>Classement (glisser-deposer sur le site) :</strong>";
+    if (ranking.condition) {
+      h.innerHTML += ' <span style="color:var(--muted);font-weight:400;">(affiche seulement si "' +
+        ranking.condition.itemText + '" n\'est pas reste sur Jamais)</span>';
+    }
 
     block.appendChild(h);
     block.appendChild(labelInput);

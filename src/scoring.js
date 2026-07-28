@@ -36,6 +36,15 @@ function labelSpectrum(spectrum, value) {
   return spectrum.scaleLabels[idx - 1] || null;
 }
 
+function conditionMet(section, sectionData, condition) {
+  if (!condition) return true;
+  const items = flattenItems(section);
+  const idx = items.indexOf(condition.itemText);
+  if (idx === -1) return true;
+  const levels = (sectionData.matrix || {})[idx] || {};
+  return Object.keys(levels).some((k) => Number(levels[k]) > 1);
+}
+
 function computeScores(config, answers) {
   const sections = {};
 
@@ -47,6 +56,7 @@ function computeScores(config, answers) {
       const rankings = {};
       if (section.rankings) {
         for (const r of section.rankings) {
+          if (!conditionMet(section, sectionData, r.condition)) continue;
           rankings[r.id] = labelRanking(r, (sectionData.rankings || {})[r.id]);
         }
       }
