@@ -21,7 +21,10 @@
         <% var isDone = !!doneGroups[groupKey]; %>
         <details class="matrix-group<%= isDone ? ' done' : '' %>" <%= (!multiGroup || gi === 0) && !isDone ? "open" : "" %> data-group-index="<%= gi %>">
           <summary>
-            <span class="group-title-text"><%= group.title || "Toutes les pratiques" %> (<%= group.items.length %>)</span>
+            <span class="group-title-wrap">
+              <span class="group-title-text"><%= group.title || "Toutes les pratiques" %></span>
+              <span class="group-count-badge"><%= group.items.length %></span>
+            </span>
             <button type="button" class="group-done-toggle<%= isDone ? ' active' : '' %>">
               <%= isDone ? "&#10003; Complet" : "Complet" %>
             </button>
