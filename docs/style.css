@@ -174,23 +174,27 @@ body {
   color: #fff;
 }
 
-.level-row {
+.level-picker {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem 0.75rem;
-  padding: 0.3rem 0;
-  border-top: 1px solid var(--border);
+  gap: 0.5rem;
 }
 
-.level-row:first-of-type {
-  border-top: none;
-}
-
-.level-label {
-  flex: 1 1 260px;
+.level-picker select {
+  background: var(--card);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.4rem 0.5rem;
   font-size: 0.85rem;
-  color: var(--muted);
+}
+
+.level-picker .level-select {
+  flex: 1 1 320px;
+}
+
+.level-picker .freq-select {
+  flex: 1 1 140px;
 }
 
 .pill-group {

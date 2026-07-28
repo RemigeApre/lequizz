@@ -30,10 +30,6 @@
     localStorage.removeItem(STORAGE_KEY);
   }
 
-  function hasProgress(attempt) {
-    return attempt.sectionIndex > 0 || Object.keys(attempt.data || {}).length > 0;
-  }
-
   function saveHistory(scores) {
     var history = [];
     try {
@@ -57,6 +53,10 @@
     return html;
   }
 
+  function levelOptionText(lvl, valueNum) {
+    return lvl.key + " — " + lvl.label + " (" + config.scaleLabels[valueNum - 1] + ")";
+  }
+
   function renderItemCard(item, i, existingMatrix, sectionKey) {
     var itemKey = sectionKey + ":" + i;
     var toTest = !!state.toTest[itemKey];
@@ -67,20 +67,29 @@
       (toTest ? "★" : "☆") + " decouverte a tester</button>";
     html += '<span class="item-name">' + item + "</span>";
     html += "</div>";
+
+    var firstLevelKey = config.levels[0].key;
+    var firstVal = existingMatrix[i] ? Number(existingMatrix[i][firstLevelKey]) : 1;
+
+    html += '<div class="level-picker" data-item-index="' + i + '">';
+    html += '<select class="level-select">';
+    config.levels.forEach(function (lvl) {
+      var v = existingMatrix[i] ? Number(existingMatrix[i][lvl.key]) : 1;
+      html += '<option value="' + lvl.key + '">' + levelOptionText(lvl, v) + "</option>";
+    });
+    html += '</select>';
+    html += '<select class="freq-select">';
+    config.scaleLabels.forEach(function (label, li) {
+      var sel = firstVal === li + 1 ? " selected" : "";
+      html += '<option value="' + (li + 1) + '"' + sel + ">" + label + "</option>";
+    });
+    html += "</select></div>";
+
     config.levels.forEach(function (lvl) {
       var existingVal = existingMatrix[i] ? Number(existingMatrix[i][lvl.key]) : 1;
-      var fieldName = "m_" + i + "_" + lvl.key;
-      html += '<div class="level-row">';
-      html += '<span class="level-label"><strong>' + lvl.key + "</strong> — " + lvl.label + "</span>";
-      html += '<div class="pill-group" data-name="' + fieldName + '">';
-      config.scaleLabels.forEach(function (label, li) {
-        var active = existingVal === li + 1 ? " active" : "";
-        html += '<button type="button" class="pill' + active + '" data-value="' + (li + 1) + '">' + label + "</button>";
-      });
-      html += "</div>";
-      html += '<input type="hidden" name="' + fieldName + '" value="' + existingVal + '" />';
-      html += "</div>";
+      html += '<input type="hidden" name="m_' + i + "_" + lvl.key + '" value="' + existingVal + '" />';
     });
+
     html += "</div>";
     return html;
   }
@@ -303,29 +312,6 @@
     });
   }
 
-  function renderResumePrompt(savedAttempt) {
-    var idx = Math.min(Math.max(savedAttempt.sectionIndex, 0), config.sections.length - 1);
-    var html = "<h1>Reprendre le quiz ?</h1>";
-    html += '<p class="intro">Une progression a ete trouvee sur ce navigateur, arrivee a la section "' +
-      config.sections[idx].title + '". Si c\'est une autre personne qui repond maintenant, choisis ' +
-      '"Recommencer a zero".</p>';
-    html += '<div class="form-actions">';
-    html += '<button type="button" id="resume-btn">Reprendre ou j\'en etais</button>';
-    html += '<button type="button" id="restart-fresh-btn" class="link-button">Recommencer a zero</button>';
-    html += "</div>";
-    app.innerHTML = html;
-
-    document.getElementById("resume-btn").addEventListener("click", function () {
-      state = savedAttempt;
-      renderSection(idx);
-    });
-    document.getElementById("restart-fresh-btn").addEventListener("click", function () {
-      state = { data: {}, sectionIndex: 0, doneGroups: {}, toTest: {} };
-      persist();
-      renderSection(0);
-    });
-  }
-
   function renderSection(idx) {
     var section = config.sections[idx];
     var html = '<p class="progress">Etape ' + (idx + 1) + " / " + config.sections.length + "</p>";
@@ -347,7 +333,34 @@
     window.initRankingLists();
 
     var quizForm = document.getElementById("quiz-form");
-    quizForm.addEventListener("change", function () {
+    quizForm.addEventListener("change", function (e) {
+      var freqSelect = e.target.closest(".freq-select");
+      if (freqSelect) {
+        var picker = freqSelect.closest(".level-picker");
+        var levelSelect = picker.querySelector(".level-select");
+        var itemIndex = picker.dataset.itemIndex;
+        var levelKey = levelSelect.value;
+        var lvl = config.levels.find(function (l) { return l.key === levelKey; });
+        var hidden = picker.parentElement.querySelector(
+          'input[type="hidden"][name="m_' + itemIndex + "_" + levelKey + '"]'
+        );
+        if (hidden) hidden.value = freqSelect.value;
+        var opt = levelSelect.querySelector('option[value="' + levelKey + '"]');
+        if (opt && lvl) opt.textContent = levelOptionText(lvl, Number(freqSelect.value));
+      }
+
+      var levelSelectChanged = e.target.closest(".level-select");
+      if (levelSelectChanged) {
+        var picker2 = levelSelectChanged.closest(".level-picker");
+        var freqSelect2 = picker2.querySelector(".freq-select");
+        var itemIndex2 = picker2.dataset.itemIndex;
+        var levelKey2 = levelSelectChanged.value;
+        var hidden2 = picker2.parentElement.querySelector(
+          'input[type="hidden"][name="m_' + itemIndex2 + "_" + levelKey2 + '"]'
+        );
+        freqSelect2.value = hidden2 ? hidden2.value : "1";
+      }
+
       state.data[section.key] = parseSection(section, idx);
       persist();
     });
@@ -435,12 +448,8 @@
     .then(function (r) { return r.json(); })
     .then(function (cfg) {
       config = cfg;
-      var saved = loadAttempt();
-      if (hasProgress(saved)) {
-        renderResumePrompt(saved);
-      } else {
-        state = saved;
-        renderSection(0);
-      }
+      state = loadAttempt();
+      var idx = Math.min(Math.max(state.sectionIndex, 0), config.sections.length - 1);
+      renderSection(idx);
     });
 })();
