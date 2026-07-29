@@ -93,10 +93,6 @@
               "text": "Portée"
             },
             {
-              "id": "double-penetration-manuelle-ou-avec-objets",
-              "text": "Double pénétration manuelle ou avec objets"
-            },
-            {
               "id": "cuillere",
               "text": "Cuillère"
             }
@@ -162,11 +158,23 @@
             },
             {
               "id": "etre-stimule-sans-rendre-la-pareille",
-              "text": "Être stimulé sans rendre la pareille"
+              "text": "Être stimulé sans rendre la pareille",
+              "variants": [
+                "Donné",
+                "Reçu"
+              ]
             },
             {
               "id": "sexe-pendant-les-regles",
               "text": "Sexe pendant les règles"
+            },
+            {
+              "id": "orgasme-force",
+              "text": "Orgasme forcé",
+              "variants": [
+                "Donné",
+                "Reçu"
+              ]
             }
           ],
           "id": "ambiance-et-rythme-du-rapport"
@@ -187,8 +195,36 @@
               "text": "Éjaculation sur le visage"
             },
             {
-              "id": "ejaculation-sur-une-autre-partie-du-corps-seins-fesses-ventre-dos-mains-pieds-cheveux",
-              "text": "Éjaculation sur une autre partie du corps (seins, fesses, ventre, dos, mains, pieds, cheveux...)"
+              "id": "ejaculation-sur-les-seins",
+              "text": "Éjaculation sur les seins"
+            },
+            {
+              "id": "ejaculation-sur-les-fesses",
+              "text": "Éjaculation sur les fesses"
+            },
+            {
+              "id": "ejaculation-sur-le-ventre",
+              "text": "Éjaculation sur le ventre"
+            },
+            {
+              "id": "ejaculation-sur-le-dos",
+              "text": "Éjaculation sur le dos"
+            },
+            {
+              "id": "ejaculation-sur-les-mains",
+              "text": "Éjaculation sur les mains"
+            },
+            {
+              "id": "ejaculation-sur-les-pieds",
+              "text": "Éjaculation sur les pieds"
+            },
+            {
+              "id": "ejaculation-sur-les-cheveux",
+              "text": "Éjaculation sur les cheveux"
+            },
+            {
+              "id": "ejaculation-sur-les-cuisses",
+              "text": "Éjaculation sur les cuisses"
             },
             {
               "id": "sur-les-vetements",
@@ -199,8 +235,12 @@
               "text": "Dans les sous-vêtements"
             },
             {
+              "id": "dans-les-sous-vetements-portes",
+              "text": "Dans les sous-vêtements portés"
+            },
+            {
               "id": "conserver-ou-porter-les-vetements-taches",
-              "text": "Conserver ou porter les vêtements tachés"
+              "text": "Se balader avec du sperme sur soi"
             },
             {
               "id": "embrasser-apres-une-ejaculation-dans-la-bouche",
