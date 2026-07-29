@@ -1,10 +1,11 @@
 const express = require("express");
 const { checkCredentials, requireAdmin } = require("../auth");
-const { listSubmissions, getSubmission } = require("../db");
+const { listSubmissions, getSubmission, getAttempt, listLinks, listWikiPages } = require("../db");
 const { createThrottle } = require("../loginThrottle");
-const { slugify } = require("../scoring");
+const { slugify, computeScores, flattenItemsRaw } = require("../scoring");
 
 const adminThrottle = createThrottle();
+const SHARED_TOKEN = "shared";
 
 function buildAdminRouter(config) {
   const router = express.Router();
@@ -37,13 +38,53 @@ function buildAdminRouter(config) {
 
   router.get("/", requireAdmin, (req, res) => {
     const submissions = listSubmissions();
-    res.render("admin-dashboard", { config, submissions });
+    const attempt = getAttempt(SHARED_TOKEN);
+    const liveScores = attempt ? computeScores(config, attempt.data) : null;
+
+    let liveRaw = 0;
+    let liveMax = 0;
+    if (liveScores) {
+      for (const key of Object.keys(liveScores.sections)) {
+        const s = liveScores.sections[key];
+        if (s.type === "matrix") {
+          liveRaw += s.raw;
+          liveMax += s.max;
+        }
+      }
+    }
+    const livePercentage = liveMax ? Math.round((liveRaw / liveMax) * 1000) / 10 : 0;
+    const favoritesCount = attempt && attempt.data.__bookmarks
+      ? Object.keys(attempt.data.__bookmarks.favorite || {}).length
+      : 0;
+
+    res.render("admin-dashboard", {
+      config,
+      submissions,
+      attempt,
+      liveScores,
+      livePercentage,
+      favoritesCount,
+      linksCount: listLinks().length,
+      wikiCount: listWikiPages().length,
+    });
+  });
+
+  router.get("/live", requireAdmin, (req, res) => {
+    const attempt = getAttempt(SHARED_TOKEN);
+    const scores = attempt ? computeScores(config, attempt.data) : computeScores(config, {});
+    const submission = {
+      id: "live",
+      createdAt: attempt ? attempt.updatedAt : new Date().toISOString(),
+      answers: attempt ? attempt.data : {},
+      scores,
+    };
+    res.render("admin-detail", { config, submission, slugify, flattenItemsRaw, isLive: true });
   });
 
   router.get("/:id", requireAdmin, (req, res) => {
     const submission = getSubmission(Number(req.params.id));
     if (!submission) return res.redirect("/admin");
-    res.render("admin-detail", { config, submission, slugify });
+    res.render("admin-detail", { config, submission, slugify, flattenItemsRaw, isLive: false });
   });
 
   return router;

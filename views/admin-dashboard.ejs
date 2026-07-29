@@ -1,13 +1,61 @@
 <%- include('partials/head', { title: 'Admin' }) %>
 <main class="container wide">
   <div class="admin-header">
-    <h1>Resultats (<%= submissions.length %>)</h1>
+    <h1>Panneau admin</h1>
     <form method="POST" action="/admin/logout">
       <button type="submit" class="link-button">Se deconnecter</button>
     </form>
   </div>
 
   <% var matrixSections = config.sections.filter(function (s) { return s.type === "matrix"; }); %>
+
+  <div class="result-section">
+    <div class="admin-header">
+      <h2>Etat actuel</h2>
+      <% if (attempt) { %><a href="/admin/live" class="link-button">Voir le detail complet</a><% } %>
+    </div>
+    <% if (attempt) { %>
+      <p class="intro">Derniere modification : <%= new Date(attempt.updatedAt).toLocaleString("fr-FR") %></p>
+
+      <div class="result-row">
+        <div class="result-label">
+          <span>Progression globale</span>
+          <span><%= livePercentage %>%</span>
+        </div>
+        <div class="bar"><div class="bar-fill" style="width: <%= livePercentage %>%"></div></div>
+      </div>
+
+      <% matrixSections.forEach(function (s) { %>
+        <% var sc = liveScores.sections[s.key]; %>
+        <div class="result-row">
+          <div class="result-label">
+            <span><%= s.title %></span>
+            <span><%= sc.percentage %>%</span>
+          </div>
+          <div class="bar"><div class="bar-fill" style="width: <%= sc.percentage %>%"></div></div>
+        </div>
+      <% }) %>
+
+      <div class="admin-stats">
+        <div class="admin-stat">
+          <span class="admin-stat-value"><%= favoritesCount %></span>
+          <span class="admin-stat-label">Favoris</span>
+        </div>
+        <div class="admin-stat">
+          <span class="admin-stat-value"><%= linksCount %></span>
+          <span class="admin-stat-label">Liens enregistres</span>
+        </div>
+        <div class="admin-stat">
+          <span class="admin-stat-value"><%= wikiCount %></span>
+          <span class="admin-stat-label">Pages wiki</span>
+        </div>
+      </div>
+    <% } else { %>
+      <p class="intro">Aucune reponse enregistree pour l'instant.</p>
+    <% } %>
+  </div>
+
+  <h2>Historique des soumissions completes (<%= submissions.length %>)</h2>
   <div class="table-scroll">
     <table class="admin-table">
       <thead>

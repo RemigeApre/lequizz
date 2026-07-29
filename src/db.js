@@ -89,9 +89,9 @@ function getSubmission(id) {
 }
 
 function getAttempt(token) {
-  const row = db.prepare("SELECT data, next_section FROM attempts WHERE token = ?").get(token);
+  const row = db.prepare("SELECT data, next_section, updated_at FROM attempts WHERE token = ?").get(token);
   if (!row) return null;
-  return { data: JSON.parse(row.data), nextSection: row.next_section };
+  return { data: JSON.parse(row.data), nextSection: row.next_section, updatedAt: row.updated_at };
 }
 
 function saveAttempt(token, data, nextSection) {

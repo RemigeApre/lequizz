@@ -1,8 +1,8 @@
-<%- include('partials/head', { title: 'Reponse #' + submission.id }) %>
+<%- include('partials/head', { title: (isLive ? 'Etat actuel' : 'Reponse #' + submission.id) + ' — Admin' }) %>
 <main class="container wide">
   <a class="link" href="/admin">&larr; Retour</a>
-  <h1>Reponse #<%= submission.id %></h1>
-  <p><%= new Date(submission.createdAt).toLocaleString("fr-FR") %></p>
+  <h1><%= isLive ? "Etat actuel" : "Reponse #" + submission.id %></h1>
+  <p><%= isLive ? "Derniere modification : " : "" %><%= new Date(submission.createdAt).toLocaleString("fr-FR") %></p>
 
   <% config.sections.forEach(function (section) { %>
     <% var data = submission.answers[section.key] || {}; %>
@@ -75,6 +75,12 @@
           <% var sp = section.spectrums.find(function (x) { return x.id === spid; }); %>
           <p class="ranking-result"><strong><%= sp ? sp.label : spid %> :</strong> <%= s.spectrums[spid] %></p>
         <% }) %>
+        <% Object.keys(s.multiselects || {}).forEach(function (msid) { %>
+          <% if (s.multiselects[msid].length) { %>
+            <% var ms = section.multiselects.find(function (x) { return x.id === msid; }); %>
+            <p class="ranking-result"><strong><%= ms ? ms.label : msid %> :</strong> <%= s.multiselects[msid].join(", ") %></p>
+          <% } %>
+        <% }) %>
       <% } else if (section.type === "profile") { %>
         <% var s = submission.scores.sections[section.key]; %>
         <ul class="answer-list">
@@ -88,5 +94,31 @@
       <% } %>
     </div>
   <% }) %>
+
+  <%
+    var bookmarks = (submission.answers && submission.answers.__bookmarks) || { favorite: {} };
+    var favoriteRows = [];
+    Object.keys(bookmarks.favorite || {}).forEach(function (key) {
+      if (!bookmarks.favorite[key]) return;
+      var sepIdx = key.indexOf(":");
+      var sectionKey = key.slice(0, sepIdx);
+      var itemId = key.slice(sepIdx + 1);
+      var sec = config.sections.find(function (s) { return s.key === sectionKey; });
+      if (!sec) return;
+      var match = flattenItemsRaw(sec).find(function (it) { return it.id === itemId; });
+      if (!match) return;
+      favoriteRows.push({ label: match.text, sectionTitle: sec.title });
+    });
+  %>
+  <% if (favoriteRows.length) { %>
+    <div class="result-section">
+      <h2>Favoris (<%= favoriteRows.length %>)</h2>
+      <ul class="answer-list">
+        <% favoriteRows.forEach(function (row) { %>
+          <li><span><%= row.label %> <em>(<%= row.sectionTitle %>)</em></span></li>
+        <% }) %>
+      </ul>
+    </div>
+  <% } %>
 </main>
 <%- include('partials/foot') %>
