@@ -21,8 +21,8 @@ function buildAdminRouter(config) {
       return res.render("admin-login", { error: `Trop de tentatives. Reessaie dans ${wait}s.` });
     }
 
-    const { username, password } = req.body;
-    if (checkCredentials(username, password)) {
+    const { password } = req.body;
+    if (checkCredentials(password)) {
       adminThrottle.recordSuccess(key);
       req.session.isAdmin = true;
       return res.redirect("/admin");

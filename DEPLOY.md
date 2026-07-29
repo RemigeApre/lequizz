@@ -238,16 +238,7 @@ cd /home/quizz
 sudo cp .env.example .env
 ```
 
-Genere le hash du mot de passe admin. Comme le VPS n'a pas forcement Node
-installe, on utilise un conteneur Docker jetable qui l'a deja :
-
-```bash
-sudo docker run --rm -v "$PWD":/app -w /app node:20-alpine \
-  sh -c "npm install bcryptjs --no-save --silent && node scripts/hash-password.js 'TON_MOT_DE_PASSE'"
-```
-
-Ca affiche une longue chaine commencant par `$2a$` ou `$2b$` : c'est le
-hash a coller dans `.env`. Genere aussi une clef de session aleatoire :
+Genere une clef de session aleatoire :
 
 ```bash
 openssl rand -hex 32
@@ -266,9 +257,13 @@ PORT=3000
 NODE_ENV=production
 SESSION_SECRET=<la sortie de openssl rand -hex 32>
 SITE_PASSWORD=<le mot de passe d'acces au site, choisi par toi>
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD_HASH=<le hash colle depuis l'etape precedente>
+ADMIN_PASSWORD=<le mot de passe du panneau admin, choisi par toi>
 ```
+
+Un seul mot de passe admin (pas de hash, pas d'identifiant) : meme
+principe que la page de connexion du site. Choisis un mot de passe
+different de `SITE_PASSWORD` et que tu n'as tape nulle part d'autre
+(ex. jamais dans une conversation en clair).
 
 ---
 

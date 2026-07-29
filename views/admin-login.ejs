@@ -1,21 +1,12 @@
 <%- include('partials/head', { title: 'Connexion admin' }) %>
-<main class="container narrow">
-  <h1>Connexion admin</h1>
-
+<main class="container narrow gate-page">
   <% if (error) { %>
-    <p class="error"><%= error %></p>
+    <p class="error gate-error"><%= error %></p>
   <% } %>
 
-  <form method="POST" action="/admin/login">
-    <label>
-      Identifiant
-      <input type="text" name="username" required autofocus />
-    </label>
-    <label>
-      Mot de passe
-      <input type="password" name="password" required />
-    </label>
-    <button type="submit">Se connecter</button>
+  <form method="POST" action="/admin/login" class="gate-form">
+    <input type="password" name="password" placeholder="mot de passe admin" required autofocus />
+    <button type="submit" aria-label="Entrer" title="Entrer">&#8594;</button>
   </form>
 </main>
 <%- include('partials/foot') %>

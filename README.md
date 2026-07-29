@@ -53,7 +53,7 @@ derniere section, le resultat final est calcule et enregistre dans
 ```bash
 npm install
 cp .env.example .env
-npm run hash-password -- "mon-mot-de-passe"   # copier le hash dans .env (ADMIN_PASSWORD_HASH)
+# renseigner SITE_PASSWORD et ADMIN_PASSWORD dans .env
 npm start
 ```
 

@@ -1,11 +1,7 @@
-const bcrypt = require("bcryptjs");
-
-function checkCredentials(username, password) {
-  const validUser = process.env.ADMIN_USERNAME || "";
-  const validHash = process.env.ADMIN_PASSWORD_HASH || "";
-  if (!validUser || !validHash) return false;
-  if (username !== validUser) return false;
-  return bcrypt.compareSync(password, validHash);
+function checkCredentials(password) {
+  const validPassword = process.env.ADMIN_PASSWORD || "";
+  if (!validPassword) return false;
+  return password === validPassword;
 }
 
 function requireAdmin(req, res, next) {
