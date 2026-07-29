@@ -41,10 +41,11 @@
           var matrix = sectionData.matrix || {};
           var rawItems = flattenItemsRaw(section);
           var answeredRows = [];
-          rawItems.forEach(function (item, i) {
+          rawItems.forEach(function (item) {
             if (item.variants) {
-              item.variants.forEach(function (variantLabel, vi) {
-                var levels = (matrix[i] && matrix[i][vi]) || {};
+              item.variants.forEach(function (variantLabel) {
+                var vKey = slugify(variantLabel);
+                var levels = (matrix[item.id] && matrix[item.id][vKey]) || {};
                 var parts = [];
                 config.levels.forEach(function (lvl) {
                   var v = Number(levels[lvl.key]) || 1;
@@ -53,7 +54,7 @@
                 if (parts.length) answeredRows.push({ item: item.text + " (" + variantLabel + ")", parts: parts.join(" · ") });
               });
             } else {
-              var levels = matrix[i] || {};
+              var levels = matrix[item.id] || {};
               var parts = [];
               config.levels.forEach(function (lvl) {
                 var v = Number(levels[lvl.key]) || 1;
@@ -94,13 +95,15 @@
       var rows = [];
       Object.keys(map || {}).forEach(function (key) {
         if (!map[key]) return;
-        var parts = key.split(":");
-        var sec = config.sections.find(function (s) { return s.key === parts[0]; });
+        var sepIdx = key.indexOf(":");
+        var sectionKey = key.slice(0, sepIdx);
+        var itemId = key.slice(sepIdx + 1);
+        var sec = config.sections.find(function (s) { return s.key === sectionKey; });
         if (!sec) return;
-        var its = flattenItems(sec);
-        var label = its[Number(parts[1])];
-        if (label === undefined) return;
-        rows.push({ label: label, sectionTitle: sec.title });
+        var its = flattenItemsRaw(sec);
+        var match = its.find(function (it) { return it.id === itemId; });
+        if (!match) return;
+        rows.push({ label: match.text, sectionTitle: sec.title });
       });
       return rows;
     }

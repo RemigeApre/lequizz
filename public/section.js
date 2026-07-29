@@ -14,9 +14,9 @@
     var itemCard = picker.closest(".item-card");
     var levelSelect = picker.querySelector(".level-select");
     var freqSelect = picker.querySelector(".freq-select");
-    var itemIndex = picker.dataset.itemIndex;
-    var variantIndex = picker.dataset.variantIndex;
-    var namePrefix = "m_" + itemIndex + (variantIndex !== undefined ? "_" + variantIndex : "") + "_";
+    var itemId = picker.dataset.itemId;
+    var variantKey = picker.dataset.variantKey;
+    var namePrefix = "m_" + itemId + (variantKey !== undefined ? "_" + variantKey : "") + "_";
 
     function hiddenFor(levelKey) {
       return itemCard.querySelector('input[type="hidden"][name="' + namePrefix + levelKey + '"]');

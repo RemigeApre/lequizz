@@ -19,7 +19,7 @@
           <div class="bar"><div class="bar-fill" style="width: <%= s.percentage %>%"></div></div>
         </div>
 
-        <% var globalIndex = 0; var matrix = data.matrix || {}; %>
+        <% var matrix = data.matrix || {}; %>
         <% section.groups.forEach(function (group) { %>
           <fieldset class="matrix-group">
             <% if (group.title) { %><legend><%= group.title %></legend><% } %>
@@ -35,14 +35,28 @@
                 </thead>
                 <tbody>
                   <% group.items.forEach(function (item) { %>
-                    <% var i = globalIndex; globalIndex += 1; %>
-                    <tr>
-                      <td class="item-col"><%= item %></td>
-                      <% config.levels.forEach(function (lvl) { %>
-                        <% var v = matrix[i] ? Number(matrix[i][lvl.key]) : 1; %>
-                        <td><%= config.scaleLabels[v - 1] %></td>
+                    <% if (item.variants) { %>
+                      <% item.variants.forEach(function (variantLabel) { %>
+                        <% var vKey = slugify(variantLabel); %>
+                        <% var levels = (matrix[item.id] && matrix[item.id][vKey]) || {}; %>
+                        <tr>
+                          <td class="item-col"><%= item.text %> (<%= variantLabel %>)</td>
+                          <% config.levels.forEach(function (lvl) { %>
+                            <% var v = Number(levels[lvl.key]) || 1; %>
+                            <td><%= config.scaleLabels[v - 1] %></td>
+                          <% }) %>
+                        </tr>
                       <% }) %>
-                    </tr>
+                    <% } else { %>
+                      <% var levels = matrix[item.id] || {}; %>
+                      <tr>
+                        <td class="item-col"><%= item.text %></td>
+                        <% config.levels.forEach(function (lvl) { %>
+                          <% var v = Number(levels[lvl.key]) || 1; %>
+                          <td><%= config.scaleLabels[v - 1] %></td>
+                        <% }) %>
+                      </tr>
+                    <% } %>
                   <% }) %>
                 </tbody>
               </table>

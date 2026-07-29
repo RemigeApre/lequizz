@@ -1,5 +1,5 @@
 const express = require("express");
-const { flattenItems, flattenItemsRaw, computeScores } = require("../scoring");
+const { flattenItems, flattenItemsRaw, computeScores, slugify } = require("../scoring");
 const {
   insertSubmission,
   getAttempt,
@@ -15,24 +15,25 @@ function parseSectionSubmission(config, section, body) {
   if (section.type === "matrix") {
     const rawItems = flattenItemsRaw(section);
     const matrix = {};
-    rawItems.forEach((item, i) => {
+    rawItems.forEach((item) => {
       if (item.variants) {
-        matrix[i] = {};
-        item.variants.forEach((_, vi) => {
+        matrix[item.id] = {};
+        item.variants.forEach((variantLabel) => {
+          const vKey = slugify(variantLabel);
           const levels = {};
           config.levels.forEach((lvl) => {
-            const v = Number(body[`m_${i}_${vi}_${lvl.key}`]);
+            const v = Number(body[`m_${item.id}_${vKey}_${lvl.key}`]);
             levels[lvl.key] = Number.isNaN(v) ? 1 : v;
           });
-          matrix[i][vi] = levels;
+          matrix[item.id][vKey] = levels;
         });
       } else {
         const levels = {};
         config.levels.forEach((lvl) => {
-          const v = Number(body[`m_${i}_${lvl.key}`]);
+          const v = Number(body[`m_${item.id}_${lvl.key}`]);
           levels[lvl.key] = Number.isNaN(v) ? 1 : v;
         });
-        matrix[i] = levels;
+        matrix[item.id] = levels;
       }
     });
 
@@ -102,19 +103,19 @@ function applySectionSubmission(config, attempt, section, idx, body) {
   attempt.data.__doneGroups = attempt.data.__doneGroups || {};
 
   if (section.type === "matrix") {
-    const items = flattenItems(section);
-    items.forEach((_, i) => {
-      const key = `${section.key}:${i}`;
-      if (body[`test_${i}`] === "1") attempt.data.__bookmarks.toTest[key] = true;
+    const rawItems = flattenItemsRaw(section);
+    rawItems.forEach((item) => {
+      const key = `${section.key}:${item.id}`;
+      if (body[`test_${item.id}`] === "1") attempt.data.__bookmarks.toTest[key] = true;
       else delete attempt.data.__bookmarks.toTest[key];
-      if (body[`dislike_${i}`] === "1") attempt.data.__bookmarks.dislike[key] = true;
+      if (body[`dislike_${item.id}`] === "1") attempt.data.__bookmarks.dislike[key] = true;
       else delete attempt.data.__bookmarks.dislike[key];
-      if (body[`fav_${i}`] === "1") attempt.data.__bookmarks.favorite[key] = true;
+      if (body[`fav_${item.id}`] === "1") attempt.data.__bookmarks.favorite[key] = true;
       else delete attempt.data.__bookmarks.favorite[key];
     });
-    section.groups.forEach((group, gi) => {
-      const gkey = `${section.key}:${gi}`;
-      if (body[`done_${gi}`] === "1") attempt.data.__doneGroups[gkey] = true;
+    section.groups.forEach((group) => {
+      const gkey = `${section.key}:${group.id}`;
+      if (body[`done_${group.id}`] === "1") attempt.data.__doneGroups[gkey] = true;
       else delete attempt.data.__doneGroups[gkey];
     });
   }
@@ -144,7 +145,7 @@ function buildQuizRouter(config) {
     res.render("section", {
       config,
       section,
-      flattenItemsRaw,
+      slugify,
       idx,
       total: config.sections.length,
       existing,
@@ -162,6 +163,7 @@ function buildQuizRouter(config) {
       answers: attempt.data,
       flattenItems,
       flattenItemsRaw,
+      slugify,
       isFinal: false,
       resumeIdx: Math.min(Math.max(attempt.nextSection, 0), config.sections.length - 1),
     });
@@ -188,7 +190,7 @@ function buildQuizRouter(config) {
       const scores = computeScores(config, attempt.data);
       insertSubmission(attempt.data, scores);
       csvLog.append("complete", SHARED_TOKEN, section.key, idx, { answers: attempt.data, scores });
-      return res.render("result", { config, scores, answers: attempt.data, flattenItems, flattenItemsRaw, isFinal: true });
+      return res.render("result", { config, scores, answers: attempt.data, flattenItems, flattenItemsRaw, slugify, isFinal: true });
     }
 
     res.redirect(`/section/${nextIdx}`);

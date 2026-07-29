@@ -39,117 +39,390 @@
         {
           "title": "Positions",
           "items": [
-            "Missionnaire",
-            "Levrette",
-            "Prone bone",
-            "cow girl",
-            "cow girl inversé",
-            "anal",
-            "69",
-            "Assis face à face",
-            "Assis de dos",
-            "Debout",
-            "Portée",
-            "Double pénétration manuelle ou avec objets",
-            "Cuillère"
-          ]
+            {
+              "id": "missionnaire",
+              "text": "Missionnaire"
+            },
+            {
+              "id": "levrette",
+              "text": "Levrette"
+            },
+            {
+              "id": "prone-bone",
+              "text": "Prone bone"
+            },
+            {
+              "id": "cow-girl",
+              "text": "cow girl"
+            },
+            {
+              "id": "cow-girl-inverse",
+              "text": "cow girl inversé"
+            },
+            {
+              "id": "anal",
+              "text": "anal"
+            },
+            {
+              "id": "69",
+              "text": "69"
+            },
+            {
+              "id": "assis-face-a-face",
+              "text": "Assis face à face"
+            },
+            {
+              "id": "assis-de-dos",
+              "text": "Assis de dos"
+            },
+            {
+              "id": "debout",
+              "text": "Debout"
+            },
+            {
+              "id": "portee",
+              "text": "Portée"
+            },
+            {
+              "id": "double-penetration-manuelle-ou-avec-objets",
+              "text": "Double pénétration manuelle ou avec objets"
+            },
+            {
+              "id": "cuillere",
+              "text": "Cuillère"
+            }
+          ],
+          "id": "positions"
         },
         {
           "title": "Pratiques manuelles et orales",
           "items": [
-            "Masturbation mutuelle",
-            { "text": "Stimulation manuelle", "variants": ["Donné", "Reçu"] },
-            { "text": "Sexe oral", "variants": ["Donné", "Reçu"] },
-            "Frottement habillé",
-            "Sexe intercrural, entre les cuisses",
-            { "text": "Anulingus", "variants": ["Donné", "Reçu"] }
-          ]
+            {
+              "id": "masturbation-mutuelle",
+              "text": "Masturbation mutuelle"
+            },
+            {
+              "id": "stimulation-manuelle",
+              "text": "Stimulation manuelle",
+              "variants": [
+                "Donné",
+                "Reçu"
+              ]
+            },
+            {
+              "id": "sexe-oral",
+              "text": "Sexe oral",
+              "variants": [
+                "Donné",
+                "Reçu"
+              ]
+            },
+            {
+              "id": "frottement-habille",
+              "text": "Frottement habillé"
+            },
+            {
+              "id": "sexe-intercrural-entre-les-cuisses",
+              "text": "Sexe intercrural, entre les cuisses"
+            },
+            {
+              "id": "anulingus",
+              "text": "Anulingus",
+              "variants": [
+                "Donné",
+                "Reçu"
+              ]
+            }
+          ],
+          "id": "pratiques-manuelles-et-orales"
         },
         {
           "title": "Ambiance et rythme du rapport",
           "items": [
-            "Rapport avec jouissance contenue",
-            "Orgasme simultané",
-            "Faire jouir sans être soi-même stimulé",
-            "Être stimulé sans rendre la pareille",
-            "Sexe pendant les règles"
-          ]
+            {
+              "id": "rapport-avec-jouissance-contenue",
+              "text": "Rapport avec jouissance contenue"
+            },
+            {
+              "id": "orgasme-simultane",
+              "text": "Orgasme simultané"
+            },
+            {
+              "id": "faire-jouir-sans-etre-soi-meme-stimule",
+              "text": "Faire jouir sans être soi-même stimulé"
+            },
+            {
+              "id": "etre-stimule-sans-rendre-la-pareille",
+              "text": "Être stimulé sans rendre la pareille"
+            },
+            {
+              "id": "sexe-pendant-les-regles",
+              "text": "Sexe pendant les règles"
+            }
+          ],
+          "id": "ambiance-et-rythme-du-rapport"
         },
         {
           "title": "Sperme",
           "items": [
-            "Éjaculation vaginale",
-            "Éjaculation anale",
-            "Éjaculation sur le visage",
-            "Éjaculation sur une autre partie du corps (seins, fesses, ventre, dos, mains, pieds, cheveux...)",
-            "Sur les vêtements",
-            "Dans les sous-vêtements",
-            "Conserver ou porter les vêtements tachés",
-            "Embrasser après une éjaculation dans la bouche",
-            "Regarder le sperme couler ou ressortir",
-            "Jouer avec les traces après le rapport",
-            "Dans un récipient",
-            "Utiliser du faux sperme",
-            "Plusieurs éjaculations sur la même personne",
-            "Éjaculations de plusieurs partenaires",
-            "Faire nettoyer par le partenaire"
-          ]
+            {
+              "id": "ejaculation-vaginale",
+              "text": "Éjaculation vaginale"
+            },
+            {
+              "id": "ejaculation-anale",
+              "text": "Éjaculation anale"
+            },
+            {
+              "id": "ejaculation-sur-le-visage",
+              "text": "Éjaculation sur le visage"
+            },
+            {
+              "id": "ejaculation-sur-une-autre-partie-du-corps-seins-fesses-ventre-dos-mains-pieds-cheveux",
+              "text": "Éjaculation sur une autre partie du corps (seins, fesses, ventre, dos, mains, pieds, cheveux...)"
+            },
+            {
+              "id": "sur-les-vetements",
+              "text": "Sur les vêtements"
+            },
+            {
+              "id": "dans-les-sous-vetements",
+              "text": "Dans les sous-vêtements"
+            },
+            {
+              "id": "conserver-ou-porter-les-vetements-taches",
+              "text": "Conserver ou porter les vêtements tachés"
+            },
+            {
+              "id": "embrasser-apres-une-ejaculation-dans-la-bouche",
+              "text": "Embrasser après une éjaculation dans la bouche"
+            },
+            {
+              "id": "regarder-le-sperme-couler-ou-ressortir",
+              "text": "Regarder le sperme couler ou ressortir"
+            },
+            {
+              "id": "jouer-avec-les-traces-apres-le-rapport",
+              "text": "Jouer avec les traces après le rapport"
+            },
+            {
+              "id": "dans-un-recipient",
+              "text": "Dans un récipient"
+            },
+            {
+              "id": "utiliser-du-faux-sperme",
+              "text": "Utiliser du faux sperme"
+            },
+            {
+              "id": "plusieurs-ejaculations-sur-la-meme-personne",
+              "text": "Plusieurs éjaculations sur la même personne"
+            },
+            {
+              "id": "ejaculations-de-plusieurs-partenaires",
+              "text": "Éjaculations de plusieurs partenaires"
+            },
+            {
+              "id": "faire-nettoyer-par-le-partenaire",
+              "text": "Faire nettoyer par le partenaire"
+            }
+          ],
+          "id": "sperme"
         },
         {
           "title": "Multipartenariat et exclusivité",
           "items": [
-            "Trio avec deux hommes et une femme",
-            "Trio avec deux femmes et un homme",
-            "Groupe majoritairement masculin",
-            "Groupe majoritairement féminin",
-            "Plusieurs couples",
-            "Regarder son partenaire avec quelqu’un d’autre",
-            "Être regardé par son partenaire",
-            "Partager son partenaire",
-            "Être partagé",
-            "Échanger de partenaire",
-            "Avoir une relation ouverte",
-            "Tromper secrètement",
-            "Être trompé",
-            "Mettre en scène ou raconter une infidélité fictive",
-            "Gang bang / Orgie",
-            "Partenaire ayant plus de liberté que soi",
-            "Avoir plus de liberté que son partenaire"
-          ]
+            {
+              "id": "trio-avec-deux-hommes-et-une-femme",
+              "text": "Trio avec deux hommes et une femme"
+            },
+            {
+              "id": "trio-avec-deux-femmes-et-un-homme",
+              "text": "Trio avec deux femmes et un homme"
+            },
+            {
+              "id": "groupe-majoritairement-masculin",
+              "text": "Groupe majoritairement masculin"
+            },
+            {
+              "id": "groupe-majoritairement-feminin",
+              "text": "Groupe majoritairement féminin"
+            },
+            {
+              "id": "plusieurs-couples",
+              "text": "Plusieurs couples"
+            },
+            {
+              "id": "regarder-son-partenaire-avec-quelqu-un-d-autre",
+              "text": "Regarder son partenaire avec quelqu’un d’autre"
+            },
+            {
+              "id": "etre-regarde-par-son-partenaire",
+              "text": "Être regardé par son partenaire"
+            },
+            {
+              "id": "partager-son-partenaire",
+              "text": "Partager son partenaire"
+            },
+            {
+              "id": "etre-partage",
+              "text": "Être partagé"
+            },
+            {
+              "id": "echanger-de-partenaire",
+              "text": "Échanger de partenaire"
+            },
+            {
+              "id": "avoir-une-relation-ouverte",
+              "text": "Avoir une relation ouverte"
+            },
+            {
+              "id": "tromper-secretement",
+              "text": "Tromper secrètement"
+            },
+            {
+              "id": "etre-trompe",
+              "text": "Être trompé"
+            },
+            {
+              "id": "mettre-en-scene-ou-raconter-une-infidelite-fictive",
+              "text": "Mettre en scène ou raconter une infidélité fictive"
+            },
+            {
+              "id": "gang-bang-orgie",
+              "text": "Gang bang / Orgie"
+            },
+            {
+              "id": "partenaire-ayant-plus-de-liberte-que-soi",
+              "text": "Partenaire ayant plus de liberté que soi"
+            },
+            {
+              "id": "avoir-plus-de-liberte-que-son-partenaire",
+              "text": "Avoir plus de liberté que son partenaire"
+            }
+          ],
+          "id": "multipartenariat-et-exclusivite"
         },
         {
           "title": "Lieux",
           "items": [
-            "Lit habituel",
-            "Autre pièce du domicile",
-            "Douche ou bain",
-            "Cuisine",
-            "Salon",
-            "Bureau",
-            "Hôtel",
-            "Voiture",
-            "Balcon ou terrasse",
-            "Jardin privé",
-            "Forêt",
-            "Champ",
-            "Plage",
-            "Piscine",
-            "Vestiaire",
-            "Cabine d’essayage",
-            "Toilettes publiques",
-            "Ruelle ou espace urbain isolé",
-            "Lieu de travail",
-            "Lieu appartenant à des proches",
-            "Lieu religieux",
-            "Lieu avec risque d'être vu, entendu ou surpris",
-            "Moyen de transport (train, avion, bateau)",
-            "Fête, festival ou concert",
-            "neige",
-            "cimetière",
-            "lac / mer",
-            "salle de sport",
-            "Cinéma/théâtre"
-          ]
+            {
+              "id": "lit-habituel",
+              "text": "Lit habituel"
+            },
+            {
+              "id": "autre-piece-du-domicile",
+              "text": "Autre pièce du domicile"
+            },
+            {
+              "id": "douche-ou-bain",
+              "text": "Douche ou bain"
+            },
+            {
+              "id": "cuisine",
+              "text": "Cuisine"
+            },
+            {
+              "id": "salon",
+              "text": "Salon"
+            },
+            {
+              "id": "bureau",
+              "text": "Bureau"
+            },
+            {
+              "id": "hotel",
+              "text": "Hôtel"
+            },
+            {
+              "id": "voiture",
+              "text": "Voiture"
+            },
+            {
+              "id": "balcon-ou-terrasse",
+              "text": "Balcon ou terrasse"
+            },
+            {
+              "id": "jardin-prive",
+              "text": "Jardin privé"
+            },
+            {
+              "id": "foret",
+              "text": "Forêt"
+            },
+            {
+              "id": "champ",
+              "text": "Champ"
+            },
+            {
+              "id": "plage",
+              "text": "Plage"
+            },
+            {
+              "id": "piscine",
+              "text": "Piscine"
+            },
+            {
+              "id": "vestiaire",
+              "text": "Vestiaire"
+            },
+            {
+              "id": "cabine-d-essayage",
+              "text": "Cabine d’essayage"
+            },
+            {
+              "id": "toilettes-publiques",
+              "text": "Toilettes publiques"
+            },
+            {
+              "id": "ruelle-ou-espace-urbain-isole",
+              "text": "Ruelle ou espace urbain isolé"
+            },
+            {
+              "id": "lieu-de-travail",
+              "text": "Lieu de travail"
+            },
+            {
+              "id": "lieu-appartenant-a-des-proches",
+              "text": "Lieu appartenant à des proches"
+            },
+            {
+              "id": "lieu-religieux",
+              "text": "Lieu religieux"
+            },
+            {
+              "id": "lieu-avec-risque-d-etre-vu-entendu-ou-surpris",
+              "text": "Lieu avec risque d'être vu, entendu ou surpris"
+            },
+            {
+              "id": "moyen-de-transport-train-avion-bateau",
+              "text": "Moyen de transport (train, avion, bateau)"
+            },
+            {
+              "id": "fete-festival-ou-concert",
+              "text": "Fête, festival ou concert"
+            },
+            {
+              "id": "neige",
+              "text": "neige"
+            },
+            {
+              "id": "cimetiere",
+              "text": "cimetière"
+            },
+            {
+              "id": "lac-mer",
+              "text": "lac / mer"
+            },
+            {
+              "id": "salle-de-sport",
+              "text": "salle de sport"
+            },
+            {
+              "id": "cinema-theatre",
+              "text": "Cinéma/théâtre"
+            }
+          ],
+          "id": "lieux"
         }
       ],
       "rankings": [
@@ -161,7 +434,7 @@
             "Dans la journee",
             "Le soir / avant de dormir"
           ],
-          "groupIndex": 2
+          "groupId": "ambiance-et-rythme-du-rapport"
         },
         {
           "id": "contraception",
@@ -171,7 +444,7 @@
             "Contraception hormonale (pilule, sterilet...)",
             "Sans contraception"
           ],
-          "groupIndex": 3
+          "groupId": "sperme"
         }
       ],
       "spectrums": [
@@ -185,7 +458,7 @@
             "Souvent",
             "Avaler"
           ],
-          "groupIndex": 3
+          "groupId": "sperme"
         },
         {
           "id": "spontane_planifie",
@@ -197,7 +470,7 @@
             "Plutot spontane",
             "Toujours spontane"
           ],
-          "groupIndex": 2
+          "groupId": "ambiance-et-rythme-du-rapport"
         },
         {
           "id": "intensite_rapport",
@@ -209,7 +482,7 @@
             "Intense",
             "Brutal, bestial"
           ],
-          "groupIndex": 2
+          "groupId": "ambiance-et-rythme-du-rapport"
         },
         {
           "id": "rapport_sperme",
@@ -221,7 +494,7 @@
             "Veut apprendre a adorer",
             "Adore"
           ],
-          "groupIndex": 3
+          "groupId": "sperme"
         }
       ],
       "color": "#6b5b95",
@@ -237,7 +510,7 @@
             "Insultes",
             "Mots possessifs"
           ],
-          "groupIndex": 2
+          "groupId": "ambiance-et-rythme-du-rapport"
         },
         {
           "id": "vision",
@@ -248,7 +521,7 @@
             "Dans le noir",
             "Masque(e)"
           ],
-          "groupIndex": 2
+          "groupId": "ambiance-et-rythme-du-rapport"
         }
       ]
     },
@@ -331,45 +604,160 @@
         {
           "title": null,
           "items": [
-            "Godes classiques",
-            "Godes ethniques",
-            "Godes éjaculateurs",
-            "Godes animaux",
-            "Godes fantastiques (poulpe, dragon, licorne, démon, alien)",
-            "Gode à forme ou texture particulière (nœud, renflements, texture, billes, gonflable, articulé...)",
-            "Gode à stimulation active (chauffant, vibrant, rotatif, pulsant)",
-            "Gode porté sous les vêtements",
-            "Machine sexuelle / fucking machine",
-            "Fauteuil sexuel",
-            "Mobilier de bondage",
-            "Plug anal",
-            "Plug à queue",
-            "Boule de Geisha",
-            "Œuf vibrant contrôlé par soi",
-            "Œuf vibrant contrôlé par son partenaire",
-            "Vibromasseur externe",
-            "Vibromasseur interne",
-            "Stimulateur clitoridien",
-            "Pince à tétons",
-            "Suceur de tétons",
-            "Électrostimulation érotique",
-            "Plume, pinceau",
-            "Glaçons",
-            "Cire adaptée au jeu érotique",
-            "Huile",
-            "Gel chauffant",
-            "Gel froid",
-            "Lubrifiant aromatisé",
-            "Nourriture utilisée sur le corps",
-            "Objet du quotidien utilisé pendant un rapport",
-            "Muselière",
-            "Masque occultant",
-            "Casque audio",
-            "Ruban",
-            "Film plastique prévu pour le bondage",
-            "Objets simulant ponte ou insémination (ovipositeur, œufs factices, capsules expulsables)",
-            "Objets monstrueux ou fantastiques"
-          ]
+            {
+              "id": "godes-classiques",
+              "text": "Godes classiques"
+            },
+            {
+              "id": "godes-ethniques",
+              "text": "Godes ethniques"
+            },
+            {
+              "id": "godes-ejaculateurs",
+              "text": "Godes éjaculateurs"
+            },
+            {
+              "id": "godes-animaux",
+              "text": "Godes animaux"
+            },
+            {
+              "id": "godes-fantastiques-poulpe-dragon-licorne-demon-alien",
+              "text": "Godes fantastiques (poulpe, dragon, licorne, démon, alien)"
+            },
+            {
+              "id": "gode-a-forme-ou-texture-particuliere-n-ud-renflements-texture-billes-gonflable-articule",
+              "text": "Gode à forme ou texture particulière (nœud, renflements, texture, billes, gonflable, articulé...)"
+            },
+            {
+              "id": "gode-a-stimulation-active-chauffant-vibrant-rotatif-pulsant",
+              "text": "Gode à stimulation active (chauffant, vibrant, rotatif, pulsant)"
+            },
+            {
+              "id": "gode-porte-sous-les-vetements",
+              "text": "Gode porté sous les vêtements"
+            },
+            {
+              "id": "machine-sexuelle-fucking-machine",
+              "text": "Machine sexuelle / fucking machine"
+            },
+            {
+              "id": "fauteuil-sexuel",
+              "text": "Fauteuil sexuel"
+            },
+            {
+              "id": "mobilier-de-bondage",
+              "text": "Mobilier de bondage"
+            },
+            {
+              "id": "plug-anal",
+              "text": "Plug anal"
+            },
+            {
+              "id": "plug-a-queue",
+              "text": "Plug à queue"
+            },
+            {
+              "id": "boule-de-geisha",
+              "text": "Boule de Geisha"
+            },
+            {
+              "id": "uf-vibrant-controle-par-soi",
+              "text": "Œuf vibrant contrôlé par soi"
+            },
+            {
+              "id": "uf-vibrant-controle-par-son-partenaire",
+              "text": "Œuf vibrant contrôlé par son partenaire"
+            },
+            {
+              "id": "vibromasseur-externe",
+              "text": "Vibromasseur externe"
+            },
+            {
+              "id": "vibromasseur-interne",
+              "text": "Vibromasseur interne"
+            },
+            {
+              "id": "stimulateur-clitoridien",
+              "text": "Stimulateur clitoridien"
+            },
+            {
+              "id": "pince-a-tetons",
+              "text": "Pince à tétons"
+            },
+            {
+              "id": "suceur-de-tetons",
+              "text": "Suceur de tétons"
+            },
+            {
+              "id": "electrostimulation-erotique",
+              "text": "Électrostimulation érotique"
+            },
+            {
+              "id": "plume-pinceau",
+              "text": "Plume, pinceau"
+            },
+            {
+              "id": "glacons",
+              "text": "Glaçons"
+            },
+            {
+              "id": "cire-adaptee-au-jeu-erotique",
+              "text": "Cire adaptée au jeu érotique"
+            },
+            {
+              "id": "huile",
+              "text": "Huile"
+            },
+            {
+              "id": "gel-chauffant",
+              "text": "Gel chauffant"
+            },
+            {
+              "id": "gel-froid",
+              "text": "Gel froid"
+            },
+            {
+              "id": "lubrifiant-aromatise",
+              "text": "Lubrifiant aromatisé"
+            },
+            {
+              "id": "nourriture-utilisee-sur-le-corps",
+              "text": "Nourriture utilisée sur le corps"
+            },
+            {
+              "id": "objet-du-quotidien-utilise-pendant-un-rapport",
+              "text": "Objet du quotidien utilisé pendant un rapport"
+            },
+            {
+              "id": "museliere",
+              "text": "Muselière"
+            },
+            {
+              "id": "masque-occultant",
+              "text": "Masque occultant"
+            },
+            {
+              "id": "casque-audio",
+              "text": "Casque audio"
+            },
+            {
+              "id": "ruban",
+              "text": "Ruban"
+            },
+            {
+              "id": "film-plastique-prevu-pour-le-bondage",
+              "text": "Film plastique prévu pour le bondage"
+            },
+            {
+              "id": "objets-simulant-ponte-ou-insemination-ovipositeur-ufs-factices-capsules-expulsables",
+              "text": "Objets simulant ponte ou insémination (ovipositeur, œufs factices, capsules expulsables)"
+            },
+            {
+              "id": "objets-monstrueux-ou-fantastiques",
+              "text": "Objets monstrueux ou fantastiques"
+            }
+          ],
+          "id": "principal"
         }
       ],
       "rankings": [
@@ -386,9 +774,9 @@
             "Métis"
           ],
           "condition": {
-            "itemText": "Godes ethniques"
+            "itemId": "godes-ethniques"
           },
-          "groupIndex": 0
+          "groupId": "principal"
         },
         {
           "id": "objets_quotidien",
@@ -409,7 +797,7 @@
             "Cravate",
             "Collier"
           ],
-          "groupIndex": 0
+          "groupId": "principal"
         },
         {
           "id": "godes_animaux",
@@ -423,10 +811,10 @@
             "Serpent"
           ],
           "condition": {
-            "itemText": "Godes animaux"
+            "itemId": "godes-animaux"
           },
           "checkable": true,
-          "groupIndex": 0
+          "groupId": "principal"
         }
       ],
       "color": "#2f9e8f"
@@ -439,57 +827,208 @@
         {
           "title": null,
           "items": [
-            "Fetichisme des pieds (adoration, piétinement, embrasser, lécher, sucer les orteils, sentir, masser)",
-            "poitrine masculine",
-            "fesses",
-            "anus",
-            "vulve",
-            "pénis",
-            "testicules",
-            "bouche, lèvres, langue",
-            "salive",
-            "sperme",
-            "sueur / transpiration",
-            "pubis",
-            "cheveux",
-            "barbe",
-            "mains, doigts, ongles",
-            "cuisses",
-            "ventre",
-            "nombril",
-            "dos",
-            "épaules",
-            "muscles, veines apparentes",
-            "tatouages",
-            "piercings",
-            "accessoires visibles sur le visage (lunettes, appareil dentaire)",
-            "voix et sons (accent, gémissements, rires, pleurs simulés)",
-            "respiration",
-            "personnalité du partenaire (autoritaire/arrogante ou douce/timide/vulnérable)",
-            "sommeil simulé",
-            "tenue professionnelle ou uniforme",
-            "lingerie portée",
-            "matières brillantes et moulantes (latex, cuir, vinyle)",
-            "matières douces (dentelle, soie, laine, fourrure synthétique)",
-            "tissu mouillé",
-            "morsures données",
-            "morsures reçues",
-            "griffures données",
-            "griffures reçues",
-            "marques ou traces laissées sur le corps (corde, main, morsure...)",
-            "crachats consentis",
-            "grossesse (ventre rond)",
-            "lactation / allaitement érotique entre adultes",
-            "fertilité / insémination fantasmée",
-            "transformation corporelle",
-            "féminisation / masculinisation / travestissement",
-            "métamorphose animale ou monstrueuse fictive",
-            "être transformé en poupée, mannequin ou statue",
-            "immobilité",
-            "corps inerte simulé",
-            "masque / visage caché",
-            "anonymat"
-          ]
+            {
+              "id": "fetichisme-des-pieds-adoration-pietinement-embrasser-lecher-sucer-les-orteils-sentir-masser",
+              "text": "Fetichisme des pieds (adoration, piétinement, embrasser, lécher, sucer les orteils, sentir, masser)"
+            },
+            {
+              "id": "poitrine-masculine",
+              "text": "poitrine masculine"
+            },
+            {
+              "id": "fesses",
+              "text": "fesses"
+            },
+            {
+              "id": "anus",
+              "text": "anus"
+            },
+            {
+              "id": "vulve",
+              "text": "vulve"
+            },
+            {
+              "id": "penis",
+              "text": "pénis"
+            },
+            {
+              "id": "testicules",
+              "text": "testicules"
+            },
+            {
+              "id": "bouche-levres-langue",
+              "text": "bouche, lèvres, langue"
+            },
+            {
+              "id": "salive",
+              "text": "salive"
+            },
+            {
+              "id": "sperme",
+              "text": "sperme"
+            },
+            {
+              "id": "sueur-transpiration",
+              "text": "sueur / transpiration"
+            },
+            {
+              "id": "pubis",
+              "text": "pubis"
+            },
+            {
+              "id": "cheveux",
+              "text": "cheveux"
+            },
+            {
+              "id": "barbe",
+              "text": "barbe"
+            },
+            {
+              "id": "mains-doigts-ongles",
+              "text": "mains, doigts, ongles"
+            },
+            {
+              "id": "cuisses",
+              "text": "cuisses"
+            },
+            {
+              "id": "ventre",
+              "text": "ventre"
+            },
+            {
+              "id": "nombril",
+              "text": "nombril"
+            },
+            {
+              "id": "dos",
+              "text": "dos"
+            },
+            {
+              "id": "epaules",
+              "text": "épaules"
+            },
+            {
+              "id": "muscles-veines-apparentes",
+              "text": "muscles, veines apparentes"
+            },
+            {
+              "id": "tatouages",
+              "text": "tatouages"
+            },
+            {
+              "id": "piercings",
+              "text": "piercings"
+            },
+            {
+              "id": "accessoires-visibles-sur-le-visage-lunettes-appareil-dentaire",
+              "text": "accessoires visibles sur le visage (lunettes, appareil dentaire)"
+            },
+            {
+              "id": "voix-et-sons-accent-gemissements-rires-pleurs-simules",
+              "text": "voix et sons (accent, gémissements, rires, pleurs simulés)"
+            },
+            {
+              "id": "respiration",
+              "text": "respiration"
+            },
+            {
+              "id": "personnalite-du-partenaire-autoritaire-arrogante-ou-douce-timide-vulnerable",
+              "text": "personnalité du partenaire (autoritaire/arrogante ou douce/timide/vulnérable)"
+            },
+            {
+              "id": "sommeil-simule",
+              "text": "sommeil simulé"
+            },
+            {
+              "id": "tenue-professionnelle-ou-uniforme",
+              "text": "tenue professionnelle ou uniforme"
+            },
+            {
+              "id": "lingerie-portee",
+              "text": "lingerie portée"
+            },
+            {
+              "id": "matieres-brillantes-et-moulantes-latex-cuir-vinyle",
+              "text": "matières brillantes et moulantes (latex, cuir, vinyle)"
+            },
+            {
+              "id": "matieres-douces-dentelle-soie-laine-fourrure-synthetique",
+              "text": "matières douces (dentelle, soie, laine, fourrure synthétique)"
+            },
+            {
+              "id": "tissu-mouille",
+              "text": "tissu mouillé"
+            },
+            {
+              "id": "morsures-donnees",
+              "text": "morsures données"
+            },
+            {
+              "id": "morsures-recues",
+              "text": "morsures reçues"
+            },
+            {
+              "id": "griffures-donnees",
+              "text": "griffures données"
+            },
+            {
+              "id": "griffures-recues",
+              "text": "griffures reçues"
+            },
+            {
+              "id": "marques-ou-traces-laissees-sur-le-corps-corde-main-morsure",
+              "text": "marques ou traces laissées sur le corps (corde, main, morsure...)"
+            },
+            {
+              "id": "crachats-consentis",
+              "text": "crachats consentis"
+            },
+            {
+              "id": "grossesse-ventre-rond",
+              "text": "grossesse (ventre rond)"
+            },
+            {
+              "id": "lactation-allaitement-erotique-entre-adultes",
+              "text": "lactation / allaitement érotique entre adultes"
+            },
+            {
+              "id": "fertilite-insemination-fantasmee",
+              "text": "fertilité / insémination fantasmée"
+            },
+            {
+              "id": "transformation-corporelle",
+              "text": "transformation corporelle"
+            },
+            {
+              "id": "feminisation-masculinisation-travestissement",
+              "text": "féminisation / masculinisation / travestissement"
+            },
+            {
+              "id": "metamorphose-animale-ou-monstrueuse-fictive",
+              "text": "métamorphose animale ou monstrueuse fictive"
+            },
+            {
+              "id": "etre-transforme-en-poupee-mannequin-ou-statue",
+              "text": "être transformé en poupée, mannequin ou statue"
+            },
+            {
+              "id": "immobilite",
+              "text": "immobilité"
+            },
+            {
+              "id": "corps-inerte-simule",
+              "text": "corps inerte simulé"
+            },
+            {
+              "id": "masque-visage-cache",
+              "text": "masque / visage caché"
+            },
+            {
+              "id": "anonymat",
+              "text": "anonymat"
+            }
+          ],
+          "id": "principal"
         }
       ],
       "color": "#c99a3e"
@@ -502,75 +1041,280 @@
         {
           "title": null,
           "items": [
-            "Professeur et élève adulte",
-            "directeur et employé",
-            "patron et secrétaire",
-            "collègue",
-            "client et professionnel fictif",
-            "personnel medical et patient (medecin, infirmier, therapeute)",
-            "policier et suspect",
-            "militaire et civil",
-            "pompier et personne secourue",
-            "garde du corps et personne protégée",
-            "gardien et prisonnier fictif",
-            "contexte judiciaire (juge et accusé, avocat et client)",
-            "maître et serviteur/domestique (majordome, soubrette)",
-            "maître et esclave dans un cadre fictif et consenti",
-            "noblesse et sujet ou paysan",
-            "figure religieuse ou divine et fidèle (prêtre, démon, divinité)",
-            "coach sportif et élève adulte",
-            "masseur et client",
-            "photographe et modèle",
-            "artiste et muse",
-            "célébrité et admirateur",
-            "Inconnu (rencontre dans un bar, ou masque)",
-            "cambrioleur ou ravisseur fictif",
-            "espion et prisonnier",
-            "interrogatoire",
-            "chantage, corruption ou dette fictive",
-            "travail du sexe simulé (prostitution, escort, strip-tease)",
-            "mari et épouse",
-            "amants secrets / adultère simulé",
-            "première rencontre",
-            "première fois simulée entre adultes",
-            "ex-partenaires",
-            "voisins",
-            "colocataires",
-            "ami(e) ou meilleur ami",
-            "cousin ou cousine uniquement entre personnages adultes fictifs",
-            "beau-parent ou belle-fille uniquement comme fantasme fictif entre adultes sans lien réel",
-            "parent fictif uniquement comme rôle symbolique entre adultes",
-            "frère ou sœur fictifs entre adultes",
-            "famille recomposée fictive",
-            "age play consenti entre adultes (partenaire jouant plus jeune, mais majeur)",
-            "partenaire adulte jouant une personne plus âgée",
-            "pet play (choix d'animal : chiot, chat, cheval/pony, renard, lapin...)",
-            "créature domestiquée et son maître",
-            "primal play",
-            "chasseur et proie",
-            "vampire et victime consentante",
-            "loup-garou",
-            "créature mythologique ou religieuse (ange, démon, succube, incube)",
-            "extraterrestre",
-            "robot",
-            "intelligence artificielle",
-            "scientifique et sujet d’expérience",
-            "monstre et humain",
-            "tentacules",
-            "plante vivante fictive",
-            "sorcier et créature invoquée",
-            "chevalier ou pirate et son prisonnier",
-            "super-héros et méchant",
-            "médecin monstrueux",
-            "secte fictive (cérémonie, sacrifice symbolique)",
-            "mariage forcé simulé",
-            "épreuve, initiation ou examen",
-            "entraînement",
-            "vente aux enchères fictive",
-            "possession",
-            "transformation",
-            "perte de contrôle mental simulée (hypnose, lavage de cerveau, perte d'identité)"
-          ]
+            {
+              "id": "professeur-et-eleve-adulte",
+              "text": "Professeur et élève adulte"
+            },
+            {
+              "id": "directeur-et-employe",
+              "text": "directeur et employé"
+            },
+            {
+              "id": "patron-et-secretaire",
+              "text": "patron et secrétaire"
+            },
+            {
+              "id": "collegue",
+              "text": "collègue"
+            },
+            {
+              "id": "client-et-professionnel-fictif",
+              "text": "client et professionnel fictif"
+            },
+            {
+              "id": "personnel-medical-et-patient-medecin-infirmier-therapeute",
+              "text": "personnel medical et patient (medecin, infirmier, therapeute)"
+            },
+            {
+              "id": "policier-et-suspect",
+              "text": "policier et suspect"
+            },
+            {
+              "id": "militaire-et-civil",
+              "text": "militaire et civil"
+            },
+            {
+              "id": "pompier-et-personne-secourue",
+              "text": "pompier et personne secourue"
+            },
+            {
+              "id": "garde-du-corps-et-personne-protegee",
+              "text": "garde du corps et personne protégée"
+            },
+            {
+              "id": "gardien-et-prisonnier-fictif",
+              "text": "gardien et prisonnier fictif"
+            },
+            {
+              "id": "contexte-judiciaire-juge-et-accuse-avocat-et-client",
+              "text": "contexte judiciaire (juge et accusé, avocat et client)"
+            },
+            {
+              "id": "maitre-et-serviteur-domestique-majordome-soubrette",
+              "text": "maître et serviteur/domestique (majordome, soubrette)"
+            },
+            {
+              "id": "maitre-et-esclave-dans-un-cadre-fictif-et-consenti",
+              "text": "maître et esclave dans un cadre fictif et consenti"
+            },
+            {
+              "id": "noblesse-et-sujet-ou-paysan",
+              "text": "noblesse et sujet ou paysan"
+            },
+            {
+              "id": "figure-religieuse-ou-divine-et-fidele-pretre-demon-divinite",
+              "text": "figure religieuse ou divine et fidèle (prêtre, démon, divinité)"
+            },
+            {
+              "id": "coach-sportif-et-eleve-adulte",
+              "text": "coach sportif et élève adulte"
+            },
+            {
+              "id": "masseur-et-client",
+              "text": "masseur et client"
+            },
+            {
+              "id": "photographe-et-modele",
+              "text": "photographe et modèle"
+            },
+            {
+              "id": "artiste-et-muse",
+              "text": "artiste et muse"
+            },
+            {
+              "id": "celebrite-et-admirateur",
+              "text": "célébrité et admirateur"
+            },
+            {
+              "id": "inconnu-rencontre-dans-un-bar-ou-masque",
+              "text": "Inconnu (rencontre dans un bar, ou masque)"
+            },
+            {
+              "id": "cambrioleur-ou-ravisseur-fictif",
+              "text": "cambrioleur ou ravisseur fictif"
+            },
+            {
+              "id": "espion-et-prisonnier",
+              "text": "espion et prisonnier"
+            },
+            {
+              "id": "interrogatoire",
+              "text": "interrogatoire"
+            },
+            {
+              "id": "chantage-corruption-ou-dette-fictive",
+              "text": "chantage, corruption ou dette fictive"
+            },
+            {
+              "id": "travail-du-sexe-simule-prostitution-escort-strip-tease",
+              "text": "travail du sexe simulé (prostitution, escort, strip-tease)"
+            },
+            {
+              "id": "mari-et-epouse",
+              "text": "mari et épouse"
+            },
+            {
+              "id": "amants-secrets-adultere-simule",
+              "text": "amants secrets / adultère simulé"
+            },
+            {
+              "id": "premiere-rencontre",
+              "text": "première rencontre"
+            },
+            {
+              "id": "premiere-fois-simulee-entre-adultes",
+              "text": "première fois simulée entre adultes"
+            },
+            {
+              "id": "ex-partenaires",
+              "text": "ex-partenaires"
+            },
+            {
+              "id": "voisins",
+              "text": "voisins"
+            },
+            {
+              "id": "colocataires",
+              "text": "colocataires"
+            },
+            {
+              "id": "ami-e-ou-meilleur-ami",
+              "text": "ami(e) ou meilleur ami"
+            },
+            {
+              "id": "cousin-ou-cousine-uniquement-entre-personnages-adultes-fictifs",
+              "text": "cousin ou cousine uniquement entre personnages adultes fictifs"
+            },
+            {
+              "id": "beau-parent-ou-belle-fille-uniquement-comme-fantasme-fictif-entre-adultes-sans-lien-reel",
+              "text": "beau-parent ou belle-fille uniquement comme fantasme fictif entre adultes sans lien réel"
+            },
+            {
+              "id": "parent-fictif-uniquement-comme-role-symbolique-entre-adultes",
+              "text": "parent fictif uniquement comme rôle symbolique entre adultes"
+            },
+            {
+              "id": "frere-ou-s-ur-fictifs-entre-adultes",
+              "text": "frère ou sœur fictifs entre adultes"
+            },
+            {
+              "id": "famille-recomposee-fictive",
+              "text": "famille recomposée fictive"
+            },
+            {
+              "id": "age-play-consenti-entre-adultes-partenaire-jouant-plus-jeune-mais-majeur",
+              "text": "age play consenti entre adultes (partenaire jouant plus jeune, mais majeur)"
+            },
+            {
+              "id": "partenaire-adulte-jouant-une-personne-plus-agee",
+              "text": "partenaire adulte jouant une personne plus âgée"
+            },
+            {
+              "id": "pet-play-choix-d-animal-chiot-chat-cheval-pony-renard-lapin",
+              "text": "pet play (choix d'animal : chiot, chat, cheval/pony, renard, lapin...)"
+            },
+            {
+              "id": "creature-domestiquee-et-son-maitre",
+              "text": "créature domestiquée et son maître"
+            },
+            {
+              "id": "primal-play",
+              "text": "primal play"
+            },
+            {
+              "id": "chasseur-et-proie",
+              "text": "chasseur et proie"
+            },
+            {
+              "id": "vampire-et-victime-consentante",
+              "text": "vampire et victime consentante"
+            },
+            {
+              "id": "loup-garou",
+              "text": "loup-garou"
+            },
+            {
+              "id": "creature-mythologique-ou-religieuse-ange-demon-succube-incube",
+              "text": "créature mythologique ou religieuse (ange, démon, succube, incube)"
+            },
+            {
+              "id": "extraterrestre",
+              "text": "extraterrestre"
+            },
+            {
+              "id": "robot",
+              "text": "robot"
+            },
+            {
+              "id": "intelligence-artificielle",
+              "text": "intelligence artificielle"
+            },
+            {
+              "id": "scientifique-et-sujet-d-experience",
+              "text": "scientifique et sujet d’expérience"
+            },
+            {
+              "id": "monstre-et-humain",
+              "text": "monstre et humain"
+            },
+            {
+              "id": "tentacules",
+              "text": "tentacules"
+            },
+            {
+              "id": "plante-vivante-fictive",
+              "text": "plante vivante fictive"
+            },
+            {
+              "id": "sorcier-et-creature-invoquee",
+              "text": "sorcier et créature invoquée"
+            },
+            {
+              "id": "chevalier-ou-pirate-et-son-prisonnier",
+              "text": "chevalier ou pirate et son prisonnier"
+            },
+            {
+              "id": "super-heros-et-mechant",
+              "text": "super-héros et méchant"
+            },
+            {
+              "id": "medecin-monstrueux",
+              "text": "médecin monstrueux"
+            },
+            {
+              "id": "secte-fictive-ceremonie-sacrifice-symbolique",
+              "text": "secte fictive (cérémonie, sacrifice symbolique)"
+            },
+            {
+              "id": "mariage-force-simule",
+              "text": "mariage forcé simulé"
+            },
+            {
+              "id": "epreuve-initiation-ou-examen",
+              "text": "épreuve, initiation ou examen"
+            },
+            {
+              "id": "entrainement",
+              "text": "entraînement"
+            },
+            {
+              "id": "vente-aux-encheres-fictive",
+              "text": "vente aux enchères fictive"
+            },
+            {
+              "id": "possession",
+              "text": "possession"
+            },
+            {
+              "id": "transformation",
+              "text": "transformation"
+            },
+            {
+              "id": "perte-de-controle-mental-simulee-hypnose-lavage-de-cerveau-perte-d-identite",
+              "text": "perte de contrôle mental simulée (hypnose, lavage de cerveau, perte d'identité)"
+            }
+          ],
+          "id": "principal"
         }
       ],
       "color": "#4f6d9a"
@@ -583,71 +1327,264 @@
         {
           "title": null,
           "items": [
-            "Domination (douce ou stricte)",
-            "soumission",
-            "changement de rôle",
-            "Service et obéissance",
-            "Protocoles et règles quotidiennes (ordres, demandes de permission)",
-            "Vouvoiement et titres honorifiques",
-            "Maître / maîtresse",
-            "propriétaire",
-            "soumis",
-            "esclave dans un cadre consenti",
-            "Collier symbolique et laisse",
-            "position d’attente",
-            "Nudité imposée ou exposition au partenaire",
-            "inspection du corps",
-            "contrôle de la posture ou de la parole",
-            "obligation de silence",
-            "obligation de répondre",
-            "Contrôle de l’orgasme (edging, orgasme forcé, interdiction)",
-            "orgasmes multiples",
-            "Chasteté imposée (cage de chasteté)",
-            "Masturbation ordonnée ou surveillée",
-            "Disponibilité sexuelle définie par contrat ou règles (free use négocié)",
-            "Somnophilie simulée (partenaire feignant de dormir, réveil sexuel consenti)",
-            "utilisation d’un partenaire immobile mais conscient",
-            "CNC uniquement comme mise en scène négociée entre adultes",
-            "Résistance ou contrainte physique simulée",
-            "enlèvement fictif",
-            "ugly bastard comme fantasme ou esthétique fictive",
-            "humiliation",
-            "Insultes négociées ou dégradation verbale",
-            "Objectification (numérotation, utilisation comme meuble)",
-            "Adoration / praise kink",
-            "récompenses",
-            "punitions",
-            "fessée",
-            "gifle avec limites définies",
-            "Instruments souples (martinet, fouet adapté)",
-            "Instruments rigides (paddle, cravache, canne, ceinture)",
-            "douleur légère",
-            "Douleur moyenne à forte",
-            "pinces",
-            "cire",
-            "Jeux de température (froid, chaud modéré)",
-            "tirage de cheveux",
-            "pression",
-            "immobilisation",
-            "Lutte et plaquage",
-            "portage",
-            "Bondage sur une partie du corps (poignets, chevilles, poitrine, corps entier)",
-            "Matériel de bondage (corde, menottes, chaînes, barre d’écartement)",
-            "suspension réservée aux personnes formées",
-            "hogtie",
-            "mummification avec matériel adapté",
-            "Privation sensorielle (visuelle, auditive)",
-            "bâillon",
-            "Contrôle du souffle simulé (sans strangulation)",
-            "ordre de retenir ses gémissements",
-            "exhibition devant un partenaire",
-            "Marques temporaires sur le corps (écriture, suçons, traces de jeu)",
-            "dressage",
-            "humiliation publique uniquement dans un espace privé ou entre participants consentants",
-            "contrat BDSM",
-            "Safeword (feu tricolore)",
-            "débriefing après la scène"
-          ]
+            {
+              "id": "domination-douce-ou-stricte",
+              "text": "Domination (douce ou stricte)"
+            },
+            {
+              "id": "soumission",
+              "text": "soumission"
+            },
+            {
+              "id": "changement-de-role",
+              "text": "changement de rôle"
+            },
+            {
+              "id": "service-et-obeissance",
+              "text": "Service et obéissance"
+            },
+            {
+              "id": "protocoles-et-regles-quotidiennes-ordres-demandes-de-permission",
+              "text": "Protocoles et règles quotidiennes (ordres, demandes de permission)"
+            },
+            {
+              "id": "vouvoiement-et-titres-honorifiques",
+              "text": "Vouvoiement et titres honorifiques"
+            },
+            {
+              "id": "maitre-maitresse",
+              "text": "Maître / maîtresse"
+            },
+            {
+              "id": "proprietaire",
+              "text": "propriétaire"
+            },
+            {
+              "id": "soumis",
+              "text": "soumis"
+            },
+            {
+              "id": "esclave-dans-un-cadre-consenti",
+              "text": "esclave dans un cadre consenti"
+            },
+            {
+              "id": "collier-symbolique-et-laisse",
+              "text": "Collier symbolique et laisse"
+            },
+            {
+              "id": "position-d-attente",
+              "text": "position d’attente"
+            },
+            {
+              "id": "nudite-imposee-ou-exposition-au-partenaire",
+              "text": "Nudité imposée ou exposition au partenaire"
+            },
+            {
+              "id": "inspection-du-corps",
+              "text": "inspection du corps"
+            },
+            {
+              "id": "controle-de-la-posture-ou-de-la-parole",
+              "text": "contrôle de la posture ou de la parole"
+            },
+            {
+              "id": "obligation-de-silence",
+              "text": "obligation de silence"
+            },
+            {
+              "id": "obligation-de-repondre",
+              "text": "obligation de répondre"
+            },
+            {
+              "id": "controle-de-l-orgasme-edging-orgasme-force-interdiction",
+              "text": "Contrôle de l’orgasme (edging, orgasme forcé, interdiction)"
+            },
+            {
+              "id": "orgasmes-multiples",
+              "text": "orgasmes multiples"
+            },
+            {
+              "id": "chastete-imposee-cage-de-chastete",
+              "text": "Chasteté imposée (cage de chasteté)"
+            },
+            {
+              "id": "masturbation-ordonnee-ou-surveillee",
+              "text": "Masturbation ordonnée ou surveillée"
+            },
+            {
+              "id": "disponibilite-sexuelle-definie-par-contrat-ou-regles-free-use-negocie",
+              "text": "Disponibilité sexuelle définie par contrat ou règles (free use négocié)"
+            },
+            {
+              "id": "somnophilie-simulee-partenaire-feignant-de-dormir-reveil-sexuel-consenti",
+              "text": "Somnophilie simulée (partenaire feignant de dormir, réveil sexuel consenti)"
+            },
+            {
+              "id": "utilisation-d-un-partenaire-immobile-mais-conscient",
+              "text": "utilisation d’un partenaire immobile mais conscient"
+            },
+            {
+              "id": "cnc-uniquement-comme-mise-en-scene-negociee-entre-adultes",
+              "text": "CNC uniquement comme mise en scène négociée entre adultes"
+            },
+            {
+              "id": "resistance-ou-contrainte-physique-simulee",
+              "text": "Résistance ou contrainte physique simulée"
+            },
+            {
+              "id": "enlevement-fictif",
+              "text": "enlèvement fictif"
+            },
+            {
+              "id": "ugly-bastard-comme-fantasme-ou-esthetique-fictive",
+              "text": "ugly bastard comme fantasme ou esthétique fictive"
+            },
+            {
+              "id": "humiliation",
+              "text": "humiliation"
+            },
+            {
+              "id": "insultes-negociees-ou-degradation-verbale",
+              "text": "Insultes négociées ou dégradation verbale"
+            },
+            {
+              "id": "objectification-numerotation-utilisation-comme-meuble",
+              "text": "Objectification (numérotation, utilisation comme meuble)"
+            },
+            {
+              "id": "adoration-praise-kink",
+              "text": "Adoration / praise kink"
+            },
+            {
+              "id": "recompenses",
+              "text": "récompenses"
+            },
+            {
+              "id": "punitions",
+              "text": "punitions"
+            },
+            {
+              "id": "fessee",
+              "text": "fessée"
+            },
+            {
+              "id": "gifle-avec-limites-definies",
+              "text": "gifle avec limites définies"
+            },
+            {
+              "id": "instruments-souples-martinet-fouet-adapte",
+              "text": "Instruments souples (martinet, fouet adapté)"
+            },
+            {
+              "id": "instruments-rigides-paddle-cravache-canne-ceinture",
+              "text": "Instruments rigides (paddle, cravache, canne, ceinture)"
+            },
+            {
+              "id": "douleur-legere",
+              "text": "douleur légère"
+            },
+            {
+              "id": "douleur-moyenne-a-forte",
+              "text": "Douleur moyenne à forte"
+            },
+            {
+              "id": "pinces",
+              "text": "pinces"
+            },
+            {
+              "id": "cire",
+              "text": "cire"
+            },
+            {
+              "id": "jeux-de-temperature-froid-chaud-modere",
+              "text": "Jeux de température (froid, chaud modéré)"
+            },
+            {
+              "id": "tirage-de-cheveux",
+              "text": "tirage de cheveux"
+            },
+            {
+              "id": "pression",
+              "text": "pression"
+            },
+            {
+              "id": "immobilisation",
+              "text": "immobilisation"
+            },
+            {
+              "id": "lutte-et-plaquage",
+              "text": "Lutte et plaquage"
+            },
+            {
+              "id": "portage",
+              "text": "portage"
+            },
+            {
+              "id": "bondage-sur-une-partie-du-corps-poignets-chevilles-poitrine-corps-entier",
+              "text": "Bondage sur une partie du corps (poignets, chevilles, poitrine, corps entier)"
+            },
+            {
+              "id": "materiel-de-bondage-corde-menottes-chaines-barre-d-ecartement",
+              "text": "Matériel de bondage (corde, menottes, chaînes, barre d’écartement)"
+            },
+            {
+              "id": "suspension-reservee-aux-personnes-formees",
+              "text": "suspension réservée aux personnes formées"
+            },
+            {
+              "id": "hogtie",
+              "text": "hogtie"
+            },
+            {
+              "id": "mummification-avec-materiel-adapte",
+              "text": "mummification avec matériel adapté"
+            },
+            {
+              "id": "privation-sensorielle-visuelle-auditive",
+              "text": "Privation sensorielle (visuelle, auditive)"
+            },
+            {
+              "id": "baillon",
+              "text": "bâillon"
+            },
+            {
+              "id": "controle-du-souffle-simule-sans-strangulation",
+              "text": "Contrôle du souffle simulé (sans strangulation)"
+            },
+            {
+              "id": "ordre-de-retenir-ses-gemissements",
+              "text": "ordre de retenir ses gémissements"
+            },
+            {
+              "id": "exhibition-devant-un-partenaire",
+              "text": "exhibition devant un partenaire"
+            },
+            {
+              "id": "marques-temporaires-sur-le-corps-ecriture-sucons-traces-de-jeu",
+              "text": "Marques temporaires sur le corps (écriture, suçons, traces de jeu)"
+            },
+            {
+              "id": "dressage",
+              "text": "dressage"
+            },
+            {
+              "id": "humiliation-publique-uniquement-dans-un-espace-prive-ou-entre-participants-consentants",
+              "text": "humiliation publique uniquement dans un espace privé ou entre participants consentants"
+            },
+            {
+              "id": "contrat-bdsm",
+              "text": "contrat BDSM"
+            },
+            {
+              "id": "safeword-feu-tricolore",
+              "text": "Safeword (feu tricolore)"
+            },
+            {
+              "id": "debriefing-apres-la-scene",
+              "text": "débriefing après la scène"
+            }
+          ],
+          "id": "principal"
         }
       ],
       "spectrums": [
@@ -673,41 +1610,144 @@
         {
           "title": null,
           "items": [
-            "Grande différence d’âge entre adultes (partenaire plus âgé ou plus jeune)",
-            "différence extrême de taille, de force ou de corpulence",
-            "pénétration avec objets très larges",
-            "Profondeur extrême et étirement progressif",
-            "Pénétrations multiples simultanées (double, triple, plusieurs orifices)",
-            "plusieurs partenaires successifs",
-            "Gang bang (ou reverse gang bang)",
-            "bukkake",
-            "endurance prolongée",
-            "orgasmes forcés répétés",
-            "Usage ou port prolongé d’un jouet, plug ou œuf",
-            "saturation sensorielle",
-            "Perte de contrôle simulée ou dépersonnalisation",
-            "immobilité complète",
-            "Partenaire(s) masqué(s), seul ou en groupe",
-            "urine",
-            "sang menstruel",
-            "faux sang",
-            "Mise en scène médicale (spéculum, examen corporel fictif)",
-            "Oviposition ou insémination fictive (ponte)",
-            "Transformation en créature monstrueuse ou fantastique",
-            "inflation fictive",
-            "Exhibitionnisme entre personnes consentantes (être regardé par plusieurs participants)",
-            "Rapport filmé ou photographié, diffusion privée consentie",
-            "Voyeurisme consenti (miroir sans tain fictif, caméra cachée simulée, couple observé)",
-            "Scénario de risque d’être découvert (lieu interdit simulé, scène publique reconstituée)",
-            "humiliation publique fictive",
-            "scatologie",
-            "Vomi ou saleté extrême",
-            "Jeux médicaux invasifs (aiguilles, coupures superficielles, marquage, électrostimulation)",
-            "Jeux de peur mis en scène (faux enlèvement, fausse agression, fausse mise à mort)",
-            "nécrophilie fictive avec partenaire vivant et consentant jouant l’immobilité",
-            "Fantasmes de bestialité, uniquement sous forme fictive, dessinée, écrite ou avec accessoires",
-            "Transformation animale ou créature anthropomorphe"
-          ]
+            {
+              "id": "grande-difference-d-age-entre-adultes-partenaire-plus-age-ou-plus-jeune",
+              "text": "Grande différence d’âge entre adultes (partenaire plus âgé ou plus jeune)"
+            },
+            {
+              "id": "difference-extreme-de-taille-de-force-ou-de-corpulence",
+              "text": "différence extrême de taille, de force ou de corpulence"
+            },
+            {
+              "id": "penetration-avec-objets-tres-larges",
+              "text": "pénétration avec objets très larges"
+            },
+            {
+              "id": "profondeur-extreme-et-etirement-progressif",
+              "text": "Profondeur extrême et étirement progressif"
+            },
+            {
+              "id": "penetrations-multiples-simultanees-double-triple-plusieurs-orifices",
+              "text": "Pénétrations multiples simultanées (double, triple, plusieurs orifices)"
+            },
+            {
+              "id": "plusieurs-partenaires-successifs",
+              "text": "plusieurs partenaires successifs"
+            },
+            {
+              "id": "gang-bang-ou-reverse-gang-bang",
+              "text": "Gang bang (ou reverse gang bang)"
+            },
+            {
+              "id": "bukkake",
+              "text": "bukkake"
+            },
+            {
+              "id": "endurance-prolongee",
+              "text": "endurance prolongée"
+            },
+            {
+              "id": "orgasmes-forces-repetes",
+              "text": "orgasmes forcés répétés"
+            },
+            {
+              "id": "usage-ou-port-prolonge-d-un-jouet-plug-ou-uf",
+              "text": "Usage ou port prolongé d’un jouet, plug ou œuf"
+            },
+            {
+              "id": "saturation-sensorielle",
+              "text": "saturation sensorielle"
+            },
+            {
+              "id": "perte-de-controle-simulee-ou-depersonnalisation",
+              "text": "Perte de contrôle simulée ou dépersonnalisation"
+            },
+            {
+              "id": "immobilite-complete",
+              "text": "immobilité complète"
+            },
+            {
+              "id": "partenaire-s-masque-s-seul-ou-en-groupe",
+              "text": "Partenaire(s) masqué(s), seul ou en groupe"
+            },
+            {
+              "id": "urine",
+              "text": "urine"
+            },
+            {
+              "id": "sang-menstruel",
+              "text": "sang menstruel"
+            },
+            {
+              "id": "faux-sang",
+              "text": "faux sang"
+            },
+            {
+              "id": "mise-en-scene-medicale-speculum-examen-corporel-fictif",
+              "text": "Mise en scène médicale (spéculum, examen corporel fictif)"
+            },
+            {
+              "id": "oviposition-ou-insemination-fictive-ponte",
+              "text": "Oviposition ou insémination fictive (ponte)"
+            },
+            {
+              "id": "transformation-en-creature-monstrueuse-ou-fantastique",
+              "text": "Transformation en créature monstrueuse ou fantastique"
+            },
+            {
+              "id": "inflation-fictive",
+              "text": "inflation fictive"
+            },
+            {
+              "id": "exhibitionnisme-entre-personnes-consentantes-etre-regarde-par-plusieurs-participants",
+              "text": "Exhibitionnisme entre personnes consentantes (être regardé par plusieurs participants)"
+            },
+            {
+              "id": "rapport-filme-ou-photographie-diffusion-privee-consentie",
+              "text": "Rapport filmé ou photographié, diffusion privée consentie"
+            },
+            {
+              "id": "voyeurisme-consenti-miroir-sans-tain-fictif-camera-cachee-simulee-couple-observe",
+              "text": "Voyeurisme consenti (miroir sans tain fictif, caméra cachée simulée, couple observé)"
+            },
+            {
+              "id": "scenario-de-risque-d-etre-decouvert-lieu-interdit-simule-scene-publique-reconstituee",
+              "text": "Scénario de risque d’être découvert (lieu interdit simulé, scène publique reconstituée)"
+            },
+            {
+              "id": "humiliation-publique-fictive",
+              "text": "humiliation publique fictive"
+            },
+            {
+              "id": "scatologie",
+              "text": "scatologie"
+            },
+            {
+              "id": "vomi-ou-salete-extreme",
+              "text": "Vomi ou saleté extrême"
+            },
+            {
+              "id": "jeux-medicaux-invasifs-aiguilles-coupures-superficielles-marquage-electrostimulation",
+              "text": "Jeux médicaux invasifs (aiguilles, coupures superficielles, marquage, électrostimulation)"
+            },
+            {
+              "id": "jeux-de-peur-mis-en-scene-faux-enlevement-fausse-agression-fausse-mise-a-mort",
+              "text": "Jeux de peur mis en scène (faux enlèvement, fausse agression, fausse mise à mort)"
+            },
+            {
+              "id": "necrophilie-fictive-avec-partenaire-vivant-et-consentant-jouant-l-immobilite",
+              "text": "nécrophilie fictive avec partenaire vivant et consentant jouant l’immobilité"
+            },
+            {
+              "id": "fantasmes-de-bestialite-uniquement-sous-forme-fictive-dessinee-ecrite-ou-avec-accessoires",
+              "text": "Fantasmes de bestialité, uniquement sous forme fictive, dessinée, écrite ou avec accessoires"
+            },
+            {
+              "id": "transformation-animale-ou-creature-anthropomorphe",
+              "text": "Transformation animale ou créature anthropomorphe"
+            }
+          ],
+          "id": "principal"
         }
       ],
       "rankings": [
@@ -723,10 +1763,10 @@
             "Serpent"
           ],
           "condition": {
-            "itemText": "Fantasmes de bestialité, uniquement sous forme fictive, dessinée, écrite ou avec accessoires"
+            "itemId": "fantasmes-de-bestialite-uniquement-sous-forme-fictive-dessinee-ecrite-ou-avec-accessoires"
           },
           "checkable": true,
-          "groupIndex": 0
+          "groupId": "principal"
         }
       ],
       "color": "#4a4a4a"

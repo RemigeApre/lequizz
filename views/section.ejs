@@ -6,6 +6,19 @@
 
   <%
     var LEVEL_COLORS = { a: "#6c8ebf", b: "#9b6cbf", c: "#4fa5a0", d: "#d9932f", e: "#c0455a" };
+
+    // Le niveau (a..e) est un choix a part entiere, au meme titre que la
+    // frequence : au rechargement, on rouvre sur le dernier niveau que la
+    // personne a effectivement renseigne (le plus "avance", pas toujours
+    // le premier), pour ne pas donner l'impression que la reponse a disparu.
+    function pickDisplayLevel(levelsObj) {
+      var chosen = config.levels[0].key;
+      config.levels.forEach(function (lvl) {
+        var v = levelsObj ? Number(levelsObj[lvl.key]) || 1 : 1;
+        if (v > 1) chosen = lvl.key;
+      });
+      return chosen;
+    }
   %>
 
   <form method="POST" action="/section/<%= idx %>" data-autosave-url="/section/<%= idx %>/autosave" style="--section-color: <%= section.color || '' %>;">
@@ -13,14 +26,12 @@
       <% var multiGroup = section.groups.length > 1; %>
 
       <%
-        var globalIndex = 0;
         var existingMatrix = (existing && existing.matrix) || {};
-        var rawItems = flattenItemsRaw(section);
       %>
       <% section.groups.forEach(function (group, gi) { %>
-        <% var groupKey = section.key + ":" + gi; %>
+        <% var groupKey = section.key + ":" + group.id; %>
         <% var isDone = !!doneGroups[groupKey]; %>
-        <details class="matrix-group<%= isDone ? ' done' : '' %>" <%= (!multiGroup || gi === 0) && !isDone ? "open" : "" %> data-group-index="<%= gi %>">
+        <details class="matrix-group<%= isDone ? ' done' : '' %>" <%= (!multiGroup || gi === 0) && !isDone ? "open" : "" %> data-group-id="<%= group.id %>">
           <summary>
             <span class="group-title-wrap">
               <span class="group-title-text"><%= group.title || "Toutes les pratiques" %></span>
@@ -29,18 +40,15 @@
             <button type="button" class="group-done-toggle<%= isDone ? ' active' : '' %>">
               <%- isDone ? "&#10003; Complet" : "Complet" %>
             </button>
-            <input type="hidden" name="done_<%= gi %>" class="group-done-hidden" value="<%= isDone ? 1 : 0 %>" />
+            <input type="hidden" name="done_<%= group.id %>" class="group-done-hidden" value="<%= isDone ? 1 : 0 %>" />
           </summary>
           <div class="item-cards">
-            <% group.items.forEach(function () { %>
-              <% var i = globalIndex; globalIndex += 1; %>
-              <% var item = rawItems[i]; %>
-              <% var itemKey = section.key + ":" + i; %>
+            <% group.items.forEach(function (item) { %>
+              <% var itemKey = section.key + ":" + item.id; %>
               <% var toTest = !!bookmarks.toTest[itemKey]; %>
               <% var disliked = !!bookmarks.dislike[itemKey]; %>
               <% var favorited = !!bookmarks.favorite[itemKey]; %>
               <% var flagClass = toTest ? "flag-test" : (disliked ? "flag-dislike" : ""); %>
-              <% var firstLevelKey = config.levels[0].key; %>
               <div class="item-card">
                 <div class="item-header">
                   <div class="item-title-row">
@@ -59,58 +67,62 @@
                         <%- favorited ? "&#9733;" : "&#9734;" %>
                       </button>
                     </div>
-                    <input type="hidden" name="test_<%= i %>" class="test-hidden" value="<%= toTest ? 1 : 0 %>" />
-                    <input type="hidden" name="dislike_<%= i %>" class="dislike-hidden" value="<%= disliked ? 1 : 0 %>" />
-                    <input type="hidden" name="fav_<%= i %>" class="fav-hidden" value="<%= favorited ? 1 : 0 %>" />
+                    <input type="hidden" name="test_<%= item.id %>" class="test-hidden" value="<%= toTest ? 1 : 0 %>" />
+                    <input type="hidden" name="dislike_<%= item.id %>" class="dislike-hidden" value="<%= disliked ? 1 : 0 %>" />
+                    <input type="hidden" name="fav_<%= item.id %>" class="fav-hidden" value="<%= favorited ? 1 : 0 %>" />
                   </div>
                 </div>
 
                 <% if (item.variants) { %>
                   <div class="variant-pickers">
-                    <% item.variants.forEach(function (variantLabel, vi) { %>
-                      <% var variantExisting = (existingMatrix[i] && existingMatrix[i][vi]) || null; %>
-                      <% var vFirstVal = variantExisting ? Number(variantExisting[firstLevelKey]) : 1; %>
+                    <% item.variants.forEach(function (variantLabel) { %>
+                      <% var vKey = slugify(variantLabel); %>
+                      <% var variantExisting = (existingMatrix[item.id] && existingMatrix[item.id][vKey]) || null; %>
+                      <% var displayLevelKey = pickDisplayLevel(variantExisting); %>
+                      <% var vDispVal = variantExisting ? Number(variantExisting[displayLevelKey]) || 1 : 1; %>
                       <div class="variant-block">
                         <span class="variant-label"><%= variantLabel %></span>
-                        <div class="level-picker" data-item-index="<%= i %>" data-variant-index="<%= vi %>">
-                          <select class="level-select" style="border-left-color: <%= LEVEL_COLORS[firstLevelKey] %>">
+                        <div class="level-picker" data-item-id="<%= item.id %>" data-variant-key="<%= vKey %>">
+                          <select class="level-select" style="border-left-color: <%= LEVEL_COLORS[displayLevelKey] %>">
                             <% config.levels.forEach(function (lvl) { %>
-                              <% var v = variantExisting ? Number(variantExisting[lvl.key]) : 1; %>
-                              <option value="<%= lvl.key %>" style="background-color: <%= LEVEL_COLORS[lvl.key] %>; color: #fff;"><%= lvl.label %> (<%= config.scaleLabels[v - 1] %>)</option>
+                              <% var v = variantExisting ? Number(variantExisting[lvl.key]) || 1 : 1; %>
+                              <option value="<%= lvl.key %>" <%= lvl.key === displayLevelKey ? "selected" : "" %> style="background-color: <%= LEVEL_COLORS[lvl.key] %>; color: #fff;"><%= lvl.label %> (<%= config.scaleLabels[v - 1] %>)</option>
                             <% }) %>
                           </select>
-                          <select class="freq-select freq-val-<%= vFirstVal %>">
+                          <select class="freq-select freq-val-<%= vDispVal %>">
                             <% config.scaleLabels.forEach(function (label, li) { %>
-                              <option value="<%= li + 1 %>" <%= vFirstVal === (li + 1) ? "selected" : "" %>><%= label %></option>
+                              <option value="<%= li + 1 %>" <%= vDispVal === (li + 1) ? "selected" : "" %>><%= label %></option>
                             <% }) %>
                           </select>
                         </div>
                         <% config.levels.forEach(function (lvl) { %>
-                          <% var existingVal = variantExisting ? Number(variantExisting[lvl.key]) : 1; %>
-                          <input type="hidden" name="m_<%= i %>_<%= vi %>_<%= lvl.key %>" value="<%= existingVal %>" />
+                          <% var existingVal = variantExisting ? Number(variantExisting[lvl.key]) || 1 : 1; %>
+                          <input type="hidden" name="m_<%= item.id %>_<%= vKey %>_<%= lvl.key %>" value="<%= existingVal %>" />
                         <% }) %>
                       </div>
                     <% }) %>
                   </div>
                 <% } else { %>
-                  <% var firstVal = existingMatrix[i] ? Number(existingMatrix[i][firstLevelKey]) : 1; %>
-                  <div class="level-picker" data-item-index="<%= i %>">
-                    <select class="level-select" style="border-left-color: <%= LEVEL_COLORS[firstLevelKey] %>">
+                  <% var itemExisting = existingMatrix[item.id] || null; %>
+                  <% var displayLevelKey = pickDisplayLevel(itemExisting); %>
+                  <% var dispVal = itemExisting ? Number(itemExisting[displayLevelKey]) || 1 : 1; %>
+                  <div class="level-picker" data-item-id="<%= item.id %>">
+                    <select class="level-select" style="border-left-color: <%= LEVEL_COLORS[displayLevelKey] %>">
                       <% config.levels.forEach(function (lvl) { %>
-                        <% var v = existingMatrix[i] ? Number(existingMatrix[i][lvl.key]) : 1; %>
-                        <option value="<%= lvl.key %>" style="background-color: <%= LEVEL_COLORS[lvl.key] %>; color: #fff;"><%= lvl.label %> (<%= config.scaleLabels[v - 1] %>)</option>
+                        <% var v = itemExisting ? Number(itemExisting[lvl.key]) || 1 : 1; %>
+                        <option value="<%= lvl.key %>" <%= lvl.key === displayLevelKey ? "selected" : "" %> style="background-color: <%= LEVEL_COLORS[lvl.key] %>; color: #fff;"><%= lvl.label %> (<%= config.scaleLabels[v - 1] %>)</option>
                       <% }) %>
                     </select>
-                    <select class="freq-select freq-val-<%= firstVal %>">
+                    <select class="freq-select freq-val-<%= dispVal %>">
                       <% config.scaleLabels.forEach(function (label, li) { %>
-                        <option value="<%= li + 1 %>" <%= firstVal === (li + 1) ? "selected" : "" %>><%= label %></option>
+                        <option value="<%= li + 1 %>" <%= dispVal === (li + 1) ? "selected" : "" %>><%= label %></option>
                       <% }) %>
                     </select>
                   </div>
 
                   <% config.levels.forEach(function (lvl) { %>
-                    <% var existingVal = existingMatrix[i] ? Number(existingMatrix[i][lvl.key]) : 1; %>
-                    <input type="hidden" name="m_<%= i %>_<%= lvl.key %>" value="<%= existingVal %>" />
+                    <% var existingVal = itemExisting ? Number(itemExisting[lvl.key]) || 1 : 1; %>
+                    <input type="hidden" name="m_<%= item.id %>_<%= lvl.key %>" value="<%= existingVal %>" />
                   <% }) %>
                 <% } %>
               </div>
@@ -119,9 +131,9 @@
 
           <%
             var extrasHere = [];
-            (section.rankings || []).forEach(function (r) { if (r.groupIndex === gi) extrasHere.push({ type: "ranking", data: r }); });
-            (section.spectrums || []).forEach(function (sp) { if (sp.groupIndex === gi) extrasHere.push({ type: "spectrum", data: sp }); });
-            (section.multiselects || []).forEach(function (ms) { if (ms.groupIndex === gi) extrasHere.push({ type: "multiselect", data: ms }); });
+            (section.rankings || []).forEach(function (r) { if (r.groupId === group.id) extrasHere.push({ type: "ranking", data: r }); });
+            (section.spectrums || []).forEach(function (sp) { if (sp.groupId === group.id) extrasHere.push({ type: "spectrum", data: sp }); });
+            (section.multiselects || []).forEach(function (ms) { if (ms.groupId === group.id) extrasHere.push({ type: "multiselect", data: ms }); });
           %>
           <% if (extrasHere.length) { %>
             <div class="extra-cards">
@@ -140,9 +152,10 @@
       <% }) %>
 
       <%
-        var leftoverRankings = (section.rankings || []).filter(function (r) { return r.groupIndex === undefined || r.groupIndex === null; });
-        var leftoverSpectrums = (section.spectrums || []).filter(function (sp) { return sp.groupIndex === undefined || sp.groupIndex === null; });
-        var leftoverMultiselects = (section.multiselects || []).filter(function (ms) { return ms.groupIndex === undefined || ms.groupIndex === null; });
+        var groupIds = section.groups.map(function (g) { return g.id; });
+        var leftoverRankings = (section.rankings || []).filter(function (r) { return groupIds.indexOf(r.groupId) === -1; });
+        var leftoverSpectrums = (section.spectrums || []).filter(function (sp) { return groupIds.indexOf(sp.groupId) === -1; });
+        var leftoverMultiselects = (section.multiselects || []).filter(function (ms) { return groupIds.indexOf(ms.groupId) === -1; });
       %>
       <% if (leftoverRankings.length || leftoverSpectrums.length || leftoverMultiselects.length) { %>
         <div class="extra-cards">

@@ -2,6 +2,7 @@ const express = require("express");
 const { checkCredentials, requireAdmin } = require("../auth");
 const { listSubmissions, getSubmission } = require("../db");
 const { createThrottle } = require("../loginThrottle");
+const { slugify } = require("../scoring");
 
 const adminThrottle = createThrottle();
 
@@ -42,7 +43,7 @@ function buildAdminRouter(config) {
   router.get("/:id", requireAdmin, (req, res) => {
     const submission = getSubmission(Number(req.params.id));
     if (!submission) return res.redirect("/admin");
-    res.render("admin-detail", { config, submission });
+    res.render("admin-detail", { config, submission, slugify });
   });
 
   return router;

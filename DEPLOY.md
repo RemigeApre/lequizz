@@ -534,3 +534,39 @@ Si malgre tout une commande SSH se fige un jour sans lien avec ca : ferme
 completement l'onglet/fenetre du terminal et reconnecte-toi (`ssh vps`)
 plutot que d'essayer de forcer la commande — ca repart instantanement,
 sans rien casser cote serveur.
+
+---
+
+## Modifier les questions sans perdre les reponses deja enregistrees
+
+Chaque item (pratique), chaque groupe, et chaque classement/echelle/choix
+multiple a un `"id"` stable dans `docs/questions.json`, distinct du texte
+affiche. Les reponses sont enregistrees en base sous cet `id`, jamais sous
+le texte ni sous la position dans le fichier. Consequence concrete :
+
+- **Reformuler le texte d'un item ou d'un groupe ne perd aucune donnee** —
+  change uniquement `"text"` (ou `"title"` pour un groupe), laisse `"id"`
+  intact.
+- **Reordonner les items, les groupes, ou les sections ne perd aucune
+  donnee non plus** — l'ordre dans le fichier n'a plus d'impact sur le
+  stockage.
+- **Ne jamais changer un `"id"` deja existant** : c'est la seule action qui
+  ferait perdre la reponse associee (le serveur ne saurait plus la
+  retrouver). Si un item change vraiment de sens (pas juste de formulation),
+  mieux vaut lui laisser son ancien `id` que d'en inventer un nouveau, sauf
+  si l'ancienne reponse n'a plus de sens et que perdre cette reponse precise
+  est voulu.
+- **Ajouter un nouvel item** : donne-lui un `"id"` unique dans la section
+  (kebab-case, ex. `"nouvelle-pratique"`) — aucune reponse existante n'est
+  affectee.
+- **Supprimer un item** : sa reponse reste orpheline en base (invisible,
+  inoffensive) mais n'est plus jamais lue.
+
+Portee actuelle de cette protection : items de type matrice (pratiques
+notees) et groupes. Les listes d'options internes aux classements
+(`rankings.items`), echelles (`spectrums.scaleLabels`) et choix multiples
+(`multiselects.options`) restent, elles, reperees par leur position dans
+leur propre petite liste — evite de reordonner ou modifier ces options-la
+une fois des reponses enregistrees (le classement/l'echelle/le choix
+multiple dans son ensemble a bien un `id` stable, ce sont uniquement ses
+options internes qui restent positionnelles).

@@ -1,6 +1,21 @@
+// Identifiant stable derive d'un texte (accents/majuscules/ponctuation
+// ignores). Sert de repli si un item n'a pas d'"id" explicite dans
+// questions.json, et pour deriver la cle de stockage des variantes
+// (donne/recu...) a partir de leur libelle.
+function slugify(text) {
+  return (
+    String(text)
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "item"
+  );
+}
+
 function normalizeItem(item) {
-  if (typeof item === "string") return { text: item, variants: null };
-  return { text: item.text, variants: item.variants || null };
+  if (typeof item === "string") return { id: slugify(item), text: item, variants: null };
+  return { id: item.id || slugify(item.text), text: item.text, variants: item.variants || null };
 }
 
 function flattenItemsRaw(section) {
@@ -24,10 +39,11 @@ function computeMatrixScore(config, section, sectionData) {
 
   let raw = 0;
   let units = 0;
-  rawItems.forEach((item, i) => {
+  rawItems.forEach((item) => {
     if (item.variants) {
-      item.variants.forEach((_, vi) => {
-        const levels = (matrix[i] && matrix[i][vi]) || {};
+      item.variants.forEach((variantLabel) => {
+        const vKey = slugify(variantLabel);
+        const levels = (matrix[item.id] && matrix[item.id][vKey]) || {};
         for (const lvl of config.levels) {
           const v = Number(levels[lvl.key]);
           if (!Number.isNaN(v)) raw += v;
@@ -35,7 +51,7 @@ function computeMatrixScore(config, section, sectionData) {
         units += 1;
       });
     } else {
-      const levels = matrix[i] || {};
+      const levels = matrix[item.id] || {};
       for (const lvl of config.levels) {
         const v = Number(levels[lvl.key]);
         if (!Number.isNaN(v)) raw += v;
@@ -71,10 +87,7 @@ function labelMultiselect(multiselect, selected) {
 
 function conditionMet(section, sectionData, condition) {
   if (!condition) return true;
-  const items = flattenItems(section);
-  const idx = items.indexOf(condition.itemText);
-  if (idx === -1) return true;
-  const levels = (sectionData.matrix || {})[idx] || {};
+  const levels = (sectionData.matrix || {})[condition.itemId] || {};
   return Object.keys(levels).some((k) => Number(levels[k]) > 1);
 }
 
@@ -131,4 +144,4 @@ function computeScores(config, answers) {
   return { sections };
 }
 
-module.exports = { flattenItems, flattenItemsRaw, computeScores };
+module.exports = { flattenItems, flattenItemsRaw, computeScores, slugify };
