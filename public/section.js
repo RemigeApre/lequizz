@@ -1,9 +1,22 @@
 (function () {
-  var LEVEL_COLORS = { a: "#6c8ebf", b: "#9b6cbf", c: "#4fa5a0", d: "#d9932f", e: "#c0455a" };
+  var LEVEL_COLORS = { jamais: "#7a7f87", a: "#6c8ebf", b: "#9b6cbf", c: "#4fa5a0", d: "#d9932f", e: "#c0455a" };
 
-  function setFreqClass(select, value) {
+  function scaleFor(levelKey) {
+    return levelKey === "jamais" ? (window.JAMAIS_SCALE || []) : (window.DEFAULT_SCALE || []);
+  }
+
+  // Reutilise le degrade freq-val-1..5 existant : l'echelle a 3 points de
+  // "jamais" pioche dedans a intervalles larges (1, 3, 5).
+  function freqValClass(levelKey, value) {
+    if (levelKey === "jamais") {
+      return "freq-val-" + ([1, 3, 5][value - 1] || 1);
+    }
+    return "freq-val-" + value;
+  }
+
+  function setFreqClass(select, className) {
     select.className = select.className.replace(/\bfreq-val-\d+\b/g, "").trim();
-    select.classList.add("freq-val-" + value);
+    select.classList.add(className);
   }
 
   document.querySelectorAll(".level-picker").forEach(function (picker) {
@@ -22,42 +35,33 @@
       var levelKey = levelSelect.value;
       var hidden = hiddenFor(levelKey);
       if (hidden) hidden.value = freqSelect.value;
-      setFreqClass(freqSelect, freqSelect.value);
+      setFreqClass(freqSelect, freqValClass(levelKey, Number(freqSelect.value)));
     });
 
     levelSelect.addEventListener("change", function () {
       var levelKey = levelSelect.value;
+      var scale = scaleFor(levelKey);
       var hidden = hiddenFor(levelKey);
-      var v = hidden ? hidden.value : "1";
-      freqSelect.value = v;
-      setFreqClass(freqSelect, v);
-      levelSelect.style.borderLeftColor = LEVEL_COLORS[levelKey] || "";
-    });
-  });
+      var v = hidden ? parseInt(hidden.value, 10) : 1;
+      if (!v || v < 1 || v > scale.length) v = 1;
 
-  document.querySelectorAll(".item-flag").forEach(function (details) {
-    var summary = details.querySelector(".item-flag-summary");
-    var itemCard = details.closest(".item-card");
-    var testHidden = itemCard.querySelector(".test-hidden");
-    var dislikeHidden = itemCard.querySelector(".dislike-hidden");
-
-    details.querySelectorAll(".item-flag-option").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var flag = btn.dataset.flag;
-        testHidden.value = flag === "test" ? "1" : "0";
-        dislikeHidden.value = flag === "dislike" ? "1" : "0";
-        summary.classList.remove("flag-test", "flag-dislike");
-        if (flag === "test") summary.classList.add("flag-test");
-        if (flag === "dislike") summary.classList.add("flag-dislike");
-        details.open = false;
-        testHidden.dispatchEvent(new Event("change", { bubbles: true }));
+      freqSelect.innerHTML = "";
+      scale.forEach(function (label, li) {
+        var opt = document.createElement("option");
+        opt.value = String(li + 1);
+        opt.textContent = label;
+        if (li + 1 === v) opt.selected = true;
+        freqSelect.appendChild(opt);
       });
+
+      setFreqClass(freqSelect, freqValClass(levelKey, v));
+      levelSelect.style.borderLeftColor = LEVEL_COLORS[levelKey] || "";
     });
   });
 
   document.querySelectorAll(".item-fav-toggle").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      var hidden = btn.parentElement.querySelector(".fav-hidden");
+      var hidden = btn.closest(".item-title-row").querySelector(".fav-hidden");
       var isOn = hidden.value !== "1";
       hidden.value = isOn ? "1" : "0";
       btn.classList.toggle("active", isOn);

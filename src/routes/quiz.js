@@ -97,7 +97,7 @@ function applySectionSubmission(config, attempt, section, idx, body) {
   attempt.data[section.key] = parseSectionSubmission(config, section, body);
 
   attempt.data.__bookmarks = Object.assign(
-    { toTest: {}, dislike: {}, favorite: {} },
+    { favorite: {} },
     attempt.data.__bookmarks || {}
   );
   attempt.data.__doneGroups = attempt.data.__doneGroups || {};
@@ -106,10 +106,6 @@ function applySectionSubmission(config, attempt, section, idx, body) {
     const rawItems = flattenItemsRaw(section);
     rawItems.forEach((item) => {
       const key = `${section.key}:${item.id}`;
-      if (body[`test_${item.id}`] === "1") attempt.data.__bookmarks.toTest[key] = true;
-      else delete attempt.data.__bookmarks.toTest[key];
-      if (body[`dislike_${item.id}`] === "1") attempt.data.__bookmarks.dislike[key] = true;
-      else delete attempt.data.__bookmarks.dislike[key];
       if (body[`fav_${item.id}`] === "1") attempt.data.__bookmarks.favorite[key] = true;
       else delete attempt.data.__bookmarks.favorite[key];
     });
@@ -149,7 +145,7 @@ function buildQuizRouter(config) {
       idx,
       total: config.sections.length,
       existing,
-      bookmarks: Object.assign({ toTest: {}, dislike: {}, favorite: {} }, attempt.data.__bookmarks || {}),
+      bookmarks: Object.assign({ favorite: {} }, attempt.data.__bookmarks || {}),
       doneGroups: attempt.data.__doneGroups || {},
     });
   });

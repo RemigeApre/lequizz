@@ -43,7 +43,8 @@
                           <td class="item-col"><%= item.text %> (<%= variantLabel %>)</td>
                           <% config.levels.forEach(function (lvl) { %>
                             <% var v = Number(levels[lvl.key]) || 1; %>
-                            <td><%= config.scaleLabels[v - 1] %></td>
+                            <% var scale = lvl.scaleLabels || config.scaleLabels; %>
+                            <td><%= scale[v - 1] %></td>
                           <% }) %>
                         </tr>
                       <% }) %>
@@ -53,7 +54,8 @@
                         <td class="item-col"><%= item.text %></td>
                         <% config.levels.forEach(function (lvl) { %>
                           <% var v = Number(levels[lvl.key]) || 1; %>
-                          <td><%= config.scaleLabels[v - 1] %></td>
+                          <% var scale = lvl.scaleLabels || config.scaleLabels; %>
+                          <td><%= scale[v - 1] %></td>
                         <% }) %>
                       </tr>
                     <% } %>

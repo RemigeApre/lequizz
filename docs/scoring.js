@@ -30,12 +30,17 @@ function flattenItems(section) {
   return flattenItemsRaw(section).map((it) => it.text);
 }
 
+function levelScaleLength(config, lvl) {
+  return (lvl.scaleLabels || config.scaleLabels).length;
+}
+
 function computeMatrixScore(config, section, sectionData) {
   const rawItems = flattenItemsRaw(section);
   const matrix = (sectionData && sectionData.matrix) || {};
-  const scaleMax = config.scaleLabels.length;
-  const levelCount = config.levels.length;
-  const maxPerItem = scaleMax * levelCount;
+  // Chaque niveau peut avoir sa propre echelle (ex. "Jamais" n'a que 3
+  // options), donc le maximum par item se calcule niveau par niveau plutot
+  // que "nombre de niveaux x taille d'une echelle unique".
+  const maxPerItem = config.levels.reduce((sum, lvl) => sum + levelScaleLength(config, lvl), 0);
 
   let raw = 0;
   let units = 0;
@@ -144,4 +149,4 @@ function computeScores(config, answers) {
   return { sections };
 }
 
-window.Scoring = { flattenItems, flattenItemsRaw, computeScores };
+window.Scoring = { flattenItems, flattenItemsRaw, computeScores, slugify };

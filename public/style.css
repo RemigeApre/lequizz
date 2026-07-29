@@ -548,12 +548,6 @@ body.nav-drawer-locked {
   flex-shrink: 0;
 }
 
-.item-flag {
-  position: relative;
-  flex-shrink: 0;
-}
-
-.item-flag-summary,
 .item-fav-toggle {
   display: flex;
   align-items: center;
@@ -571,61 +565,11 @@ body.nav-drawer-locked {
   font-size: 1rem;
   line-height: 1;
   cursor: pointer;
-  list-style: none;
 }
 
-.item-flag-summary:hover,
 .item-fav-toggle:hover {
   border-color: var(--accent);
   color: var(--accent);
-}
-
-.item-flag-summary::marker,
-.item-flag-summary::-webkit-details-marker {
-  display: none;
-  content: "";
-}
-
-.item-flag-summary.flag-test {
-  border-color: #2e7d32;
-  color: #2e7d32;
-  background: color-mix(in srgb, #2e7d32 12%, var(--card));
-}
-
-.item-flag-summary.flag-dislike {
-  border-color: #c0392b;
-  color: #c0392b;
-  background: color-mix(in srgb, #c0392b 12%, var(--card));
-}
-
-.item-flag-menu {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 0.4rem);
-  display: flex;
-  flex-direction: column;
-  min-width: 140px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
-  overflow: hidden;
-  z-index: 15;
-}
-
-.item-flag-option {
-  background: none;
-  color: var(--fg);
-  border: none;
-  border-radius: 0;
-  padding: 0.6rem 0.8rem;
-  font-size: 0.85rem;
-  text-align: left;
-  cursor: pointer;
-}
-
-.item-flag-option:hover {
-  background: var(--bg);
 }
 
 .item-fav-toggle.active {

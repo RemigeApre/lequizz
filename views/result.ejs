@@ -49,7 +49,8 @@
                 var parts = [];
                 config.levels.forEach(function (lvl) {
                   var v = Number(levels[lvl.key]) || 1;
-                  if (v > 1) parts.push(lvl.label + " : " + config.scaleLabels[v - 1]);
+                  var scale = lvl.scaleLabels || config.scaleLabels;
+                  if (v > 1) parts.push(lvl.label + " : " + scale[v - 1]);
                 });
                 if (parts.length) answeredRows.push({ item: item.text + " (" + variantLabel + ")", parts: parts.join(" · ") });
               });
@@ -58,7 +59,8 @@
               var parts = [];
               config.levels.forEach(function (lvl) {
                 var v = Number(levels[lvl.key]) || 1;
-                if (v > 1) parts.push(lvl.label + " : " + config.scaleLabels[v - 1]);
+                var scale = lvl.scaleLabels || config.scaleLabels;
+                if (v > 1) parts.push(lvl.label + " : " + scale[v - 1]);
               });
               if (parts.length) answeredRows.push({ item: item.text, parts: parts.join(" · ") });
             }
@@ -90,7 +92,7 @@
   <% }) %>
 
   <%
-    var bookmarks = (answers && answers.__bookmarks) || { toTest: {}, dislike: {}, favorite: {} };
+    var bookmarks = (answers && answers.__bookmarks) || { favorite: {} };
     function bookmarkRows(map) {
       var rows = [];
       Object.keys(map || {}).forEach(function (key) {
@@ -108,34 +110,12 @@
       return rows;
     }
     var favoriteRows = bookmarkRows(bookmarks.favorite);
-    var toTestRows = bookmarkRows(bookmarks.toTest);
-    var dislikeRows = bookmarkRows(bookmarks.dislike);
   %>
   <% if (favoriteRows.length) { %>
     <div class="result-section">
       <h2>Tes favoris (<%= favoriteRows.length %>)</h2>
       <ul class="answer-list">
         <% favoriteRows.forEach(function (row) { %>
-          <li><span><%= row.label %> <em>(<%= row.sectionTitle %>)</em></span></li>
-        <% }) %>
-      </ul>
-    </div>
-  <% } %>
-  <% if (toTestRows.length) { %>
-    <div class="result-section">
-      <h2>Tes decouvertes a tester (<%= toTestRows.length %>)</h2>
-      <ul class="answer-list">
-        <% toTestRows.forEach(function (row) { %>
-          <li><span><%= row.label %> <em>(<%= row.sectionTitle %>)</em></span></li>
-        <% }) %>
-      </ul>
-    </div>
-  <% } %>
-  <% if (dislikeRows.length) { %>
-    <div class="result-section">
-      <h2>Ce que tu n'aimes pas (<%= dislikeRows.length %>)</h2>
-      <ul class="answer-list">
-        <% dislikeRows.forEach(function (row) { %>
           <li><span><%= row.label %> <em>(<%= row.sectionTitle %>)</em></span></li>
         <% }) %>
       </ul>
