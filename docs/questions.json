@@ -651,7 +651,8 @@
       "type": "matrix",
       "groups": [
         {
-          "title": null,
+          "id": "godes",
+          "title": "Godes",
           "items": [
             {
               "id": "godes-classiques",
@@ -684,7 +685,13 @@
             {
               "id": "gode-porte-sous-les-vetements",
               "text": "Gode porté sous les vêtements"
-            },
+            }
+          ]
+        },
+        {
+          "id": "machines-et-mobilier",
+          "title": "Machines et mobilier",
+          "items": [
             {
               "id": "machine-sexuelle-fucking-machine",
               "text": "Machine sexuelle / fucking machine"
@@ -696,7 +703,13 @@
             {
               "id": "mobilier-de-bondage",
               "text": "Mobilier de bondage"
-            },
+            }
+          ]
+        },
+        {
+          "id": "plugs-et-boules",
+          "title": "Plugs et boules",
+          "items": [
             {
               "id": "plug-anal",
               "text": "Plug anal"
@@ -716,7 +729,13 @@
             {
               "id": "uf-vibrant-controle-par-son-partenaire",
               "text": "Œuf vibrant contrôlé par son partenaire"
-            },
+            }
+          ]
+        },
+        {
+          "id": "vibromasseurs-et-stimulateurs",
+          "title": "Vibromasseurs et stimulateurs",
+          "items": [
             {
               "id": "vibromasseur-externe",
               "text": "Vibromasseur externe"
@@ -740,7 +759,13 @@
             {
               "id": "electrostimulation-erotique",
               "text": "Électrostimulation érotique"
-            },
+            }
+          ]
+        },
+        {
+          "id": "sensations-et-matieres",
+          "title": "Sensations et matieres",
+          "items": [
             {
               "id": "plume-pinceau",
               "text": "Plume, pinceau"
@@ -776,7 +801,13 @@
             {
               "id": "objet-du-quotidien-utilise-pendant-un-rapport",
               "text": "Objet du quotidien utilisé pendant un rapport"
-            },
+            }
+          ]
+        },
+        {
+          "id": "bondage-et-privation-sensorielle",
+          "title": "Bondage et privation sensorielle",
+          "items": [
             {
               "id": "museliere",
               "text": "Muselière"
@@ -796,7 +827,13 @@
             {
               "id": "film-plastique-prevu-pour-le-bondage",
               "text": "Film plastique prévu pour le bondage"
-            },
+            }
+          ]
+        },
+        {
+          "id": "objets-fantastiques",
+          "title": "Objets fantastiques",
+          "items": [
             {
               "id": "objets-simulant-ponte-ou-insemination-ovipositeur-ufs-factices-capsules-expulsables",
               "text": "Objets simulant ponte ou insémination (ovipositeur, œufs factices, capsules expulsables)"
@@ -805,8 +842,7 @@
               "id": "objets-monstrueux-ou-fantastiques",
               "text": "Objets monstrueux ou fantastiques"
             }
-          ],
-          "id": "principal"
+          ]
         }
       ],
       "rankings": [
@@ -825,7 +861,7 @@
           "condition": {
             "itemId": "godes-ethniques"
           },
-          "groupId": "principal"
+          "groupId": "godes"
         },
         {
           "id": "objets_quotidien",
@@ -846,7 +882,7 @@
             "Cravate",
             "Collier"
           ],
-          "groupId": "principal"
+          "groupId": "sensations-et-matieres"
         },
         {
           "id": "godes_animaux",
@@ -863,7 +899,22 @@
             "itemId": "godes-animaux"
           },
           "checkable": true,
-          "groupId": "principal"
+          "groupId": "godes"
+        },
+        {
+          "id": "godes_fantastiques",
+          "label": "Si tu es interessee par les godes fantastiques : classe ces creatures par preference",
+          "items": [
+            "Poulpe",
+            "Dragon",
+            "Licorne",
+            "Demon",
+            "Alien"
+          ],
+          "condition": {
+            "itemId": "godes-fantastiques-poulpe-dragon-licorne-demon-alien"
+          },
+          "groupId": "godes"
         }
       ],
       "color": "#2f9e8f"
@@ -1794,6 +1845,14 @@
             {
               "id": "transformation-animale-ou-creature-anthropomorphe",
               "text": "Transformation animale ou créature anthropomorphe"
+            },
+            {
+              "id": "se-toucher-en-presence-de-son-partenaire",
+              "text": "Te toucher en presence de ton partenaire",
+              "variants": [
+                "Il sait",
+                "Il ne sait pas"
+              ]
             }
           ],
           "id": "principal"

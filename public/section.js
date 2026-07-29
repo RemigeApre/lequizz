@@ -19,6 +19,15 @@
     select.classList.add(className);
   }
 
+  // Certains items (godes ethniques/animaux/fantastiques...) ont un volet de
+  // classement cache juste en dessous, qui ne s'affiche que si la reponse
+  // n'est plus au defaut complet ("jamais" + valeur 1 = "pas interessee").
+  function updateReveal(itemId, levelKey, value) {
+    var target = document.getElementById("reveal-" + itemId);
+    if (!target) return;
+    target.hidden = levelKey === "jamais" && Number(value) === 1;
+  }
+
   document.querySelectorAll(".level-picker").forEach(function (picker) {
     var itemCard = picker.closest(".item-card");
     var levelSelect = picker.querySelector(".level-select");
@@ -36,6 +45,7 @@
       var hidden = hiddenFor(levelKey);
       if (hidden) hidden.value = freqSelect.value;
       setFreqClass(freqSelect, freqValClass(levelKey, Number(freqSelect.value)));
+      updateReveal(itemId, levelKey, freqSelect.value);
     });
 
     levelSelect.addEventListener("change", function () {
@@ -56,6 +66,7 @@
 
       setFreqClass(freqSelect, freqValClass(levelKey, v));
       levelSelect.style.borderLeftColor = LEVEL_COLORS[levelKey] || "";
+      updateReveal(itemId, levelKey, v);
     });
   });
 

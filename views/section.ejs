@@ -128,12 +128,26 @@
                   <% }) %>
                 <% } %>
               </div>
+              <%
+                var itemRanking = (section.rankings || []).find(function (r) {
+                  return r.condition && r.condition.itemId === item.id;
+                });
+              %>
+              <% if (itemRanking) { %>
+                <% var revealNow = !(displayLevelKey === "jamais" && dispVal === 1); %>
+                <div class="item-reveal" id="reveal-<%= item.id %>" <%= revealNow ? "" : "hidden" %>>
+                  <%- include('partials/extra-ranking', { r: itemRanking }) %>
+                </div>
+              <% } %>
             <% }) %>
           </div>
 
           <%
             var extrasHere = [];
-            (section.rankings || []).forEach(function (r) { if (r.groupId === group.id) extrasHere.push({ type: "ranking", data: r }); });
+            // Les classements lies a une condition (condition.itemId) sont deja
+            // affiches juste sous l'item declencheur (volet reveler/masquer),
+            // pas ici avec les autres extras du groupe.
+            (section.rankings || []).forEach(function (r) { if (!r.condition && r.groupId === group.id) extrasHere.push({ type: "ranking", data: r }); });
             (section.spectrums || []).forEach(function (sp) { if (sp.groupId === group.id) extrasHere.push({ type: "spectrum", data: sp }); });
             (section.multiselects || []).forEach(function (ms) { if (ms.groupId === group.id) extrasHere.push({ type: "multiselect", data: ms }); });
           %>
@@ -155,7 +169,7 @@
 
       <%
         var groupIds = section.groups.map(function (g) { return g.id; });
-        var leftoverRankings = (section.rankings || []).filter(function (r) { return groupIds.indexOf(r.groupId) === -1; });
+        var leftoverRankings = (section.rankings || []).filter(function (r) { return !r.condition && groupIds.indexOf(r.groupId) === -1; });
         var leftoverSpectrums = (section.spectrums || []).filter(function (sp) { return groupIds.indexOf(sp.groupId) === -1; });
         var leftoverMultiselects = (section.multiselects || []).filter(function (ms) { return groupIds.indexOf(ms.groupId) === -1; });
       %>
