@@ -1,5 +1,11 @@
 <%
   var existingOrder = (existing && existing.rankings && existing.rankings[r.id]) || r.items.map(function (_, i) { return i; });
+  // Si des options ont ete ajoutees a r.items depuis la derniere sauvegarde
+  // de cet ordre, elles ne seraient jamais affichees sans ca (l'ordre
+  // sauvegarde ne connait que les anciens index) : on les ajoute a la fin.
+  var seenIdx = {};
+  existingOrder.forEach(function (i) { seenIdx[i] = true; });
+  r.items.forEach(function (_, i) { if (!seenIdx[i]) existingOrder.push(i); });
   var existingChecked = (existing && existing.rankingsChecked && existing.rankingsChecked[r.id]) || [];
   var checkedSet = {};
   existingChecked.forEach(function (idx) { checkedSet[idx] = true; });

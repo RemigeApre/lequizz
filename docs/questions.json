@@ -893,7 +893,10 @@
             "Chien",
             "Chat",
             "Dauphin",
-            "Serpent"
+            "Serpent",
+            "Cochon",
+            "Ane",
+            "Cerf"
           ],
           "condition": {
             "itemId": "godes-animaux"
@@ -925,11 +928,12 @@
       "type": "matrix",
       "groups": [
         {
-          "title": null,
+          "id": "corps",
+          "title": "Corps",
           "items": [
             {
               "id": "fetichisme-des-pieds-adoration-pietinement-embrasser-lecher-sucer-les-orteils-sentir-masser",
-              "text": "Fetichisme des pieds (adoration, piétinement, embrasser, lécher, sucer les orteils, sentir, masser)"
+              "text": "Fetichisme des pieds"
             },
             {
               "id": "poitrine-masculine",
@@ -958,18 +962,6 @@
             {
               "id": "bouche-levres-langue",
               "text": "bouche, lèvres, langue"
-            },
-            {
-              "id": "salive",
-              "text": "salive"
-            },
-            {
-              "id": "sperme",
-              "text": "sperme"
-            },
-            {
-              "id": "sueur-transpiration",
-              "text": "sueur / transpiration"
             },
             {
               "id": "pubis",
@@ -1010,7 +1002,39 @@
             {
               "id": "muscles-veines-apparentes",
               "text": "muscles, veines apparentes"
+            }
+          ]
+        },
+        {
+          "id": "fluides-et-matieres-corporelles",
+          "title": "Fluides et matieres corporelles",
+          "items": [
+            {
+              "id": "salive",
+              "text": "salive"
             },
+            {
+              "id": "sperme",
+              "text": "sperme"
+            },
+            {
+              "id": "sueur-transpiration",
+              "text": "sueur / transpiration"
+            },
+            {
+              "id": "pisse",
+              "text": "Pisse"
+            },
+            {
+              "id": "merde",
+              "text": "Merde"
+            }
+          ]
+        },
+        {
+          "id": "apparence-et-matieres",
+          "title": "Apparence et matieres",
+          "items": [
             {
               "id": "tatouages",
               "text": "tatouages"
@@ -1021,23 +1045,7 @@
             },
             {
               "id": "accessoires-visibles-sur-le-visage-lunettes-appareil-dentaire",
-              "text": "accessoires visibles sur le visage (lunettes, appareil dentaire)"
-            },
-            {
-              "id": "voix-et-sons-accent-gemissements-rires-pleurs-simules",
-              "text": "voix et sons (accent, gémissements, rires, pleurs simulés)"
-            },
-            {
-              "id": "respiration",
-              "text": "respiration"
-            },
-            {
-              "id": "personnalite-du-partenaire-autoritaire-arrogante-ou-douce-timide-vulnerable",
-              "text": "personnalité du partenaire (autoritaire/arrogante ou douce/timide/vulnérable)"
-            },
-            {
-              "id": "sommeil-simule",
-              "text": "sommeil simulé"
+              "text": "Accessoires visibles sur le visage"
             },
             {
               "id": "tenue-professionnelle-ou-uniforme",
@@ -1049,52 +1057,96 @@
             },
             {
               "id": "matieres-brillantes-et-moulantes-latex-cuir-vinyle",
-              "text": "matières brillantes et moulantes (latex, cuir, vinyle)"
+              "text": "Matieres brillantes et moulantes"
             },
             {
               "id": "matieres-douces-dentelle-soie-laine-fourrure-synthetique",
-              "text": "matières douces (dentelle, soie, laine, fourrure synthétique)"
+              "text": "Matieres douces"
             },
             {
               "id": "tissu-mouille",
               "text": "tissu mouillé"
+            }
+          ]
+        },
+        {
+          "id": "voix-et-attitude",
+          "title": "Voix et attitude",
+          "items": [
+            {
+              "id": "voix-et-sons-accent-gemissements-rires-pleurs-simules",
+              "text": "Voix et sons"
             },
             {
-              "id": "morsures-donnees",
-              "text": "morsures données"
+              "id": "respiration",
+              "text": "respiration"
             },
             {
-              "id": "morsures-recues",
-              "text": "morsures reçues"
+              "id": "personnalite-du-partenaire-autoritaire-arrogante-ou-douce-timide-vulnerable",
+              "text": "Personnalite du partenaire"
+            }
+          ]
+        },
+        {
+          "id": "marques-et-jeux-de-peau",
+          "title": "Marques et jeux de peau",
+          "items": [
+            {
+              "id": "morsures",
+              "text": "Morsures",
+              "variants": [
+                "Donne",
+                "Recu"
+              ]
             },
             {
-              "id": "griffures-donnees",
-              "text": "griffures données"
-            },
-            {
-              "id": "griffures-recues",
-              "text": "griffures reçues"
+              "id": "griffures",
+              "text": "Griffures",
+              "variants": [
+                "Donne",
+                "Recu"
+              ]
             },
             {
               "id": "marques-ou-traces-laissees-sur-le-corps-corde-main-morsure",
-              "text": "marques ou traces laissées sur le corps (corde, main, morsure...)"
+              "text": "Marques ou traces laissees sur le corps"
             },
             {
               "id": "crachats-consentis",
-              "text": "crachats consentis"
-            },
+              "text": "Crachats",
+              "variants": [
+                "Donne",
+                "Recu"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "grossesse-et-fertilite",
+          "title": "Grossesse et fertilite",
+          "items": [
             {
               "id": "grossesse-ventre-rond",
-              "text": "grossesse (ventre rond)"
+              "text": "Grossesse"
             },
             {
               "id": "lactation-allaitement-erotique-entre-adultes",
-              "text": "lactation / allaitement érotique entre adultes"
+              "text": "lactation / allaitement érotique entre adultes",
+              "variants": [
+                "Donne",
+                "Recu"
+              ]
             },
             {
               "id": "fertilite-insemination-fantasmee",
               "text": "fertilité / insémination fantasmée"
-            },
+            }
+          ]
+        },
+        {
+          "id": "transformation-et-non-humain",
+          "title": "Transformation et non-humain",
+          "items": [
             {
               "id": "transformation-corporelle",
               "text": "transformation corporelle"
@@ -1110,6 +1162,16 @@
             {
               "id": "etre-transforme-en-poupee-mannequin-ou-statue",
               "text": "être transformé en poupée, mannequin ou statue"
+            }
+          ]
+        },
+        {
+          "id": "immobilite-sommeil-et-absence",
+          "title": "Immobilite, sommeil et absence",
+          "items": [
+            {
+              "id": "sommeil-simule",
+              "text": "sommeil simulé"
             },
             {
               "id": "immobilite",
@@ -1127,11 +1189,11 @@
               "id": "anonymat",
               "text": "anonymat"
             }
-          ],
-          "id": "principal"
+          ]
         }
       ],
-      "color": "#c99a3e"
+      "color": "#c99a3e",
+      "intro": "Ici, les fetichismes portent sur des objets, matieres, sensations, comportements ou traits de caractere : pas sur des scenarios ou des personnages joues, qui se trouvent dans la section Jeux de role."
     },
     {
       "key": "jeuxderole",
@@ -1868,7 +1930,10 @@
             "Chien",
             "Chat",
             "Dauphin",
-            "Serpent"
+            "Serpent",
+            "Cochon",
+            "Ane",
+            "Cerf"
           ],
           "condition": {
             "itemId": "fantasmes-de-bestialite-uniquement-sous-forme-fictive-dessinee-ecrite-ou-avec-accessoires"
