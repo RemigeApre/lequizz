@@ -403,6 +403,11 @@ Cette version serveur (pas la version GitHub Pages statique) gere ca :
 - `data/log.csv` n'est jamais commite dans Git (`.gitignore`), comme
   `data/quizz.db` — pense a inclure `data/` dans tes propres sauvegardes
   manuelles du VPS si tu en fais.
+- Les images ajoutees dans le wiki sont stockees dans
+  `data/uploads/wiki/` (servies sous `/uploads/...`, derriere la meme
+  barriere de mot de passe que tout le site) — meme regle que le reste
+  de `data/` : jamais commitees dans Git, a inclure dans tes sauvegardes
+  manuelles si tu en fais.
 
 ---
 

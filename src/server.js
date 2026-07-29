@@ -8,6 +8,7 @@ const session = require("express-session");
 const buildQuizRouter = require("./routes/quiz");
 const buildAdminRouter = require("./routes/admin");
 const buildLinksRouter = require("./routes/links");
+const buildWikiRouter = require("./routes/wiki");
 const { createThrottle } = require("./loginThrottle");
 
 const gateThrottle = createThrottle();
@@ -100,9 +101,17 @@ app.use((req, res, next) => {
   res.redirect("/gate");
 });
 
+// Apres la barriere de mot de passe : les images du wiki sont du contenu
+// prive au meme titre que le reste du site, elles ne doivent jamais etre
+// accessibles sans etre passe par /gate.
+const uploadsDir = path.join(__dirname, "..", "data", "uploads");
+fs.mkdirSync(uploadsDir, { recursive: true });
+app.use("/uploads", express.static(uploadsDir));
+
 app.use("/", buildQuizRouter(config));
 app.use("/admin", buildAdminRouter(config));
 app.use("/liens", buildLinksRouter(config));
+app.use("/wiki", buildWikiRouter(config));
 
 if (usingHttps) {
   https

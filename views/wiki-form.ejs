@@ -1,0 +1,52 @@
+<%- include('partials/head', { title: 'Modifier — ' + page.title + ' — ' + config.title }) %>
+<main class="container">
+  <%- include('partials/top-nav', { config: config }) %>
+  <a href="/wiki/<%= page.id %>" class="link-button">&larr; Retour</a>
+  <h1 class="section-title-h1">Modifier la page</h1>
+
+  <% if (page.imagePath) { %>
+    <img src="<%= page.imagePath %>" alt="" class="wiki-form-current-image" />
+  <% } %>
+
+  <form method="POST" action="/wiki/<%= page.id %>" enctype="multipart/form-data" class="links-add-form">
+    <label class="links-field">
+      <span class="links-field-label">Titre</span>
+      <input type="text" name="title" required value="<%= page.title %>" />
+    </label>
+
+    <label class="links-field">
+      <span class="links-field-label">Categorie</span>
+      <select name="category" id="wiki-category-select" class="wiki-category-select">
+        <% categories.forEach(function (c) { %>
+          <option value="<%= c.key %>" <%= c.key === page.category ? "selected" : "" %>><%= c.label %></option>
+        <% }) %>
+      </select>
+    </label>
+
+    <label class="links-field wiki-owned-field" id="wiki-owned-field" <%= page.category === "objets" ? "" : "hidden" %>>
+      <span class="chip-option">
+        <input type="checkbox" name="owned" <%= page.owned ? "checked" : "" %> />
+        <span>On possede cet objet</span>
+      </span>
+    </label>
+
+    <label class="links-field">
+      <span class="links-field-label">Contenu</span>
+      <textarea name="content" rows="4"><%= page.content %></textarea>
+    </label>
+
+    <label class="links-field">
+      <span class="links-field-label">Tags (separes par des virgules)</span>
+      <input type="text" name="tags" value="<%= page.tags.join(', ') %>" />
+    </label>
+
+    <label class="links-field">
+      <span class="links-field-label">Remplacer l'image (optionnel)</span>
+      <input type="file" name="image" accept="image/*" />
+    </label>
+
+    <button type="submit">Enregistrer</button>
+  </form>
+</main>
+<script src="/wiki.js?v=<%= assetVersion %>"></script>
+<%- include('partials/foot') %>

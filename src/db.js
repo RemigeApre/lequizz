@@ -38,6 +38,20 @@ db.exec(`
   )
 `);
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS wiki_pages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    category TEXT NOT NULL DEFAULT 'autre',
+    content TEXT NOT NULL DEFAULT '',
+    tags TEXT NOT NULL DEFAULT '[]',
+    image_path TEXT,
+    owned INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  )
+`);
+
 function insertSubmission(answers, scores) {
   const stmt = db.prepare(
     "INSERT INTO submissions (created_at, answers, scores) VALUES (?, ?, ?)"
@@ -117,6 +131,57 @@ function deleteLink(id) {
   db.prepare("DELETE FROM links WHERE id = ?").run(id);
 }
 
+function rowToWikiPage(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    category: row.category,
+    content: row.content,
+    tags: JSON.parse(row.tags),
+    imagePath: row.image_path,
+    owned: !!row.owned,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function insertWikiPage({ title, category, content, tags, imagePath, owned }) {
+  const now = new Date().toISOString();
+  const info = db
+    .prepare(
+      `INSERT INTO wiki_pages (title, category, content, tags, image_path, owned, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    )
+    .run(title, category, content, JSON.stringify(tags), imagePath || null, owned ? 1 : 0, now, now);
+  return info.lastInsertRowid;
+}
+
+function listWikiPages() {
+  const rows = db.prepare("SELECT * FROM wiki_pages ORDER BY id DESC").all();
+  return rows.map(rowToWikiPage);
+}
+
+function getWikiPage(id) {
+  const row = db.prepare("SELECT * FROM wiki_pages WHERE id = ?").get(id);
+  if (!row) return null;
+  return rowToWikiPage(row);
+}
+
+function updateWikiPage(id, { title, category, content, tags, imagePath, owned }) {
+  const existing = db.prepare("SELECT image_path FROM wiki_pages WHERE id = ?").get(id);
+  if (!existing) return false;
+  const finalImagePath = imagePath !== undefined ? imagePath : existing.image_path;
+  db.prepare(
+    `UPDATE wiki_pages SET title = ?, category = ?, content = ?, tags = ?, image_path = ?, owned = ?, updated_at = ?
+     WHERE id = ?`
+  ).run(title, category, content, JSON.stringify(tags), finalImagePath, owned ? 1 : 0, new Date().toISOString(), id);
+  return true;
+}
+
+function deleteWikiPage(id) {
+  db.prepare("DELETE FROM wiki_pages WHERE id = ?").run(id);
+}
+
 module.exports = {
   db,
   insertSubmission,
@@ -128,4 +193,9 @@ module.exports = {
   insertLink,
   listLinks,
   deleteLink,
+  insertWikiPage,
+  listWikiPages,
+  getWikiPage,
+  updateWikiPage,
+  deleteWikiPage,
 };

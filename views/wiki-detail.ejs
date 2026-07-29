@@ -1,0 +1,38 @@
+<%- include('partials/head', { title: page.title + ' — Wiki — ' + config.title }) %>
+<main class="container">
+  <%- include('partials/top-nav', { config: config }) %>
+  <a href="/wiki" class="link-button">&larr; Retour au wiki</a>
+
+  <% var cat = categories.find(function (c) { return c.key === page.category; }); %>
+  <div class="wiki-detail">
+    <% if (page.imagePath) { %>
+      <img src="<%= page.imagePath %>" alt="" class="wiki-detail-image" />
+    <% } %>
+
+    <div class="wiki-detail-header">
+      <span class="wiki-category-badge"><%= cat ? cat.label : page.category %></span>
+      <% if (page.owned) { %><span class="wiki-owned-badge" title="Possede">&#9733; Possede</span><% } %>
+    </div>
+
+    <h1 class="wiki-detail-title"><%= page.title %></h1>
+
+    <% if (page.tags.length) { %>
+      <div class="link-card-tags">
+        <% page.tags.forEach(function (t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
+      </div>
+    <% } %>
+
+    <% if (page.content) { %>
+      <p class="wiki-detail-content"><%= page.content %></p>
+    <% } %>
+
+    <div class="wiki-detail-actions">
+      <a href="/wiki/<%= page.id %>/edit" class="link-button">Modifier</a>
+      <form method="POST" action="/wiki/<%= page.id %>/delete" class="link-delete-form-inline">
+        <button type="submit" class="link-delete-btn-text">Supprimer</button>
+      </form>
+    </div>
+  </div>
+</main>
+<script src="/wiki.js?v=<%= assetVersion %>"></script>
+<%- include('partials/foot') %>

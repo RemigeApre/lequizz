@@ -1,0 +1,96 @@
+<%- include('partials/head', { title: 'Wiki — ' + config.title }) %>
+<main class="container wide">
+  <%- include('partials/top-nav', { config: config }) %>
+  <h1 class="section-title-h1">Wiki</h1>
+
+  <details class="links-add-card">
+    <summary class="links-add-summary">Ajouter une page</summary>
+    <form method="POST" action="/wiki" enctype="multipart/form-data" class="links-add-form">
+      <label class="links-field">
+        <span class="links-field-label">Titre</span>
+        <input type="text" name="title" required placeholder="Titre de la page" />
+      </label>
+
+      <label class="links-field">
+        <span class="links-field-label">Categorie</span>
+        <select name="category" id="wiki-category-select" class="wiki-category-select">
+          <% categories.forEach(function (c) { %>
+            <option value="<%= c.key %>"><%= c.label %></option>
+          <% }) %>
+        </select>
+      </label>
+
+      <label class="links-field wiki-owned-field" id="wiki-owned-field" hidden>
+        <span class="chip-option">
+          <input type="checkbox" name="owned" />
+          <span>On possede cet objet</span>
+        </span>
+      </label>
+
+      <label class="links-field">
+        <span class="links-field-label">Contenu</span>
+        <textarea name="content" rows="4" placeholder="Description, notes..."></textarea>
+      </label>
+
+      <label class="links-field">
+        <span class="links-field-label">Tags (separes par des virgules)</span>
+        <input type="text" name="tags" placeholder="ex : exhib, pov, brunette" />
+      </label>
+
+      <label class="links-field">
+        <span class="links-field-label">Image (optionnel)</span>
+        <input type="file" name="image" accept="image/*" />
+      </label>
+
+      <button type="submit">Ajouter</button>
+    </form>
+  </details>
+
+  <div class="links-filter" id="wiki-category-filter">
+    <button type="button" class="tag-chip active" data-category="">Tous</button>
+    <% categories.forEach(function (c) { %>
+      <button type="button" class="tag-chip" data-category="<%= c.key %>"><%= c.label %></button>
+    <% }) %>
+    <button type="button" class="tag-chip tag-chip-owned" data-category="__owned__">&#9733; Nos objets</button>
+  </div>
+
+  <% if (allTags.length) { %>
+    <div class="links-filter" id="wiki-tag-filter">
+      <button type="button" class="tag-chip active" data-tag="">Tous les tags</button>
+      <% allTags.forEach(function (tag) { %>
+        <button type="button" class="tag-chip" data-tag="<%= tag %>"><%= tag %></button>
+      <% }) %>
+    </div>
+  <% } %>
+
+  <div class="wiki-grid" id="wiki-list">
+    <% if (!pages.length) { %>
+      <p class="intro">Aucune page pour l'instant.</p>
+    <% } %>
+    <% pages.forEach(function (page) { %>
+      <% var cat = categories.find(function (c) { return c.key === page.category; }); %>
+      <a href="/wiki/<%= page.id %>" class="wiki-card" data-category="<%= page.category %>" data-owned="<%= page.owned ? '1' : '0' %>" data-tags="<%= page.tags.join('|').toLowerCase() %>">
+        <% if (page.imagePath) { %>
+          <div class="wiki-card-image" style="background-image: url('<%= page.imagePath %>')"></div>
+        <% } %>
+        <div class="wiki-card-body">
+          <div class="wiki-card-header">
+            <span class="wiki-category-badge"><%= cat ? cat.label : page.category %></span>
+            <% if (page.owned) { %><span class="wiki-owned-badge" title="Possede">&#9733;</span><% } %>
+          </div>
+          <p class="wiki-card-title"><%= page.title %></p>
+          <% if (page.content) { %>
+            <p class="wiki-card-excerpt"><%= page.content.slice(0, 120) %><%= page.content.length > 120 ? "…" : "" %></p>
+          <% } %>
+          <% if (page.tags.length) { %>
+            <div class="link-card-tags">
+              <% page.tags.forEach(function (t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
+            </div>
+          <% } %>
+        </div>
+      </a>
+    <% }) %>
+  </div>
+</main>
+<script src="/wiki.js?v=<%= assetVersion %>"></script>
+<%- include('partials/foot') %>
