@@ -28,6 +28,17 @@ const usingHttps = Boolean(
   certPath && keyPath && fs.existsSync(certPath) && fs.existsSync(keyPath)
 );
 
+if (!process.env.SITE_PASSWORD) {
+  console.warn(
+    "ATTENTION: SITE_PASSWORD n'est pas defini dans .env -> /gate refusera TOUJOURS l'acces, quel que soit le mot de passe tape."
+  );
+}
+if (certPath && keyPath && !usingHttps) {
+  console.warn(
+    `ATTENTION: TLS_CERT_PATH/TLS_KEY_PATH sont definis dans .env mais les fichiers sont introuvables (${certPath}, ${keyPath}) -> demarrage en HTTP. Si tu comptais servir du HTTPS, regenere les certificats (voir DEPLOY.md).`
+  );
+}
+
 // Pas de "trust proxy" ici : ce deploiement expose l'app directement
 // (IP:port, sans nginx devant). L'activer sans proxy reel permettrait a
 // n'importe qui de falsifier son IP via un en-tete et de contourner le

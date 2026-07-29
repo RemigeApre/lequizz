@@ -455,3 +455,67 @@ Ouvre **https://51.91.158.21:8082** (bien `https`, pas `http`). Le
 navigateur affiche un avertissement la premiere fois ("Avance" /
 "Continuer vers le site") — normal pour un certificat auto-signe, a
 accepter une fois par navigateur/appareil.
+
+---
+
+## Depannage : boucle de connexion sur `/gate`
+
+Symptome : le mot de passe correct ne debloque jamais l'acces, retour
+permanent sur la page de connexion.
+
+Depuis la correction de `src/server.js`, `usingHttps` est calcule **une
+seule fois** au demarrage (presence reelle des fichiers de certificat) et
+sert a la fois a choisir HTTP/HTTPS **et** a regler `cookie.secure` — les
+deux ne peuvent donc plus se desynchroniser au niveau du code. Le serveur
+affiche aussi desormais un avertissement au demarrage
+(`sudo docker compose logs lequizz`) si `SITE_PASSWORD` manque ou si des
+chemins de certificat sont configures sans fichiers presents. Si ca
+bloque quand meme, verifie dans cet ordre (sur le VPS, dans
+`/home/quizz`) :
+
+```bash
+# 1. Le serveur tourne dans quel mode ?
+sudo docker compose logs --tail=30 lequizz | grep -iE "listening|attention"
+
+# 2. .env a-t-il bien SITE_PASSWORD ? (doit repondre 1, pas 0)
+grep -c SITE_PASSWORD .env
+
+# 3. certs/ contient-il vraiment les fichiers attendus par .env ?
+ls -la certs/
+grep -c TLS_CERT_PATH .env
+```
+
+- Log `(HTTP)` -> utilise `http://51.91.158.21:8082` dans le navigateur
+  (pas `https`). Log `(HTTPS)` -> l'inverse. Se tromper de prefixe est la
+  cause la plus frequente de blocage.
+- `.env` contient `TLS_CERT_PATH`/`TLS_KEY_PATH` mais `certs/` est vide :
+  normal juste apres un clone frais, `certs/` n'est jamais commite dans
+  Git. Regenere le certificat (memes commandes qu'a l'etape 1 ci-dessus)
+  puis `sudo docker compose up -d --build`.
+- `grep -c SITE_PASSWORD .env` repond `0` : aucun mot de passe ne sera
+  jamais accepte tant que la ligne n'existe pas dans `.env`.
+
+Test direct sans navigateur, pour isoler si le probleme vient du serveur
+ou du navigateur (cookies bloques/perimes) — remplace
+`REMPLACE_PAR_LE_VRAI` par le vrai mot de passe juste avant de lancer :
+
+```bash
+cd /tmp && rm -f cookies.txt
+curl -s -o /dev/null -w "GET /gate -> %{http_code}\n" -c cookies.txt http://localhost:3000/gate
+curl -s -o /dev/null -w "POST mauvais mdp -> %{http_code}\n" -b cookies.txt -c cookies.txt --data-urlencode "password=test-faux" http://localhost:3000/gate
+curl -s -o /dev/null -w "POST bon mdp -> %{http_code}\n" -b cookies.txt -c cookies.txt --data-urlencode "password=REMPLACE_PAR_LE_VRAI" http://localhost:3000/gate
+curl -s -o /dev/null -w "GET / apres connexion -> %{http_code}\n" -b cookies.txt http://localhost:3000/
+```
+
+Attendu : `200`, `200`, `302`, `200` (dans cet ordre). Si le `302`
+apparait mais que le dernier `GET /` renvoie quand meme vers `/gate`, le
+souci est cote navigateur (vide les cookies du site et reessaie) — pas
+cote serveur.
+
+### Si une commande SSH "fige" le terminal
+
+Deja rencontre plusieurs fois : ce n'est pas le VPS qui bloque, c'est la
+session SSH locale qui meurt silencieusement (Ctrl+C ne repond plus).
+Ferme completement l'onglet/fenetre du terminal et reconnecte-toi
+(`ssh vps`) plutot que d'essayer de forcer la commande — ca repart
+instantanement, sans rien casser cote serveur.
