@@ -7,6 +7,7 @@ const session = require("express-session");
 
 const buildQuizRouter = require("./routes/quiz");
 const buildAdminRouter = require("./routes/admin");
+const buildLinksRouter = require("./routes/links");
 const { createThrottle } = require("./loginThrottle");
 
 const gateThrottle = createThrottle();
@@ -101,6 +102,7 @@ app.use((req, res, next) => {
 
 app.use("/", buildQuizRouter(config));
 app.use("/admin", buildAdminRouter(config));
+app.use("/liens", buildLinksRouter(config));
 
 if (usingHttps) {
   https

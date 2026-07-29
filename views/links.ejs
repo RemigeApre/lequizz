@@ -1,0 +1,86 @@
+<%- include('partials/head', { title: 'Liens — ' + config.title }) %>
+<main class="container wide">
+  <%- include('partials/top-nav', { config: config }) %>
+  <h1 class="section-title-h1">Liens</h1>
+
+  <details class="links-add-card">
+    <summary class="links-add-summary">Ajouter un lien</summary>
+    <form method="POST" action="/liens" class="links-add-form">
+      <label class="links-field">
+        <span class="links-field-label">Lien (URL)</span>
+        <input type="url" name="url" required placeholder="https://..." />
+      </label>
+
+      <label class="links-field">
+        <span class="links-field-label">Type</span>
+        <div class="multiselect-options">
+          <label class="chip-option"><input type="radio" name="type" value="site" checked /> <span>Site</span></label>
+          <label class="chip-option"><input type="radio" name="type" value="video" /> <span>Video</span></label>
+        </div>
+      </label>
+
+      <label class="links-field">
+        <span class="links-field-label">Titre (laisse vide pour une video : recupere automatiquement le titre de la page)</span>
+        <input type="text" name="title" placeholder="Titre (optionnel)" />
+      </label>
+
+      <label class="links-field">
+        <span class="links-field-label">Description</span>
+        <textarea name="description" rows="2" placeholder="Description (optionnel)"></textarea>
+      </label>
+
+      <label class="links-field">
+        <span class="links-field-label">Tags (separes par des virgules)</span>
+        <input type="text" name="tags" placeholder="ex : exhib, pov, brunette" />
+      </label>
+
+      <button type="submit">Ajouter</button>
+    </form>
+  </details>
+
+  <% if (allTags.length) { %>
+    <div class="links-filter" id="links-filter">
+      <button type="button" class="tag-chip active" data-tag="">Tous</button>
+      <% allTags.forEach(function (tag) { %>
+        <button type="button" class="tag-chip" data-tag="<%= tag %>"><%= tag %></button>
+      <% }) %>
+    </div>
+  <% } %>
+
+  <% if (links.length > 1) { %>
+    <div class="links-sort">
+      <label class="links-sort-label">
+        Trier
+        <select id="links-sort-select">
+          <option value="recent">Plus recent</option>
+          <option value="alpha">Titre (A-Z)</option>
+        </select>
+      </label>
+    </div>
+  <% } %>
+
+  <div class="links-list" id="links-list">
+    <% if (!links.length) { %>
+      <p class="intro">Aucun lien enregistre pour l'instant.</p>
+    <% } %>
+    <% links.forEach(function (link) { %>
+      <div class="link-card" data-id="<%= link.id %>" data-tags="<%= link.tags.join('|').toLowerCase() %>" data-title="<%= link.title.toLowerCase() %>">
+        <div class="link-card-header">
+          <span class="link-type-badge link-type-<%= link.type %>"><%= link.type === "video" ? "Video" : "Site" %></span>
+          <a href="<%= link.url %>" target="_blank" rel="noopener noreferrer" class="link-card-title"><%= link.title %></a>
+        </div>
+        <% if (link.description) { %><p class="link-card-desc"><%= link.description %></p><% } %>
+        <% if (link.tags.length) { %>
+          <div class="link-card-tags">
+            <% link.tags.forEach(function (t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
+          </div>
+        <% } %>
+        <form method="POST" action="/liens/<%= link.id %>/delete" class="link-delete-form">
+          <button type="submit" class="link-delete-btn" title="Supprimer">&#10005;</button>
+        </form>
+      </div>
+    <% }) %>
+  </div>
+</main>
+<script src="/links.js?v=<%= assetVersion %>"></script>
+<%- include('partials/foot') %>

@@ -26,6 +26,18 @@ db.exec(`
   )
 `);
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS links (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    url TEXT NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    type TEXT NOT NULL DEFAULT 'site',
+    tags TEXT NOT NULL DEFAULT '[]',
+    created_at TEXT NOT NULL
+  )
+`);
+
 function insertSubmission(answers, scores) {
   const stmt = db.prepare(
     "INSERT INTO submissions (created_at, answers, scores) VALUES (?, ?, ?)"
@@ -79,6 +91,32 @@ function deleteAttempt(token) {
   db.prepare("DELETE FROM attempts WHERE token = ?").run(token);
 }
 
+function insertLink({ url, title, description, type, tags }) {
+  const info = db
+    .prepare(
+      "INSERT INTO links (url, title, description, type, tags, created_at) VALUES (?, ?, ?, ?, ?, ?)"
+    )
+    .run(url, title, description, type, JSON.stringify(tags), new Date().toISOString());
+  return info.lastInsertRowid;
+}
+
+function listLinks() {
+  const rows = db.prepare("SELECT * FROM links ORDER BY id DESC").all();
+  return rows.map((row) => ({
+    id: row.id,
+    url: row.url,
+    title: row.title,
+    description: row.description,
+    type: row.type,
+    tags: JSON.parse(row.tags),
+    createdAt: row.created_at,
+  }));
+}
+
+function deleteLink(id) {
+  db.prepare("DELETE FROM links WHERE id = ?").run(id);
+}
+
 module.exports = {
   db,
   insertSubmission,
@@ -87,4 +125,7 @@ module.exports = {
   getAttempt,
   saveAttempt,
   deleteAttempt,
+  insertLink,
+  listLinks,
+  deleteLink,
 };
