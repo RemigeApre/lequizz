@@ -1201,7 +1201,8 @@
       "type": "matrix",
       "groups": [
         {
-          "title": null,
+          "id": "metiers-et-autorite-professionnelle",
+          "title": "Metiers et autorite professionnelle",
           "items": [
             {
               "id": "professeur-et-eleve-adulte",
@@ -1244,6 +1245,24 @@
               "text": "garde du corps et personne protégée"
             },
             {
+              "id": "coach-sportif-et-eleve-adulte",
+              "text": "coach sportif et élève adulte"
+            },
+            {
+              "id": "masseur-et-client",
+              "text": "masseur et client"
+            },
+            {
+              "id": "photographe-et-modele",
+              "text": "photographe et modèle"
+            }
+          ]
+        },
+        {
+          "id": "pouvoir-justice-et-captivite",
+          "title": "Pouvoir, justice et captivite",
+          "items": [
+            {
               "id": "gardien-et-prisonnier-fictif",
               "text": "gardien et prisonnier fictif"
             },
@@ -1251,6 +1270,28 @@
               "id": "contexte-judiciaire-juge-et-accuse-avocat-et-client",
               "text": "contexte judiciaire (juge et accusé, avocat et client)"
             },
+            {
+              "id": "interrogatoire",
+              "text": "interrogatoire"
+            },
+            {
+              "id": "espion-et-prisonnier",
+              "text": "espion et prisonnier"
+            },
+            {
+              "id": "cambrioleur-ou-ravisseur-fictif",
+              "text": "cambrioleur ou ravisseur fictif"
+            },
+            {
+              "id": "chantage-corruption-ou-dette-fictive",
+              "text": "chantage, corruption ou dette fictive"
+            }
+          ]
+        },
+        {
+          "id": "domination-sociale-et-sacre",
+          "title": "Domination sociale et sacre",
+          "items": [
             {
               "id": "maitre-et-serviteur-domestique-majordome-soubrette",
               "text": "maître et serviteur/domestique (majordome, soubrette)"
@@ -1266,19 +1307,13 @@
             {
               "id": "figure-religieuse-ou-divine-et-fidele-pretre-demon-divinite",
               "text": "figure religieuse ou divine et fidèle (prêtre, démon, divinité)"
-            },
-            {
-              "id": "coach-sportif-et-eleve-adulte",
-              "text": "coach sportif et élève adulte"
-            },
-            {
-              "id": "masseur-et-client",
-              "text": "masseur et client"
-            },
-            {
-              "id": "photographe-et-modele",
-              "text": "photographe et modèle"
-            },
+            }
+          ]
+        },
+        {
+          "id": "celebrite-art-et-inconnu",
+          "title": "Celebrite, art et inconnu",
+          "items": [
             {
               "id": "artiste-et-muse",
               "text": "artiste et muse"
@@ -1292,25 +1327,15 @@
               "text": "Inconnu (rencontre dans un bar, ou masque)"
             },
             {
-              "id": "cambrioleur-ou-ravisseur-fictif",
-              "text": "cambrioleur ou ravisseur fictif"
-            },
-            {
-              "id": "espion-et-prisonnier",
-              "text": "espion et prisonnier"
-            },
-            {
-              "id": "interrogatoire",
-              "text": "interrogatoire"
-            },
-            {
-              "id": "chantage-corruption-ou-dette-fictive",
-              "text": "chantage, corruption ou dette fictive"
-            },
-            {
               "id": "travail-du-sexe-simule-prostitution-escort-strip-tease",
               "text": "travail du sexe simulé (prostitution, escort, strip-tease)"
-            },
+            }
+          ]
+        },
+        {
+          "id": "couple-famille-et-proches",
+          "title": "Couple, famille et proches",
+          "items": [
             {
               "id": "mari-et-epouse",
               "text": "mari et épouse"
@@ -1370,7 +1395,13 @@
             {
               "id": "partenaire-adulte-jouant-une-personne-plus-agee",
               "text": "partenaire adulte jouant une personne plus âgée"
-            },
+            }
+          ]
+        },
+        {
+          "id": "creatures-pet-play-et-primal",
+          "title": "Creatures, pet play et primal",
+          "items": [
             {
               "id": "pet-play-choix-d-animal-chiot-chat-cheval-pony-renard-lapin",
               "text": "pet play (choix d'animal : chiot, chat, cheval/pony, renard, lapin...)"
@@ -1398,7 +1429,13 @@
             {
               "id": "creature-mythologique-ou-religieuse-ange-demon-succube-incube",
               "text": "créature mythologique ou religieuse (ange, démon, succube, incube)"
-            },
+            }
+          ]
+        },
+        {
+          "id": "science-fiction-non-humain-et-heroic-fantasy",
+          "title": "Science-fiction, non-humain et heroic-fantasy",
+          "items": [
             {
               "id": "extraterrestre",
               "text": "extraterrestre"
@@ -1442,7 +1479,13 @@
             {
               "id": "medecin-monstrueux",
               "text": "médecin monstrueux"
-            },
+            }
+          ]
+        },
+        {
+          "id": "rituel-epreuve-et-controle",
+          "title": "Rituel, epreuve et controle",
+          "items": [
             {
               "id": "secte-fictive-ceremonie-sacrifice-symbolique",
               "text": "secte fictive (cérémonie, sacrifice symbolique)"
@@ -1475,8 +1518,7 @@
               "id": "perte-de-controle-mental-simulee-hypnose-lavage-de-cerveau-perte-d-identite",
               "text": "perte de contrôle mental simulée (hypnose, lavage de cerveau, perte d'identité)"
             }
-          ],
-          "id": "principal"
+          ]
         }
       ],
       "color": "#4f6d9a"
@@ -1487,7 +1529,8 @@
       "type": "matrix",
       "groups": [
         {
-          "title": null,
+          "id": "roles-et-hierarchie-d-s",
+          "title": "Roles et hierarchie D/s",
           "items": [
             {
               "id": "domination-douce-ou-stricte",
@@ -1504,14 +1547,6 @@
             {
               "id": "service-et-obeissance",
               "text": "Service et obéissance"
-            },
-            {
-              "id": "protocoles-et-regles-quotidiennes-ordres-demandes-de-permission",
-              "text": "Protocoles et règles quotidiennes (ordres, demandes de permission)"
-            },
-            {
-              "id": "vouvoiement-et-titres-honorifiques",
-              "text": "Vouvoiement et titres honorifiques"
             },
             {
               "id": "maitre-maitresse",
@@ -1532,6 +1567,24 @@
             {
               "id": "collier-symbolique-et-laisse",
               "text": "Collier symbolique et laisse"
+            },
+            {
+              "id": "dressage",
+              "text": "dressage"
+            }
+          ]
+        },
+        {
+          "id": "protocoles-regles-et-cadre",
+          "title": "Protocoles, regles et cadre",
+          "items": [
+            {
+              "id": "protocoles-et-regles-quotidiennes-ordres-demandes-de-permission",
+              "text": "Protocoles et règles quotidiennes (ordres, demandes de permission)"
+            },
+            {
+              "id": "vouvoiement-et-titres-honorifiques",
+              "text": "Vouvoiement et titres honorifiques"
             },
             {
               "id": "position-d-attente",
@@ -1558,6 +1611,24 @@
               "text": "obligation de répondre"
             },
             {
+              "id": "contrat-bdsm",
+              "text": "contrat BDSM"
+            },
+            {
+              "id": "safeword-feu-tricolore",
+              "text": "Safeword (feu tricolore)"
+            },
+            {
+              "id": "debriefing-apres-la-scene",
+              "text": "débriefing après la scène"
+            }
+          ]
+        },
+        {
+          "id": "controle-sexuel",
+          "title": "Controle sexuel",
+          "items": [
+            {
               "id": "controle-de-l-orgasme-edging-orgasme-force-interdiction",
               "text": "Contrôle de l’orgasme (edging, orgasme forcé, interdiction)"
             },
@@ -1576,7 +1647,13 @@
             {
               "id": "disponibilite-sexuelle-definie-par-contrat-ou-regles-free-use-negocie",
               "text": "Disponibilité sexuelle définie par contrat ou règles (free use négocié)"
-            },
+            }
+          ]
+        },
+        {
+          "id": "scenarios-de-contrainte-simulee",
+          "title": "Scenarios de contrainte simulee",
+          "items": [
             {
               "id": "somnophilie-simulee-partenaire-feignant-de-dormir-reveil-sexuel-consenti",
               "text": "Somnophilie simulée (partenaire feignant de dormir, réveil sexuel consenti)"
@@ -1600,7 +1677,13 @@
             {
               "id": "ugly-bastard-comme-fantasme-ou-esthetique-fictive",
               "text": "ugly bastard comme fantasme ou esthétique fictive"
-            },
+            }
+          ]
+        },
+        {
+          "id": "humiliation-et-objectification",
+          "title": "Humiliation et objectification",
+          "items": [
             {
               "id": "humiliation",
               "text": "humiliation"
@@ -1618,6 +1701,16 @@
               "text": "Adoration / praise kink"
             },
             {
+              "id": "humiliation-publique-uniquement-dans-un-espace-prive-ou-entre-participants-consentants",
+              "text": "humiliation publique uniquement dans un espace privé ou entre participants consentants"
+            }
+          ]
+        },
+        {
+          "id": "recompenses-et-punitions",
+          "title": "Recompenses et punitions",
+          "items": [
+            {
               "id": "recompenses",
               "text": "récompenses"
             },
@@ -1632,7 +1725,13 @@
             {
               "id": "gifle-avec-limites-definies",
               "text": "gifle avec limites définies"
-            },
+            }
+          ]
+        },
+        {
+          "id": "impact-et-douleur",
+          "title": "Impact et douleur",
+          "items": [
             {
               "id": "instruments-souples-martinet-fouet-adapte",
               "text": "Instruments souples (martinet, fouet adapté)"
@@ -1660,7 +1759,13 @@
             {
               "id": "jeux-de-temperature-froid-chaud-modere",
               "text": "Jeux de température (froid, chaud modéré)"
-            },
+            }
+          ]
+        },
+        {
+          "id": "contrainte-et-sensations-physiques",
+          "title": "Contrainte et sensations physiques",
+          "items": [
             {
               "id": "tirage-de-cheveux",
               "text": "tirage de cheveux"
@@ -1680,7 +1785,13 @@
             {
               "id": "portage",
               "text": "portage"
-            },
+            }
+          ]
+        },
+        {
+          "id": "bondage-et-suspension",
+          "title": "Bondage et suspension",
+          "items": [
             {
               "id": "bondage-sur-une-partie-du-corps-poignets-chevilles-poitrine-corps-entier",
               "text": "Bondage sur une partie du corps (poignets, chevilles, poitrine, corps entier)"
@@ -1704,7 +1815,13 @@
             {
               "id": "privation-sensorielle-visuelle-auditive",
               "text": "Privation sensorielle (visuelle, auditive)"
-            },
+            }
+          ]
+        },
+        {
+          "id": "souffle-silence-et-exposition",
+          "title": "Souffle, silence et exposition",
+          "items": [
             {
               "id": "baillon",
               "text": "bâillon"
@@ -1724,29 +1841,8 @@
             {
               "id": "marques-temporaires-sur-le-corps-ecriture-sucons-traces-de-jeu",
               "text": "Marques temporaires sur le corps (écriture, suçons, traces de jeu)"
-            },
-            {
-              "id": "dressage",
-              "text": "dressage"
-            },
-            {
-              "id": "humiliation-publique-uniquement-dans-un-espace-prive-ou-entre-participants-consentants",
-              "text": "humiliation publique uniquement dans un espace privé ou entre participants consentants"
-            },
-            {
-              "id": "contrat-bdsm",
-              "text": "contrat BDSM"
-            },
-            {
-              "id": "safeword-feu-tricolore",
-              "text": "Safeword (feu tricolore)"
-            },
-            {
-              "id": "debriefing-apres-la-scene",
-              "text": "débriefing après la scène"
             }
-          ],
-          "id": "principal"
+          ]
         }
       ],
       "spectrums": [
@@ -1759,7 +1855,8 @@
             "Aftercare modere",
             "Aftercare attentif",
             "Aftercare tres tendre / prolonge"
-          ]
+          ],
+          "groupId": "protocoles-regles-et-cadre"
         }
       ],
       "color": "#8e3b46"
@@ -1770,7 +1867,8 @@
       "type": "matrix",
       "groups": [
         {
-          "title": null,
+          "id": "differences-et-intensite-corporelle",
+          "title": "Differences et intensite corporelle",
           "items": [
             {
               "id": "grande-difference-d-age-entre-adultes-partenaire-plus-age-ou-plus-jeune",
@@ -1793,6 +1891,20 @@
               "text": "Pénétrations multiples simultanées (double, triple, plusieurs orifices)"
             },
             {
+              "id": "endurance-prolongee",
+              "text": "endurance prolongée"
+            },
+            {
+              "id": "usage-ou-port-prolonge-d-un-jouet-plug-ou-uf",
+              "text": "Usage ou port prolongé d’un jouet, plug ou œuf"
+            }
+          ]
+        },
+        {
+          "id": "partenaires-multiples",
+          "title": "Partenaires multiples",
+          "items": [
+            {
               "id": "plusieurs-partenaires-successifs",
               "text": "plusieurs partenaires successifs"
             },
@@ -1803,22 +1915,16 @@
             {
               "id": "bukkake",
               "text": "bukkake"
-            },
-            {
-              "id": "endurance-prolongee",
-              "text": "endurance prolongée"
-            },
+            }
+          ]
+        },
+        {
+          "id": "orgasme-controle-et-immobilite",
+          "title": "Orgasme, controle et immobilite",
+          "items": [
             {
               "id": "orgasmes-forces-repetes",
               "text": "orgasmes forcés répétés"
-            },
-            {
-              "id": "usage-ou-port-prolonge-d-un-jouet-plug-ou-uf",
-              "text": "Usage ou port prolongé d’un jouet, plug ou œuf"
-            },
-            {
-              "id": "saturation-sensorielle",
-              "text": "saturation sensorielle"
             },
             {
               "id": "perte-de-controle-simulee-ou-depersonnalisation",
@@ -1829,9 +1935,15 @@
               "text": "immobilité complète"
             },
             {
-              "id": "partenaire-s-masque-s-seul-ou-en-groupe",
-              "text": "Partenaire(s) masqué(s), seul ou en groupe"
-            },
+              "id": "saturation-sensorielle",
+              "text": "saturation sensorielle"
+            }
+          ]
+        },
+        {
+          "id": "fluides-et-matieres",
+          "title": "Fluides et matieres",
+          "items": [
             {
               "id": "urine",
               "text": "urine"
@@ -1845,9 +1957,33 @@
               "text": "faux sang"
             },
             {
+              "id": "scatologie",
+              "text": "scatologie"
+            },
+            {
+              "id": "vomi-ou-salete-extreme",
+              "text": "Vomi ou saleté extrême"
+            }
+          ]
+        },
+        {
+          "id": "mise-en-scene-medicale",
+          "title": "Mise en scene medicale",
+          "items": [
+            {
               "id": "mise-en-scene-medicale-speculum-examen-corporel-fictif",
               "text": "Mise en scène médicale (spéculum, examen corporel fictif)"
             },
+            {
+              "id": "jeux-medicaux-invasifs-aiguilles-coupures-superficielles-marquage-electrostimulation",
+              "text": "Jeux médicaux invasifs (aiguilles, coupures superficielles, marquage, électrostimulation)"
+            }
+          ]
+        },
+        {
+          "id": "fantastique-et-transformation",
+          "title": "Fantastique et transformation",
+          "items": [
             {
               "id": "oviposition-ou-insemination-fictive-ponte",
               "text": "Oviposition ou insémination fictive (ponte)"
@@ -1859,6 +1995,20 @@
             {
               "id": "inflation-fictive",
               "text": "inflation fictive"
+            },
+            {
+              "id": "transformation-animale-ou-creature-anthropomorphe",
+              "text": "Transformation animale ou créature anthropomorphe"
+            }
+          ]
+        },
+        {
+          "id": "exhibition-voyeurisme-et-regard",
+          "title": "Exhibition, voyeurisme et regard",
+          "items": [
+            {
+              "id": "partenaire-s-masque-s-seul-ou-en-groupe",
+              "text": "Partenaire(s) masqué(s), seul ou en groupe"
             },
             {
               "id": "exhibitionnisme-entre-personnes-consentantes-etre-regarde-par-plusieurs-participants",
@@ -1877,20 +2027,22 @@
               "text": "Scénario de risque d’être découvert (lieu interdit simulé, scène publique reconstituée)"
             },
             {
+              "id": "se-toucher-en-presence-de-son-partenaire",
+              "text": "Te toucher en presence de ton partenaire",
+              "variants": [
+                "Il sait",
+                "Il ne sait pas"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "humiliation-peur-et-mises-en-scene-extremes",
+          "title": "Humiliation, peur et mises en scene extremes",
+          "items": [
+            {
               "id": "humiliation-publique-fictive",
               "text": "humiliation publique fictive"
-            },
-            {
-              "id": "scatologie",
-              "text": "scatologie"
-            },
-            {
-              "id": "vomi-ou-salete-extreme",
-              "text": "Vomi ou saleté extrême"
-            },
-            {
-              "id": "jeux-medicaux-invasifs-aiguilles-coupures-superficielles-marquage-electrostimulation",
-              "text": "Jeux médicaux invasifs (aiguilles, coupures superficielles, marquage, électrostimulation)"
             },
             {
               "id": "jeux-de-peur-mis-en-scene-faux-enlevement-fausse-agression-fausse-mise-a-mort",
@@ -1903,21 +2055,8 @@
             {
               "id": "fantasmes-de-bestialite-uniquement-sous-forme-fictive-dessinee-ecrite-ou-avec-accessoires",
               "text": "Fantasmes de bestialité, uniquement sous forme fictive, dessinée, écrite ou avec accessoires"
-            },
-            {
-              "id": "transformation-animale-ou-creature-anthropomorphe",
-              "text": "Transformation animale ou créature anthropomorphe"
-            },
-            {
-              "id": "se-toucher-en-presence-de-son-partenaire",
-              "text": "Te toucher en presence de ton partenaire",
-              "variants": [
-                "Il sait",
-                "Il ne sait pas"
-              ]
             }
-          ],
-          "id": "principal"
+          ]
         }
       ],
       "rankings": [
@@ -1939,7 +2078,7 @@
             "itemId": "fantasmes-de-bestialite-uniquement-sous-forme-fictive-dessinee-ecrite-ou-avec-accessoires"
           },
           "checkable": true,
-          "groupId": "principal"
+          "groupId": "humiliation-peur-et-mises-en-scene-extremes"
         }
       ],
       "color": "#4a4a4a"
