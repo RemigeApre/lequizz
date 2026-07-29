@@ -472,6 +472,24 @@
             }
           ],
           "id": "lieux"
+        },
+        {
+          "id": "contexte-et-communication",
+          "title": "Contexte et communication",
+          "items": [
+            {
+              "id": "sexting-messages-ou-photos-explicites",
+              "text": "Sexting (messages ou photos explicites)"
+            },
+            {
+              "id": "role-play-numerique-a-distance",
+              "text": "Role play numerique (par message ou appel, a distance)"
+            },
+            {
+              "id": "sexe-sous-influence-alcool-drogue",
+              "text": "Sexe sous influence (alcool, drogue)"
+            }
+          ]
         }
       ],
       "rankings": [
@@ -625,6 +643,18 @@
             "Moyen",
             "Gros",
             "Tres gros"
+          ]
+        },
+        {
+          "id": "age",
+          "label": "Preference d'age (du partenaire)",
+          "type": "choice",
+          "options": [
+            "Beaucoup plus jeune",
+            "Plus jeune",
+            "Meme age",
+            "Plus age",
+            "Beaucoup plus age"
           ]
         }
       ],
