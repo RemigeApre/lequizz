@@ -6,10 +6,6 @@
     select.classList.add("freq-val-" + value);
   }
 
-  function levelOptionLabel(select, levelKey) {
-    return select.querySelector('option[value="' + levelKey + '"]');
-  }
-
   document.querySelectorAll(".level-picker").forEach(function (picker) {
     var itemCard = picker.closest(".item-card");
     var levelSelect = picker.querySelector(".level-select");
@@ -26,12 +22,6 @@
       var levelKey = levelSelect.value;
       var hidden = hiddenFor(levelKey);
       if (hidden) hidden.value = freqSelect.value;
-      var opt = levelOptionLabel(levelSelect, levelKey);
-      if (opt) {
-        var baseLabel = opt.textContent.replace(/\s*\([^)]*\)\s*$/, "");
-        var freqLabel = freqSelect.options[freqSelect.selectedIndex].textContent;
-        opt.textContent = baseLabel + " (" + freqLabel + ")";
-      }
       setFreqClass(freqSelect, freqSelect.value);
     });
 

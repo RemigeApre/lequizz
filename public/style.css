@@ -655,6 +655,8 @@ body.nav-drawer-locked {
   border-left-width: 6px;
   border-left-style: solid;
   font-weight: 600;
+  text-align: center;
+  text-align-last: center;
 }
 
 .level-picker .freq-select {

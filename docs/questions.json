@@ -33,7 +33,7 @@
   "sections": [
     {
       "key": "fondamentaux",
-      "title": "I — Fondamentaux",
+      "title": "Fondamentaux",
       "type": "matrix",
       "groups": [
         {
@@ -527,7 +527,7 @@
     },
     {
       "key": "corps",
-      "title": "II — Corps et attirances",
+      "title": "Corps et attirances",
       "type": "profile",
       "intro": "Ici les reponses ne sont pas sur l'echelle de frequence : ce sont des preferences directes.",
       "fields": [
@@ -598,7 +598,7 @@
     },
     {
       "key": "objets",
-      "title": "III — Objets",
+      "title": "Objets",
       "type": "matrix",
       "groups": [
         {
@@ -821,7 +821,7 @@
     },
     {
       "key": "fetichisme",
-      "title": "IV — Fetichismes",
+      "title": "Fetichismes",
       "type": "matrix",
       "groups": [
         {
@@ -1035,7 +1035,7 @@
     },
     {
       "key": "jeuxderole",
-      "title": "V — Jeux de role",
+      "title": "Jeux de role",
       "type": "matrix",
       "groups": [
         {
@@ -1321,7 +1321,7 @@
     },
     {
       "key": "bdsm",
-      "title": "VI — BDSM",
+      "title": "BDSM",
       "type": "matrix",
       "groups": [
         {
@@ -1604,7 +1604,7 @@
     },
     {
       "key": "autrehard",
-      "title": "VII — Autre hard",
+      "title": "Autre hard",
       "type": "matrix",
       "groups": [
         {

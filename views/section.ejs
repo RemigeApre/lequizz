@@ -85,8 +85,7 @@
                         <div class="level-picker" data-item-id="<%= item.id %>" data-variant-key="<%= vKey %>">
                           <select class="level-select" style="border-left-color: <%= LEVEL_COLORS[displayLevelKey] %>">
                             <% config.levels.forEach(function (lvl) { %>
-                              <% var v = variantExisting ? Number(variantExisting[lvl.key]) || 1 : 1; %>
-                              <option value="<%= lvl.key %>" <%= lvl.key === displayLevelKey ? "selected" : "" %> style="background-color: <%= LEVEL_COLORS[lvl.key] %>; color: #fff;"><%= lvl.label %> (<%= config.scaleLabels[v - 1] %>)</option>
+                              <option value="<%= lvl.key %>" <%= lvl.key === displayLevelKey ? "selected" : "" %> style="background-color: <%= LEVEL_COLORS[lvl.key] %>; color: #fff;"><%= lvl.label %></option>
                             <% }) %>
                           </select>
                           <select class="freq-select freq-val-<%= vDispVal %>">
@@ -109,8 +108,7 @@
                   <div class="level-picker" data-item-id="<%= item.id %>">
                     <select class="level-select" style="border-left-color: <%= LEVEL_COLORS[displayLevelKey] %>">
                       <% config.levels.forEach(function (lvl) { %>
-                        <% var v = itemExisting ? Number(itemExisting[lvl.key]) || 1 : 1; %>
-                        <option value="<%= lvl.key %>" <%= lvl.key === displayLevelKey ? "selected" : "" %> style="background-color: <%= LEVEL_COLORS[lvl.key] %>; color: #fff;"><%= lvl.label %> (<%= config.scaleLabels[v - 1] %>)</option>
+                        <option value="<%= lvl.key %>" <%= lvl.key === displayLevelKey ? "selected" : "" %> style="background-color: <%= LEVEL_COLORS[lvl.key] %>; color: #fff;"><%= lvl.label %></option>
                       <% }) %>
                     </select>
                     <select class="freq-select freq-val-<%= dispVal %>">
