@@ -1,20 +1,37 @@
 <div class="top-nav">
   <a href="/" class="top-nav-brand"><%= config.title %></a>
-  <details class="nav-menu">
-    <summary title="Menu">&#9776;</summary>
-    <nav class="nav-menu-list">
-      <a href="/" class="nav-menu-item">
-        <span class="nav-menu-dot nav-menu-dot-home">&#8226;</span> Accueil
-      </a>
-      <a href="/results" class="nav-menu-item">
-        <span class="nav-menu-dot nav-menu-dot-key">&#128273;</span> Resultats
-      </a>
-      <div class="nav-menu-divider"></div>
-      <% config.sections.forEach(function (s, i) { %>
-        <a href="/section/<%= i %>" class="nav-menu-item">
-          <span class="nav-menu-dot" style="background: <%= s.color || 'var(--accent)' %>"></span> <%= s.title %>
-        </a>
-      <% }) %>
-    </nav>
-  </details>
+  <button type="button" class="nav-burger" id="nav-burger" aria-label="Menu" aria-expanded="false" aria-controls="nav-drawer">
+    &#9776;
+  </button>
 </div>
+
+<div class="nav-backdrop" id="nav-backdrop"></div>
+
+<aside class="nav-drawer" id="nav-drawer" aria-hidden="true">
+  <div class="nav-drawer-header">
+    <span class="nav-drawer-title"><%= config.title %></span>
+    <button type="button" class="nav-drawer-close" id="nav-drawer-close" aria-label="Fermer">&#10005;</button>
+  </div>
+
+  <nav class="nav-drawer-body">
+    <a href="/" class="nav-drawer-link nav-drawer-link-home">Accueil</a>
+
+    <details class="nav-drawer-group" open>
+      <summary class="nav-drawer-group-summary">Quizz</summary>
+      <div class="nav-drawer-sublist">
+        <% config.sections.forEach(function (s, i) { %>
+          <a href="/section/<%= i %>" class="nav-drawer-link">
+            <span class="nav-drawer-dot" style="background: <%= s.color || 'var(--accent)' %>"></span> <%= s.title %>
+          </a>
+        <% }) %>
+      </div>
+    </details>
+
+    <span class="nav-drawer-link nav-drawer-link-disabled">Dictionnaire</span>
+    <span class="nav-drawer-link nav-drawer-link-disabled">Liens</span>
+  </nav>
+
+  <div class="nav-drawer-footer">
+    <a href="/admin" class="nav-drawer-admin" title="Panneau admin">&#128273;</a>
+  </div>
+</aside>
