@@ -586,13 +586,29 @@ body.nav-drawer-locked {
 
 .level-picker select {
   width: 100%;
-  background: var(--card);
+  background-color: var(--card);
   color: var(--fg);
   border: 2px solid var(--border);
-  border-radius: 8px;
-  padding: 0.65rem 0.6rem;
+  border-radius: 10px;
+  padding: 0.65rem 2.3rem 0.65rem 0.75rem;
   font-size: 1rem;
   min-height: 2.75rem;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%238a8a8a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.8rem center;
+  background-size: 0.8rem;
+}
+
+.level-picker select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 .level-picker .level-select {
@@ -606,34 +622,36 @@ body.nav-drawer-locked {
 .level-picker .freq-select {
   font-weight: 700;
   text-align: center;
+  text-align-last: center;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
 }
 
 .freq-select.freq-val-1 {
-  background: #141414;
+  background-color: #141414;
   color: #fff;
   border-color: #000;
 }
 
 .freq-select.freq-val-2 {
-  background: #c62828;
+  background-color: #c62828;
   color: #fff;
   border-color: #991f1f;
 }
 
 .freq-select.freq-val-3 {
-  background: #c77b23;
+  background-color: #c77b23;
   color: #fff;
   border-color: #a3631b;
 }
 
 .freq-select.freq-val-4 {
-  background: #a3a02b;
+  background-color: #a3a02b;
   color: #fff;
   border-color: #837f22;
 }
 
 .freq-select.freq-val-5 {
-  background: #2e7d32;
+  background-color: #2e7d32;
   color: #fff;
   border-color: #245e26;
 }

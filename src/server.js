@@ -50,6 +50,15 @@ app.set("views", path.join(__dirname, "..", "views"));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "..", "public")));
 
+// Casse le cache navigateur (surtout mobile, tres agressif) a chaque
+// redemarrage du serveur : sans ca, un correctif JS/CSS deploye peut
+// continuer a servir l'ancienne version depuis le cache pendant des jours.
+const ASSET_VERSION = String(Date.now());
+app.use((req, res, next) => {
+  res.locals.assetVersion = ASSET_VERSION;
+  next();
+});
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "change_me",

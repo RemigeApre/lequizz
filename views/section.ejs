@@ -204,7 +204,7 @@
   window.DEFAULT_SCALE = <%- JSON.stringify(config.scaleLabels) %>;
   window.JAMAIS_SCALE = <%- JSON.stringify(scaleForLevel("jamais")) %>;
 </script>
-<script src="/quiz.js"></script>
-<script src="/section.js"></script>
-<script src="/autosave.js"></script>
+<script src="/quiz.js?v=<%= assetVersion %>"></script>
+<script src="/section.js?v=<%= assetVersion %>"></script>
+<script src="/autosave.js?v=<%= assetVersion %>"></script>
 <%- include('partials/foot') %>
