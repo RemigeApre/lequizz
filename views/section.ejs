@@ -8,7 +8,7 @@
     var LEVEL_COLORS = { a: "#6c8ebf", b: "#9b6cbf", c: "#4fa5a0", d: "#d9932f", e: "#c0455a" };
   %>
 
-  <form method="POST" action="/section/<%= idx %>" style="--section-color: <%= section.color || '' %>;">
+  <form method="POST" action="/section/<%= idx %>" data-autosave-url="/section/<%= idx %>/autosave" style="--section-color: <%= section.color || '' %>;">
     <% if (section.type === "matrix") { %>
       <% var multiGroup = section.groups.length > 1; %>
 
@@ -183,7 +183,9 @@
       <button type="submit"><%= idx + 1 >= total ? "Voir mon resultat" : "Section suivante" %></button>
     </div>
   </form>
+  <div id="autosave-status" class="autosave-status"></div>
 </main>
 <script src="/quiz.js"></script>
 <script src="/section.js"></script>
+<script src="/autosave.js"></script>
 <%- include('partials/foot') %>

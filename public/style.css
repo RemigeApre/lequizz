@@ -701,6 +701,28 @@ body.nav-drawer-locked {
   color: var(--fg);
 }
 
+.autosave-status {
+  position: fixed;
+  left: 50%;
+  bottom: 1.1rem;
+  transform: translateX(-50%);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 50;
+}
+
+.autosave-status.visible {
+  opacity: 1;
+}
+
 .form-actions {
   display: flex;
   flex-wrap: wrap;

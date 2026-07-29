@@ -7,6 +7,22 @@
       return li.dataset.index;
     });
     input.value = order.join(",");
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+
+    if (list.classList.contains("ranking-checkable")) {
+      var checkedInput = list.parentElement.querySelector(
+        'input.ranking-checked[name="' + list.dataset.questionId + '_checked"]'
+      );
+      var checkedIdxs = [];
+      Array.prototype.forEach.call(list.children, function (li) {
+        var cb = li.querySelector(".ranking-check");
+        if (cb && cb.checked) checkedIdxs.push(li.dataset.index);
+      });
+      if (checkedInput) {
+        checkedInput.value = checkedIdxs.join(",");
+        checkedInput.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    }
   }
 
   function getDragAfterElement(list, y) {
@@ -51,6 +67,13 @@
       } else {
         list.insertBefore(dragging, after);
       }
+    });
+
+    list.addEventListener("change", function (e) {
+      if (!e.target.classList.contains("ranking-check")) return;
+      var li = e.target.closest("li");
+      if (li) li.classList.toggle("unchecked", !e.target.checked);
+      updateOrderInput(list);
     });
   });
 })();

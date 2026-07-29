@@ -92,6 +92,38 @@ function parseSectionSubmission(config, section, body) {
   return {};
 }
 
+function applySectionSubmission(config, attempt, section, idx, body) {
+  attempt.data[section.key] = parseSectionSubmission(config, section, body);
+
+  attempt.data.__bookmarks = Object.assign(
+    { toTest: {}, dislike: {}, favorite: {} },
+    attempt.data.__bookmarks || {}
+  );
+  attempt.data.__doneGroups = attempt.data.__doneGroups || {};
+
+  if (section.type === "matrix") {
+    const items = flattenItems(section);
+    items.forEach((_, i) => {
+      const key = `${section.key}:${i}`;
+      if (body[`test_${i}`] === "1") attempt.data.__bookmarks.toTest[key] = true;
+      else delete attempt.data.__bookmarks.toTest[key];
+      if (body[`dislike_${i}`] === "1") attempt.data.__bookmarks.dislike[key] = true;
+      else delete attempt.data.__bookmarks.dislike[key];
+      if (body[`fav_${i}`] === "1") attempt.data.__bookmarks.favorite[key] = true;
+      else delete attempt.data.__bookmarks.favorite[key];
+    });
+    section.groups.forEach((group, gi) => {
+      const gkey = `${section.key}:${gi}`;
+      if (body[`done_${gi}`] === "1") attempt.data.__doneGroups[gkey] = true;
+      else delete attempt.data.__doneGroups[gkey];
+    });
+  }
+
+  // Filet de securite : chaque sauvegarde (soumission finale ou autosave)
+  // part aussi dans un CSV en texte brut, independant de SQLite.
+  csvLog.append("section_save", SHARED_TOKEN, section.key, idx, attempt.data[section.key]);
+}
+
 function buildQuizRouter(config) {
   const router = express.Router();
 
@@ -144,35 +176,7 @@ function buildQuizRouter(config) {
     const attempt = getAttempt(SHARED_TOKEN) || { data: {}, nextSection: 0 };
     const section = config.sections[idx];
 
-    attempt.data[section.key] = parseSectionSubmission(config, section, req.body);
-
-    attempt.data.__bookmarks = Object.assign(
-      { toTest: {}, dislike: {}, favorite: {} },
-      attempt.data.__bookmarks || {}
-    );
-    attempt.data.__doneGroups = attempt.data.__doneGroups || {};
-
-    if (section.type === "matrix") {
-      const items = flattenItems(section);
-      items.forEach((_, i) => {
-        const key = `${section.key}:${i}`;
-        if (req.body[`test_${i}`] === "1") attempt.data.__bookmarks.toTest[key] = true;
-        else delete attempt.data.__bookmarks.toTest[key];
-        if (req.body[`dislike_${i}`] === "1") attempt.data.__bookmarks.dislike[key] = true;
-        else delete attempt.data.__bookmarks.dislike[key];
-        if (req.body[`fav_${i}`] === "1") attempt.data.__bookmarks.favorite[key] = true;
-        else delete attempt.data.__bookmarks.favorite[key];
-      });
-      section.groups.forEach((group, gi) => {
-        const gkey = `${section.key}:${gi}`;
-        if (req.body[`done_${gi}`] === "1") attempt.data.__doneGroups[gkey] = true;
-        else delete attempt.data.__doneGroups[gkey];
-      });
-    }
-
-    // Safety net: append every section save to a plain CSV log, independent
-    // of the SQLite write below, in case that ever fails or the process dies.
-    csvLog.append("section_save", SHARED_TOKEN, section.key, idx, attempt.data[section.key]);
+    applySectionSubmission(config, attempt, section, idx, req.body);
 
     const nextIdx = idx + 1;
     attempt.nextSection = Math.max(attempt.nextSection, Math.min(nextIdx, config.sections.length - 1));
@@ -188,6 +192,25 @@ function buildQuizRouter(config) {
     }
 
     res.redirect(`/section/${nextIdx}`);
+  });
+
+  // Sauvegarde silencieuse a chaque modification (select, coche, favori...),
+  // sans avancer la progression ni finaliser le quiz : evite de perdre une
+  // reponse si on ferme l'onglet ou qu'on repart vers une autre section
+  // sans avoir clique sur le bouton "Section suivante".
+  router.post("/section/:idx/autosave", (req, res) => {
+    const idx = Number(req.params.idx);
+    if (!Number.isInteger(idx) || idx < 0 || idx >= config.sections.length) {
+      return res.status(400).json({ ok: false });
+    }
+
+    const attempt = getAttempt(SHARED_TOKEN) || { data: {}, nextSection: 0 };
+    const section = config.sections[idx];
+
+    applySectionSubmission(config, attempt, section, idx, req.body);
+    saveAttempt(SHARED_TOKEN, attempt.data, attempt.nextSection);
+
+    res.json({ ok: true });
   });
 
   return router;
