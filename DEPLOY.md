@@ -512,10 +512,25 @@ apparait mais que le dernier `GET /` renvoie quand meme vers `/gate`, le
 souci est cote navigateur (vide les cookies du site et reessaie) — pas
 cote serveur.
 
-### Si une commande SSH "fige" le terminal
+### Si une commande SSH "fige" le terminal, ou si le site se bloque en reseau mobile
 
-Deja rencontre plusieurs fois : ce n'est pas le VPS qui bloque, c'est la
-session SSH locale qui meurt silencieusement (Ctrl+C ne repond plus).
-Ferme completement l'onglet/fenetre du terminal et reconnecte-toi
-(`ssh vps`) plutot que d'essayer de forcer la commande — ca repart
-instantanement, sans rien casser cote serveur.
+Cause reelle identifiee : partage de connexion / tethering mobile. Ce mode
+de connexion ajoute une couche d'encapsulation supplementaire qui reduit
+le MTU reellement utilisable sur le chemin, sans que personne ne le
+signale proprement (le "trou noir PMTU" : les paquets trop gros sont
+silencieusement jetes au lieu de declencher une reponse ICMP "fragmentation
+needed"). Resultat cote client : SSH qui se fige d'un coup (Ctrl+C ne
+repond plus), ou une page HTTPS qui ne charge jamais — ce n'est ni le VPS,
+ni l'app, ni le cookie de session qui sont en cause. Ca ne se produit que
+sur reseau mobile ; en Wi-Fi, aucun probleme.
+
+**Fix cote client** (sur l'appareil qui partage sa connexion) : abaisser
+la taille de paquet/MTU utilisee, par exemple a 1400 (au lieu de 1500 par
+defaut) pour laisser de la marge a l'encapsulation ajoutee par le
+tethering. Une fois applique, SSH et le site fonctionnent normalement,
+meme en deplacement.
+
+Si malgre tout une commande SSH se fige un jour sans lien avec ca : ferme
+completement l'onglet/fenetre du terminal et reconnecte-toi (`ssh vps`)
+plutot que d'essayer de forcer la commande — ca repart instantanement,
+sans rien casser cote serveur.
