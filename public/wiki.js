@@ -177,7 +177,6 @@
   var step2     = document.getElementById("wiki-step2");
   var catInput  = document.getElementById("wiki-new-cat-input");
   var catBadge  = document.getElementById("wiki-new-cat-badge");
-  var changeBtn = document.getElementById("wiki-change-cat");
   var cancelBtn = document.getElementById("wiki-cancel-new");
   var newOwned  = document.getElementById("wiki-new-owned");
   var newPosMeta = step2 ? step2.querySelector(".wiki-position-meta") : null;
@@ -202,22 +201,24 @@
         var key   = card.dataset.category;
         var hue   = card.dataset.hue  || 220;
         var label = card.dataset.label || key;
-        if (catInput)  catInput.value = key;
+        if (catInput) catInput.value = key;
         if (catBadge) {
           catBadge.textContent = label;
           catBadge.style.background = "hsl(" + hue + ", 55%, 45%)";
         }
-        // Champs conditionnels
-        if (newOwned)  newOwned.hidden  = key !== "objets" && key !== "tenues";
+        // Champs conditionnels — owned uniquement objets/tenues
+        if (newOwned)   newOwned.hidden   = key !== "objets" && key !== "tenues";
         if (newPosMeta) newPosMeta.hidden = key !== "position";
         showStep(2);
       });
     });
   }
 
-  if (changeBtn) {
-    changeBtn.addEventListener("click", function () { showStep(1); });
+  // Badge cliquable pour revenir à l'étape 1
+  if (catBadge) {
+    catBadge.addEventListener("click", function () { showStep(1); });
   }
+
   if (cancelBtn) {
     cancelBtn.addEventListener("click", function () { showStep(0); });
   }
