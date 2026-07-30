@@ -4,7 +4,7 @@
   <a href="/wiki" class="link-button">&larr; Retour au wiki</a>
 
   <% var cat = categories.find(function (c) { return c.key === page.category; }); %>
-  <div class="wiki-detail">
+  <article class="wiki-detail">
     <% if (page.imagePath) { %>
       <img src="<%= page.imagePath %>" alt="" class="wiki-detail-image" />
     <% } %>
@@ -23,7 +23,7 @@
     <% } %>
 
     <% if (page.content) { %>
-      <p class="wiki-detail-content"><%= page.content %></p>
+      <div class="wiki-md"><span class="wiki-md-raw" hidden><%= page.content %></span></div>
     <% } %>
 
     <div class="wiki-detail-actions">
@@ -32,7 +32,9 @@
         <button type="submit" class="link-delete-btn-text">Supprimer</button>
       </form>
     </div>
-  </div>
+
+    <p class="wiki-detail-meta">Mis &agrave; jour le <%= new Date(page.updatedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) %></p>
+  </article>
 </main>
 <script src="/wiki.js?v=<%= assetVersion %>"></script>
 <%- include('partials/foot') %>

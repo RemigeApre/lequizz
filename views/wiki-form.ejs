@@ -2,20 +2,16 @@
 <main class="container">
   <%- include('partials/top-nav', { config: config }) %>
   <a href="/wiki/<%= page.id %>" class="link-button">&larr; Retour</a>
-  <h1 class="section-title-h1">Modifier la page</h1>
+  <h1 class="section-title-h1">Modifier</h1>
 
-  <% if (page.imagePath) { %>
-    <img src="<%= page.imagePath %>" alt="" class="wiki-form-current-image" />
-  <% } %>
-
-  <form method="POST" action="/wiki/<%= page.id %>" enctype="multipart/form-data" class="links-add-form">
+  <form method="POST" action="/wiki/<%= page.id %>" enctype="multipart/form-data" class="links-add-form wiki-form">
     <label class="links-field">
       <span class="links-field-label">Titre</span>
       <input type="text" name="title" required value="<%= page.title %>" />
     </label>
 
     <label class="links-field">
-      <span class="links-field-label">Categorie</span>
+      <span class="links-field-label">Cat&eacute;gorie</span>
       <select name="category" id="wiki-category-select" class="wiki-category-select">
         <% categories.forEach(function (c) { %>
           <option value="<%= c.key %>" <%= c.key === page.category ? "selected" : "" %>><%= c.label %></option>
@@ -26,24 +22,54 @@
     <label class="links-field wiki-owned-field" id="wiki-owned-field" <%= page.category === "objets" ? "" : "hidden" %>>
       <span class="chip-option">
         <input type="checkbox" name="owned" <%= page.owned ? "checked" : "" %> />
-        <span>On possede cet objet</span>
+        <span>On poss&egrave;de cet objet</span>
       </span>
     </label>
 
-    <label class="links-field">
-      <span class="links-field-label">Contenu</span>
-      <textarea name="content" rows="4"><%= page.content %></textarea>
-    </label>
+    <div class="links-field">
+      <span class="links-field-label">Contenu <span class="wiki-md-hint">(Markdown support&eacute;)</span></span>
+      <div class="wiki-editor">
+        <div class="md-toolbar">
+          <button type="button" class="md-btn" data-md="bold" title="Gras (Ctrl+B)"><strong>B</strong></button>
+          <button type="button" class="md-btn md-btn-italic" data-md="italic" title="Italique (Ctrl+I)"><em>I</em></button>
+          <span class="md-sep"></span>
+          <button type="button" class="md-btn" data-md="h2" title="Titre">H2</button>
+          <button type="button" class="md-btn" data-md="h3" title="Sous-titre">H3</button>
+          <span class="md-sep"></span>
+          <button type="button" class="md-btn" data-md="list" title="Liste &agrave; puces">&#8226;&nbsp;Liste</button>
+          <button type="button" class="md-btn" data-md="hr" title="S&eacute;parateur">&mdash;</button>
+          <div class="md-toolbar-spacer"></div>
+          <button type="button" class="md-btn md-preview-btn" title="Aper&ccedil;u">Aper&ccedil;u</button>
+        </div>
+        <textarea name="content" class="wiki-textarea" rows="10" placeholder="Description, notes... (Markdown support&eacute;)"><%= page.content %></textarea>
+        <div class="wiki-md-preview wiki-md" hidden></div>
+      </div>
+    </div>
 
-    <label class="links-field">
-      <span class="links-field-label">Tags (separes par des virgules)</span>
-      <input type="text" name="tags" value="<%= page.tags.join(', ') %>" />
-    </label>
+    <div class="links-field">
+      <span class="links-field-label">Tags <span class="wiki-md-hint">(s&eacute;par&eacute;s par des virgules)</span></span>
+      <input type="text" id="wiki-tags-edit" name="tags" value="<%= page.tags.join(', ') %>" placeholder="ex : exhib, pov, brunette" autocomplete="off" />
+      <% if (allTags.length) { %>
+        <div class="wiki-tag-suggestions" data-for="wiki-tags-edit">
+          <% allTags.forEach(function (t) { %>
+            <button type="button" class="wiki-tag-chip" data-tag="<%= t %>"><%= t %></button>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
 
-    <label class="links-field">
-      <span class="links-field-label">Remplacer l'image (optionnel)</span>
-      <input type="file" name="image" accept="image/*" />
-    </label>
+    <div class="links-field wiki-image-field">
+      <span class="links-field-label">Image</span>
+      <% if (page.imagePath) { %>
+        <img src="<%= page.imagePath %>" alt="" class="wiki-form-current-image" id="wiki-current-image" />
+        <label class="chip-option wiki-image-remove-label">
+          <input type="checkbox" name="remove_image" id="wiki-remove-image" />
+          <span>Supprimer l&apos;image</span>
+        </label>
+      <% } %>
+      <input type="file" name="image" accept="image/*" class="wiki-image-input" />
+      <img class="wiki-image-preview-new" hidden alt="Aper&ccedil;u" />
+    </div>
 
     <button type="submit">Enregistrer</button>
   </form>

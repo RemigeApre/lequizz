@@ -5,14 +5,14 @@
 
   <details class="links-add-card">
     <summary class="links-add-summary">Ajouter une page</summary>
-    <form method="POST" action="/wiki" enctype="multipart/form-data" class="links-add-form">
+    <form method="POST" action="/wiki" enctype="multipart/form-data" class="links-add-form wiki-form">
       <label class="links-field">
         <span class="links-field-label">Titre</span>
         <input type="text" name="title" required placeholder="Titre de la page" />
       </label>
 
       <label class="links-field">
-        <span class="links-field-label">Categorie</span>
+        <span class="links-field-label">Cat&eacute;gorie</span>
         <select name="category" id="wiki-category-select" class="wiki-category-select">
           <% categories.forEach(function (c) { %>
             <option value="<%= c.key %>"><%= c.label %></option>
@@ -23,24 +23,47 @@
       <label class="links-field wiki-owned-field" id="wiki-owned-field" hidden>
         <span class="chip-option">
           <input type="checkbox" name="owned" />
-          <span>On possede cet objet</span>
+          <span>On poss&egrave;de cet objet</span>
         </span>
       </label>
 
-      <label class="links-field">
-        <span class="links-field-label">Contenu</span>
-        <textarea name="content" rows="4" placeholder="Description, notes..."></textarea>
-      </label>
+      <div class="links-field">
+        <span class="links-field-label">Contenu <span class="wiki-md-hint">(Markdown support&eacute;)</span></span>
+        <div class="wiki-editor">
+          <div class="md-toolbar">
+            <button type="button" class="md-btn" data-md="bold" title="Gras (Ctrl+B)"><strong>B</strong></button>
+            <button type="button" class="md-btn md-btn-italic" data-md="italic" title="Italique (Ctrl+I)"><em>I</em></button>
+            <span class="md-sep"></span>
+            <button type="button" class="md-btn" data-md="h2" title="Titre">H2</button>
+            <button type="button" class="md-btn" data-md="h3" title="Sous-titre">H3</button>
+            <span class="md-sep"></span>
+            <button type="button" class="md-btn" data-md="list" title="Liste &agrave; puces">&#8226;&nbsp;Liste</button>
+            <button type="button" class="md-btn" data-md="hr" title="S&eacute;parateur">&mdash;</button>
+            <div class="md-toolbar-spacer"></div>
+            <button type="button" class="md-btn md-preview-btn" title="Aper&ccedil;u">Aper&ccedil;u</button>
+          </div>
+          <textarea name="content" class="wiki-textarea" rows="6" placeholder="Description, notes... (Markdown support&eacute;)"></textarea>
+          <div class="wiki-md-preview wiki-md" hidden></div>
+        </div>
+      </div>
 
-      <label class="links-field">
-        <span class="links-field-label">Tags (separes par des virgules)</span>
-        <input type="text" name="tags" placeholder="ex : exhib, pov, brunette" />
-      </label>
+      <div class="links-field">
+        <span class="links-field-label">Tags <span class="wiki-md-hint">(s&eacute;par&eacute;s par des virgules)</span></span>
+        <input type="text" id="wiki-tags-add" name="tags" placeholder="ex : exhib, pov, brunette" autocomplete="off" />
+        <% if (allTags.length) { %>
+          <div class="wiki-tag-suggestions" data-for="wiki-tags-add">
+            <% allTags.forEach(function (t) { %>
+              <button type="button" class="wiki-tag-chip" data-tag="<%= t %>"><%= t %></button>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
 
-      <label class="links-field">
+      <div class="links-field wiki-image-field">
         <span class="links-field-label">Image (optionnel)</span>
-        <input type="file" name="image" accept="image/*" />
-      </label>
+        <input type="file" name="image" accept="image/*" class="wiki-image-input" />
+        <img class="wiki-image-preview-new" hidden alt="Aper&ccedil;u" />
+      </div>
 
       <button type="submit">Ajouter</button>
     </form>
@@ -65,7 +88,7 @@
 
   <div class="wiki-grid" id="wiki-list">
     <% if (!pages.length) { %>
-      <p class="intro">Aucune page pour l'instant.</p>
+      <p class="intro">Aucune page pour l&apos;instant.</p>
     <% } %>
     <% pages.forEach(function (page) { %>
       <% var cat = categories.find(function (c) { return c.key === page.category; }); %>
@@ -80,7 +103,7 @@
           </div>
           <p class="wiki-card-title"><%= page.title %></p>
           <% if (page.content) { %>
-            <p class="wiki-card-excerpt"><%= page.content.slice(0, 120) %><%= page.content.length > 120 ? "…" : "" %></p>
+            <p class="wiki-card-excerpt"><%= page.content.slice(0, 120) %><%= page.content.length > 120 ? "&hellip;" : "" %></p>
           <% } %>
           <% if (page.tags.length) { %>
             <div class="link-card-tags">

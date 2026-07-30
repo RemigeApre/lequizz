@@ -86,7 +86,11 @@ function buildWikiRouter(config) {
     const id = Number(req.params.id);
     const page = Number.isInteger(id) ? getWikiPage(id) : null;
     if (!page) return res.redirect("/wiki");
-    res.render("wiki-form", { config, categories: CATEGORIES, page });
+    const pages = listWikiPages();
+    const allTags = Array.from(new Set(pages.flatMap((p) => p.tags))).sort((a, b) =>
+      a.localeCompare(b, "fr")
+    );
+    res.render("wiki-form", { config, categories: CATEGORIES, page, allTags });
   });
 
   router.post("/:id", upload.single("image"), (req, res) => {
@@ -99,7 +103,14 @@ function buildWikiRouter(config) {
     const content = String(req.body.content || "").trim();
     const tags = parseTags(req.body.tags);
     const owned = category === "objets" && req.body.owned === "on";
-    const imagePath = req.file ? `/uploads/wiki/${req.file.filename}` : undefined;
+
+    let imagePath;
+    if (req.file) {
+      imagePath = `/uploads/wiki/${req.file.filename}`;
+    } else if (req.body.remove_image === "on") {
+      imagePath = null;
+    }
+    // undefined = conserver l'image existante
 
     updateWikiPage(id, { title, category, content, tags, imagePath, owned });
     res.redirect(`/wiki/${id}`);

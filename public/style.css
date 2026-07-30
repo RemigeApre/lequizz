@@ -1343,6 +1343,191 @@ input[type="text"], input[type="password"] {
   line-height: 1.6;
 }
 
+/* Markdown rendered content */
+.wiki-md {
+  line-height: 1.75;
+}
+
+.wiki-md h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 1.5rem 0 0.4rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--fg);
+}
+
+.wiki-md h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 1.1rem 0 0.3rem;
+  color: var(--fg);
+}
+
+.wiki-md p {
+  margin: 0 0 0.7rem;
+}
+
+.wiki-md ul {
+  margin: 0 0 0.7rem;
+  padding-left: 1.4rem;
+}
+
+.wiki-md li {
+  margin-bottom: 0.2rem;
+}
+
+.wiki-md code {
+  background: var(--border);
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+  font-size: 0.88em;
+  font-family: ui-monospace, monospace;
+}
+
+.wiki-md hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.25rem 0;
+}
+
+.wiki-md-empty {
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* Markdown hint label */
+.wiki-md-hint {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: normal;
+}
+
+/* Markdown toolbar */
+.wiki-editor {
+  display: flex;
+  flex-direction: column;
+}
+
+.md-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.35rem 0.5rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  flex-wrap: wrap;
+}
+
+.md-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: var(--fg);
+  padding: 0.2rem 0.5rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  line-height: 1.4;
+  transition: background 0.1s, border-color 0.1s;
+}
+
+.md-btn:hover {
+  border-color: var(--border);
+  background: var(--card);
+}
+
+.md-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.md-sep {
+  width: 1px;
+  height: 1.1rem;
+  background: var(--border);
+  margin: 0 0.1rem;
+  flex-shrink: 0;
+}
+
+.md-toolbar-spacer {
+  flex: 1;
+}
+
+.wiki-editor .wiki-textarea {
+  border-radius: 0 0 8px 8px;
+  resize: none;
+  overflow: hidden;
+  min-height: 7rem;
+  transition: height 0.1s ease;
+}
+
+.wiki-md-preview {
+  min-height: 7rem;
+  padding: 0.7rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0 0 8px 8px;
+  background: var(--bg);
+}
+
+/* Tag suggestions */
+.wiki-tag-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.wiki-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 0.18rem 0.6rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+
+.wiki-tag-chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.wiki-tag-chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* Image preview (new upload) */
+.wiki-image-preview-new {
+  margin-top: 0.5rem;
+  max-width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.wiki-image-remove-label {
+  margin: 0.5rem 0 0;
+  width: fit-content;
+}
+
+/* Detail page meta */
+.wiki-detail-meta {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin: 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
 .wiki-detail-actions {
   display: flex;
   align-items: center;
