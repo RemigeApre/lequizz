@@ -57,6 +57,16 @@ try { db.exec("ALTER TABLE wiki_pages ADD COLUMN image_paths TEXT NOT NULL DEFAU
 try { db.exec("ALTER TABLE wiki_pages ADD COLUMN rating INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
 try { db.exec("ALTER TABLE wiki_pages ADD COLUMN flame INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
 try { db.exec("ALTER TABLE wiki_pages ADD COLUMN interested INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
+try { db.exec("ALTER TABLE wiki_pages ADD COLUMN views INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS wiki_image_links (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    src TEXT NOT NULL,
+    page_id INTEGER NOT NULL,
+    UNIQUE(src, page_id)
+  )
+`);
 
 function insertSubmission(answers, scores) {
   const stmt = db.prepare(
@@ -152,6 +162,7 @@ function rowToWikiPage(row) {
     rating: row.rating || 0,
     flame: !!row.flame,
     interested: !!row.interested,
+    views: row.views || 0,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -205,6 +216,26 @@ function deleteWikiPage(id) {
   db.prepare("DELETE FROM wiki_pages WHERE id = ?").run(id);
 }
 
+function incrementWikiViews(id) {
+  db.prepare("UPDATE wiki_pages SET views = views + 1 WHERE id = ?").run(id);
+}
+
+function getImageLinks(src) {
+  return db.prepare(
+    `SELECT w.id, w.title, w.category FROM wiki_image_links il
+     JOIN wiki_pages w ON w.id = il.page_id
+     WHERE il.src = ? ORDER BY w.title`
+  ).all(src);
+}
+
+function addImageLink(src, pageId) {
+  db.prepare("INSERT OR IGNORE INTO wiki_image_links (src, page_id) VALUES (?, ?)").run(src, pageId);
+}
+
+function removeImageLink(src, pageId) {
+  db.prepare("DELETE FROM wiki_image_links WHERE src = ? AND page_id = ?").run(src, pageId);
+}
+
 module.exports = {
   db,
   insertSubmission,
@@ -222,4 +253,8 @@ module.exports = {
   getWikiPage,
   updateWikiPage,
   deleteWikiPage,
+  incrementWikiViews,
+  getImageLinks,
+  addImageLink,
+  removeImageLink,
 };

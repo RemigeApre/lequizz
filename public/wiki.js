@@ -405,7 +405,7 @@
         img.className = "wiki-new-preview-img";
         img.src = URL.createObjectURL(file);
         img.alt = "";
-        img.addEventListener("click", function () { openLightbox(img.src); });
+        img.addEventListener("click", function () { openLightbox(img.src); }); // blob: URL, pas de panel
 
         var removeBtn = document.createElement("button");
         removeBtn.type = "button";
@@ -436,35 +436,203 @@
   });
 
   // ══════════════════════════════════════════════════
-  // LIGHTBOX
+  // LIGHTBOX + ASSOCIATIONS + NAVIGATION
   // ══════════════════════════════════════════════════
   var lightbox = document.createElement("div");
   lightbox.className = "wiki-lightbox";
-  lightbox.innerHTML = '<img class="wiki-lightbox-img" alt="" />';
+  lightbox.innerHTML = [
+    '<button class="wiki-lightbox-close" title="Fermer">&#215;</button>',
+    '<button class="wiki-lightbox-prev" title="Image pr\u00e9c\u00e9dente">&#8249;</button>',
+    '<button class="wiki-lightbox-next" title="Image suivante">&#8250;</button>',
+    '<div class="wiki-lightbox-inner">',
+      '<img class="wiki-lightbox-img" alt="" />',
+      '<div class="wiki-lightbox-panel" hidden>',
+        '<div class="wiki-lightbox-panel-title">Pages li&#233;es</div>',
+        '<ul class="wiki-lightbox-links"></ul>',
+        '<div class="wiki-lightbox-search">',
+          '<input type="text" class="wiki-lightbox-search-input" placeholder="Rechercher une page\u2026" autocomplete="off" />',
+          '<ul class="wiki-lightbox-results"></ul>',
+        '</div>',
+      '</div>',
+    '</div>',
+  ].join("");
   lightbox.hidden = true;
   document.body.appendChild(lightbox);
 
-  var lbImg = lightbox.querySelector(".wiki-lightbox-img");
+  var lbImg      = lightbox.querySelector(".wiki-lightbox-img");
+  var lbPanel    = lightbox.querySelector(".wiki-lightbox-panel");
+  var lbLinks    = lightbox.querySelector(".wiki-lightbox-links");
+  var lbSearch   = lightbox.querySelector(".wiki-lightbox-search-input");
+  var lbResults  = lightbox.querySelector(".wiki-lightbox-results");
+  var lbCloseBtn = lightbox.querySelector(".wiki-lightbox-close");
+  var lbPrevBtn  = lightbox.querySelector(".wiki-lightbox-prev");
+  var lbNextBtn  = lightbox.querySelector(".wiki-lightbox-next");
+
+  // Liste des src de la page dans l'ordre DOM, et index courant
+  var lbSrcs = [];
+  var lbIndex = 0;
+  var lbCurrentSrc = "";
+
+  function lbGetSrc(img) {
+    var src = img.dataset.src || img.getAttribute("src");
+    if (src && !src.startsWith("blob:") && !src.startsWith("/")) src = "/" + src;
+    return src || "";
+  }
+
+  function rebuildSrcList() {
+    lbSrcs = [];
+    document.querySelectorAll(".wiki-infobox-img, .wiki-gallery-img, .wiki-form-existing-image, .wiki-card-img").forEach(function (img) {
+      var src = lbGetSrc(img);
+      if (src) lbSrcs.push(src);
+    });
+    // Ajoute aussi les previews de nouvelles images (blob:)
+    document.querySelectorAll(".wiki-new-preview-img").forEach(function (img) {
+      if (img.src) lbSrcs.push(img.src);
+    });
+  }
+
+  function syncNavButtons() {
+    var multi = lbSrcs.length > 1;
+    lbPrevBtn.hidden = !multi;
+    lbNextBtn.hidden = !multi;
+  }
+
+  // Charge et affiche les associations pour l'image en cours
+  function loadLinks() {
+    if (!lbCurrentSrc.startsWith("/uploads/")) return;
+    lbLinks.innerHTML = "";
+    fetch("/wiki/image-links?src=" + encodeURIComponent(lbCurrentSrc))
+      .then(function (r) { return r.json(); })
+      .then(function (pages) {
+        lbLinks.innerHTML = "";
+        if (!pages.length) {
+          var li = document.createElement("li");
+          li.className = "wiki-lb-empty";
+          li.textContent = "Aucune page associ\u00e9e";
+          lbLinks.appendChild(li);
+          return;
+        }
+        pages.forEach(function (page) {
+          var li = document.createElement("li");
+          li.className = "wiki-lb-link-item";
+          var a = document.createElement("a");
+          a.href = "/wiki/" + page.id;
+          a.textContent = page.title;
+          a.className = "wiki-lb-page-link";
+          var rm = document.createElement("button");
+          rm.type = "button";
+          rm.className = "wiki-lb-unlink";
+          rm.innerHTML = "&#215;";
+          rm.title = "D\u00e9sassocier";
+          rm.addEventListener("click", function (e) {
+            e.preventDefault();
+            fetch("/wiki/image-links", {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ src: lbCurrentSrc, page_id: page.id }),
+            }).then(loadLinks);
+          });
+          li.appendChild(a);
+          li.appendChild(rm);
+          lbLinks.appendChild(li);
+        });
+      });
+  }
+
+  // Recherche de pages à associer
+  var lbSearchTimer;
+  lbSearch.addEventListener("input", function () {
+    clearTimeout(lbSearchTimer);
+    lbSearchTimer = setTimeout(function () {
+      var q = lbSearch.value.trim();
+      fetch("/wiki/search?q=" + encodeURIComponent(q))
+        .then(function (r) { return r.json(); })
+        .then(function (pages) {
+          lbResults.innerHTML = "";
+          pages.forEach(function (page) {
+            var li = document.createElement("li");
+            li.className = "wiki-lb-result-item";
+            li.textContent = page.title;
+            li.addEventListener("click", function () {
+              fetch("/wiki/image-links", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ src: lbCurrentSrc, page_id: page.id }),
+              }).then(function () {
+                lbSearch.value = "";
+                lbResults.innerHTML = "";
+                loadLinks();
+              });
+            });
+            lbResults.appendChild(li);
+          });
+        });
+    }, 250);
+  });
+
+  function showImage(src) {
+    lbCurrentSrc = src;
+    lbImg.src = src;
+    if (src.startsWith("/uploads/")) {
+      lbPanel.hidden = false;
+      lbSearch.value = "";
+      lbResults.innerHTML = "";
+      loadLinks();
+    } else {
+      lbPanel.hidden = true;
+    }
+  }
 
   function openLightbox(src) {
-    lbImg.src = src;
+    rebuildSrcList();
+    lbIndex = lbSrcs.indexOf(src);
+    if (lbIndex === -1) lbIndex = 0;
     lightbox.hidden = false;
     document.body.style.overflow = "hidden";
+    syncNavButtons();
+    showImage(src);
   }
 
   function closeLightbox() {
     lightbox.hidden = true;
     lbImg.src = "";
+    lbCurrentSrc = "";
     document.body.style.overflow = "";
   }
 
+  function lbNavigate(dir) {
+    if (!lbSrcs.length) return;
+    lbIndex = (lbIndex + dir + lbSrcs.length) % lbSrcs.length;
+    showImage(lbSrcs[lbIndex]);
+  }
+
+  // Boutons close / prev / next
+  lbCloseBtn.addEventListener("click", function (e) { e.stopPropagation(); closeLightbox(); });
+  lbPrevBtn.addEventListener("click",  function (e) { e.stopPropagation(); lbNavigate(-1); });
+  lbNextBtn.addEventListener("click",  function (e) { e.stopPropagation(); lbNavigate(+1); });
+
+  // Clic sur l'overlay (fond) → fermer
   lightbox.addEventListener("click", function (e) {
     if (e.target === lightbox) closeLightbox();
   });
 
+  // Clavier : Échap, flèches
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && !lightbox.hidden) closeLightbox();
+    if (lightbox.hidden) return;
+    if (e.key === "Escape")     closeLightbox();
+    if (e.key === "ArrowLeft")  lbNavigate(-1);
+    if (e.key === "ArrowRight") lbNavigate(+1);
   });
+
+  // Swipe tactile
+  var lbTouchStartX = 0;
+  lightbox.addEventListener("touchstart", function (e) {
+    lbTouchStartX = e.touches[0].clientX;
+  }, { passive: true });
+  lightbox.addEventListener("touchend", function (e) {
+    var dx = e.changedTouches[0].clientX - lbTouchStartX;
+    if (Math.abs(dx) > 50) lbNavigate(dx < 0 ? +1 : -1);
+  }, { passive: true });
 
   // Rend cliquables toutes les images de la galerie et des formulaires
   function attachLightboxToImages() {
@@ -472,7 +640,9 @@
       if (img.dataset.lbBound) return;
       img.dataset.lbBound = "1";
       img.style.cursor = "zoom-in";
-      img.addEventListener("click", function () { openLightbox(img.src); });
+      img.addEventListener("click", function () {
+        openLightbox(lbGetSrc(img));
+      });
     });
   }
   attachLightboxToImages();

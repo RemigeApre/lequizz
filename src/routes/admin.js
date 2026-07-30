@@ -57,6 +57,7 @@ function buildAdminRouter(config) {
       ? Object.keys(attempt.data.__bookmarks.favorite || {}).length
       : 0;
 
+    const wikiPages = listWikiPages().sort((a, b) => b.views - a.views);
     res.render("admin-dashboard", {
       config,
       submissions,
@@ -65,7 +66,7 @@ function buildAdminRouter(config) {
       livePercentage,
       favoritesCount,
       linksCount: listLinks().length,
-      wikiCount: listWikiPages().length,
+      wikiPages,
     });
   });
 

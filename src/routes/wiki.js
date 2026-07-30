@@ -9,6 +9,10 @@ const {
   updateWikiPage,
   reactWikiPage,
   deleteWikiPage,
+  incrementWikiViews,
+  getImageLinks,
+  addImageLink,
+  removeImageLink,
 } = require("../db");
 
 const CATEGORIES = [
@@ -124,10 +128,42 @@ function buildWikiRouter(config) {
     res.redirect("/wiki");
   });
 
+  // ── Associations image ─────────────────────────────
+  router.get("/image-links", (req, res) => {
+    const src = req.query.src;
+    if (!src) return res.json([]);
+    res.json(getImageLinks(src));
+  });
+
+  router.post("/image-links", (req, res) => {
+    const { src, page_id } = req.body;
+    if (!src || !page_id) return res.status(400).json({ ok: false });
+    addImageLink(src, Number(page_id));
+    res.json({ ok: true });
+  });
+
+  router.delete("/image-links", (req, res) => {
+    const { src, page_id } = req.body;
+    if (!src || !page_id) return res.status(400).json({ ok: false });
+    removeImageLink(src, Number(page_id));
+    res.json({ ok: true });
+  });
+
+  // ── Recherche de pages (pour associer) ─────────────
+  router.get("/search", (req, res) => {
+    const q = String(req.query.q || "").toLowerCase().trim();
+    const pages = listWikiPages();
+    const results = q
+      ? pages.filter((p) => p.title.toLowerCase().includes(q)).slice(0, 12)
+      : pages.slice(0, 12);
+    res.json(results.map((p) => ({ id: p.id, title: p.title, category: p.category })));
+  });
+
   router.get("/:id", (req, res) => {
     const id = Number(req.params.id);
     const page = Number.isInteger(id) ? getWikiPage(id) : null;
     if (!page) return res.redirect("/wiki");
+    incrementWikiViews(id);
     res.render("wiki-detail", { config, page, ...CTX });
   });
 

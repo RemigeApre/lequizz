@@ -111,6 +111,25 @@
             </dl>
           <% } %>
 
+          <%# Réactions dans l'infobox %>
+          <div class="wiki-react wiki-infobox-react"
+            data-id="<%= page.id %>"
+            data-rating="<%= page.rating %>"
+            data-flame="<%= page.flame ? '1' : '0' %>"
+            data-interested="<%= page.interested ? '1' : '0' %>">
+            <div class="wiki-react-stars">
+              <% for (var i = 1; i <= 5; i++) { %>
+                <button type="button" class="wiki-star" data-value="<%= i %>"><%- i <= page.rating ? '&#9733;' : '&#9734;' %></button>
+              <% } %>
+            </div>
+            <button type="button" class="wiki-react-btn wiki-react-flame<%= page.flame ? ' active' : '' %>" data-key="flame">
+              <span class="wiki-react-icon">&#128293;</span><span class="wiki-react-label">J&apos;adore</span>
+            </button>
+            <button type="button" class="wiki-react-btn wiki-react-interest<%= page.interested ? ' active' : '' %>" data-key="interested">
+              <span class="wiki-react-icon">&#10024;</span><span class="wiki-react-label">Int&eacute;ress&eacute;e</span>
+            </button>
+          </div>
+
           <%# Images suivantes après les caractéristiques %>
           <% if (hasImages && page.imagePaths.length > 1) { %>
             <div class="wiki-infobox-images wiki-infobox-images-rest">
@@ -126,31 +145,6 @@
         <div class="wiki-md"><span class="wiki-md-raw" hidden><%= page.content %></span></div>
       <% } %>
 
-    </div>
-
-    <%# ─ Réactions de Manon ─ %>
-    <div class="wiki-react"
-      data-id="<%= page.id %>"
-      data-rating="<%= page.rating %>"
-      data-flame="<%= page.flame ? '1' : '0' %>"
-      data-interested="<%= page.interested ? '1' : '0' %>">
-
-      <div class="wiki-react-stars" title="Note">
-        <% for (var i = 1; i <= 5; i++) { %>
-          <button type="button" class="wiki-star" data-value="<%= i %>"><%- i <= page.rating ? '&#9733;' : '&#9734;' %></button>
-        <% } %>
-      </div>
-
-      <div class="wiki-react-toggles">
-        <button type="button" class="wiki-react-btn wiki-react-flame<%= page.flame ? ' active' : '' %>" data-key="flame" title="J&apos;adore">
-          <span class="wiki-react-icon">&#128293;</span>
-          <span class="wiki-react-label">J&apos;adore</span>
-        </button>
-        <button type="button" class="wiki-react-btn wiki-react-interest<%= page.interested ? ' active' : '' %>" data-key="interested" title="&Ccedil;a m&apos;int&eacute;resse">
-          <span class="wiki-react-icon">&#10024;</span>
-          <span class="wiki-react-label">&Ccedil;a m&apos;int&eacute;resse</span>
-        </button>
-      </div>
     </div>
 
     <div class="wiki-detail-actions">

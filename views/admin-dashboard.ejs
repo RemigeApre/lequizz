@@ -46,7 +46,7 @@
           <span class="admin-stat-label">Liens enregistres</span>
         </div>
         <div class="admin-stat">
-          <span class="admin-stat-value"><%= wikiCount %></span>
+          <span class="admin-stat-value"><%= wikiPages.length %></span>
           <span class="admin-stat-label">Pages wiki</span>
         </div>
       </div>
@@ -54,6 +54,28 @@
       <p class="intro">Aucune reponse enregistree pour l'instant.</p>
     <% } %>
   </div>
+
+  <% if (wikiPages.length) { %>
+  <div class="result-section">
+    <h2>Pages wiki &mdash; vues</h2>
+    <div class="table-scroll">
+      <table class="admin-table">
+        <thead>
+          <tr><th>Page</th><th>Cat&eacute;gorie</th><th style="text-align:right">Vues</th></tr>
+        </thead>
+        <tbody>
+          <% wikiPages.forEach(function (p) { %>
+            <tr>
+              <td><a href="/wiki/<%= p.id %>"><%= p.title %></a></td>
+              <td><%= p.category %></td>
+              <td style="text-align:right;font-variant-numeric:tabular-nums"><%= p.views %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <% } %>
 
   <h2>Historique des soumissions completes (<%= submissions.length %>)</h2>
   <div class="table-scroll">
