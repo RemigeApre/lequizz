@@ -1,0 +1,81 @@
+<%- include('partials/head', { title: book.title + ' — BD — ' + config.title }) %>
+<main class="bd-reader-main">
+  <div class="bd-reader-topbar">
+    <a href="/bd" class="bd-reader-back link-button">&larr; BD</a>
+    <span class="bd-reader-title"><%= book.title %></span>
+    <span class="bd-reader-counter" id="bd-counter">1 / <%= book.imagePaths.length %></span>
+    <a href="/bd/<%= book.id %>/edit" class="bd-reader-edit link-button">Modifier</a>
+  </div>
+
+  <% if (!book.imagePaths.length) { %>
+    <p class="intro" style="text-align:center;padding:3rem">Aucune page dans cette BD.</p>
+  <% } else { %>
+    <div class="bd-reader-stage" id="bd-stage">
+      <% book.imagePaths.forEach(function(src, i) { %>
+        <div class="bd-reader-page" data-page="<%= i %>" <%= i === 0 ? '' : 'hidden' %>>
+          <img src="<%= src %>" alt="Page <%= i + 1 %>" class="bd-reader-img" />
+        </div>
+      <% }) %>
+    </div>
+
+    <button type="button" class="bd-nav-btn bd-nav-prev" id="bd-prev" title="Page pr&eacute;c&eacute;dente" <%= book.imagePaths.length <= 1 ? 'hidden' : '' %>>&#8249;</button>
+    <button type="button" class="bd-nav-btn bd-nav-next" id="bd-next" title="Page suivante" <%= book.imagePaths.length <= 1 ? 'hidden' : '' %>>&#8250;</button>
+  <% } %>
+</main>
+
+<% if (book.imagePaths.length) { %>
+<script>
+(function() {
+  var pages = Array.from(document.querySelectorAll(".bd-reader-page"));
+  var counter = document.getElementById("bd-counter");
+  var prev = document.getElementById("bd-prev");
+  var next = document.getElementById("bd-next");
+  var current = 0;
+  var total = pages.length;
+
+  function go(n) {
+    n = Math.max(0, Math.min(total - 1, n));
+    if (n === current) return;
+    pages[current].hidden = true;
+    pages[n].hidden = false;
+    current = n;
+    if (counter) counter.textContent = (current + 1) + " / " + total;
+    if (prev) prev.hidden = current === 0;
+    if (next) next.hidden = current === total - 1;
+  }
+
+  if (prev) prev.addEventListener("click", function() { go(current - 1); });
+  if (next) next.addEventListener("click", function() { go(current + 1); });
+
+  // Keyboard
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "ArrowLeft")  go(current - 1);
+    if (e.key === "ArrowRight") go(current + 1);
+  });
+
+  // Click left/right half of stage
+  var stage = document.getElementById("bd-stage");
+  if (stage) {
+    stage.addEventListener("click", function(e) {
+      if (e.target.tagName === "A" || e.target.tagName === "BUTTON") return;
+      var x = e.clientX;
+      if (x < window.innerWidth / 2) go(current - 1);
+      else go(current + 1);
+    });
+  }
+
+  // Swipe
+  var tx = 0;
+  document.addEventListener("touchstart", function(e) { tx = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener("touchend", function(e) {
+    var dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) > 50) go(current + (dx < 0 ? 1 : -1));
+  });
+
+  // Init prev/next visibility
+  if (prev) prev.hidden = true;
+  if (next) next.hidden = total <= 1;
+})();
+</script>
+<% } %>
+<%- include('partials/foot') %>

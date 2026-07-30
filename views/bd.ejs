@@ -1,0 +1,38 @@
+<%- include('partials/head', { title: 'BD — ' + config.title }) %>
+<main class="container wide">
+  <%- include('partials/top-nav', { config: config }) %>
+  <div class="bd-list-header">
+    <h1 class="section-title-h1">BD</h1>
+    <a href="/bd/new" class="link-button">+ Nouvelle BD</a>
+  </div>
+
+  <% if (!books.length) { %>
+    <p class="intro">Aucune BD pour l&apos;instant.</p>
+  <% } else { %>
+    <div class="bd-grid">
+      <% books.forEach(function(book) { %>
+        <a href="/bd/<%= book.id %>" class="bd-card">
+          <% if (book.imagePaths && book.imagePaths.length) { %>
+            <div class="bd-card-cover">
+              <img src="<%= book.imagePaths[0] %>" alt="" class="bd-card-img" loading="lazy" />
+              <span class="bd-page-count"><%= book.imagePaths.length %>&nbsp;p.</span>
+            </div>
+          <% } else { %>
+            <div class="bd-card-cover bd-card-cover-empty">
+              <span class="bd-card-empty-icon">&#128214;</span>
+            </div>
+          <% } %>
+          <div class="bd-card-body">
+            <p class="bd-card-title"><%= book.title %></p>
+            <% if (book.tags.length) { %>
+              <div class="bd-card-tags">
+                <% book.tags.slice(0,3).forEach(function(t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
+              </div>
+            <% } %>
+          </div>
+        </a>
+      <% }) %>
+    </div>
+  <% } %>
+</main>
+<%- include('partials/foot') %>

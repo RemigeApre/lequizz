@@ -51,6 +51,7 @@
       <button type="button" class="tag-chip" data-source="wiki">Wiki</button>
       <button type="button" class="tag-chip" data-source="gallery">Galerie</button>
     </div>
+    <button type="button" id="gallery-ultra-toggle" class="tag-chip gallery-ultra-toggle">&#128274; Masquer Ultra</button>
 
     <% if (allTags.length) { %>
       <div class="links-filter" id="gallery-tag-filter">
@@ -73,6 +74,7 @@
         data-idx="<%= idx %>"
         data-tags="<%= item.tags.join('|').toLowerCase() %>"
         data-source="<%= item.type %>"
+        data-ultra="<%= item.tags.indexOf('ultra') !== -1 ? '1' : '0' %>"
         data-title="<%= (item.title || '').toLowerCase() %>"
         data-src="<%= item.src %>"
         data-wiki-id="<%= item.wikiPageId || '' %>"

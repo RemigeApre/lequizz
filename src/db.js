@@ -74,6 +74,18 @@ db.exec(`
 `);
 
 db.exec(`
+  CREATE TABLE IF NOT EXISTS bd_books (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    tags TEXT NOT NULL DEFAULT '[]',
+    image_paths TEXT NOT NULL DEFAULT '[]',
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  )
+`);
+
+db.exec(`
   CREATE TABLE IF NOT EXISTS wiki_page_links (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     page_id INTEGER NOT NULL,
@@ -320,6 +332,45 @@ function removeImageLink(src, pageId) {
   db.prepare("DELETE FROM wiki_image_links WHERE src = ? AND page_id = ?").run(src, pageId);
 }
 
+function rowToBdBook(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description || "",
+    tags: JSON.parse(row.tags || "[]"),
+    imagePaths: JSON.parse(row.image_paths || "[]"),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function listBdBooks() {
+  return db.prepare("SELECT * FROM bd_books ORDER BY updated_at DESC").all().map(rowToBdBook);
+}
+
+function getBdBook(id) {
+  const row = db.prepare("SELECT * FROM bd_books WHERE id = ?").get(id);
+  return row ? rowToBdBook(row) : null;
+}
+
+function insertBdBook({ title, description, tags, imagePaths }) {
+  const now = new Date().toISOString();
+  const info = db.prepare(
+    `INSERT INTO bd_books (title, description, tags, image_paths, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`
+  ).run(title, description, JSON.stringify(tags || []), JSON.stringify(imagePaths || []), now, now);
+  return info.lastInsertRowid;
+}
+
+function updateBdBook(id, { title, description, tags, imagePaths }) {
+  db.prepare(
+    `UPDATE bd_books SET title = ?, description = ?, tags = ?, image_paths = ?, updated_at = ? WHERE id = ?`
+  ).run(title, description, JSON.stringify(tags || []), JSON.stringify(imagePaths || []), new Date().toISOString(), id);
+}
+
+function deleteBdBook(id) {
+  db.prepare("DELETE FROM bd_books WHERE id = ?").run(id);
+}
+
 function rowToGalleryImage(row) {
   return {
     id: row.id,
@@ -394,4 +445,9 @@ module.exports = {
   deleteGalleryImage,
   setWikiPageFeatured,
   listFeaturedWikiPages,
+  listBdBooks,
+  getBdBook,
+  insertBdBook,
+  updateBdBook,
+  deleteBdBook,
 };

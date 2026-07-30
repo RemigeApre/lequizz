@@ -10,6 +10,7 @@ const buildAdminRouter = require("./routes/admin");
 const buildLinksRouter = require("./routes/links");
 const buildWikiRouter = require("./routes/wiki");
 const buildGalleryRouter = require("./routes/gallery");
+const buildBdRouter = require("./routes/bd");
 const { createThrottle } = require("./loginThrottle");
 
 const gateThrottle = createThrottle();
@@ -115,6 +116,7 @@ app.use("/admin", buildAdminRouter(config));
 app.use("/liens", buildLinksRouter(config));
 app.use("/wiki", buildWikiRouter(config));
 app.use("/galerie", buildGalleryRouter(config));
+app.use("/bd", buildBdRouter(config));
 
 if (usingHttps) {
   https

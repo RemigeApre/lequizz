@@ -118,6 +118,7 @@
   var activeTag    = "";
   var activeSource = "";
   var searchQ      = "";
+  var hideUltra    = localStorage.getItem("gallery-hide-ultra") !== "0";
 
   function norm(s) {
     return (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -135,12 +136,13 @@
       var okSource   = !activeSource || card.dataset.source === activeSource;
       var okSearch   = !q || norm(card.dataset.title).includes(q) ||
                        cardTags.some(function(t){ return norm(t).includes(q); });
-      card.hidden = !(okTag && okSource && okSearch);
+      var okUltra    = !hideUltra || card.dataset.ultra !== "1";
+      card.hidden = !(okTag && okSource && okSearch && okUltra);
       if (!card.hidden) shown++;
     });
 
     if (countEl) {
-      var hasFilter = activeTag || activeSource || q;
+      var hasFilter = activeTag || activeSource || q || hideUltra;
       countEl.hidden = !hasFilter;
       if (hasFilter) countEl.textContent = shown + "\u00a0image" + (shown > 1 ? "s" : "");
     }
@@ -174,6 +176,22 @@
       applyFilters();
     });
   }
+
+  var ultraToggle = document.getElementById("gallery-ultra-toggle");
+  function syncUltraBtn() {
+    if (!ultraToggle) return;
+    ultraToggle.textContent = hideUltra ? "\uD83D\uDD12 Masquer Ultra" : "\uD83D\uDD13 Afficher Ultra";
+    ultraToggle.classList.toggle("active", hideUltra);
+  }
+  if (ultraToggle) {
+    ultraToggle.addEventListener("click", function() {
+      hideUltra = !hideUltra;
+      localStorage.setItem("gallery-hide-ultra", hideUltra ? "1" : "0");
+      syncUltraBtn();
+      applyFilters();
+    });
+  }
+  syncUltraBtn();
 
   // ══════════════════════════════════════════════════
   // 4. LIGHTBOX
