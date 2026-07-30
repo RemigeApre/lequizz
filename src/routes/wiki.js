@@ -75,40 +75,35 @@ function normalizeCategory(value) {
 function arr(v) { return Array.isArray(v) ? v : v ? [v] : []; }
 
 function parseMeta(category, body) {
+  // Champs transversaux (toutes catégories)
+  const base = {
+    termes_derives: parseTags(body.meta_termes_derives || ""),
+    anglais: body.meta_anglais === "on",
+  };
+
+  let specific = {};
   if (category === "position") {
-    return {
+    specific = {
       qui_dessus:  String(body.meta_qui_dessus || ""),
       canal:       arr(body.meta_canal),
       orientation: arr(body.meta_orientation),
     };
-  }
-  if (category === "fantasmes") {
+  } else if (category === "fantasmes") {
     const sub = body.meta_sous_cat;
     const validSubs = FANTASMES_SUBCATS.map((s) => s.key);
-    return {
-      sous_cat: validSubs.includes(sub) ? sub : "",
-    };
-  }
-  if (category === "partenaires") {
+    specific = { sous_cat: validSubs.includes(sub) ? sub : "" };
+  } else if (category === "partenaires") {
     const nb = (v) => ["0","1","2","3","nombreux"].includes(String(v)) ? String(v) : "";
-    return {
-      nb_femmes: nb(body.meta_nb_femmes),
-      nb_hommes: nb(body.meta_nb_hommes),
-    };
-  }
-  if (category === "lieux") {
+    specific = { nb_femmes: nb(body.meta_nb_femmes), nb_hommes: nb(body.meta_nb_hommes) };
+  } else if (category === "lieux") {
     const t = body.meta_type_lieu;
-    return {
-      type_lieu: ["prive","public","cache"].includes(t) ? t : "",
-    };
-  }
-  if (category === "objets") {
+    specific = { type_lieu: ["prive","public","cache"].includes(t) ? t : "" };
+  } else if (category === "objets") {
     const t = body.meta_type_gode;
-    return {
-      type_gode: ["animal","monstre","fantaisiste","ethnique","autre"].includes(t) ? t : "",
-    };
+    specific = { type_gode: ["animal","monstre","fantaisiste","ethnique","autre"].includes(t) ? t : "" };
   }
-  return {};
+
+  return { ...base, ...specific };
 }
 
 const PRESET_TAGS = ["fantaisie", "ultra"];
@@ -131,6 +126,33 @@ function buildQuestionIndex(config) {
     if (s.multiselects) s.multiselects.forEach((f) => add("multiselect:" + f.id, f.label));
   });
   return list;
+}
+
+function computeSuggestions(page, allPages) {
+  const pageTagSet = new Set(page.tags.map((t) => t.toLowerCase()));
+  const pageDerived = new Set((page.meta.termes_derives || []).map((t) => t.toLowerCase()));
+  const pageTitleWords = new Set(
+    page.title.toLowerCase().split(/\s+/).filter((w) => w.length > 3)
+  );
+
+  return allPages
+    .filter((p) => p.id !== page.id)
+    .map((p) => {
+      let score = 0;
+      // Tags communs
+      p.tags.forEach((t) => { if (pageTagSet.has(t.toLowerCase())) score += 3; });
+      // Même catégorie
+      if (p.category === page.category) score += 2;
+      // Termes dérivés communs
+      (p.meta.termes_derives || []).forEach((t) => { if (pageDerived.has(t.toLowerCase())) score += 2; });
+      // Mots du titre communs (> 3 lettres)
+      p.title.toLowerCase().split(/\s+/).forEach((w) => { if (w.length > 3 && pageTitleWords.has(w)) score += 1; });
+      return { p, score };
+    })
+    .filter(({ score }) => score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 6)
+    .map(({ p }) => p);
 }
 
 function buildWikiRouter(config) {
@@ -204,7 +226,8 @@ function buildWikiRouter(config) {
     const page = Number.isInteger(id) ? getWikiPage(id) : null;
     if (!page) return res.redirect("/wiki");
     incrementWikiViews(id);
-    res.render("wiki-detail", { config, page, ...CTX });
+    const suggestions = computeSuggestions(page, listWikiPages());
+    res.render("wiki-detail", { config, page, suggestions, ...CTX });
   });
 
   router.get("/:id/edit", (req, res) => {

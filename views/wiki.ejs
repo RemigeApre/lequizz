@@ -154,6 +154,21 @@
         </div>
       </div>
 
+      <%# ─ Termes dérivés + Anglais ─ %>
+      <div class="wiki-derived-row">
+        <div class="wiki-tags-widget wiki-derived-widget">
+          <p class="wiki-meta-label">Synonymes&nbsp;/ termes d&eacute;riv&eacute;s</p>
+          <div class="wiki-tags-board">
+            <input type="text" class="wiki-tags-typing" placeholder="Ajouter un terme&hellip;" autocomplete="off" />
+          </div>
+          <input type="hidden" name="meta_termes_derives" class="wiki-tags-hidden" value="" />
+        </div>
+        <label class="chip-option wiki-anglais-chip">
+          <input type="checkbox" name="meta_anglais" />
+          <span>&#127468;&#127463;&nbsp;Terme anglais</span>
+        </label>
+      </div>
+
       <%# ─ Tags ─ %>
       <div class="wiki-tags-widget">
         <div class="wiki-tags-board">
@@ -232,30 +247,48 @@
         data-title="<%= page.title.toLowerCase() %>"
         data-date="<%= new Date(page.updatedAt).getTime() %>"
         data-rating="<%= page.rating || 0 %>">
+
+        <%# Si image : image pleine + overlay avec badge et réactions %>
         <% if (page.imagePaths && page.imagePaths.length) { %>
-          <div class="wiki-card-image"><img src="<%= page.imagePaths[0] %>" alt="" class="wiki-card-img" /></div>
-        <% } %>
-        <div class="wiki-card-body">
+          <div class="wiki-card-image">
+            <img src="<%= page.imagePaths[0] %>" alt="" class="wiki-card-img" />
+            <div class="wiki-card-overlay">
+              <span class="wiki-category-badge" style="background: hsl(<%= cat ? cat.hue : 220 %>, 55%, 45%)"><%= cat ? cat.label : page.category %></span>
+              <span class="wiki-card-badges">
+                <% if (page.owned) { %><span class="wiki-owned-badge" title="Possédé">&#9733;</span><% } %>
+                <% if (page.flame) { %><span class="wiki-card-react-badge" title="J'adore">&#128293;</span><% } %>
+                <% if (page.interested) { %><span class="wiki-card-react-badge" title="Ça m'intéresse">&#10024;</span><% } %>
+              </span>
+            </div>
+          </div>
+        <% } else { %>
+          <%# Sans image : header classique %>
           <div class="wiki-card-header">
             <span class="wiki-category-badge" style="background: hsl(<%= cat ? cat.hue : 220 %>, 55%, 45%)"><%= cat ? cat.label : page.category %></span>
             <span class="wiki-card-badges">
-              <% if (page.owned) { %><span class="wiki-owned-badge" title="Poss\u00e9d\u00e9">&#9733;</span><% } %>
-              <% if (page.flame) { %><span class="wiki-card-react-badge" title="J'adore">&#128293;</span><% } %>
-              <% if (page.interested) { %><span class="wiki-card-react-badge" title="Ça m'intéresse">&#10024;</span><% } %>
+              <% if (page.owned) { %><span class="wiki-owned-badge" title="Possédé">&#9733;</span><% } %>
+              <% if (page.flame) { %><span class="wiki-card-react-badge">&#128293;</span><% } %>
+              <% if (page.interested) { %><span class="wiki-card-react-badge">&#10024;</span><% } %>
             </span>
           </div>
+        <% } %>
+
+        <div class="wiki-card-body">
           <% if (page.rating) { %>
             <div class="wiki-card-stars">
               <% for (var si = 1; si <= 5; si++) { %><span class="wiki-card-star<%= si <= page.rating ? ' filled' : '' %>">&#9733;</span><% } %>
             </div>
           <% } %>
           <p class="wiki-card-title"><%= page.title %></p>
-          <% if (page.content) { %>
-            <p class="wiki-card-excerpt"><%= page.content.replace(/[#*`_]/g, '').slice(0, 120) %><%= page.content.length > 120 ? "\u2026" : "" %></p>
+          <% var pm2 = page.meta || {}; %>
+          <% if (pm2.termes_derives && pm2.termes_derives.length) { %>
+            <p class="wiki-card-derived"><%= pm2.termes_derives.slice(0,3).join(' · ') %></p>
           <% } %>
           <% if (page.tags.length) { %>
-            <div class="link-card-tags">
-              <% page.tags.forEach(function (t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
+            <div class="wiki-card-tags">
+              <% if (pm2.anglais) { %><span class="wiki-anglais-badge wiki-anglais-badge-sm">&#127468;&#127463;</span><% } %>
+              <% page.tags.slice(0,4).forEach(function (t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
+              <% if (page.tags.length > 4) { %><span class="wiki-card-tags-more">+<%= page.tags.length - 4 %></span><% } %>
             </div>
           <% } %>
         </div>

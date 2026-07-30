@@ -1214,6 +1214,63 @@ input[type="text"], input[type="password"] {
   }
 }
 
+/* Pastille "Anglais" */
+.wiki-anglais-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  background: #e8f0ff;
+  color: #1a3a80;
+  border: 1px solid #b0c8f0;
+  border-radius: 999px;
+  padding: 0.18rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+@media (prefers-color-scheme: dark) {
+  .wiki-anglais-badge {
+    background: #0d1a40;
+    color: #7090e0;
+    border-color: #2040a0;
+  }
+}
+
+/* Termes dérivés */
+.wiki-derived-sep {
+  color: var(--muted);
+  font-size: 0.8rem;
+  align-self: center;
+}
+.wiki-derived-pill {
+  background: transparent;
+  color: var(--muted);
+  border: 1px dashed var(--border);
+  border-radius: 999px;
+  padding: 0.18rem 0.6rem;
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
+/* Ligne termes dérivés dans le formulaire */
+.wiki-derived-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+  margin-bottom: 0.25rem;
+}
+.wiki-derived-widget {
+  flex: 1 1 200px;
+}
+.wiki-derived-widget .wiki-meta-label {
+  margin-bottom: 0.35rem;
+}
+.wiki-anglais-chip {
+  flex: 0 0 auto;
+  align-self: flex-end;
+  margin-bottom: 0.15rem;
+}
+
 .link-delete-form {
   position: absolute;
   top: 0.6rem;
@@ -1696,8 +1753,8 @@ input[type="text"], input[type="password"] {
 
 .wiki-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.1rem;
   margin-top: 1rem;
 }
 
@@ -1705,40 +1762,51 @@ input[type="text"], input[type="password"] {
   display: flex;
   flex-direction: column;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--card);
   overflow: hidden;
   text-decoration: none;
   color: inherit;
-  transition: border-color 0.15s ease, transform 0.1s ease;
+  transition: box-shadow 0.2s ease, transform 0.15s ease, border-color 0.15s ease;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
-
 .wiki-card:hover {
   border-color: var(--accent);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.13);
 }
 
 .wiki-card-image {
-  height: 140px;
+  height: 175px;
   background: var(--bg);
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative;
+  flex: 0 0 auto;
 }
-
 .wiki-card-img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  border-radius: 0;
 }
-
-.wiki-card-body {
-  padding: 0.85rem 1rem 1rem;
+.wiki-card-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.5rem 0.6rem 0.5rem;
+  background: linear-gradient(transparent, rgba(0,0,0,0.6));
   display: flex;
-  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
   gap: 0.4rem;
+}
+.wiki-card-overlay .wiki-category-badge {
+  font-size: 0.68rem;
+}
+.wiki-card-overlay .wiki-card-react-badge,
+.wiki-card-overlay .wiki-owned-badge {
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
 }
 
 .wiki-card-header {
@@ -1746,6 +1814,15 @@ input[type="text"], input[type="password"] {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
+  padding: 0.75rem 0.85rem 0;
+}
+
+.wiki-card-body {
+  padding: 0.65rem 0.85rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
 }
 
 .wiki-category-badge {
@@ -1768,18 +1845,37 @@ input[type="text"], input[type="password"] {
 
 .wiki-card-title {
   margin: 0;
-  font-weight: 600;
+  font-size: 0.97rem;
+  font-weight: 700;
   color: var(--fg);
+  line-height: 1.3;
 }
 
-.wiki-card-excerpt {
+.wiki-card-derived {
   margin: 0;
+  font-size: 0.75rem;
+  font-style: italic;
   color: var(--muted);
-  font-size: 0.85rem;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
+  line-height: 1.2;
+}
+
+.wiki-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: auto;
+  padding-top: 0.3rem;
+}
+
+.wiki-card-tags-more {
+  font-size: 0.72rem;
+  color: var(--muted);
+  align-self: center;
+}
+
+.wiki-anglais-badge-sm {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.35rem;
 }
 
 .wiki-detail {
@@ -2323,6 +2419,93 @@ input[type="text"], input[type="password"] {
 
 .wiki-card-star.filled {
   color: #f5a623;
+}
+
+/* ── Suggestions de pages similaires ──────────────── */
+.wiki-suggestions {
+  margin: 2rem 0 0;
+  border-top: 1px solid var(--border);
+  padding-top: 1.25rem;
+}
+
+.wiki-sugg-heading {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  margin: 0 0 0.85rem;
+}
+
+.wiki-sugg-row {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scrollbar-width: none;
+}
+.wiki-sugg-row::-webkit-scrollbar { display: none; }
+
+.wiki-sugg-card {
+  flex: 0 0 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--card);
+  text-decoration: none;
+  color: var(--fg);
+  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  padding-bottom: 0.5rem;
+}
+.wiki-sugg-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.wiki-sugg-img-wrap {
+  height: 90px;
+  background: var(--bg);
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+.wiki-sugg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.wiki-sugg-badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.12rem 0.5rem;
+  align-self: flex-start;
+  margin: 0.4rem 0.5rem 0;
+}
+
+.wiki-sugg-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.3;
+  padding: 0 0.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.wiki-sugg-stars {
+  font-size: 0.65rem;
+  color: #f5a623;
+  padding: 0 0.5rem;
+  letter-spacing: -1px;
 }
 
 /* ── Liens entre pages wiki ────────────────────────── */

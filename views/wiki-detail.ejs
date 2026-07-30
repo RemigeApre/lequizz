@@ -37,9 +37,17 @@
 
     <h1 class="wiki-detail-title"><%= page.title %></h1>
 
-    <% if (page.tags.length) { %>
+    <%
+      var hasAnyTags = page.tags.length || (pm.termes_derives && pm.termes_derives.length) || pm.anglais;
+    %>
+    <% if (hasAnyTags) { %>
       <div class="link-card-tags wiki-detail-tags">
+        <% if (pm.anglais) { %><span class="wiki-anglais-badge">&#127468;&#127463; Anglais</span><% } %>
         <% page.tags.forEach(function (t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
+        <% if (pm.termes_derives && pm.termes_derives.length) { %>
+          <span class="wiki-derived-sep">&mdash;</span>
+          <% pm.termes_derives.forEach(function (t) { %><span class="wiki-derived-pill"><%= t %></span><% }) %>
+        <% } %>
       </div>
     <% } %>
 
@@ -57,9 +65,14 @@
           <% } %>
 
           <%# Tags (dupliqués ici pour l'ordre mobile) %>
-          <% if (page.tags.length) { %>
+          <% if (hasAnyTags) { %>
             <div class="wiki-infobox-tags">
+              <% if (pm.anglais) { %><span class="wiki-anglais-badge">&#127468;&#127463; Anglais</span><% } %>
               <% page.tags.forEach(function (t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
+              <% if (pm.termes_derives && pm.termes_derives.length) { %>
+                <span class="wiki-derived-sep">&mdash;</span>
+                <% pm.termes_derives.forEach(function (t) { %><span class="wiki-derived-pill"><%= t %></span><% }) %>
+              <% } %>
             </div>
           <% } %>
 
@@ -162,6 +175,28 @@
       <% } %>
 
     </div>
+
+    <%# ─ Suggestions ─ %>
+    <% if (suggestions && suggestions.length) { %>
+      <div class="wiki-suggestions">
+        <h3 class="wiki-sugg-heading">Pages similaires</h3>
+        <div class="wiki-sugg-row">
+          <% suggestions.forEach(function (s) { %>
+            <% var scat = categories.find(function (c) { return c.key === s.category; }); %>
+            <a href="/wiki/<%= s.id %>" class="wiki-sugg-card">
+              <% if (s.imagePaths && s.imagePaths.length) { %>
+                <div class="wiki-sugg-img-wrap">
+                  <img src="<%= s.imagePaths[0] %>" alt="" class="wiki-sugg-img" />
+                </div>
+              <% } %>
+              <span class="wiki-sugg-badge" style="background: hsl(<%= scat ? scat.hue : 220 %>, 55%, 45%)"><%= scat ? scat.label : s.category %></span>
+              <span class="wiki-sugg-title"><%= s.title %></span>
+              <% if (s.rating) { %><span class="wiki-sugg-stars"><% for (var si2=1;si2<=s.rating;si2++){ %>&#9733;<% } %></span><% } %>
+            </a>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
 
     <%# ─ Pages liées ─ %>
     <div class="wiki-page-links" data-page-id="<%= page.id %>">
