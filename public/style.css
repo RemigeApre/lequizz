@@ -1362,6 +1362,141 @@ input[type="text"], input[type="password"] {
   }
 }
 
+/* ── Recherche wiki ─────────────────────────────────────────── */
+.wiki-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.wiki-search-bar {
+  position: relative;
+  flex: 1 1 220px;
+  display: flex;
+  align-items: center;
+}
+
+.wiki-search-icon {
+  position: absolute;
+  left: 0.6rem;
+  font-size: 0.9rem;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.wiki-search-input {
+  width: 100%;
+  padding: 0.45rem 2.2rem 0.45rem 2rem;
+  font-size: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--fg);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.wiki-search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+.wiki-search-input::-webkit-search-cancel-button { display: none; }
+
+.wiki-search-clear {
+  position: absolute;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  color: var(--muted);
+  line-height: 1;
+  padding: 0 0.2rem;
+}
+.wiki-search-clear:hover { color: var(--fg); }
+
+.wiki-adv-toggle {
+  font-size: 0.78rem;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s, color 0.15s;
+}
+.wiki-adv-toggle:hover { border-color: var(--accent); color: var(--fg); }
+
+.wiki-result-count {
+  font-size: 0.78rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* Panneau avancé */
+.wiki-adv-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.wiki-adv-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.wiki-adv-label {
+  font-size: 0.78rem;
+  color: var(--muted);
+  white-space: nowrap;
+  min-width: 5rem;
+}
+
+.wiki-adv-stars {
+  display: flex;
+  gap: 0.2rem;
+  align-items: center;
+}
+
+.wiki-adv-star {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 0 0.1rem;
+  transition: color 0.1s;
+  line-height: 1;
+}
+.wiki-adv-star.active,
+.wiki-adv-star:hover { color: #f5a623; }
+
+.wiki-adv-star-reset {
+  background: none;
+  border: none;
+  font-size: 0.7rem;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 0 0.3rem;
+  opacity: 0.6;
+}
+.wiki-adv-star-reset:hover { opacity: 1; }
+
+.wiki-adv-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
 .wiki-new-btn {
   background: transparent;
   border: 1px dashed var(--border);
@@ -1876,6 +2011,109 @@ input[type="text"], input[type="password"] {
 .wiki-anglais-badge-sm {
   font-size: 0.7rem;
   padding: 0.1rem 0.35rem;
+}
+
+/* ── Extra catégories ───────────────────────────── */
+.wiki-category-badge-sm {
+  font-size: 0.63rem;
+  padding: 0.15rem 0.5rem;
+}
+.wiki-category-badge-extra {
+  opacity: 0.85;
+}
+.wiki-card-extra-cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.1rem;
+}
+.wiki-extra-cats-field {
+  margin: 0.5rem 0;
+}
+
+/* ── Cartes ULTRA ───────────────────────────────── */
+.wiki-card[data-ultra="1"] {
+  border-color: #3d2278;
+  background: linear-gradient(160deg, #160d2e 0%, #1e1040 100%);
+  box-shadow: 0 0 0 1px #4a2a8a, 0 2px 12px rgba(80,30,160,0.25);
+}
+.wiki-card[data-ultra="1"] .wiki-card-body {
+  background: transparent;
+}
+.wiki-card[data-ultra="1"] .wiki-card-title {
+  color: #c8a8f8;
+}
+.wiki-card[data-ultra="1"] .wiki-card-header {
+  background: transparent;
+}
+.wiki-card[data-ultra="1"] .wiki-card-derived {
+  color: #9070c0;
+}
+.wiki-card[data-ultra="1"] .link-tag-pill {
+  background: rgba(100,50,180,0.35);
+  border: 1px solid rgba(140,80,220,0.4);
+  color: #c0a0e8;
+}
+.wiki-card[data-ultra="1"]::before {
+  content: "Ultra";
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(180,130,255,0.7);
+  z-index: 2;
+}
+/* Assure que position: relative est là pour ::before */
+.wiki-card { position: relative; }
+
+/* ── Cartes FANTAISIE ───────────────────────────── */
+.wiki-card[data-fantaisie="1"] {
+  border-color: #c89fe0;
+  background: linear-gradient(150deg, #fdf0ff 0%, #f0e4ff 50%, #fff0f8 100%);
+}
+.wiki-card[data-fantaisie="1"] .wiki-card-title {
+  color: #6a2f9a;
+}
+.wiki-card[data-fantaisie="1"] .wiki-card-derived {
+  color: #9a60b8;
+}
+.wiki-card[data-fantaisie="1"] .wiki-card-header {
+  background: transparent;
+}
+.wiki-card[data-fantaisie="1"] .link-tag-pill {
+  background: rgba(160,80,200,0.12);
+  border: 1px solid rgba(180,100,220,0.35);
+  color: #7a3fa8;
+}
+.wiki-card[data-fantaisie="1"]::after {
+  content: "✨";
+  position: absolute;
+  top: 0.45rem;
+  right: 0.5rem;
+  font-size: 0.85rem;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Priorité ultra > fantaisie si les deux (ultra efface le ::after fantaisie) */
+.wiki-card[data-ultra="1"]::after { display: none; }
+
+/* Mode sombre pour fantaisie */
+@media (prefers-color-scheme: dark) {
+  .wiki-card[data-fantaisie="1"] {
+    border-color: #7a4aaa;
+    background: linear-gradient(150deg, #1e0f2a 0%, #260e38 50%, #200e28 100%);
+  }
+  .wiki-card[data-fantaisie="1"] .wiki-card-title { color: #d8a8f8; }
+  .wiki-card[data-fantaisie="1"] .wiki-card-derived { color: #a870d0; }
+  .wiki-card[data-fantaisie="1"] .link-tag-pill {
+    background: rgba(160,80,200,0.2);
+    border-color: rgba(180,100,220,0.4);
+    color: #c090e0;
+  }
 }
 
 .wiki-detail {
@@ -2869,6 +3107,52 @@ input[type="text"], input[type="password"] {
 .wiki-img-remove-label:has(input:checked) ~ .wiki-form-existing-image,
 .wiki-existing-img-wrap:has(input:checked) .wiki-form-existing-image {
   opacity: 0.3;
+}
+
+/* Bouton couverture (étoile en bas à gauche de la miniature) */
+.wiki-cover-radio-label {
+  position: absolute;
+  bottom: 0.25rem;
+  left: 0.25rem;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.wiki-cover-radio-label input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.wiki-cover-badge-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.45);
+  color: rgba(255,255,255,0.55);
+  font-size: 0.85rem;
+  transition: background 0.15s, color 0.15s;
+}
+
+.wiki-cover-radio-label:hover .wiki-cover-badge-icon {
+  background: rgba(0,0,0,0.65);
+  color: #f5c842;
+}
+
+.wiki-cover-radio-label:has(input:checked) .wiki-cover-badge-icon {
+  background: rgba(240,180,0,0.85);
+  color: #fff;
+}
+
+/* Bordure dorée sur le wrap quand c'est la couverture */
+.wiki-existing-img-wrap:has(.wiki-cover-radio:checked),
+.wiki-new-preview-wrap:has(.wiki-cover-radio:checked) {
+  border-color: #d4a017;
+  box-shadow: 0 0 0 2px rgba(212,160,23,0.35);
 }
 
 /* Bouton d'ajout d'images */

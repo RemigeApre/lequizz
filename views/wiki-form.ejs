@@ -141,6 +141,20 @@
       </div>
     </div>
 
+    <%# ─ Catégories supplémentaires ─ %>
+    <div class="wiki-extra-cats-field" id="wiki-edit-extra-cats">
+      <p class="wiki-meta-label">Aussi dans&hellip;</p>
+      <div class="wiki-meta-options">
+        <% categories.forEach(function(c) { %>
+          <label class="chip-option wiki-extra-cat-option" data-cat="<%= c.key %>">
+            <input type="checkbox" name="extra_categories" value="<%= c.key %>"
+              <%= (page.extraCategories || []).indexOf(c.key) !== -1 ? 'checked' : '' %> />
+            <span><%= c.label %></span>
+          </label>
+        <% }) %>
+      </div>
+    </div>
+
     <%# ─ Termes dérivés + Anglais ─ %>
     <div class="wiki-derived-row">
       <div class="wiki-tags-widget wiki-derived-widget">
@@ -175,9 +189,13 @@
     <div class="wiki-image-field">
       <% if (page.imagePaths && page.imagePaths.length) { %>
         <div class="wiki-images-existing">
-          <% page.imagePaths.forEach(function(src) { %>
+          <% page.imagePaths.forEach(function(src, idx) { %>
             <div class="wiki-existing-img-wrap">
               <img src="<%= src %>" alt="" class="wiki-form-existing-image" />
+              <label class="wiki-cover-radio-label" title="Définir comme couverture">
+                <input type="radio" name="cover_image" value="<%= src %>" class="wiki-cover-radio" <%= idx === 0 ? 'checked' : '' %> />
+                <span class="wiki-cover-badge-icon">&#9733;</span>
+              </label>
               <label class="wiki-img-remove-label">
                 <input type="checkbox" name="remove_image" value="<%= src %>" />
                 <span>&#215;</span>

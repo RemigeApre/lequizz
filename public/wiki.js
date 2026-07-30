@@ -279,6 +279,13 @@
         if (newLieuxMeta)  newLieuxMeta.hidden   = key !== "lieux";
         if (newPosMeta)    newPosMeta.hidden      = key !== "position";
         if (newObjetsMeta) newObjetsMeta.hidden   = key !== "objets";
+        // Cache la catégorie principale dans les options supplémentaires
+        var newExtraOpts = document.querySelectorAll("#wiki-new-extra-cats .wiki-extra-cat-option");
+        newExtraOpts.forEach(function (opt) {
+          var hide = opt.dataset.cat === key;
+          opt.hidden = hide;
+          if (hide) opt.querySelector("input").checked = false;
+        });
         showStep(2);
       });
     });
@@ -313,6 +320,13 @@
     if (editLieuxMeta)  editLieuxMeta.hidden   = cat !== "lieux";
     if (editPosMeta)    editPosMeta.hidden      = cat !== "position";
     if (editObjetsMeta) editObjetsMeta.hidden   = cat !== "objets";
+    // Cache la catégorie principale dans les options supplémentaires
+    var editExtraOpts = document.querySelectorAll("#wiki-edit-extra-cats .wiki-extra-cat-option");
+    editExtraOpts.forEach(function (opt) {
+      var hide = opt.dataset.cat === cat;
+      opt.hidden = hide;
+      if (hide) opt.querySelector("input").checked = false;
+    });
     // Couleur du select (optionnel, via data-hue)
     var opt = editCatSelect.options[editCatSelect.selectedIndex];
     if (opt && opt.dataset.hue) {
@@ -394,33 +408,104 @@
   }
 
   // ══════════════════════════════════════════════════
-  // 6. FILTRES + TRI DE LA GRILLE
+  // 6. FILTRES + RECHERCHE + TRI DE LA GRILLE
   // ══════════════════════════════════════════════════
-  var categoryFilter = document.getElementById("wiki-category-filter");
-  var tagFilter      = document.getElementById("wiki-tag-filter");
-  var sortSelect     = document.getElementById("wiki-sort-select");
-  var ultraToggle    = document.getElementById("wiki-ultra-toggle");
-  var wikiList       = document.getElementById("wiki-list");
-  var activeCategory = "", activeTag = "", activeSort = "alpha-asc";
-  var hideUltra = localStorage.getItem("wiki-hide-ultra") === "1";
+  var categoryFilter  = document.getElementById("wiki-category-filter");
+  var tagFilter       = document.getElementById("wiki-tag-filter");
+  var sortSelect      = document.getElementById("wiki-sort-select");
+  var ultraToggle     = document.getElementById("wiki-ultra-toggle");
+  var wikiList        = document.getElementById("wiki-list");
+  var searchInput     = document.getElementById("wiki-search-input");
+  var searchClear     = document.getElementById("wiki-search-clear");
+  var resultCount     = document.getElementById("wiki-result-count");
+  var advToggle       = document.getElementById("wiki-adv-toggle");
+  var advPanel        = document.getElementById("wiki-adv-panel");
+  var advStarsWrap    = document.getElementById("wiki-adv-stars");
+  var advStarReset    = document.getElementById("wiki-adv-star-reset");
+  var advOwned        = document.getElementById("adv-owned");
+  var advFlame        = document.getElementById("adv-flame");
+  var advInterested   = document.getElementById("adv-interested");
+  var advAnglais      = document.getElementById("adv-anglais");
+
+  var activeCategory  = "", activeTag = "", activeSort = "alpha-asc";
+  var hideUltra       = localStorage.getItem("wiki-hide-ultra") === "1";
+  var searchQuery     = "";
+  var advMinRating    = 0;
+
+  // Normalise une chaîne : minuscules + sans accents
+  function norm(s) {
+    return (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  }
+
+  // Score de pertinence d'une carte pour un terme de recherche
+  function scoreCard(card, q) {
+    if (!q) return 1; // tout passe si pas de query
+    var words = q.split(/\s+/).filter(Boolean);
+    var title   = norm(card.dataset.title || "");
+    var derived = norm(card.dataset.derived || "");
+    var tags    = norm(card.dataset.tags || "").replace(/\|/g, " ");
+    var content = norm(card.dataset.content || "");
+    var cat     = norm(card.dataset.category || "");
+
+    var score = 0;
+    words.forEach(function (w) {
+      if (title === w)              score += 12;
+      else if (title.startsWith(w)) score += 8;
+      else if (title.includes(w))   score += 5;
+
+      if (derived.includes(w))      score += 4;
+      if (tags.includes(w))         score += 3;
+      if (content.includes(w))      score += 2;
+      if (cat.includes(w))          score += 1;
+    });
+    return score;
+  }
 
   function applyFilters() {
     if (!wikiList) return;
-    var cards = Array.from(wikiList.querySelectorAll(".wiki-card"));
+    var cards   = Array.from(wikiList.querySelectorAll(".wiki-card"));
+    var q       = norm(searchQuery);
+    var hasAdv  = advMinRating > 0 ||
+                  (advOwned && advOwned.checked) ||
+                  (advFlame && advFlame.checked) ||
+                  (advInterested && advInterested.checked) ||
+                  (advAnglais && advAnglais.checked);
+
+    var scores = new Map();
 
     // Filtrage
     cards.forEach(function (card) {
+      var extraCats = (card.dataset.extraCats || "").split("|").filter(Boolean);
       var okCat = !activeCategory ||
-        (activeCategory === "__owned__" ? card.dataset.owned === "1" : card.dataset.category === activeCategory);
-      var cardTags = (card.dataset.tags || "").split("|");
-      var okTag = !activeTag || cardTags.indexOf(activeTag) !== -1;
-      var okUltra = !hideUltra || cardTags.indexOf("ultra") === -1;
-      card.hidden = !(okCat && okTag && okUltra);
+        (activeCategory === "__owned__" ? card.dataset.owned === "1"
+          : card.dataset.category === activeCategory || extraCats.indexOf(activeCategory) !== -1);
+      var cardTags  = (card.dataset.tags || "").split("|");
+      var okTag     = !activeTag || cardTags.indexOf(activeTag) !== -1;
+      var okUltra   = !hideUltra || cardTags.indexOf("ultra") === -1;
+
+      // Recherche textuelle
+      var sc = scoreCard(card, q);
+      var okSearch = !q || sc > 0;
+      scores.set(card, sc);
+
+      // Filtres avancés
+      var okRating     = !advMinRating || Number(card.dataset.rating) >= advMinRating;
+      var okOwned      = !(advOwned && advOwned.checked) || card.dataset.owned === "1";
+      var okFlame      = !(advFlame && advFlame.checked) || card.dataset.flame === "1";
+      var okInterested = !(advInterested && advInterested.checked) || card.dataset.interested === "1";
+      var okAnglais    = !(advAnglais && advAnglais.checked) || card.dataset.anglais === "1";
+
+      card.hidden = !(okCat && okTag && okUltra && okSearch && okRating && okOwned && okFlame && okInterested && okAnglais);
     });
 
-    // Tri (uniquement les cartes visibles)
+    // Tri
     var visible = cards.filter(function (c) { return !c.hidden; });
     visible.sort(function (a, b) {
+      // Si recherche active : d'abord par score de pertinence, puis par le tri choisi
+      if (q) {
+        var diff = (scores.get(b) || 0) - (scores.get(a) || 0);
+        if (diff !== 0) return diff;
+      }
       switch (activeSort) {
         case "alpha-asc":   return (a.dataset.title || "").localeCompare(b.dataset.title || "", "fr", { sensitivity: "base" });
         case "alpha-desc":  return (b.dataset.title || "").localeCompare(a.dataset.title || "", "fr", { sensitivity: "base" });
@@ -432,7 +517,74 @@
       }
     });
     visible.forEach(function (card) { wikiList.appendChild(card); });
+
+    // Compteur
+    if (resultCount) {
+      var showCount = q || hasAdv;
+      resultCount.hidden = !showCount;
+      if (showCount) {
+        var n = visible.length;
+        resultCount.textContent = n + "\u00a0r\u00e9sultat" + (n > 1 ? "s" : "");
+      }
+    }
   }
+
+  // Barre de recherche
+  if (searchInput) {
+    searchInput.addEventListener("input", function () {
+      searchQuery = searchInput.value;
+      if (searchClear) searchClear.hidden = !searchQuery;
+      applyFilters();
+    });
+  }
+  if (searchClear) {
+    searchClear.addEventListener("click", function () {
+      searchQuery = "";
+      if (searchInput) searchInput.value = "";
+      searchClear.hidden = true;
+      applyFilters();
+    });
+  }
+
+  // Panneau avancé
+  if (advToggle && advPanel) {
+    advToggle.addEventListener("click", function () {
+      advPanel.hidden = !advPanel.hidden;
+      advToggle.innerHTML = advPanel.hidden ? "Filtres avanc\u00e9s &#9662;" : "Filtres avanc\u00e9s &#9652;";
+    });
+  }
+
+  // Étoiles min dans le panneau avancé
+  if (advStarsWrap) {
+    var advStarBtns = advStarsWrap.querySelectorAll(".wiki-adv-star");
+    function renderAdvStars() {
+      advStarBtns.forEach(function (btn) {
+        var v = Number(btn.dataset.value);
+        btn.innerHTML = v <= advMinRating ? "&#9733;" : "&#9734;";
+        btn.classList.toggle("active", v <= advMinRating);
+      });
+    }
+    advStarBtns.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var v = Number(btn.dataset.value);
+        advMinRating = advMinRating === v ? 0 : v;
+        renderAdvStars();
+        applyFilters();
+      });
+    });
+    if (advStarReset) {
+      advStarReset.addEventListener("click", function () {
+        advMinRating = 0;
+        renderAdvStars();
+        applyFilters();
+      });
+    }
+  }
+
+  // Checkboxes avancées
+  [advOwned, advFlame, advInterested, advAnglais].forEach(function (cb) {
+    if (cb) cb.addEventListener("change", applyFilters);
+  });
 
   if (categoryFilter) {
     categoryFilter.querySelectorAll(".tag-chip").forEach(function (chip) {
@@ -508,6 +660,10 @@
 
     function renderPreviews() {
       previewsZone.innerHTML = "";
+      // Vérifie si la couverture est déjà une image existante (radio coché hors previewsZone)
+      var form = wrapper.closest("form");
+      var existingCoverChecked = form && !!form.querySelector(".wiki-cover-radio:checked");
+
       currentFiles.forEach(function (file, idx) {
         var wrap = document.createElement("div");
         wrap.className = "wiki-new-preview-wrap";
@@ -516,7 +672,24 @@
         img.className = "wiki-new-preview-img";
         img.src = URL.createObjectURL(file);
         img.alt = "";
-        img.addEventListener("click", function () { openLightbox(img.src); }); // blob: URL, pas de panel
+        img.addEventListener("click", function () { openLightbox(img.src); });
+
+        // Radio couverture
+        var coverLabel = document.createElement("label");
+        coverLabel.className = "wiki-cover-radio-label";
+        coverLabel.title = "D\u00e9finir comme couverture";
+        var coverRadio = document.createElement("input");
+        coverRadio.type = "radio";
+        coverRadio.name = "cover_image";
+        coverRadio.value = "__new__:" + idx;
+        coverRadio.className = "wiki-cover-radio";
+        // Si aucune image existante n'est déjà couverte et c'est le premier fichier nouveau
+        if (!existingCoverChecked && idx === 0) coverRadio.checked = true;
+        var coverStar = document.createElement("span");
+        coverStar.className = "wiki-cover-badge-icon";
+        coverStar.innerHTML = "&#9733;";
+        coverLabel.appendChild(coverRadio);
+        coverLabel.appendChild(coverStar);
 
         var removeBtn = document.createElement("button");
         removeBtn.type = "button";
@@ -530,6 +703,7 @@
         });
 
         wrap.appendChild(img);
+        wrap.appendChild(coverLabel);
         wrap.appendChild(removeBtn);
         previewsZone.appendChild(wrap);
       });

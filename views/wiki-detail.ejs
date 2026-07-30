@@ -32,6 +32,11 @@
 
     <div class="wiki-detail-header">
       <span class="wiki-category-badge" style="background: hsl(<%= cat ? cat.hue : 220 %>, 55%, 45%)"><%= cat ? cat.label : page.category %></span>
+      <% if (page.extraCategories && page.extraCategories.length) { %>
+        <% page.extraCategories.forEach(function(eck) { var ecat = categories.find(function(c){ return c.key === eck; }); %>
+          <span class="wiki-category-badge wiki-category-badge-extra" style="background: hsl(<%= ecat ? ecat.hue : 220 %>, 55%, 45%)"><%= ecat ? ecat.label : eck %></span>
+        <% }) %>
+      <% } %>
       <% if (page.owned) { %><span class="wiki-owned-badge" title="Poss\u00e9d\u00e9">&#9733; Poss\u00e9d\u00e9</span><% } %>
     </div>
 

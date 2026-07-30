@@ -170,14 +170,15 @@ function buildWikiRouter(config) {
     const title = String(req.body.title || "").trim();
     if (!title) return res.redirect("/wiki");
 
-    const category   = normalizeCategory(req.body.category);
-    const content    = String(req.body.content || "").trim();
-    const tags       = parseTags(req.body.tags);
-    const owned      = OWNED_CATEGORIES.includes(category) && req.body.owned === "on";
-    const meta       = parseMeta(category, req.body);
-    const imagePaths = (req.files || []).map((f) => `/uploads/wiki/${f.filename}`);
+    const category        = normalizeCategory(req.body.category);
+    const content         = String(req.body.content || "").trim();
+    const tags            = parseTags(req.body.tags);
+    const owned           = OWNED_CATEGORIES.includes(category) && req.body.owned === "on";
+    const meta            = parseMeta(category, req.body);
+    const imagePaths      = (req.files || []).map((f) => `/uploads/wiki/${f.filename}`);
+    const extraCategories = arr(req.body.extra_categories).filter((k) => CATEGORY_KEYS.includes(k) && k !== category);
 
-    insertWikiPage({ title, category, content, tags, imagePaths, owned, meta });
+    insertWikiPage({ title, category, content, tags, imagePaths, owned, meta, extraCategories });
     res.redirect("/wiki");
   });
 
@@ -254,9 +255,21 @@ function buildWikiRouter(config) {
     const toRemove  = [].concat(req.body.remove_image || []);
     const kept      = existing.imagePaths.filter((p) => !toRemove.includes(p));
     const added     = (req.files || []).map((f) => `/uploads/wiki/${f.filename}`);
-    const imagePaths = [...kept, ...added];
+    let imagePaths  = [...kept, ...added];
 
-    updateWikiPage(id, { title, category, content, tags, imagePaths, owned, meta });
+    // Réordonne selon l'image de couverture choisie
+    const coverValue = String(req.body.cover_image || "");
+    if (coverValue.startsWith("__new__:")) {
+      const ni = Number(coverValue.replace("__new__:", ""));
+      if (!isNaN(ni) && ni >= 0 && ni < added.length) {
+        imagePaths = [added[ni], ...kept, ...added.filter((_, i) => i !== ni)];
+      }
+    } else if (coverValue && imagePaths.includes(coverValue)) {
+      imagePaths = [coverValue, ...imagePaths.filter((p) => p !== coverValue)];
+    }
+
+    const extraCategories = arr(req.body.extra_categories).filter((k) => CATEGORY_KEYS.includes(k) && k !== category);
+    updateWikiPage(id, { title, category, content, tags, imagePaths, owned, meta, extraCategories });
     res.redirect(`/wiki/${id}`);
   });
 

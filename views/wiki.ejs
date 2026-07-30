@@ -154,6 +154,19 @@
         </div>
       </div>
 
+      <%# ─ Catégories supplémentaires ─ %>
+      <div class="wiki-extra-cats-field" id="wiki-new-extra-cats">
+        <p class="wiki-meta-label">Aussi dans&hellip;</p>
+        <div class="wiki-meta-options">
+          <% categories.forEach(function(c) { %>
+            <label class="chip-option wiki-extra-cat-option" data-cat="<%= c.key %>">
+              <input type="checkbox" name="extra_categories" value="<%= c.key %>" />
+              <span><%= c.label %></span>
+            </label>
+          <% }) %>
+        </div>
+      </div>
+
       <%# ─ Termes dérivés + Anglais ─ %>
       <div class="wiki-derived-row">
         <div class="wiki-tags-widget wiki-derived-widget">
@@ -198,6 +211,35 @@
         <button type="button" class="wiki-cancel-btn" id="wiki-cancel-new">Annuler</button>
       </div>
     </form>
+  </div>
+
+  <%# ─── RECHERCHE ───────────────────────────────────────────────────── %>
+  <div class="wiki-search-wrap">
+    <div class="wiki-search-bar">
+      <span class="wiki-search-icon">&#128269;</span>
+      <input type="search" id="wiki-search-input" class="wiki-search-input" placeholder="Rechercher une page&hellip;" autocomplete="off" />
+      <button type="button" id="wiki-search-clear" class="wiki-search-clear" hidden>&#215;</button>
+    </div>
+    <button type="button" id="wiki-adv-toggle" class="wiki-adv-toggle">Filtres avancés &#9662;</button>
+    <span id="wiki-result-count" class="wiki-result-count" hidden></span>
+  </div>
+
+  <div id="wiki-adv-panel" class="wiki-adv-panel" hidden>
+    <div class="wiki-adv-row">
+      <label class="wiki-adv-label">Note min.</label>
+      <div class="wiki-adv-stars" id="wiki-adv-stars">
+        <% for (var si = 1; si <= 5; si++) { %>
+          <button type="button" class="wiki-adv-star" data-value="<%= si %>">&#9734;</button>
+        <% } %>
+        <button type="button" class="wiki-adv-star-reset" id="wiki-adv-star-reset">&#10006;</button>
+      </div>
+    </div>
+    <div class="wiki-adv-checks">
+      <label class="chip-option"><input type="checkbox" id="adv-owned" /><span>&#9733; Poss&eacute;d&eacute;</span></label>
+      <label class="chip-option"><input type="checkbox" id="adv-flame" /><span>&#128293; J&apos;adore</span></label>
+      <label class="chip-option"><input type="checkbox" id="adv-interested" /><span>&#10024; Int&eacute;ress&eacute;e</span></label>
+      <label class="chip-option"><input type="checkbox" id="adv-anglais" /><span>&#127468;&#127463; Anglais</span></label>
+    </div>
   </div>
 
   <%# ─── FILTRES + TRI ────────────────────────────────────────────────── %>
@@ -246,7 +288,15 @@
         data-tags="<%= page.tags.join('|').toLowerCase() %>"
         data-title="<%= page.title.toLowerCase() %>"
         data-date="<%= new Date(page.updatedAt).getTime() %>"
-        data-rating="<%= page.rating || 0 %>">
+        data-rating="<%= page.rating || 0 %>"
+        data-flame="<%= page.flame ? '1' : '0' %>"
+        data-interested="<%= page.interested ? '1' : '0' %>"
+        data-anglais="<%= (page.meta && page.meta.anglais) ? '1' : '0' %>"
+        data-derived="<%= ((page.meta && page.meta.termes_derives) || []).join('|').toLowerCase() %>"
+        data-content="<%= (page.content || '').toLowerCase().replace(/"/g,'').replace(/\s+/g,' ').slice(0, 400) %>"
+        data-ultra="<%= page.tags.indexOf('ultra') !== -1 ? '1' : '0' %>"
+        data-fantaisie="<%= page.tags.indexOf('fantaisie') !== -1 ? '1' : '0' %>"
+        data-extra-cats="<%= (page.extraCategories || []).join('|') %>">
 
         <%# Si image : image pleine + overlay avec badge et réactions %>
         <% if (page.imagePaths && page.imagePaths.length) { %>
@@ -283,6 +333,13 @@
           <% var pm2 = page.meta || {}; %>
           <% if (pm2.termes_derives && pm2.termes_derives.length) { %>
             <p class="wiki-card-derived"><%= pm2.termes_derives.slice(0,3).join(' · ') %></p>
+          <% } %>
+          <% if (page.extraCategories && page.extraCategories.length) { %>
+            <div class="wiki-card-extra-cats">
+              <% page.extraCategories.forEach(function(eck) { var ecat = categories.find(function(c){ return c.key === eck; }); %>
+                <span class="wiki-category-badge wiki-category-badge-sm" style="background: hsl(<%= ecat ? ecat.hue : 220 %>, 55%, 45%)"><%= ecat ? ecat.label : eck %></span>
+              <% }) %>
+            </div>
           <% } %>
           <% if (page.tags.length) { %>
             <div class="wiki-card-tags">
