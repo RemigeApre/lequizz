@@ -1745,8 +1745,13 @@ input[type="text"], input[type="password"] {
   cursor: zoom-in;
 }
 
-/* séparateur entre images si plusieurs */
+/* séparateur entre images si plusieurs dans le même bloc */
 .wiki-infobox-img + .wiki-infobox-img {
+  border-top: 1px solid var(--border);
+}
+
+/* images suivantes : séparateur avec le bloc paramètres */
+.wiki-infobox-images-rest {
   border-top: 1px solid var(--border);
 }
 
@@ -1994,6 +1999,118 @@ input[type="text"], input[type="password"] {
   margin: 0;
   padding-top: 0.75rem;
   border-top: 1px solid var(--border);
+}
+
+/* ── Widget réactions ──────────────────────────── */
+.wiki-react {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+}
+
+.wiki-react-stars {
+  display: flex;
+  gap: 0.15rem;
+}
+
+.wiki-star {
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  line-height: 1;
+  padding: 0.1rem;
+  cursor: pointer;
+  color: var(--border);
+  transition: color 0.1s, transform 0.1s;
+}
+
+.wiki-star.active,
+.wiki-star:hover {
+  color: #f5a623;
+}
+
+.wiki-star:active { transform: scale(1.25); }
+
+.wiki-react-toggles {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.wiki-react-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
+}
+
+.wiki-react-btn:active { transform: scale(0.95); }
+
+.wiki-react-icon { font-size: 1.05rem; line-height: 1; }
+
+.wiki-react-flame.active {
+  background: #fff0e6;
+  border-color: #f07030;
+  color: #d05010;
+}
+@media (prefers-color-scheme: dark) {
+  .wiki-react-flame.active {
+    background: #3a1800;
+    border-color: #c05020;
+    color: #ff8040;
+  }
+}
+
+.wiki-react-interest.active {
+  background: #f0ecff;
+  border-color: #7c60e0;
+  color: #5040b0;
+}
+@media (prefers-color-scheme: dark) {
+  .wiki-react-interest.active {
+    background: #1e1440;
+    border-color: #8060d0;
+    color: #b090ff;
+  }
+}
+
+/* ── Indicateurs sur les cartes ─────────────── */
+.wiki-card-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.wiki-card-react-badge {
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.wiki-card-stars {
+  display: flex;
+  gap: 0.05rem;
+  margin-top: 0.1rem;
+}
+
+.wiki-card-star {
+  font-size: 0.75rem;
+  color: var(--border);
+}
+
+.wiki-card-star.filled {
+  color: #f5a623;
 }
 
 .wiki-detail-actions {

@@ -204,8 +204,17 @@
         <div class="wiki-card-body">
           <div class="wiki-card-header">
             <span class="wiki-category-badge" style="background: hsl(<%= cat ? cat.hue : 220 %>, 55%, 45%)"><%= cat ? cat.label : page.category %></span>
-            <% if (page.owned) { %><span class="wiki-owned-badge" title="Poss\u00e9d\u00e9">&#9733;</span><% } %>
+            <span class="wiki-card-badges">
+              <% if (page.owned) { %><span class="wiki-owned-badge" title="Poss\u00e9d\u00e9">&#9733;</span><% } %>
+              <% if (page.flame) { %><span class="wiki-card-react-badge" title="J'adore">&#128293;</span><% } %>
+              <% if (page.interested) { %><span class="wiki-card-react-badge" title="Ça m'intéresse">&#10024;</span><% } %>
+            </span>
           </div>
+          <% if (page.rating) { %>
+            <div class="wiki-card-stars">
+              <% for (var si = 1; si <= 5; si++) { %><span class="wiki-card-star<%= si <= page.rating ? ' filled' : '' %>">&#9733;</span><% } %>
+            </div>
+          <% } %>
           <p class="wiki-card-title"><%= page.title %></p>
           <% if (page.content) { %>
             <p class="wiki-card-excerpt"><%= page.content.replace(/[#*`_]/g, '').slice(0, 120) %><%= page.content.length > 120 ? "\u2026" : "" %></p>

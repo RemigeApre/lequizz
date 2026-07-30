@@ -258,6 +258,75 @@
   }
 
   // ══════════════════════════════════════════════════
+  // 6. RÉACTIONS (étoiles, flamme, intérêt)
+  // ══════════════════════════════════════════════════
+  var reactWidget = document.querySelector(".wiki-react");
+  if (reactWidget) {
+    var reactId       = reactWidget.dataset.id;
+    var reactRating   = Number(reactWidget.dataset.rating) || 0;
+    var reactFlame    = reactWidget.dataset.flame === "1";
+    var reactInterest = reactWidget.dataset.interested === "1";
+
+    var starBtns = reactWidget.querySelectorAll(".wiki-star");
+    var flamBtn  = reactWidget.querySelector("[data-key='flame']");
+    var intrBtn  = reactWidget.querySelector("[data-key='interested']");
+
+    function save() {
+      fetch("/wiki/" + reactId + "/react", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rating: reactRating, flame: reactFlame, interested: reactInterest }),
+      });
+    }
+
+    function renderStars() {
+      starBtns.forEach(function (btn) {
+        var v = Number(btn.dataset.value);
+        btn.innerHTML = v <= reactRating ? "&#9733;" : "&#9734;";
+        btn.classList.toggle("active", v <= reactRating);
+      });
+    }
+
+    // Étoiles : hover pour preview, clic pour valider
+    // Si on reclique la même étoile → remet à 0
+    starBtns.forEach(function (btn) {
+      var v = Number(btn.dataset.value);
+
+      btn.addEventListener("mouseenter", function () {
+        starBtns.forEach(function (b) {
+          b.innerHTML = Number(b.dataset.value) <= v ? "&#9733;" : "&#9734;";
+        });
+      });
+
+      btn.addEventListener("mouseleave", renderStars);
+
+      btn.addEventListener("click", function () {
+        reactRating = (reactRating === v) ? 0 : v;
+        renderStars();
+        save();
+      });
+    });
+
+    // Flamme
+    if (flamBtn) {
+      flamBtn.addEventListener("click", function () {
+        reactFlame = !reactFlame;
+        flamBtn.classList.toggle("active", reactFlame);
+        save();
+      });
+    }
+
+    // Intérêt
+    if (intrBtn) {
+      intrBtn.addEventListener("click", function () {
+        reactInterest = !reactInterest;
+        intrBtn.classList.toggle("active", reactInterest);
+        save();
+      });
+    }
+  }
+
+  // ══════════════════════════════════════════════════
   // 6. FILTRES GRILLE (catégorie + tag)
   // ══════════════════════════════════════════════════
   var categoryFilter = document.getElementById("wiki-category-filter");

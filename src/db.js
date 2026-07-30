@@ -54,6 +54,9 @@ db.exec(`
 // Migrations non destructives
 try { db.exec("ALTER TABLE wiki_pages ADD COLUMN meta TEXT NOT NULL DEFAULT '{}'"); } catch (_) {}
 try { db.exec("ALTER TABLE wiki_pages ADD COLUMN image_paths TEXT NOT NULL DEFAULT '[]'"); } catch (_) {}
+try { db.exec("ALTER TABLE wiki_pages ADD COLUMN rating INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
+try { db.exec("ALTER TABLE wiki_pages ADD COLUMN flame INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
+try { db.exec("ALTER TABLE wiki_pages ADD COLUMN interested INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
 
 function insertSubmission(answers, scores) {
   const stmt = db.prepare(
@@ -135,7 +138,6 @@ function deleteLink(id) {
 }
 
 function rowToWikiPage(row) {
-  // image_paths est la source de vérité. Si vide mais image_path existe (anciennes lignes), on le wrape.
   let imagePaths = JSON.parse(row.image_paths || "[]");
   if (!imagePaths.length && row.image_path) imagePaths = [row.image_path];
   return {
@@ -147,6 +149,9 @@ function rowToWikiPage(row) {
     imagePaths,
     owned: !!row.owned,
     meta: JSON.parse(row.meta || "{}"),
+    rating: row.rating || 0,
+    flame: !!row.flame,
+    interested: !!row.interested,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -190,6 +195,12 @@ function updateWikiPage(id, { title, category, content, tags, imagePaths, owned,
   return true;
 }
 
+function reactWikiPage(id, { rating, flame, interested }) {
+  const r = Math.max(0, Math.min(5, Number(rating) || 0));
+  db.prepare("UPDATE wiki_pages SET rating = ?, flame = ?, interested = ? WHERE id = ?")
+    .run(r, flame ? 1 : 0, interested ? 1 : 0, id);
+}
+
 function deleteWikiPage(id) {
   db.prepare("DELETE FROM wiki_pages WHERE id = ?").run(id);
 }
@@ -207,6 +218,7 @@ module.exports = {
   deleteLink,
   insertWikiPage,
   listWikiPages,
+  reactWikiPage,
   getWikiPage,
   updateWikiPage,
   deleteWikiPage,

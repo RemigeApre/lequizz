@@ -7,6 +7,7 @@ const {
   listWikiPages,
   getWikiPage,
   updateWikiPage,
+  reactWikiPage,
   deleteWikiPage,
 } = require("../db");
 
@@ -158,6 +159,14 @@ function buildWikiRouter(config) {
 
     updateWikiPage(id, { title, category, content, tags, imagePaths, owned, meta });
     res.redirect(`/wiki/${id}`);
+  });
+
+  router.post("/:id/react", express.json(), (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.status(400).json({ ok: false });
+    const { rating, flame, interested } = req.body;
+    reactWikiPage(id, { rating, flame, interested });
+    res.json({ ok: true });
   });
 
   router.post("/:id/delete", (req, res) => {
