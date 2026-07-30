@@ -52,9 +52,10 @@
       <div class="wiki-meta-group">
         <p class="wiki-meta-label">Qui est au-dessus&nbsp;?</p>
         <div class="wiki-meta-options">
-          <label class="chip-option"><input type="radio" name="meta_qui_dessus" value="femme"       <%= pm.qui_dessus === 'femme'       ? 'checked' : '' %>><span>Femme</span></label>
-          <label class="chip-option"><input type="radio" name="meta_qui_dessus" value="homme"       <%= pm.qui_dessus === 'homme'       ? 'checked' : '' %>><span>Homme</span></label>
-          <label class="chip-option"><input type="radio" name="meta_qui_dessus" value="aucun"       <%= pm.qui_dessus === 'aucun'       ? 'checked' : '' %>><span>Aucun&nbsp;/ debout</span></label>
+          <label class="chip-option"><input type="radio" name="meta_qui_dessus" value="femme"    <%= pm.qui_dessus === 'femme'    ? 'checked' : '' %>><span>Femme</span></label>
+          <label class="chip-option"><input type="radio" name="meta_qui_dessus" value="homme"    <%= pm.qui_dessus === 'homme'    ? 'checked' : '' %>><span>Homme</span></label>
+          <label class="chip-option"><input type="radio" name="meta_qui_dessus" value="variable" <%= pm.qui_dessus === 'variable' ? 'checked' : '' %>><span>Variable</span></label>
+          <label class="chip-option"><input type="radio" name="meta_qui_dessus" value="aucun"    <%= pm.qui_dessus === 'aucun'    ? 'checked' : '' %>><span>Aucun&nbsp;/ debout</span></label>
         </div>
       </div>
       <div class="wiki-meta-group">
@@ -70,10 +71,13 @@
       <div class="wiki-meta-group">
         <p class="wiki-meta-label">Orientation</p>
         <div class="wiki-meta-options">
-          <label class="chip-option"><input type="radio" name="meta_orientation" value="face_a_face"     <%= pm.orientation === 'face_a_face'     ? 'checked' : '' %>><span>Face &agrave; face</span></label>
-          <label class="chip-option"><input type="radio" name="meta_orientation" value="face_contre_dos" <%= pm.orientation === 'face_contre_dos' ? 'checked' : '' %>><span>Face contre dos</span></label>
-          <label class="chip-option"><input type="radio" name="meta_orientation" value="acrobatique"     <%= pm.orientation === 'acrobatique'     ? 'checked' : '' %>><span>Acrobatique</span></label>
-          <label class="chip-option"><input type="radio" name="meta_orientation" value="autre"           <%= pm.orientation === 'autre'           ? 'checked' : '' %>><span>Autre</span></label>
+          <%
+            var pmOri = Array.isArray(pm.orientation) ? pm.orientation : (pm.orientation ? [pm.orientation] : []);
+          %>
+          <label class="chip-option"><input type="checkbox" name="meta_orientation" value="face_a_face"     <%= pmOri.indexOf('face_a_face')     !== -1 ? 'checked' : '' %>><span>Face &agrave; face</span></label>
+          <label class="chip-option"><input type="checkbox" name="meta_orientation" value="face_contre_dos" <%= pmOri.indexOf('face_contre_dos') !== -1 ? 'checked' : '' %>><span>Face contre dos</span></label>
+          <label class="chip-option"><input type="checkbox" name="meta_orientation" value="acrobatique"     <%= pmOri.indexOf('acrobatique')     !== -1 ? 'checked' : '' %>><span>Acrobatique</span></label>
+          <label class="chip-option"><input type="checkbox" name="meta_orientation" value="autre"           <%= pmOri.indexOf('autre')           !== -1 ? 'checked' : '' %>><span>Autre</span></label>
         </div>
       </div>
     </div>

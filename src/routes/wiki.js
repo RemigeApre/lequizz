@@ -55,10 +55,11 @@ function normalizeCategory(value) {
 function parseMeta(category, body) {
   if (category !== "position") return {};
   const canal = body.meta_canal;
+  const orientation = body.meta_orientation;
   return {
-    qui_dessus:  String(body.meta_qui_dessus  || ""),
-    canal:       Array.isArray(canal) ? canal : canal ? [canal] : [],
-    orientation: String(body.meta_orientation || ""),
+    qui_dessus:  String(body.meta_qui_dessus || ""),
+    canal:       Array.isArray(canal)       ? canal       : canal       ? [canal]       : [],
+    orientation: Array.isArray(orientation) ? orientation : orientation ? [orientation] : [],
   };
 }
 

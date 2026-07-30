@@ -27,10 +27,11 @@
     <%# ─ Meta position ─ %>
     <%
       var pm = page.meta || {};
-      var QUI  = { femme: 'Femme', homme: 'Homme', les_deux: 'Les deux', aucun: 'Aucun / debout' };
+      var QUI  = { femme: 'Femme', homme: 'Homme', variable: 'Variable', aucun: 'Aucun / debout' };
       var CAN  = { vagin: 'Vagin', anus: 'Anus', bouche: 'Bouche', mains: 'Mains', autre: 'Autre' };
       var ORI  = { face_a_face: 'Face \u00e0 face', face_contre_dos: 'Face contre dos', acrobatique: 'Acrobatique', autre: 'Autre' };
-      var hasPosMeta = page.category === 'position' && (pm.qui_dessus || (pm.canal && pm.canal.length) || pm.orientation);
+      var pmOri = Array.isArray(pm.orientation) ? pm.orientation : (pm.orientation ? [pm.orientation] : []);
+      var hasPosMeta = page.category === 'position' && (pm.qui_dessus || (pm.canal && pm.canal.length) || pmOri.length);
     %>
     <% if (hasPosMeta) { %>
       <div class="wiki-position-info">
@@ -40,8 +41,8 @@
         <% if (pm.canal && pm.canal.length) { %>
           <span class="wiki-pos-item"><span class="wiki-pos-key">Canal</span><strong><%= pm.canal.map(function(c){ return CAN[c] || c; }).join(' \u00b7 ') %></strong></span>
         <% } %>
-        <% if (pm.orientation && ORI[pm.orientation]) { %>
-          <span class="wiki-pos-item"><span class="wiki-pos-key">Orientation</span><strong><%= ORI[pm.orientation] %></strong></span>
+        <% if (pmOri.length) { %>
+          <span class="wiki-pos-item"><span class="wiki-pos-key">Orientation</span><strong><%= pmOri.map(function(o){ return ORI[o] || o; }).join(' · ') %></strong></span>
         <% } %>
       </div>
     <% } %>
