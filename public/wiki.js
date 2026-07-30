@@ -310,27 +310,98 @@
   });
 
   // ══════════════════════════════════════════════════
-  // 8. PREVIEW IMAGES MULTIPLES
+  // 8. PREVIEW IMAGES MULTIPLES + SUPPRESSION
   // ══════════════════════════════════════════════════
   document.querySelectorAll(".wiki-image-field").forEach(function (wrapper) {
     var input        = wrapper.querySelector(".wiki-image-input");
     var previewsZone = wrapper.querySelector(".wiki-new-previews");
     if (!input || !previewsZone) return;
 
-    input.addEventListener("change", function () {
+    // DataTransfer permet de reconstruire la FileList après suppression d'un fichier
+    var currentFiles = [];
+
+    function rebuildInput() {
+      var dt = new DataTransfer();
+      currentFiles.forEach(function (f) { dt.items.add(f); });
+      input.files = dt.files;
+    }
+
+    function renderPreviews() {
       previewsZone.innerHTML = "";
-      Array.from(input.files || []).forEach(function (file) {
+      currentFiles.forEach(function (file, idx) {
         var wrap = document.createElement("div");
         wrap.className = "wiki-new-preview-wrap";
+
         var img = document.createElement("img");
         img.className = "wiki-new-preview-img";
         img.src = URL.createObjectURL(file);
         img.alt = "";
+        img.addEventListener("click", function () { openLightbox(img.src); });
+
+        var removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.className = "wiki-preview-remove";
+        removeBtn.innerHTML = "&#215;";
+        removeBtn.title = "Retirer";
+        removeBtn.addEventListener("click", function () {
+          currentFiles.splice(idx, 1);
+          rebuildInput();
+          renderPreviews();
+        });
+
         wrap.appendChild(img);
+        wrap.appendChild(removeBtn);
         previewsZone.appendChild(wrap);
       });
+    }
+
+    input.addEventListener("change", function () {
+      currentFiles = Array.from(input.files || []);
+      renderPreviews();
     });
   });
+
+  // ══════════════════════════════════════════════════
+  // LIGHTBOX
+  // ══════════════════════════════════════════════════
+  var lightbox = document.createElement("div");
+  lightbox.className = "wiki-lightbox";
+  lightbox.innerHTML = '<img class="wiki-lightbox-img" alt="" />';
+  lightbox.hidden = true;
+  document.body.appendChild(lightbox);
+
+  var lbImg = lightbox.querySelector(".wiki-lightbox-img");
+
+  function openLightbox(src) {
+    lbImg.src = src;
+    lightbox.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeLightbox() {
+    lightbox.hidden = true;
+    lbImg.src = "";
+    document.body.style.overflow = "";
+  }
+
+  lightbox.addEventListener("click", function (e) {
+    if (e.target === lightbox) closeLightbox();
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !lightbox.hidden) closeLightbox();
+  });
+
+  // Rend cliquables toutes les images de la galerie et des formulaires
+  function attachLightboxToImages() {
+    document.querySelectorAll(".wiki-infobox-img, .wiki-gallery-img, .wiki-form-existing-image, .wiki-card-img").forEach(function (img) {
+      if (img.dataset.lbBound) return;
+      img.dataset.lbBound = "1";
+      img.style.cursor = "zoom-in";
+      img.addEventListener("click", function () { openLightbox(img.src); });
+    });
+  }
+  attachLightboxToImages();
 
   // ══════════════════════════════════════════════════
   // 9. TOOLBAR MARKDOWN

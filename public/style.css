@@ -1568,25 +1568,7 @@ input[type="text"], input[type="password"] {
 }
 
 /* Affichage des meta position dans la page détail */
-.wiki-position-info {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1.5rem;
-  padding: 0.7rem 1rem;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-size: 0.85rem;
-}
-.wiki-pos-item {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-.wiki-pos-key {
-  color: var(--muted);
-  font-size: 0.78rem;
-}
+/* .wiki-position-info remplacé par .wiki-infobox-params */
 
 .wiki-category-select {
   padding: 0.6rem 0.7rem;
@@ -1713,31 +1695,92 @@ input[type="text"], input[type="password"] {
   margin-top: 1rem;
 }
 
-/* Galerie Wikipedia : flotte à droite sur desktop, pleine largeur sur mobile */
+/* ── Corps article ──────────────────────────────── */
 .wiki-body {
   display: block;
+  /* clearfix pour contenir le float de l'infobox */
+}
+.wiki-body::after {
+  content: "";
+  display: table;
+  clear: both;
 }
 
-.wiki-gallery {
+/* ── Infobox Wikipedia ───────────────────────────
+   Desktop : flotte à droite, largeur fixe
+   Mobile  : pleine largeur, en haut
+   ────────────────────────────────────────────── */
+.wiki-infobox {
   float: right;
   clear: right;
-  margin: 0 0 1rem 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  max-width: 260px;
-  width: 40%;
+  width: 220px;
+  margin: 0 0 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--card);
+  font-size: 0.85rem;
 }
 
-@media (max-width: 560px) {
-  .wiki-gallery {
+@media (max-width: 520px) {
+  .wiki-infobox {
     float: none;
     width: 100%;
-    max-width: 100%;
-    margin: 0 0 1rem 0;
+    margin: 0 0 1.1rem 0;
   }
 }
 
+.wiki-infobox-images {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: var(--bg);
+}
+
+.wiki-infobox-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  cursor: zoom-in;
+}
+
+/* séparateur entre images si plusieurs */
+.wiki-infobox-img + .wiki-infobox-img {
+  border-top: 1px solid var(--border);
+}
+
+/* ── Paramètres sous les images ─────────────── */
+.wiki-infobox-params {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.wiki-infobox-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding: 0.45rem 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.wiki-infobox-row dt {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+  min-width: 5rem;
+}
+
+.wiki-infobox-row dd {
+  margin: 0;
+  font-weight: 600;
+  color: var(--fg);
+  word-break: break-word;
+}
+
+/* ── Images anciennes (compat) ──────────────── */
 .wiki-gallery-figure {
   margin: 0;
   border: 1px solid var(--border);
@@ -1751,7 +1794,6 @@ input[type="text"], input[type="password"] {
   height: auto;
   display: block;
   object-fit: contain;
-  border-radius: 0;
 }
 
 .wiki-detail-header {
@@ -2084,6 +2126,49 @@ input[type="text"], input[type="password"] {
   height: 90px;
   object-fit: contain;
   display: block;
+  cursor: zoom-in;
+}
+
+.wiki-preview-remove {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: background 0.1s;
+}
+.wiki-preview-remove:hover { background: rgba(180,30,30,0.85); }
+
+/* ══ LIGHTBOX ══════════════════════════════════════ */
+.wiki-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0,0,0,0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+}
+
+.wiki-lightbox-img {
+  max-width: 92vw;
+  max-height: 92vh;
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 8px 48px rgba(0,0,0,0.6);
+  cursor: default;
 }
 
 .admin-stats {

@@ -4,6 +4,28 @@
   <a href="/wiki" class="link-button">&larr; Retour au wiki</a>
 
   <% var cat = categories.find(function (c) { return c.key === page.category; }); %>
+  <%
+    var pm = page.meta || {};
+
+    var FSUBS = { jeux_role: 'Jeux de r\u00f4le et comportement', hardcore: 'Hardcore', bdsm: 'BDSM', classique: 'Classique' };
+    var nbF = pm.nb_femmes, nbH = pm.nb_hommes;
+    var hasPartMeta = page.category === 'partenaires' && (nbF || nbH);
+    var LIEU = { prive: 'Priv\u00e9', public: 'Public', cache: 'Cach\u00e9' };
+    var QUI  = { femme: 'Femme', homme: 'Homme', variable: 'Variable', aucun: 'Aucun\u00a0/ debout' };
+    var CAN  = { vagin: 'Vagin', anus: 'Anus', bouche: 'Bouche', mains: 'Mains', autre: 'Autre' };
+    var ORI  = { face_a_face: 'Face \u00e0 face', face_contre_dos: 'Face contre dos', acrobatique: 'Acrobatique', autre: 'Autre' };
+    var pmOri = Array.isArray(pm.orientation) ? pm.orientation : (pm.orientation ? [pm.orientation] : []);
+    var hasPosMeta = page.category === 'position' && (pm.qui_dessus || (pm.canal && pm.canal.length) || pmOri.length);
+
+    var hasMeta = (page.category === 'fantasmes' && pm.sous_cat && FSUBS[pm.sous_cat])
+               || hasPartMeta
+               || (page.category === 'lieux' && pm.type_lieu && LIEU[pm.type_lieu])
+               || hasPosMeta;
+
+    var hasImages = page.imagePaths && page.imagePaths.length;
+    var hasInfobox = hasImages || hasMeta;
+  %>
+
   <article class="wiki-detail">
 
     <div class="wiki-detail-header">
@@ -13,82 +35,90 @@
 
     <h1 class="wiki-detail-title"><%= page.title %></h1>
 
-    <%# ─ Tags ─ %>
     <% if (page.tags.length) { %>
       <div class="link-card-tags">
         <% page.tags.forEach(function (t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
       </div>
     <% } %>
 
-    <%
-      var pm = page.meta || {};
-
-      // — Fantasmes
-      var FSUBS = { jeux_role: 'Jeux de r\u00f4le et comportement', hardcore: 'Hardcore', bdsm: 'BDSM', classique: 'Classique' };
-
-      // — Partenaires
-      var nbF = pm.nb_femmes, nbH = pm.nb_hommes;
-      var hasPartMeta = page.category === 'partenaires' && (nbF || nbH);
-
-      // — Lieux
-      var LIEU = { prive: 'Priv\u00e9', public: 'Public', cache: 'Cach\u00e9' };
-
-      // — Position
-      var QUI  = { femme: 'Femme', homme: 'Homme', variable: 'Variable', aucun: 'Aucun / debout' };
-      var CAN  = { vagin: 'Vagin', anus: 'Anus', bouche: 'Bouche', mains: 'Mains', autre: 'Autre' };
-      var ORI  = { face_a_face: 'Face \u00e0 face', face_contre_dos: 'Face contre dos', acrobatique: 'Acrobatique', autre: 'Autre' };
-      var pmOri = Array.isArray(pm.orientation) ? pm.orientation : (pm.orientation ? [pm.orientation] : []);
-      var hasPosMeta = page.category === 'position' && (pm.qui_dessus || (pm.canal && pm.canal.length) || pmOri.length);
-    %>
-
-    <% if (page.category === 'fantasmes' && pm.sous_cat && FSUBS[pm.sous_cat]) { %>
-      <div class="wiki-position-info">
-        <span class="wiki-pos-item"><span class="wiki-pos-key">Cat\u00e9gorie</span><strong><%= FSUBS[pm.sous_cat] %></strong></span>
-      </div>
-    <% } %>
-
-    <% if (hasPartMeta) { %>
-      <div class="wiki-position-info">
-        <% if (nbF) { %><span class="wiki-pos-item"><span class="wiki-pos-key">Femmes</span><strong><%= nbF === 'nombreux' ? 'Nombreuses' : nbF %></strong></span><% } %>
-        <% if (nbH) { %><span class="wiki-pos-item"><span class="wiki-pos-key">Hommes</span><strong><%= nbH === 'nombreux' ? 'Nombreux' : nbH %></strong></span><% } %>
-      </div>
-    <% } %>
-
-    <% if (page.category === 'lieux' && pm.type_lieu && LIEU[pm.type_lieu]) { %>
-      <div class="wiki-position-info">
-        <span class="wiki-pos-item"><span class="wiki-pos-key">Type</span><strong><%= LIEU[pm.type_lieu] %></strong></span>
-      </div>
-    <% } %>
-
-    <% if (hasPosMeta) { %>
-      <div class="wiki-position-info">
-        <% if (pm.qui_dessus && QUI[pm.qui_dessus]) { %>
-          <span class="wiki-pos-item"><span class="wiki-pos-key">Au-dessus</span><strong><%= QUI[pm.qui_dessus] %></strong></span>
-        <% } %>
-        <% if (pm.canal && pm.canal.length) { %>
-          <span class="wiki-pos-item"><span class="wiki-pos-key">Canal</span><strong><%= pm.canal.map(function(c){ return CAN[c] || c; }).join(' \u00b7 ') %></strong></span>
-        <% } %>
-        <% if (pmOri.length) { %>
-          <span class="wiki-pos-item"><span class="wiki-pos-key">Orientation</span><strong><%= pmOri.map(function(o){ return ORI[o] || o; }).join(' \u00b7 ') %></strong></span>
-        <% } %>
-      </div>
-    <% } %>
-
-    <%# ─ Contenu + galerie flottante style Wikipedia ─ %>
+    <%# ─ Corps : infobox flottante + texte ─ %>
     <div class="wiki-body">
-      <% if (page.imagePaths && page.imagePaths.length) { %>
-        <div class="wiki-gallery">
-          <% page.imagePaths.forEach(function(src) { %>
-            <figure class="wiki-gallery-figure">
-              <img src="<%= src %>" alt="" class="wiki-gallery-img" />
-            </figure>
-          <% }) %>
-        </div>
+
+      <% if (hasInfobox) { %>
+        <aside class="wiki-infobox">
+
+          <%# Images empilées %>
+          <% if (hasImages) { %>
+            <div class="wiki-infobox-images">
+              <% page.imagePaths.forEach(function(src) { %>
+                <img src="<%= src %>" alt="" class="wiki-infobox-img" />
+              <% }) %>
+            </div>
+          <% } %>
+
+          <%# Paramètres sous les images %>
+          <% if (hasMeta) { %>
+            <dl class="wiki-infobox-params">
+
+              <% if (page.category === 'fantasmes' && pm.sous_cat && FSUBS[pm.sous_cat]) { %>
+                <div class="wiki-infobox-row">
+                  <dt>Cat\u00e9gorie</dt>
+                  <dd><%= FSUBS[pm.sous_cat] %></dd>
+                </div>
+              <% } %>
+
+              <% if (hasPartMeta) { %>
+                <% if (nbF) { %>
+                  <div class="wiki-infobox-row">
+                    <dt>Femmes</dt>
+                    <dd><%= nbF === 'nombreux' ? 'Nombreuses' : nbF %></dd>
+                  </div>
+                <% } %>
+                <% if (nbH) { %>
+                  <div class="wiki-infobox-row">
+                    <dt>Hommes</dt>
+                    <dd><%= nbH === 'nombreux' ? 'Nombreux' : nbH %></dd>
+                  </div>
+                <% } %>
+              <% } %>
+
+              <% if (page.category === 'lieux' && pm.type_lieu && LIEU[pm.type_lieu]) { %>
+                <div class="wiki-infobox-row">
+                  <dt>Type</dt>
+                  <dd><%= LIEU[pm.type_lieu] %></dd>
+                </div>
+              <% } %>
+
+              <% if (hasPosMeta) { %>
+                <% if (pm.qui_dessus && QUI[pm.qui_dessus]) { %>
+                  <div class="wiki-infobox-row">
+                    <dt>Au-dessus</dt>
+                    <dd><%= QUI[pm.qui_dessus] %></dd>
+                  </div>
+                <% } %>
+                <% if (pm.canal && pm.canal.length) { %>
+                  <div class="wiki-infobox-row">
+                    <dt>Canal</dt>
+                    <dd><%= pm.canal.map(function(c){ return CAN[c] || c; }).join('\u00a0\u00b7 ') %></dd>
+                  </div>
+                <% } %>
+                <% if (pmOri.length) { %>
+                  <div class="wiki-infobox-row">
+                    <dt>Orientation</dt>
+                    <dd><%= pmOri.map(function(o){ return ORI[o] || o; }).join('\u00a0\u00b7 ') %></dd>
+                  </div>
+                <% } %>
+              <% } %>
+
+            </dl>
+          <% } %>
+        </aside>
       <% } %>
 
       <% if (page.content) { %>
         <div class="wiki-md"><span class="wiki-md-raw" hidden><%= page.content %></span></div>
       <% } %>
+
     </div>
 
     <div class="wiki-detail-actions">
