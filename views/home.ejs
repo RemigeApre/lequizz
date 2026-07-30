@@ -9,6 +9,26 @@
     <a href="/wiki" class="home-shortcut">Wiki</a>
   </div>
 
+  <% if (featuredPages && featuredPages.length) { %>
+  <section class="home-featured">
+    <h2 class="home-featured-heading">Ce qui pourrait t&apos;int&eacute;resser</h2>
+    <div class="home-featured-strip">
+      <% featuredPages.forEach(function (p) { %>
+        <a href="/wiki/<%= p.id %>" class="home-featured-card">
+          <% if (p.imagePaths && p.imagePaths.length) { %>
+            <div class="home-featured-img-wrap">
+              <img src="<%= p.imagePaths[0] %>" alt="" class="home-featured-img" />
+            </div>
+          <% } else { %>
+            <div class="home-featured-img-wrap home-featured-img-placeholder"></div>
+          <% } %>
+          <span class="home-featured-title"><%= p.title %></span>
+        </a>
+      <% }) %>
+    </div>
+  </section>
+  <% } %>
+
   <div class="section-cards">
     <% config.sections.forEach(function (s, i) { %>
       <a class="section-card" href="/section/<%= i %>" style="--card-color: <%= s.color || 'var(--accent)' %>">

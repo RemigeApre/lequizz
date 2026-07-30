@@ -77,6 +77,24 @@
   </div>
   <% } %>
 
+  <% if (allWikiPagesSorted && allWikiPagesSorted.length) { %>
+  <div class="result-section">
+    <h2>Mise en avant &mdash; Accueil</h2>
+    <p class="intro" style="margin-bottom:.75rem">Ces pages apparaissent comme &laquo;&nbsp;Ce qui pourrait t&apos;int&eacute;resser&nbsp;&raquo; sur la page d&apos;accueil.</p>
+    <ul class="admin-featured-list">
+      <% allWikiPagesSorted.forEach(function (p) { %>
+        <li class="admin-featured-item" data-id="<%= p.id %>">
+          <button type="button" class="admin-featured-toggle<%= p.featured ? ' active' : '' %>" title="<%= p.featured ? 'Retirer' : 'Mettre en avant' %>">
+            <%= p.featured ? '&#9733;' : '&#9734;' %>
+          </button>
+          <a href="/wiki/<%= p.id %>" class="admin-featured-title"><%= p.title %></a>
+          <span class="admin-featured-cat"><%= p.category %></span>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+  <% } %>
+
   <h2>Historique des soumissions completes (<%= submissions.length %>)</h2>
   <div class="table-scroll">
     <table class="admin-table">
@@ -106,4 +124,19 @@
     </table>
   </div>
 </main>
+<script>
+document.querySelectorAll(".admin-featured-toggle").forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    var id = btn.closest("[data-id]").dataset.id;
+    fetch("/admin/wiki-featured/" + id, { method: "POST" })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d.ok) return;
+        btn.classList.toggle("active", d.featured);
+        btn.innerHTML = d.featured ? "&#9733;" : "&#9734;";
+        btn.title = d.featured ? "Retirer" : "Mettre en avant";
+      });
+  });
+});
+</script>
 <%- include('partials/foot') %>

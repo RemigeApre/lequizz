@@ -1,7 +1,26 @@
 <%- include('partials/head', { title: page.title + ' \u2014 Wiki \u2014 ' + config.title }) %>
 <main class="container">
   <%- include('partials/top-nav', { config: config }) %>
-  <a href="/wiki" class="link-button">&larr; Retour au wiki</a>
+
+  <nav class="wiki-page-nav" aria-label="Navigation entre pages">
+    <% if (prevPage) { %>
+      <a href="/wiki/<%= prevPage.id %>" class="wiki-page-nav-btn wiki-page-nav-prev" id="wiki-nav-prev" title="<%= prevPage.title %>">
+        <span class="wiki-page-nav-arrow">&#8592;</span>
+        <span class="wiki-page-nav-label"><%= prevPage.title %></span>
+      </a>
+    <% } else { %>
+      <span class="wiki-page-nav-btn wiki-page-nav-prev wiki-page-nav-disabled"></span>
+    <% } %>
+    <a href="/wiki" class="link-button wiki-page-nav-back">&#8592; Wiki</a>
+    <% if (nextPage) { %>
+      <a href="/wiki/<%= nextPage.id %>" class="wiki-page-nav-btn wiki-page-nav-next" id="wiki-nav-next" title="<%= nextPage.title %>">
+        <span class="wiki-page-nav-label"><%= nextPage.title %></span>
+        <span class="wiki-page-nav-arrow">&#8594;</span>
+      </a>
+    <% } else { %>
+      <span class="wiki-page-nav-btn wiki-page-nav-next wiki-page-nav-disabled"></span>
+    <% } %>
+  </nav>
 
   <% var cat = categories.find(function (c) { return c.key === page.category; }); %>
   <%

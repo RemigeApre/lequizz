@@ -1,0 +1,38 @@
+<%- include('partials/head', { title: 'Modifier l\'image — ' + config.title }) %>
+<main class="container">
+  <%- include('partials/top-nav', { config: config }) %>
+  <a href="/galerie" class="link-button">&larr; Retour à la galerie</a>
+
+  <form method="POST" action="/galerie/<%= image.id %>" class="wiki-form">
+    <h2 class="wiki-detail-title">Modifier l&apos;image</h2>
+
+    <div class="gallery-edit-preview">
+      <img src="<%= image.filename %>" alt="" class="gallery-edit-img" />
+    </div>
+
+    <input type="text" name="title" class="wiki-title-input" value="<%= image.title %>" placeholder="Titre&hellip;" />
+
+    <div class="wiki-tags-widget">
+      <div class="wiki-tags-board">
+        <input type="text" class="wiki-tags-typing" placeholder="Ajouter un tag&hellip;" autocomplete="off" />
+      </div>
+      <input type="hidden" name="tags" class="wiki-tags-hidden" value="<%= image.tags.join(', ') %>" />
+      <% if (allTags.length) { %>
+        <div class="wiki-tag-suggestions">
+          <% allTags.forEach(function(t) { %>
+            <button type="button" class="wiki-tag-suggest-chip" data-tag="<%= t %>"><%= t %></button>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+
+    <textarea name="notes" class="wiki-textarea gallery-notes-input" rows="4" placeholder="Notes&hellip;"><%= image.notes %></textarea>
+
+    <div class="wiki-form-actions">
+      <button type="submit">Enregistrer</button>
+      <a href="/galerie" class="link-button">Annuler</a>
+    </div>
+  </form>
+</main>
+<script src="/wiki.js?v=<%= assetVersion %>"></script>
+<%- include('partials/foot') %>

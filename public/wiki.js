@@ -106,6 +106,7 @@
         var chip = createChipEl(tag, removeTag);
         board.insertBefore(chip, typer);
       });
+      syncHidden();
       syncSuggestions();
     }
 
@@ -181,6 +182,9 @@
     var existingPages = [];
     try { existingPages = JSON.parse(pagesEl.textContent); } catch (_) {}
 
+    // Flag : l'utilisateur a explicitement confirmé la création malgré le doublon
+    var userConfirmed = false;
+
     function normalize(s) {
       return s.toLowerCase()
         .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
@@ -198,37 +202,56 @@
       });
     }
 
+    function renderWarn(matches) {
+      userConfirmed = false;
+      warnBox.innerHTML = "";
+
+      var msg = document.createElement("span");
+      msg.innerHTML = "\u26A0\uFE0F Page similaire d\u00e9j\u00e0 existante\u00a0: " +
+        matches.map(function (p) {
+          return '<a href="/wiki/' + p.id + '" target="_blank" class="wiki-warn-link">' + p.title + "</a>";
+        }).join(", ");
+      warnBox.appendChild(msg);
+
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "wiki-warn-confirm";
+      btn.textContent = "Cr\u00e9er quand m\u00eame";
+      btn.addEventListener("click", function () {
+        userConfirmed = true;
+        warnBox.hidden = true;
+        // Soumettre le formulaire directement
+        var form = document.getElementById("wiki-new-form");
+        if (form) form.submit();
+      });
+      warnBox.appendChild(btn);
+      warnBox.hidden = false;
+    }
+
     var warnTimer;
     titleInput.addEventListener("input", function () {
+      userConfirmed = false;
       clearTimeout(warnTimer);
       warnTimer = setTimeout(function () {
         var matches = findSimilar(titleInput.value.trim());
         if (!matches.length) { warnBox.hidden = true; warnBox.innerHTML = ""; return; }
-        var html = '<span class="wiki-warn-icon">&#9888;</span> Page similaire d\u00e9j\u00e0 existante&nbsp;: ';
-        html += matches.map(function (p) {
-          return '<a href="/wiki/' + p.id + '" target="_blank" class="wiki-warn-link">' + p.title + '</a>';
-        }).join(", ");
-        html += '<label class="wiki-warn-confirm"><input type="checkbox" id="wiki-title-confirm" /> Cr\u00e9er quand m\u00eame</label>';
-        warnBox.innerHTML = html;
-        warnBox.hidden = false;
+        renderWarn(matches);
       }, 350);
     });
 
-    // Bloque la soumission si warning non confirmé
+    // Bloque la soumission si warning visible et non confirmé
     var form = document.getElementById("wiki-new-form");
     if (form) {
       form.addEventListener("submit", function (e) {
-        if (!warnBox.hidden) {
-          var confirm = document.getElementById("wiki-title-confirm");
-          if (confirm && !confirm.checked) {
-            e.preventDefault();
-            warnBox.querySelector(".wiki-warn-confirm").style.outline = "2px solid #e53";
-            setTimeout(function () {
-              warnBox.querySelector(".wiki-warn-confirm").style.outline = "";
-            }, 1200);
+        if (!warnBox.hidden && !userConfirmed) {
+          e.preventDefault();
+          var btn = warnBox.querySelector(".wiki-warn-confirm");
+          if (btn) {
+            btn.style.outline = "2px solid #e53";
+            setTimeout(function () { btn.style.outline = ""; }, 1200);
           }
         }
-      }, true);
+      });
     }
   })();
 
@@ -427,11 +450,13 @@
   var advInterested   = document.getElementById("adv-interested");
   var advAnglais      = document.getElementById("adv-anglais");
 
-  var activeCategory  = "", activeTag = "", activeSort = "alpha-asc";
+  var activeCategory  = localStorage.getItem("wiki-filter-cat") || "";
+  var activeTag       = localStorage.getItem("wiki-filter-tag") || "";
+  var activeSort      = localStorage.getItem("wiki-filter-sort") || "alpha-asc";
   // Par défaut : ultra masqué. Seulement "0" explicite = affiché.
   var hideUltra       = localStorage.getItem("wiki-hide-ultra") !== "0";
-  var searchQuery     = "";
-  var advMinRating    = 0;
+  var searchQuery     = localStorage.getItem("wiki-filter-search") || "";
+  var advMinRating    = Number(localStorage.getItem("wiki-filter-rating")) || 0;
 
   // Normalise une chaîne : minuscules + sans accents
   function norm(s) {
@@ -534,6 +559,7 @@
   if (searchInput) {
     searchInput.addEventListener("input", function () {
       searchQuery = searchInput.value;
+      localStorage.setItem("wiki-filter-search", searchQuery);
       if (searchClear) searchClear.hidden = !searchQuery;
       applyFilters();
     });
@@ -541,6 +567,7 @@
   if (searchClear) {
     searchClear.addEventListener("click", function () {
       searchQuery = "";
+      localStorage.setItem("wiki-filter-search", "");
       if (searchInput) searchInput.value = "";
       searchClear.hidden = true;
       applyFilters();
@@ -565,10 +592,12 @@
         btn.classList.toggle("active", v <= advMinRating);
       });
     }
+    renderAdvStars(); // applique l'état restauré visuellement
     advStarBtns.forEach(function (btn) {
       btn.addEventListener("click", function () {
         var v = Number(btn.dataset.value);
         advMinRating = advMinRating === v ? 0 : v;
+        localStorage.setItem("wiki-filter-rating", advMinRating);
         renderAdvStars();
         applyFilters();
       });
@@ -576,6 +605,7 @@
     if (advStarReset) {
       advStarReset.addEventListener("click", function () {
         advMinRating = 0;
+        localStorage.setItem("wiki-filter-rating", "0");
         renderAdvStars();
         applyFilters();
       });
@@ -583,8 +613,20 @@
   }
 
   // Checkboxes avancées
-  [advOwned, advFlame, advInterested, advAnglais].forEach(function (cb) {
-    if (cb) cb.addEventListener("change", applyFilters);
+  var advCbMap = [
+    [advOwned,      "wiki-filter-owned"],
+    [advFlame,      "wiki-filter-flame"],
+    [advInterested, "wiki-filter-interested"],
+    [advAnglais,    "wiki-filter-anglais"],
+  ];
+  advCbMap.forEach(function (pair) {
+    var cb = pair[0], key = pair[1];
+    if (!cb) return;
+    if (localStorage.getItem(key) === "1") cb.checked = true;
+    cb.addEventListener("change", function () {
+      localStorage.setItem(key, cb.checked ? "1" : "0");
+      applyFilters();
+    });
   });
 
   if (categoryFilter) {
@@ -593,9 +635,21 @@
         categoryFilter.querySelectorAll(".tag-chip").forEach(function (c) { c.classList.remove("active"); });
         chip.classList.add("active");
         activeCategory = chip.dataset.category || "";
+        localStorage.setItem("wiki-filter-cat", activeCategory);
         applyFilters();
       });
     });
+    // Restaure la catégorie active visuellement
+    if (activeCategory) {
+      var restoredCatChip = categoryFilter.querySelector('[data-category="' + activeCategory + '"]');
+      if (restoredCatChip) {
+        categoryFilter.querySelectorAll(".tag-chip").forEach(function (c) { c.classList.remove("active"); });
+        restoredCatChip.classList.add("active");
+      } else {
+        activeCategory = "";
+        localStorage.removeItem("wiki-filter-cat");
+      }
+    }
   }
   if (tagFilter) {
     tagFilter.querySelectorAll(".tag-chip").forEach(function (chip) {
@@ -603,13 +657,27 @@
         tagFilter.querySelectorAll(".tag-chip").forEach(function (c) { c.classList.remove("active"); });
         chip.classList.add("active");
         activeTag = (chip.dataset.tag || "").toLowerCase();
+        localStorage.setItem("wiki-filter-tag", activeTag);
         applyFilters();
       });
     });
+    // Restaure le tag actif visuellement
+    if (activeTag) {
+      var restoredTagChip = tagFilter.querySelector('[data-tag="' + activeTag + '"]');
+      if (restoredTagChip) {
+        tagFilter.querySelectorAll(".tag-chip").forEach(function (c) { c.classList.remove("active"); });
+        restoredTagChip.classList.add("active");
+      } else {
+        activeTag = "";
+        localStorage.removeItem("wiki-filter-tag");
+      }
+    }
   }
   if (sortSelect) {
+    sortSelect.value = activeSort;
     sortSelect.addEventListener("change", function () {
       activeSort = sortSelect.value;
+      localStorage.setItem("wiki-filter-sort", activeSort);
       applyFilters();
     });
   }
@@ -628,6 +696,25 @@
     });
   }
   syncUltraBtn();
+
+  // Restaure la barre de recherche
+  if (searchInput && searchQuery) {
+    searchInput.value = searchQuery;
+    if (searchClear) searchClear.hidden = false;
+  }
+  // Ouvre le panneau avancé si un filtre avancé est actif
+  if (advPanel) {
+    var anyAdv = advMinRating > 0 ||
+      (advOwned && advOwned.checked) ||
+      (advFlame && advFlame.checked) ||
+      (advInterested && advInterested.checked) ||
+      (advAnglais && advAnglais.checked);
+    if (anyAdv) {
+      advPanel.hidden = false;
+      if (advToggle) advToggle.innerHTML = "Filtres avanc\u00e9s &#9652;";
+    }
+  }
+
   applyFilters(); // toujours appelé au chargement
 
   // ══════════════════════════════════════════════════
@@ -934,7 +1021,42 @@
   attachLightboxToImages();
 
   // ══════════════════════════════════════════════════
-  // 9. TOOLBAR MARKDOWN
+  // 9. NAVIGATION ENTRE PAGES WIKI (←/→ + swipe)
+  // ══════════════════════════════════════════════════
+  var wikiNavPrev = document.getElementById("wiki-nav-prev");
+  var wikiNavNext = document.getElementById("wiki-nav-next");
+
+  if (wikiNavPrev || wikiNavNext) {
+    // Clavier : ← et → (ignoré si focus dans un champ de saisie)
+    document.addEventListener("keydown", function (e) {
+      var tag = document.activeElement && document.activeElement.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      if (lightbox && !lightbox.hidden) return; // lightbox a la priorité
+      if (e.key === "ArrowLeft"  && wikiNavPrev) { e.preventDefault(); location.href = wikiNavPrev.href; }
+      if (e.key === "ArrowRight" && wikiNavNext) { e.preventDefault(); location.href = wikiNavNext.href; }
+    });
+
+    // Swipe horizontal sur tout le document
+    var pageSwipeStartX = 0;
+    var pageSwipeStartY = 0;
+    document.addEventListener("touchstart", function (e) {
+      pageSwipeStartX = e.touches[0].clientX;
+      pageSwipeStartY = e.touches[0].clientY;
+    }, { passive: true });
+    document.addEventListener("touchend", function (e) {
+      if (lightbox && !lightbox.hidden) return; // lightbox gère son propre swipe
+      var dx = e.changedTouches[0].clientX - pageSwipeStartX;
+      var dy = e.changedTouches[0].clientY - pageSwipeStartY;
+      // Swipe horizontal dominant (> 80px, moins de 60px vertical)
+      if (Math.abs(dx) > 80 && Math.abs(dy) < 60) {
+        if (dx < 0 && wikiNavNext) location.href = wikiNavNext.href; // swipe gauche = suivant
+        if (dx > 0 && wikiNavPrev) location.href = wikiNavPrev.href; // swipe droit = précédent
+      }
+    }, { passive: true });
+  }
+
+  // ══════════════════════════════════════════════════
+  // 10. TOOLBAR MARKDOWN
   // ══════════════════════════════════════════════════
   function insertMd(ta, action) {
     var start = ta.selectionStart, end = ta.selectionEnd;

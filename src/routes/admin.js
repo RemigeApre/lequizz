@@ -1,6 +1,6 @@
 const express = require("express");
 const { checkCredentials, requireAdmin } = require("../auth");
-const { listSubmissions, getSubmission, getAttempt, listLinks, listWikiPages } = require("../db");
+const { listSubmissions, getSubmission, getAttempt, listLinks, listWikiPages, setWikiPageFeatured, getWikiPage } = require("../db");
 const { createThrottle } = require("../loginThrottle");
 const { slugify, computeScores, flattenItemsRaw } = require("../scoring");
 
@@ -58,6 +58,9 @@ function buildAdminRouter(config) {
       : 0;
 
     const wikiPages = listWikiPages().sort((a, b) => b.views - a.views);
+    const allWikiPagesSorted = listWikiPages().sort((a, b) =>
+      a.title.localeCompare(b.title, "fr", { sensitivity: "base" })
+    );
     res.render("admin-dashboard", {
       config,
       submissions,
@@ -67,6 +70,7 @@ function buildAdminRouter(config) {
       favoritesCount,
       linksCount: listLinks().length,
       wikiPages,
+      allWikiPagesSorted,
     });
   });
 
@@ -80,6 +84,15 @@ function buildAdminRouter(config) {
       scores,
     };
     res.render("admin-detail", { config, submission, slugify, flattenItemsRaw, isLive: true });
+  });
+
+  router.post("/wiki-featured/:id", requireAdmin, (req, res) => {
+    const id = Number(req.params.id);
+    const page = getWikiPage(id);
+    if (!page) return res.status(404).json({ ok: false });
+    const newVal = !page.featured;
+    setWikiPageFeatured(id, newVal);
+    res.json({ ok: true, featured: newVal });
   });
 
   router.get("/:id", requireAdmin, (req, res) => {

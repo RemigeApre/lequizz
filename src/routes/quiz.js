@@ -4,6 +4,7 @@ const {
   insertSubmission,
   getAttempt,
   saveAttempt,
+  listFeaturedWikiPages,
 } = require("../db");
 const csvLog = require("../csvLog");
 
@@ -125,7 +126,8 @@ function buildQuizRouter(config) {
   const router = express.Router();
 
   router.get("/", (req, res) => {
-    res.render("home", { config });
+    const featuredPages = listFeaturedWikiPages();
+    res.render("home", { config, featuredPages });
   });
 
   router.get("/section/:idx", (req, res) => {

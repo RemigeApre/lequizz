@@ -227,8 +227,14 @@ function buildWikiRouter(config) {
     const page = Number.isInteger(id) ? getWikiPage(id) : null;
     if (!page) return res.redirect("/wiki");
     incrementWikiViews(id);
-    const suggestions = computeSuggestions(page, listWikiPages());
-    res.render("wiki-detail", { config, page, suggestions, ...CTX });
+    const allPages = listWikiPages().sort((a, b) =>
+      a.title.localeCompare(b.title, "fr", { sensitivity: "base" })
+    );
+    const idx = allPages.findIndex((p) => p.id === id);
+    const prevPage = idx > 0 ? { id: allPages[idx - 1].id, title: allPages[idx - 1].title } : null;
+    const nextPage = idx < allPages.length - 1 ? { id: allPages[idx + 1].id, title: allPages[idx + 1].title } : null;
+    const suggestions = computeSuggestions(page, allPages);
+    res.render("wiki-detail", { config, page, suggestions, prevPage, nextPage, ...CTX });
   });
 
   router.get("/:id/edit", (req, res) => {

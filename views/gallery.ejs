@@ -1,0 +1,138 @@
+<%- include('partials/head', { title: 'Galerie — ' + config.title }) %>
+<main class="container wide">
+  <%- include('partials/top-nav', { config: config }) %>
+  <h1 class="section-title-h1">Galerie</h1>
+
+  <%# ─── BOUTON + FORMULAIRE UPLOAD ──────────────────────────────────── %>
+  <div class="gallery-new-wrap">
+    <button type="button" id="gallery-new-btn" class="gallery-new-btn">+ Ajouter des images</button>
+  </div>
+
+  <div id="gallery-upload-panel" hidden>
+    <form method="POST" action="/galerie" enctype="multipart/form-data" class="gallery-upload-form">
+      <div class="gallery-form-row">
+        <input type="text" name="title" class="gallery-title-input" placeholder="Titre commun aux images (optionnel)&hellip;" autocomplete="off" />
+      </div>
+      <div class="wiki-tags-widget">
+        <div class="wiki-tags-board">
+          <input type="text" class="wiki-tags-typing" placeholder="Tags&hellip;" autocomplete="off" />
+        </div>
+        <input type="hidden" name="tags" class="wiki-tags-hidden" value="" />
+        <% if (allTags.length) { %>
+          <div class="wiki-tag-suggestions">
+            <% allTags.forEach(function(t) { %>
+              <button type="button" class="wiki-tag-suggest-chip" data-tag="<%= t %>"><%= t %></button>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+      <textarea name="notes" class="gallery-notes-input" rows="2" placeholder="Notes&hellip;"></textarea>
+      <div class="gallery-upload-file-row">
+        <label class="wiki-image-add-label gallery-file-label">
+          <span>Choisir des images</span>
+          <input type="file" name="images" accept="image/*" multiple class="gallery-file-input" required />
+        </label>
+        <button type="submit" class="gallery-submit-btn">Ajouter</button>
+        <button type="button" id="gallery-upload-cancel" class="link-button">Annuler</button>
+      </div>
+      <div class="gallery-upload-previews" id="gallery-upload-previews"></div>
+    </form>
+  </div>
+
+  <%# ─── FILTRES ─────────────────────────────────────────────────────── %>
+  <div class="gallery-controls">
+    <div class="gallery-search-bar">
+      <span class="wiki-search-icon">&#128269;</span>
+      <input type="search" id="gallery-search" class="wiki-search-input" placeholder="Rechercher&hellip;" autocomplete="off" />
+    </div>
+
+    <div class="links-filter" id="gallery-source-filter">
+      <button type="button" class="tag-chip active" data-source="">Toutes sources</button>
+      <button type="button" class="tag-chip" data-source="wiki">Wiki</button>
+      <button type="button" class="tag-chip" data-source="gallery">Galerie</button>
+    </div>
+
+    <% if (allTags.length) { %>
+      <div class="links-filter" id="gallery-tag-filter">
+        <button type="button" class="tag-chip active" data-tag="">Tous les tags</button>
+        <% allTags.forEach(function(t) { %>
+          <button type="button" class="tag-chip" data-tag="<%= t %>"><%= t %></button>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+  <p id="gallery-count" class="gallery-count" hidden></p>
+
+  <%# ─── GRILLE ───────────────────────────────────────────────────────── %>
+  <% if (!items.length) { %>
+    <p class="intro">Aucune image pour l&apos;instant.</p>
+  <% } %>
+  <div class="gallery-grid" id="gallery-grid">
+    <% items.forEach(function(item, idx) { %>
+      <div class="gallery-card"
+        data-idx="<%= idx %>"
+        data-tags="<%= item.tags.join('|').toLowerCase() %>"
+        data-source="<%= item.type %>"
+        data-title="<%= (item.title || '').toLowerCase() %>"
+        data-src="<%= item.src %>"
+        data-wiki-id="<%= item.wikiPageId || '' %>"
+        data-gallery-id="<%= item.id || '' %>">
+
+        <img src="<%= item.src %>" alt="<%= item.title %>" class="gallery-img" loading="lazy" />
+
+        <div class="gallery-card-overlay">
+          <% if (item.type === 'wiki' && item.cat) { %>
+            <span class="gallery-source-badge" style="background: hsl(<%= item.cat.hue %>, 55%, 45%)"><%= item.cat.label %></span>
+          <% } else { %>
+            <span class="gallery-source-badge gallery-source-own">Galerie</span>
+          <% } %>
+          <div class="gallery-card-btns">
+            <% if (item.type === 'gallery' && item.id) { %>
+              <a href="/galerie/<%= item.id %>/edit" class="gallery-card-btn" title="Modifier">&#9998;</a>
+            <% } %>
+            <% if (item.type === 'wiki' && item.wikiPageId) { %>
+              <a href="/wiki/<%= item.wikiPageId %>" class="gallery-card-btn" title="Page wiki">&#128196;</a>
+            <% } %>
+          </div>
+        </div>
+
+        <% if (item.title || item.tags.length) { %>
+          <div class="gallery-card-body">
+            <% if (item.title) { %><p class="gallery-card-title"><%= item.title %></p><% } %>
+            <% if (item.tags.length) { %>
+              <div class="wiki-card-tags">
+                <% item.tags.slice(0,4).forEach(function(t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
+                <% if (item.tags.length > 4) { %><span class="wiki-card-tags-more">+<%= item.tags.length - 4 %></span><% } %>
+              </div>
+            <% } %>
+          </div>
+        <% } %>
+
+        <% if (item.type === 'gallery' && item.id) { %>
+          <form method="POST" action="/galerie/<%= item.id %>/delete" class="gallery-delete-form">
+            <button type="submit" class="gallery-delete-btn" title="Supprimer">&#215;</button>
+          </form>
+        <% } %>
+      </div>
+    <% }) %>
+  </div>
+</main>
+
+<%# ─── LIGHTBOX ──────────────────────────────────────────────────────── %>
+<div id="gallery-lightbox" class="gallery-lightbox" hidden>
+  <button type="button" class="gallery-lb-close" title="Fermer">&#215;</button>
+  <button type="button" class="gallery-lb-prev" title="Pr&eacute;c&eacute;dente">&#8249;</button>
+  <button type="button" class="gallery-lb-next" title="Suivante">&#8250;</button>
+  <div class="gallery-lb-inner">
+    <img class="gallery-lb-img" alt="" />
+    <div class="gallery-lb-panel">
+      <p class="gallery-lb-title"></p>
+      <div class="gallery-lb-tags"></div>
+      <a class="gallery-lb-wiki-link link-button" href="" hidden>Voir la page wiki &rarr;</a>
+      <div class="gallery-lb-notes"></div>
+    </div>
+  </div>
+</div>
+
+<script src="/gallery.js?v=<%= assetVersion %>"></script>
+<%- include('partials/foot') %>

@@ -59,6 +59,19 @@ try { db.exec("ALTER TABLE wiki_pages ADD COLUMN flame INTEGER NOT NULL DEFAULT 
 try { db.exec("ALTER TABLE wiki_pages ADD COLUMN interested INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
 try { db.exec("ALTER TABLE wiki_pages ADD COLUMN views INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
 try { db.exec("ALTER TABLE wiki_pages ADD COLUMN extra_categories TEXT NOT NULL DEFAULT '[]'"); } catch (_) {}
+try { db.exec("ALTER TABLE wiki_pages ADD COLUMN featured INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS gallery_images (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    filename TEXT NOT NULL,
+    title TEXT NOT NULL DEFAULT '',
+    tags TEXT NOT NULL DEFAULT '[]',
+    notes TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  )
+`);
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS wiki_page_links (
@@ -183,10 +196,19 @@ function rowToWikiPage(row) {
     flame: !!row.flame,
     interested: !!row.interested,
     views: row.views || 0,
+    featured: !!row.featured,
     extraCategories: (() => { try { return JSON.parse(row.extra_categories || "[]"); } catch (_) { return []; } })(),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
+}
+
+function setWikiPageFeatured(id, featured) {
+  db.prepare("UPDATE wiki_pages SET featured = ? WHERE id = ?").run(featured ? 1 : 0, id);
+}
+
+function listFeaturedWikiPages() {
+  return db.prepare("SELECT * FROM wiki_pages WHERE featured = 1").all().map(rowToWikiPage);
 }
 
 function insertWikiPage({ title, category, content, tags, imagePaths, owned, meta, extraCategories }) {
@@ -298,6 +320,45 @@ function removeImageLink(src, pageId) {
   db.prepare("DELETE FROM wiki_image_links WHERE src = ? AND page_id = ?").run(src, pageId);
 }
 
+function rowToGalleryImage(row) {
+  return {
+    id: row.id,
+    filename: row.filename,
+    title: row.title || "",
+    tags: (() => { try { return JSON.parse(row.tags || "[]"); } catch(_) { return []; } })(),
+    notes: row.notes || "",
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function listGalleryImages() {
+  return db.prepare("SELECT * FROM gallery_images ORDER BY created_at DESC").all().map(rowToGalleryImage);
+}
+
+function getGalleryImage(id) {
+  const row = db.prepare("SELECT * FROM gallery_images WHERE id = ?").get(id);
+  return row ? rowToGalleryImage(row) : null;
+}
+
+function insertGalleryImage({ filename, title, tags, notes }) {
+  const now = new Date().toISOString();
+  const info = db.prepare(
+    `INSERT INTO gallery_images (filename, title, tags, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`
+  ).run(filename, title || "", JSON.stringify(tags || []), notes || "", now, now);
+  return info.lastInsertRowid;
+}
+
+function updateGalleryImage(id, { title, tags, notes }) {
+  db.prepare(
+    `UPDATE gallery_images SET title = ?, tags = ?, notes = ?, updated_at = ? WHERE id = ?`
+  ).run(title || "", JSON.stringify(tags || []), notes || "", new Date().toISOString(), id);
+}
+
+function deleteGalleryImage(id) {
+  db.prepare("DELETE FROM gallery_images WHERE id = ?").run(id);
+}
+
 module.exports = {
   db,
   insertSubmission,
@@ -326,4 +387,11 @@ module.exports = {
   getImageLinks,
   addImageLink,
   removeImageLink,
+  listGalleryImages,
+  getGalleryImage,
+  insertGalleryImage,
+  updateGalleryImage,
+  deleteGalleryImage,
+  setWikiPageFeatured,
+  listFeaturedWikiPages,
 };
