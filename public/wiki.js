@@ -425,7 +425,12 @@
     }
 
     input.addEventListener("change", function () {
-      currentFiles = Array.from(input.files || []);
+      Array.from(input.files || []).forEach(function (f) {
+        // Évite les doublons (même nom + même taille)
+        var exists = currentFiles.some(function (e) { return e.name === f.name && e.size === f.size; });
+        if (!exists) currentFiles.push(f);
+      });
+      rebuildInput();
       renderPreviews();
     });
   });

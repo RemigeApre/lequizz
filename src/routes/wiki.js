@@ -161,7 +161,7 @@ function buildWikiRouter(config) {
     res.redirect(`/wiki/${id}`);
   });
 
-  router.post("/:id/react", express.json(), (req, res) => {
+  router.post("/:id/react", (req, res) => {
     const id = Number(req.params.id);
     if (!Number.isInteger(id)) return res.status(400).json({ ok: false });
     const { rating, flame, interested } = req.body;
