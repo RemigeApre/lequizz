@@ -428,7 +428,8 @@
   var advAnglais      = document.getElementById("adv-anglais");
 
   var activeCategory  = "", activeTag = "", activeSort = "alpha-asc";
-  var hideUltra       = localStorage.getItem("wiki-hide-ultra") === "1";
+  // Par défaut : ultra masqué. Seulement "0" explicite = affiché.
+  var hideUltra       = localStorage.getItem("wiki-hide-ultra") !== "0";
   var searchQuery     = "";
   var advMinRating    = 0;
 
