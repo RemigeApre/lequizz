@@ -245,4 +245,36 @@
     });
   }
 
+  // ══════════════════════════════════════════════════
+  // FILTRE ULTRA (liste BD)
+  // ══════════════════════════════════════════════════
+  var bdGrid       = document.getElementById("bd-grid");
+  var bdUltraToggle = document.getElementById("bd-ultra-toggle");
+  var hideUltra    = localStorage.getItem("bd-hide-ultra") !== "0";
+
+  function syncUltraBtn() {
+    if (!bdUltraToggle) return;
+    bdUltraToggle.textContent = hideUltra ? "\uD83D\uDD12 Masquer Ultra" : "\uD83D\uDD13 Afficher Ultra";
+    bdUltraToggle.classList.toggle("active", hideUltra);
+  }
+
+  function applyUltra() {
+    if (!bdGrid) return;
+    bdGrid.querySelectorAll(".bd-card").forEach(function(card) {
+      card.hidden = hideUltra && card.dataset.ultra === "1";
+    });
+  }
+
+  if (bdUltraToggle) {
+    bdUltraToggle.addEventListener("click", function() {
+      hideUltra = !hideUltra;
+      localStorage.setItem("bd-hide-ultra", hideUltra ? "1" : "0");
+      syncUltraBtn();
+      applyUltra();
+    });
+  }
+
+  syncUltraBtn();
+  applyUltra();
+
 })();

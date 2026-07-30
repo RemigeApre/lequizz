@@ -6,12 +6,19 @@
     <a href="/bd/new" class="link-button">+ Nouvelle BD</a>
   </div>
 
+  <% if (books.length) { %>
+  <div class="bd-controls">
+    <button type="button" id="bd-ultra-toggle" class="tag-chip gallery-ultra-toggle">&#128274; Masquer Ultra</button>
+  </div>
+  <% } %>
+
   <% if (!books.length) { %>
     <p class="intro">Aucune BD pour l&apos;instant.</p>
   <% } else { %>
-    <div class="bd-grid">
+    <div class="bd-grid" id="bd-grid">
       <% books.forEach(function(book) { %>
-        <a href="/bd/<%= book.id %>" class="bd-card">
+        <a href="/bd/<%= book.id %>" class="bd-card"
+          data-ultra="<%= book.tags.indexOf('ultra') !== -1 ? '1' : '0' %>">
           <% if (book.imagePaths && book.imagePaths.length) { %>
             <div class="bd-card-cover">
               <img src="<%= book.imagePaths[0] %>" alt="" class="bd-card-img" loading="lazy" />
