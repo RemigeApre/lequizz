@@ -482,7 +482,7 @@
           : card.dataset.category === activeCategory || extraCats.indexOf(activeCategory) !== -1);
       var cardTags  = (card.dataset.tags || "").split("|");
       var okTag     = !activeTag || cardTags.indexOf(activeTag) !== -1;
-      var okUltra   = !hideUltra || cardTags.indexOf("ultra") === -1;
+      var okUltra   = !hideUltra || card.dataset.ultra !== "1";
 
       // Recherche textuelle
       var sc = scoreCard(card, q);
@@ -626,9 +626,9 @@
       syncUltraBtn();
       applyFilters();
     });
-    syncUltraBtn();
-    applyFilters(); // applique l'état sauvegardé au chargement
   }
+  syncUltraBtn();
+  applyFilters(); // toujours appelé au chargement
 
   // ══════════════════════════════════════════════════
   // 7. AUTO-RESIZE TEXTAREA
