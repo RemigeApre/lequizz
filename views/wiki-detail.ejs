@@ -11,6 +11,7 @@
     var nbF = pm.nb_femmes, nbH = pm.nb_hommes;
     var hasPartMeta = page.category === 'partenaires' && (nbF || nbH);
     var LIEU = { prive: 'Priv\u00e9', public: 'Public', cache: 'Cach\u00e9' };
+    var GODE = { animal: 'Animal', monstre: 'Monstre', fantaisiste: 'Fantaisiste', ethnique: 'Ethnique', autre: 'Autre' };
     var QUI  = { femme: 'Femme', homme: 'Homme', variable: 'Variable', aucun: 'Aucun\u00a0/ debout' };
     var CAN  = { vagin: 'Vagin', anus: 'Anus', bouche: 'Bouche', mains: 'Mains', autre: 'Autre' };
     var ORI  = { face_a_face: 'Face \u00e0 face', face_contre_dos: 'Face contre dos', acrobatique: 'Acrobatique', autre: 'Autre' };
@@ -20,7 +21,8 @@
     var hasMeta = (page.category === 'fantasmes' && pm.sous_cat && FSUBS[pm.sous_cat])
                || hasPartMeta
                || (page.category === 'lieux' && pm.type_lieu && LIEU[pm.type_lieu])
-               || hasPosMeta;
+               || hasPosMeta
+               || (page.category === 'objets' && pm.type_gode && GODE[pm.type_gode]);
 
     var hasImages = page.imagePaths && page.imagePaths.length;
     var hasInfobox = hasImages || hasMeta;
@@ -36,7 +38,7 @@
     <h1 class="wiki-detail-title"><%= page.title %></h1>
 
     <% if (page.tags.length) { %>
-      <div class="link-card-tags">
+      <div class="link-card-tags wiki-detail-tags">
         <% page.tags.forEach(function (t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
       </div>
     <% } %>
@@ -51,6 +53,13 @@
           <% if (hasImages) { %>
             <div class="wiki-infobox-images">
               <img src="<%= page.imagePaths[0] %>" alt="" class="wiki-infobox-img" />
+            </div>
+          <% } %>
+
+          <%# Tags (dupliqués ici pour l'ordre mobile) %>
+          <% if (page.tags.length) { %>
+            <div class="wiki-infobox-tags">
+              <% page.tags.forEach(function (t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
             </div>
           <% } %>
 
@@ -78,6 +87,13 @@
                     <dd><%= nbH === 'nombreux' ? 'Nombreux' : nbH %></dd>
                   </div>
                 <% } %>
+              <% } %>
+
+              <% if (page.category === 'objets' && pm.type_gode && GODE[pm.type_gode]) { %>
+                <div class="wiki-infobox-row">
+                  <dt>Type</dt>
+                  <dd><%= GODE[pm.type_gode] %></dd>
+                </div>
               <% } %>
 
               <% if (page.category === 'lieux' && pm.type_lieu && LIEU[pm.type_lieu]) { %>
@@ -145,6 +161,16 @@
         <div class="wiki-md"><span class="wiki-md-raw" hidden><%= page.content %></span></div>
       <% } %>
 
+    </div>
+
+    <%# ─ Questions liées au quizz ─ %>
+    <div class="wiki-question-links" data-page-id="<%= page.id %>">
+      <h3 class="wiki-ql-heading">Questions du quizz li&eacute;es</h3>
+      <ul class="wiki-ql-list"></ul>
+      <div class="wiki-ql-add">
+        <input type="text" class="wiki-ql-search" placeholder="Associer une question&hellip;" autocomplete="off" />
+        <ul class="wiki-ql-results"></ul>
+      </div>
     </div>
 
     <div class="wiki-detail-actions">

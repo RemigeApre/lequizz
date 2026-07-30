@@ -10,6 +10,9 @@ const {
   reactWikiPage,
   deleteWikiPage,
   incrementWikiViews,
+  getWikiQuestionLinks,
+  addWikiQuestionLink,
+  removeWikiQuestionLink,
   getImageLinks,
   addImageLink,
   removeImageLink,
@@ -94,6 +97,12 @@ function parseMeta(category, body) {
       type_lieu: ["prive","public","cache"].includes(t) ? t : "",
     };
   }
+  if (category === "objets") {
+    const t = body.meta_type_gode;
+    return {
+      type_gode: ["animal","monstre","fantaisiste","ethnique","autre"].includes(t) ? t : "",
+    };
+  }
   return {};
 }
 
@@ -103,8 +112,23 @@ function getAllTags(pages) {
   );
 }
 
+// Liste plate de toutes les questions du quiz (construite une seule fois)
+function buildQuestionIndex(config) {
+  const list = [];
+  (config.sections || []).forEach((s) => {
+    const add = (id, text) => list.push({ section_key: s.key, section_title: s.title, question_id: id, question_text: text });
+    if (s.groups) s.groups.forEach((g) => g.items.forEach((it) => add(it.id, it.text)));
+    if (s.fields) s.fields.forEach((f) => add(f.id, f.label));
+    if (s.spectrums) s.spectrums.forEach((f) => add("spectrum:" + f.id, f.label));
+    if (s.rankings) s.rankings.forEach((f) => add("ranking:" + f.id, f.label));
+    if (s.multiselects) s.multiselects.forEach((f) => add("multiselect:" + f.id, f.label));
+  });
+  return list;
+}
+
 function buildWikiRouter(config) {
   const router = express.Router();
+  const ALL_QUESTIONS = buildQuestionIndex(config);
 
   const CTX = { categories: CATEGORIES, fantasmesSubs: FANTASMES_SUBCATS };
 
@@ -147,6 +171,15 @@ function buildWikiRouter(config) {
     if (!src || !page_id) return res.status(400).json({ ok: false });
     removeImageLink(src, Number(page_id));
     res.json({ ok: true });
+  });
+
+  // ── Recherche de questions du quiz ─────────────────
+  router.get("/question-search", (req, res) => {
+    const q = String(req.query.q || "").toLowerCase().trim();
+    const results = q
+      ? ALL_QUESTIONS.filter((x) => x.question_text.toLowerCase().includes(q) || x.section_title.toLowerCase().includes(q)).slice(0, 15)
+      : ALL_QUESTIONS.slice(0, 15);
+    res.json(results);
   });
 
   // ── Recherche de pages (pour associer) ─────────────
@@ -195,6 +228,41 @@ function buildWikiRouter(config) {
 
     updateWikiPage(id, { title, category, content, tags, imagePaths, owned, meta });
     res.redirect(`/wiki/${id}`);
+  });
+
+  // ── Associations questions ──────────────────────────
+  router.get("/:id/question-links", (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.json([]);
+    const links = getWikiQuestionLinks(id);
+    const enriched = links.map((l) => {
+      const found = ALL_QUESTIONS.find((x) => x.section_key === l.section_key && x.question_id === l.question_id);
+      return {
+        section_key:    l.section_key,
+        section_title:  found ? found.section_title  : l.section_key,
+        question_id:    l.question_id,
+        question_text:  found ? found.question_text  : l.question_id,
+      };
+    });
+    res.json(enriched);
+  });
+
+  router.post("/:id/question-links", (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.status(400).json({ ok: false });
+    const { section_key, question_id } = req.body;
+    if (!section_key || !question_id) return res.status(400).json({ ok: false });
+    addWikiQuestionLink(id, section_key, question_id);
+    res.json({ ok: true });
+  });
+
+  router.delete("/:id/question-links", (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.status(400).json({ ok: false });
+    const { section_key, question_id } = req.body;
+    if (!section_key || !question_id) return res.status(400).json({ ok: false });
+    removeWikiQuestionLink(id, section_key, question_id);
+    res.json({ ok: true });
   });
 
   router.post("/:id/react", (req, res) => {

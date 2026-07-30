@@ -60,6 +60,16 @@ try { db.exec("ALTER TABLE wiki_pages ADD COLUMN interested INTEGER NOT NULL DEF
 try { db.exec("ALTER TABLE wiki_pages ADD COLUMN views INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
 
 db.exec(`
+  CREATE TABLE IF NOT EXISTS wiki_question_links (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    wiki_page_id INTEGER NOT NULL,
+    section_key TEXT NOT NULL,
+    question_id TEXT NOT NULL,
+    UNIQUE(wiki_page_id, section_key, question_id)
+  )
+`);
+
+db.exec(`
   CREATE TABLE IF NOT EXISTS wiki_image_links (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     src TEXT NOT NULL,
@@ -216,6 +226,18 @@ function deleteWikiPage(id) {
   db.prepare("DELETE FROM wiki_pages WHERE id = ?").run(id);
 }
 
+function getWikiQuestionLinks(wikiPageId) {
+  return db.prepare("SELECT section_key, question_id FROM wiki_question_links WHERE wiki_page_id = ? ORDER BY id").all(wikiPageId);
+}
+
+function addWikiQuestionLink(wikiPageId, sectionKey, questionId) {
+  db.prepare("INSERT OR IGNORE INTO wiki_question_links (wiki_page_id, section_key, question_id) VALUES (?, ?, ?)").run(wikiPageId, sectionKey, questionId);
+}
+
+function removeWikiQuestionLink(wikiPageId, sectionKey, questionId) {
+  db.prepare("DELETE FROM wiki_question_links WHERE wiki_page_id = ? AND section_key = ? AND question_id = ?").run(wikiPageId, sectionKey, questionId);
+}
+
 function incrementWikiViews(id) {
   db.prepare("UPDATE wiki_pages SET views = views + 1 WHERE id = ?").run(id);
 }
@@ -253,6 +275,9 @@ module.exports = {
   getWikiPage,
   updateWikiPage,
   deleteWikiPage,
+  getWikiQuestionLinks,
+  addWikiQuestionLink,
+  removeWikiQuestionLink,
   incrementWikiViews,
   getImageLinks,
   addImageLink,

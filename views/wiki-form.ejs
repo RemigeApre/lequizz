@@ -79,6 +79,18 @@
       </div>
     </div>
 
+    <%# ─ Champs objets ─ %>
+    <div class="wiki-objets-meta" <%= page.category === 'objets' ? '' : 'hidden' %>>
+      <div class="wiki-meta-group">
+        <p class="wiki-meta-label">Type de gode</p>
+        <div class="wiki-meta-options">
+          <% [['animal','Animal'],['monstre','Monstre'],['fantaisiste','Fantaisiste'],['ethnique','Ethnique'],['autre','Autre']].forEach(function(o) { %>
+            <label class="chip-option"><input type="radio" name="meta_type_gode" value="<%= o[0] %>" <%= pm.type_gode === o[0] ? 'checked' : '' %>><span><%= o[1] %></span></label>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+
     <%# ─ Champs lieux ─ %>
     <div class="wiki-lieux-meta" <%= page.category === 'lieux' ? '' : 'hidden' %>>
       <div class="wiki-meta-group">

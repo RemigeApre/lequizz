@@ -183,6 +183,7 @@
   var newFantasMeta   = step2 ? step2.querySelector(".wiki-fantasmes-meta")     : null;
   var newPartMeta     = step2 ? step2.querySelector(".wiki-partenaires-meta")   : null;
   var newLieuxMeta    = step2 ? step2.querySelector(".wiki-lieux-meta")         : null;
+  var newObjetsMeta   = step2 ? step2.querySelector(".wiki-objets-meta")        : null;
 
   function showStep(n) {
     if (!step1 || !step2) return;
@@ -214,6 +215,7 @@
         if (newPartMeta)   newPartMeta.hidden    = key !== "partenaires";
         if (newLieuxMeta)  newLieuxMeta.hidden   = key !== "lieux";
         if (newPosMeta)    newPosMeta.hidden      = key !== "position";
+        if (newObjetsMeta) newObjetsMeta.hidden   = key !== "objets";
         showStep(2);
       });
     });
@@ -237,6 +239,7 @@
   var editFantasMeta  = document.querySelector("#wiki-edit-form .wiki-fantasmes-meta");
   var editPartMeta    = document.querySelector("#wiki-edit-form .wiki-partenaires-meta");
   var editLieuxMeta   = document.querySelector("#wiki-edit-form .wiki-lieux-meta");
+  var editObjetsMeta  = document.querySelector("#wiki-edit-form .wiki-objets-meta");
 
   function syncEditFields() {
     if (!editCatSelect) return;
@@ -246,6 +249,7 @@
     if (editPartMeta)   editPartMeta.hidden    = cat !== "partenaires";
     if (editLieuxMeta)  editLieuxMeta.hidden   = cat !== "lieux";
     if (editPosMeta)    editPosMeta.hidden      = cat !== "position";
+    if (editObjetsMeta) editObjetsMeta.hidden   = cat !== "objets";
     // Couleur du select (optionnel, via data-hue)
     var opt = editCatSelect.options[editCatSelect.selectedIndex];
     if (opt && opt.dataset.hue) {
@@ -743,6 +747,168 @@
       if (btn) { btn.disabled = true; btn.textContent = "Enregistrement\u2026"; }
     });
   });
+
+  // ══════════════════════════════════════════════════
+  // 11. CARROUSEL MOBILE (images suivantes)
+  // ══════════════════════════════════════════════════
+  (function () {
+    var rail = document.querySelector(".wiki-infobox-images-rest");
+    if (!rail) return;
+    var imgs = rail.querySelectorAll(".wiki-infobox-img");
+    if (imgs.length < 2) return;
+
+    // Dots indicateurs
+    var dotsWrap = document.createElement("div");
+    dotsWrap.className = "wiki-carousel-dots";
+    rail.parentNode.insertBefore(dotsWrap, rail.nextSibling);
+    var dots = [];
+    imgs.forEach(function (_, i) {
+      var d = document.createElement("button");
+      d.type = "button";
+      d.className = "wiki-carousel-dot";
+      d.addEventListener("click", function () { goTo(i); });
+      dotsWrap.appendChild(d);
+      dots.push(d);
+    });
+
+    var current = 0;
+    var paused = false;
+
+    function setDot(i) {
+      dots.forEach(function (d, j) { d.classList.toggle("active", j === i); });
+    }
+
+    function goTo(i) {
+      current = i;
+      imgs[i].scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      setDot(i);
+    }
+
+    setDot(0);
+
+    // Auto-scroll toutes les 3,5 s si le carrousel est visible (mobile)
+    var timer = setInterval(function () {
+      if (paused) return;
+      // Ne fait rien si le rail n'est pas scrollable (desktop)
+      if (rail.scrollWidth <= rail.clientWidth + 4) return;
+      goTo((current + 1) % imgs.length);
+    }, 3500);
+
+    // Pause au toucher, reprise 4 s après
+    rail.addEventListener("touchstart", function () { paused = true; }, { passive: true });
+    rail.addEventListener("touchend",   function () { setTimeout(function () { paused = false; }, 4000); }, { passive: true });
+
+    // Synchronise le dot au scroll manuel
+    rail.addEventListener("scroll", function () {
+      var mid = rail.scrollLeft + rail.clientWidth / 2;
+      imgs.forEach(function (img, i) {
+        if (img.offsetLeft <= mid && img.offsetLeft + img.offsetWidth > mid) {
+          current = i;
+          setDot(i);
+        }
+      });
+    }, { passive: true });
+  })();
+
+  // ══════════════════════════════════════════════════
+  // 12. QUESTIONS LIÉES AU QUIZZ
+  // ══════════════════════════════════════════════════
+  var qlWidget = document.querySelector(".wiki-question-links");
+  if (qlWidget) {
+    var qlPageId  = qlWidget.dataset.pageId;
+    var qlList    = qlWidget.querySelector(".wiki-ql-list");
+    var qlSearch  = qlWidget.querySelector(".wiki-ql-search");
+    var qlResults = qlWidget.querySelector(".wiki-ql-results");
+    var qlTimer;
+
+    function qlLoadLinks() {
+      fetch("/wiki/" + qlPageId + "/question-links")
+        .then(function (r) { return r.json(); })
+        .then(function (links) {
+          qlList.innerHTML = "";
+          if (!links.length) {
+            var li = document.createElement("li");
+            li.className = "wiki-ql-empty";
+            li.textContent = "Aucune question associ\u00e9e";
+            qlList.appendChild(li);
+            return;
+          }
+          links.forEach(function (lk) {
+            var li = document.createElement("li");
+            li.className = "wiki-ql-item";
+            var label = document.createElement("span");
+            label.className = "wiki-ql-label";
+            var section = document.createElement("span");
+            section.className = "wiki-ql-section";
+            section.textContent = lk.section_title;
+            var text = document.createElement("span");
+            text.className = "wiki-ql-text";
+            text.textContent = lk.question_text;
+            label.appendChild(section);
+            label.appendChild(text);
+            var rm = document.createElement("button");
+            rm.type = "button";
+            rm.className = "wiki-ql-remove";
+            rm.innerHTML = "&#215;";
+            rm.title = "D\u00e9sassocier";
+            rm.addEventListener("click", function () {
+              fetch("/wiki/" + qlPageId + "/question-links", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ section_key: lk.section_key, question_id: lk.question_id }),
+              }).then(qlLoadLinks);
+            });
+            li.appendChild(label);
+            li.appendChild(rm);
+            qlList.appendChild(li);
+          });
+        });
+    }
+
+    qlSearch.addEventListener("input", function () {
+      clearTimeout(qlTimer);
+      qlTimer = setTimeout(function () {
+        var q = qlSearch.value.trim();
+        if (!q) { qlResults.innerHTML = ""; return; }
+        fetch("/wiki/question-search?q=" + encodeURIComponent(q))
+          .then(function (r) { return r.json(); })
+          .then(function (items) {
+            qlResults.innerHTML = "";
+            items.forEach(function (it) {
+              var li = document.createElement("li");
+              li.className = "wiki-ql-result-item";
+              var s = document.createElement("span");
+              s.className = "wiki-ql-result-section";
+              s.textContent = it.section_title;
+              var t = document.createElement("span");
+              t.className = "wiki-ql-result-text";
+              t.textContent = it.question_text;
+              li.appendChild(s);
+              li.appendChild(t);
+              li.addEventListener("click", function () {
+                fetch("/wiki/" + qlPageId + "/question-links", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ section_key: it.section_key, question_id: it.question_id }),
+                }).then(function () {
+                  qlSearch.value = "";
+                  qlResults.innerHTML = "";
+                  qlLoadLinks();
+                });
+              });
+              qlResults.appendChild(li);
+            });
+          });
+      }, 200);
+    });
+
+    // Ferme les résultats si on clique ailleurs
+    document.addEventListener("click", function (e) {
+      if (!qlWidget.contains(e.target)) qlResults.innerHTML = "";
+    });
+
+    qlLoadLinks();
+  }
 
   document.querySelectorAll(".link-delete-form, .link-delete-form-inline").forEach(function (form) {
     form.addEventListener("submit", function (e) {
