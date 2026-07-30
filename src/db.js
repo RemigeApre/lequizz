@@ -51,8 +51,9 @@ db.exec(`
     updated_at TEXT NOT NULL
   )
 `);
-// Migration non destructive : ajoute la colonne meta si elle n'existe pas encore.
+// Migrations non destructives
 try { db.exec("ALTER TABLE wiki_pages ADD COLUMN meta TEXT NOT NULL DEFAULT '{}'"); } catch (_) {}
+try { db.exec("ALTER TABLE wiki_pages ADD COLUMN image_paths TEXT NOT NULL DEFAULT '[]'"); } catch (_) {}
 
 function insertSubmission(answers, scores) {
   const stmt = db.prepare(
@@ -134,13 +135,16 @@ function deleteLink(id) {
 }
 
 function rowToWikiPage(row) {
+  // image_paths est la source de vérité. Si vide mais image_path existe (anciennes lignes), on le wrape.
+  let imagePaths = JSON.parse(row.image_paths || "[]");
+  if (!imagePaths.length && row.image_path) imagePaths = [row.image_path];
   return {
     id: row.id,
     title: row.title,
     category: row.category,
     content: row.content,
     tags: JSON.parse(row.tags),
-    imagePath: row.image_path,
+    imagePaths,
     owned: !!row.owned,
     meta: JSON.parse(row.meta || "{}"),
     createdAt: row.created_at,
@@ -148,14 +152,14 @@ function rowToWikiPage(row) {
   };
 }
 
-function insertWikiPage({ title, category, content, tags, imagePath, owned, meta }) {
+function insertWikiPage({ title, category, content, tags, imagePaths, owned, meta }) {
   const now = new Date().toISOString();
   const info = db
     .prepare(
-      `INSERT INTO wiki_pages (title, category, content, tags, image_path, owned, meta, created_at, updated_at)
+      `INSERT INTO wiki_pages (title, category, content, tags, image_paths, owned, meta, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
-    .run(title, category, content, JSON.stringify(tags), imagePath || null, owned ? 1 : 0, JSON.stringify(meta || {}), now, now);
+    .run(title, category, content, JSON.stringify(tags), JSON.stringify(imagePaths || []), owned ? 1 : 0, JSON.stringify(meta || {}), now, now);
   return info.lastInsertRowid;
 }
 
@@ -170,14 +174,19 @@ function getWikiPage(id) {
   return rowToWikiPage(row);
 }
 
-function updateWikiPage(id, { title, category, content, tags, imagePath, owned, meta }) {
-  const existing = db.prepare("SELECT image_path FROM wiki_pages WHERE id = ?").get(id);
+function updateWikiPage(id, { title, category, content, tags, imagePaths, owned, meta }) {
+  const existing = db.prepare("SELECT image_paths, image_path FROM wiki_pages WHERE id = ?").get(id);
   if (!existing) return false;
-  const finalImagePath = imagePath !== undefined ? imagePath : existing.image_path;
+  // Si imagePaths n'est pas fourni, conserver les images existantes
+  let finalImagePaths = imagePaths;
+  if (finalImagePaths === undefined) {
+    finalImagePaths = JSON.parse(existing.image_paths || "[]");
+    if (!finalImagePaths.length && existing.image_path) finalImagePaths = [existing.image_path];
+  }
   db.prepare(
-    `UPDATE wiki_pages SET title = ?, category = ?, content = ?, tags = ?, image_path = ?, owned = ?, meta = ?, updated_at = ?
+    `UPDATE wiki_pages SET title = ?, category = ?, content = ?, tags = ?, image_paths = ?, owned = ?, meta = ?, updated_at = ?
      WHERE id = ?`
-  ).run(title, category, content, JSON.stringify(tags), finalImagePath, owned ? 1 : 0, JSON.stringify(meta || {}), new Date().toISOString(), id);
+  ).run(title, category, content, JSON.stringify(tags), JSON.stringify(finalImagePaths), owned ? 1 : 0, JSON.stringify(meta || {}), new Date().toISOString(), id);
   return true;
 }
 

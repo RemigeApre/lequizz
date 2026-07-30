@@ -43,9 +43,56 @@
       <div class="wiki-md-preview wiki-md" hidden></div>
     </div>
 
-    <%# ─ Champs position ─ %>
     <%
       var pm = page.meta || {};
+    %>
+
+    <%# ─ Champs fantasmes ─ %>
+    <div class="wiki-fantasmes-meta" <%= page.category === 'fantasmes' ? '' : 'hidden' %>>
+      <div class="wiki-meta-group">
+        <p class="wiki-meta-label">Sous-cat&eacute;gorie</p>
+        <div class="wiki-meta-options">
+          <% fantasmesSubs.forEach(function(s) { %>
+            <label class="chip-option"><input type="radio" name="meta_sous_cat" value="<%= s.key %>" <%= pm.sous_cat === s.key ? 'checked' : '' %>><span><%= s.label %></span></label>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+
+    <%# ─ Champs partenaires ─ %>
+    <div class="wiki-partenaires-meta" <%= page.category === 'partenaires' ? '' : 'hidden' %>>
+      <div class="wiki-meta-group">
+        <p class="wiki-meta-label">Nombre de femmes</p>
+        <div class="wiki-meta-options">
+          <% ['0','1','2','3','nombreux'].forEach(function(v) { %>
+            <label class="chip-option"><input type="radio" name="meta_nb_femmes" value="<%= v %>" <%= pm.nb_femmes === v ? 'checked' : '' %>><span><%= v === 'nombreux' ? 'Nombreuses' : v %></span></label>
+          <% }) %>
+        </div>
+      </div>
+      <div class="wiki-meta-group">
+        <p class="wiki-meta-label">Nombre d&apos;hommes</p>
+        <div class="wiki-meta-options">
+          <% ['0','1','2','3','nombreux'].forEach(function(v) { %>
+            <label class="chip-option"><input type="radio" name="meta_nb_hommes" value="<%= v %>" <%= pm.nb_hommes === v ? 'checked' : '' %>><span><%= v === 'nombreux' ? 'Nombreux' : v %></span></label>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+
+    <%# ─ Champs lieux ─ %>
+    <div class="wiki-lieux-meta" <%= page.category === 'lieux' ? '' : 'hidden' %>>
+      <div class="wiki-meta-group">
+        <p class="wiki-meta-label">Type de lieu</p>
+        <div class="wiki-meta-options">
+          <label class="chip-option"><input type="radio" name="meta_type_lieu" value="prive"  <%= pm.type_lieu === 'prive'  ? 'checked' : '' %>><span>Priv&eacute;</span></label>
+          <label class="chip-option"><input type="radio" name="meta_type_lieu" value="public" <%= pm.type_lieu === 'public' ? 'checked' : '' %>><span>Public</span></label>
+          <label class="chip-option"><input type="radio" name="meta_type_lieu" value="cache"  <%= pm.type_lieu === 'cache'  ? 'checked' : '' %>><span>Cach&eacute;</span></label>
+        </div>
+      </div>
+    </div>
+
+    <%# ─ Champs position ─ %>
+    <%
       var pmCanal = pm.canal || [];
     %>
     <div class="wiki-position-meta" <%= page.category === 'position' ? '' : 'hidden' %>>
@@ -97,17 +144,26 @@
       <% } %>
     </div>
 
-    <%# ─ Image ─ %>
+    <%# ─ Images ─ %>
     <div class="wiki-image-field">
-      <% if (page.imagePath) { %>
-        <img src="<%= page.imagePath %>" alt="" class="wiki-form-current-image" id="wiki-current-image" />
-        <label class="chip-option wiki-image-remove-label">
-          <input type="checkbox" name="remove_image" id="wiki-remove-image" />
-          <span>Supprimer l&apos;image</span>
-        </label>
+      <% if (page.imagePaths && page.imagePaths.length) { %>
+        <div class="wiki-images-existing">
+          <% page.imagePaths.forEach(function(src) { %>
+            <div class="wiki-existing-img-wrap">
+              <img src="<%= src %>" alt="" class="wiki-form-existing-image" />
+              <label class="wiki-img-remove-label">
+                <input type="checkbox" name="remove_image" value="<%= src %>" />
+                <span>&#215;</span>
+              </label>
+            </div>
+          <% }) %>
+        </div>
       <% } %>
-      <input type="file" name="image" accept="image/*" class="wiki-image-input" />
-      <img class="wiki-image-preview-new" hidden alt="" />
+      <label class="wiki-image-add-label">
+        <span>+ Ajouter des images</span>
+        <input type="file" name="images" accept="image/*" multiple class="wiki-image-input" />
+      </label>
+      <div class="wiki-new-previews"></div>
     </div>
 
     <button type="submit">Enregistrer</button>

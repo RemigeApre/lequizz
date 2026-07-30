@@ -6,10 +6,6 @@
   <% var cat = categories.find(function (c) { return c.key === page.category; }); %>
   <article class="wiki-detail">
 
-    <% if (page.imagePath) { %>
-      <img src="<%= page.imagePath %>" alt="" class="wiki-detail-image" />
-    <% } %>
-
     <div class="wiki-detail-header">
       <span class="wiki-category-badge" style="background: hsl(<%= cat ? cat.hue : 220 %>, 55%, 45%)"><%= cat ? cat.label : page.category %></span>
       <% if (page.owned) { %><span class="wiki-owned-badge" title="Poss\u00e9d\u00e9">&#9733; Poss\u00e9d\u00e9</span><% } %>
@@ -24,15 +20,46 @@
       </div>
     <% } %>
 
-    <%# ─ Meta position ─ %>
     <%
       var pm = page.meta || {};
+
+      // — Fantasmes
+      var FSUBS = { jeux_role: 'Jeux de r\u00f4le et comportement', hardcore: 'Hardcore', bdsm: 'BDSM', classique: 'Classique' };
+
+      // — Partenaires
+      var nbF = pm.nb_femmes, nbH = pm.nb_hommes;
+      var hasPartMeta = page.category === 'partenaires' && (nbF || nbH);
+
+      // — Lieux
+      var LIEU = { prive: 'Priv\u00e9', public: 'Public', cache: 'Cach\u00e9' };
+
+      // — Position
       var QUI  = { femme: 'Femme', homme: 'Homme', variable: 'Variable', aucun: 'Aucun / debout' };
       var CAN  = { vagin: 'Vagin', anus: 'Anus', bouche: 'Bouche', mains: 'Mains', autre: 'Autre' };
       var ORI  = { face_a_face: 'Face \u00e0 face', face_contre_dos: 'Face contre dos', acrobatique: 'Acrobatique', autre: 'Autre' };
       var pmOri = Array.isArray(pm.orientation) ? pm.orientation : (pm.orientation ? [pm.orientation] : []);
       var hasPosMeta = page.category === 'position' && (pm.qui_dessus || (pm.canal && pm.canal.length) || pmOri.length);
     %>
+
+    <% if (page.category === 'fantasmes' && pm.sous_cat && FSUBS[pm.sous_cat]) { %>
+      <div class="wiki-position-info">
+        <span class="wiki-pos-item"><span class="wiki-pos-key">Cat\u00e9gorie</span><strong><%= FSUBS[pm.sous_cat] %></strong></span>
+      </div>
+    <% } %>
+
+    <% if (hasPartMeta) { %>
+      <div class="wiki-position-info">
+        <% if (nbF) { %><span class="wiki-pos-item"><span class="wiki-pos-key">Femmes</span><strong><%= nbF === 'nombreux' ? 'Nombreuses' : nbF %></strong></span><% } %>
+        <% if (nbH) { %><span class="wiki-pos-item"><span class="wiki-pos-key">Hommes</span><strong><%= nbH === 'nombreux' ? 'Nombreux' : nbH %></strong></span><% } %>
+      </div>
+    <% } %>
+
+    <% if (page.category === 'lieux' && pm.type_lieu && LIEU[pm.type_lieu]) { %>
+      <div class="wiki-position-info">
+        <span class="wiki-pos-item"><span class="wiki-pos-key">Type</span><strong><%= LIEU[pm.type_lieu] %></strong></span>
+      </div>
+    <% } %>
+
     <% if (hasPosMeta) { %>
       <div class="wiki-position-info">
         <% if (pm.qui_dessus && QUI[pm.qui_dessus]) { %>
@@ -42,15 +69,27 @@
           <span class="wiki-pos-item"><span class="wiki-pos-key">Canal</span><strong><%= pm.canal.map(function(c){ return CAN[c] || c; }).join(' \u00b7 ') %></strong></span>
         <% } %>
         <% if (pmOri.length) { %>
-          <span class="wiki-pos-item"><span class="wiki-pos-key">Orientation</span><strong><%= pmOri.map(function(o){ return ORI[o] || o; }).join(' · ') %></strong></span>
+          <span class="wiki-pos-item"><span class="wiki-pos-key">Orientation</span><strong><%= pmOri.map(function(o){ return ORI[o] || o; }).join(' \u00b7 ') %></strong></span>
         <% } %>
       </div>
     <% } %>
 
-    <%# ─ Contenu Markdown ─ %>
-    <% if (page.content) { %>
-      <div class="wiki-md"><span class="wiki-md-raw" hidden><%= page.content %></span></div>
-    <% } %>
+    <%# ─ Contenu + galerie flottante style Wikipedia ─ %>
+    <div class="wiki-body">
+      <% if (page.imagePaths && page.imagePaths.length) { %>
+        <div class="wiki-gallery">
+          <% page.imagePaths.forEach(function(src) { %>
+            <figure class="wiki-gallery-figure">
+              <img src="<%= src %>" alt="" class="wiki-gallery-img" />
+            </figure>
+          <% }) %>
+        </div>
+      <% } %>
+
+      <% if (page.content) { %>
+        <div class="wiki-md"><span class="wiki-md-raw" hidden><%= page.content %></span></div>
+      <% } %>
+    </div>
 
     <div class="wiki-detail-actions">
       <a href="/wiki/<%= page.id %>/edit" class="link-button">Modifier</a>

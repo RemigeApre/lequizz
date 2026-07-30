@@ -58,6 +58,54 @@
         <div class="wiki-md-preview wiki-md" hidden></div>
       </div>
 
+      <%# ─ Champs fantasmes ─ %>
+      <div class="wiki-fantasmes-meta" hidden>
+        <div class="wiki-meta-group">
+          <p class="wiki-meta-label">Sous-cat&eacute;gorie</p>
+          <div class="wiki-meta-options">
+            <% fantasmesSubs.forEach(function(s) { %>
+              <label class="chip-option"><input type="radio" name="meta_sous_cat" value="<%= s.key %>"><span><%= s.label %></span></label>
+            <% }) %>
+          </div>
+        </div>
+      </div>
+
+      <%# ─ Champs partenaires ─ %>
+      <div class="wiki-partenaires-meta" hidden>
+        <div class="wiki-meta-group">
+          <p class="wiki-meta-label">Nombre de femmes</p>
+          <div class="wiki-meta-options">
+            <label class="chip-option"><input type="radio" name="meta_nb_femmes" value="0"><span>0</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_femmes" value="1"><span>1</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_femmes" value="2"><span>2</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_femmes" value="3"><span>3</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_femmes" value="nombreux"><span>Nombreuses</span></label>
+          </div>
+        </div>
+        <div class="wiki-meta-group">
+          <p class="wiki-meta-label">Nombre d&apos;hommes</p>
+          <div class="wiki-meta-options">
+            <label class="chip-option"><input type="radio" name="meta_nb_hommes" value="0"><span>0</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_hommes" value="1"><span>1</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_hommes" value="2"><span>2</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_hommes" value="3"><span>3</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_hommes" value="nombreux"><span>Nombreux</span></label>
+          </div>
+        </div>
+      </div>
+
+      <%# ─ Champs lieux ─ %>
+      <div class="wiki-lieux-meta" hidden>
+        <div class="wiki-meta-group">
+          <p class="wiki-meta-label">Type de lieu</p>
+          <div class="wiki-meta-options">
+            <label class="chip-option"><input type="radio" name="meta_type_lieu" value="prive"><span>Priv&eacute;</span></label>
+            <label class="chip-option"><input type="radio" name="meta_type_lieu" value="public"><span>Public</span></label>
+            <label class="chip-option"><input type="radio" name="meta_type_lieu" value="cache"><span>Cach&eacute;</span></label>
+          </div>
+        </div>
+      </div>
+
       <%# ─ Champs position ─ %>
       <div class="wiki-position-meta" hidden>
         <div class="wiki-meta-group">
@@ -107,8 +155,11 @@
 
       <%# ─ Image ─ %>
       <div class="wiki-image-field">
-        <input type="file" name="image" accept="image/*" class="wiki-image-input" />
-        <img class="wiki-image-preview-new" hidden alt="" />
+        <label class="wiki-image-add-label">
+          <span>+ Ajouter des images</span>
+          <input type="file" name="images" accept="image/*" multiple class="wiki-image-input" />
+        </label>
+        <div class="wiki-new-previews"></div>
       </div>
 
       <div class="wiki-form-actions">
@@ -147,8 +198,8 @@
         data-category="<%= page.category %>"
         data-owned="<%= page.owned ? '1' : '0' %>"
         data-tags="<%= page.tags.join('|').toLowerCase() %>">
-        <% if (page.imagePath) { %>
-          <div class="wiki-card-image" style="background-image: url('<%= page.imagePath %>')"></div>
+        <% if (page.imagePaths && page.imagePaths.length) { %>
+          <div class="wiki-card-image"><img src="<%= page.imagePaths[0] %>" alt="" class="wiki-card-img" /></div>
         <% } %>
         <div class="wiki-card-body">
           <div class="wiki-card-header">

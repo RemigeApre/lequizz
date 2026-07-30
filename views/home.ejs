@@ -4,6 +4,11 @@
 
   <p class="home-message"><%= config.intro %></p>
 
+  <div class="home-shortcuts">
+    <a href="/liens" class="home-shortcut">Liens</a>
+    <a href="/wiki" class="home-shortcut">Wiki</a>
+  </div>
+
   <div class="section-cards">
     <% config.sections.forEach(function (s, i) { %>
       <a class="section-card" href="/section/<%= i %>" style="--card-color: <%= s.color || 'var(--accent)' %>">

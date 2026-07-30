@@ -172,14 +172,17 @@
   // ══════════════════════════════════════════════════
   // 4. FLOW CRÉATION (étape 1 → étape 2)
   // ══════════════════════════════════════════════════
-  var newBtn    = document.getElementById("wiki-new-btn");
-  var step1     = document.getElementById("wiki-step1");
-  var step2     = document.getElementById("wiki-step2");
-  var catInput  = document.getElementById("wiki-new-cat-input");
-  var catBadge  = document.getElementById("wiki-new-cat-badge");
-  var cancelBtn = document.getElementById("wiki-cancel-new");
-  var newOwned  = document.getElementById("wiki-new-owned");
-  var newPosMeta = step2 ? step2.querySelector(".wiki-position-meta") : null;
+  var newBtn          = document.getElementById("wiki-new-btn");
+  var step1           = document.getElementById("wiki-step1");
+  var step2           = document.getElementById("wiki-step2");
+  var catInput        = document.getElementById("wiki-new-cat-input");
+  var catBadge        = document.getElementById("wiki-new-cat-badge");
+  var cancelBtn       = document.getElementById("wiki-cancel-new");
+  var newOwned        = document.getElementById("wiki-new-owned");
+  var newPosMeta      = step2 ? step2.querySelector(".wiki-position-meta")      : null;
+  var newFantasMeta   = step2 ? step2.querySelector(".wiki-fantasmes-meta")     : null;
+  var newPartMeta     = step2 ? step2.querySelector(".wiki-partenaires-meta")   : null;
+  var newLieuxMeta    = step2 ? step2.querySelector(".wiki-lieux-meta")         : null;
 
   function showStep(n) {
     if (!step1 || !step2) return;
@@ -206,9 +209,11 @@
           catBadge.textContent = label;
           catBadge.style.background = "hsl(" + hue + ", 55%, 45%)";
         }
-        // Champs conditionnels — owned uniquement objets/tenues
-        if (newOwned)   newOwned.hidden   = key !== "objets" && key !== "tenues";
-        if (newPosMeta) newPosMeta.hidden = key !== "position";
+        if (newOwned)      newOwned.hidden      = key !== "objets" && key !== "tenues";
+        if (newFantasMeta) newFantasMeta.hidden  = key !== "fantasmes";
+        if (newPartMeta)   newPartMeta.hidden    = key !== "partenaires";
+        if (newLieuxMeta)  newLieuxMeta.hidden   = key !== "lieux";
+        if (newPosMeta)    newPosMeta.hidden      = key !== "position";
         showStep(2);
       });
     });
@@ -226,15 +231,21 @@
   // ══════════════════════════════════════════════════
   // 5. FORMULAIRE ÉDITION : catégorie + champs conditionnels
   // ══════════════════════════════════════════════════
-  var editCatSelect = document.getElementById("wiki-category-select");
-  var editOwned     = document.getElementById("wiki-owned-field");
-  var editPosMeta   = document.querySelector("#wiki-edit-form .wiki-position-meta");
+  var editCatSelect   = document.getElementById("wiki-category-select");
+  var editOwned       = document.getElementById("wiki-owned-field");
+  var editPosMeta     = document.querySelector("#wiki-edit-form .wiki-position-meta");
+  var editFantasMeta  = document.querySelector("#wiki-edit-form .wiki-fantasmes-meta");
+  var editPartMeta    = document.querySelector("#wiki-edit-form .wiki-partenaires-meta");
+  var editLieuxMeta   = document.querySelector("#wiki-edit-form .wiki-lieux-meta");
 
   function syncEditFields() {
     if (!editCatSelect) return;
     var cat = editCatSelect.value;
-    if (editOwned)   editOwned.hidden   = cat !== "objets" && cat !== "tenues";
-    if (editPosMeta) editPosMeta.hidden = cat !== "position";
+    if (editOwned)      editOwned.hidden      = cat !== "objets" && cat !== "tenues";
+    if (editFantasMeta) editFantasMeta.hidden  = cat !== "fantasmes";
+    if (editPartMeta)   editPartMeta.hidden    = cat !== "partenaires";
+    if (editLieuxMeta)  editLieuxMeta.hidden   = cat !== "lieux";
+    if (editPosMeta)    editPosMeta.hidden      = cat !== "position";
     // Couleur du select (optionnel, via data-hue)
     var opt = editCatSelect.options[editCatSelect.selectedIndex];
     if (opt && opt.dataset.hue) {
@@ -299,31 +310,26 @@
   });
 
   // ══════════════════════════════════════════════════
-  // 8. PREVIEW IMAGE + SUPPRESSION
+  // 8. PREVIEW IMAGES MULTIPLES
   // ══════════════════════════════════════════════════
   document.querySelectorAll(".wiki-image-field").forEach(function (wrapper) {
-    var input      = wrapper.querySelector(".wiki-image-input");
-    var preview    = wrapper.querySelector(".wiki-image-preview-new");
-    var removeChk  = wrapper.querySelector("#wiki-remove-image");
-    var currentImg = wrapper.querySelector("#wiki-current-image");
-    if (!input || !preview) return;
+    var input        = wrapper.querySelector(".wiki-image-input");
+    var previewsZone = wrapper.querySelector(".wiki-new-previews");
+    if (!input || !previewsZone) return;
 
     input.addEventListener("change", function () {
-      if (input.files && input.files[0]) {
-        preview.src = URL.createObjectURL(input.files[0]);
-        preview.hidden = false;
-        if (removeChk) removeChk.checked = false;
-      } else {
-        preview.hidden = true;
-        preview.src = "";
-      }
-    });
-
-    if (removeChk && currentImg) {
-      removeChk.addEventListener("change", function () {
-        currentImg.style.opacity = removeChk.checked ? "0.3" : "1";
+      previewsZone.innerHTML = "";
+      Array.from(input.files || []).forEach(function (file) {
+        var wrap = document.createElement("div");
+        wrap.className = "wiki-new-preview-wrap";
+        var img = document.createElement("img");
+        img.className = "wiki-new-preview-img";
+        img.src = URL.createObjectURL(file);
+        img.alt = "";
+        wrap.appendChild(img);
+        previewsZone.appendChild(wrap);
       });
-    }
+    });
   });
 
   // ══════════════════════════════════════════════════
