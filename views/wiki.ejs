@@ -26,6 +26,7 @@
   </div>
 
   <%# ─── STEP 2 : FORMULAIRE ──────────────────────────────────────────── %>
+  <script id="wiki-existing-pages" type="application/json"><%- JSON.stringify(pages.map(function(p){ return { id: p.id, title: p.title }; })) %></script>
   <div id="wiki-step2" class="wiki-step2" hidden>
     <form method="POST" action="/wiki" enctype="multipart/form-data" class="wiki-form" id="wiki-new-form">
       <input type="hidden" name="category" id="wiki-new-cat-input" value="" />
@@ -34,7 +35,8 @@
         <button type="button" id="wiki-new-cat-badge" class="wiki-category-badge wiki-badge-btn" title="Changer de type"></button>
       </div>
 
-      <input type="text" name="title" class="wiki-title-input" required placeholder="Titre&hellip;" />
+      <input type="text" name="title" class="wiki-title-input" id="wiki-new-title" required placeholder="Titre&hellip;" autocomplete="off" />
+      <div id="wiki-title-warn" class="wiki-title-warn" hidden></div>
 
       <label class="chip-option wiki-owned-chip" id="wiki-new-owned" hidden>
         <input type="checkbox" name="owned" />
@@ -183,23 +185,38 @@
     </form>
   </div>
 
-  <%# ─── FILTRES ──────────────────────────────────────────────────────── %>
-  <div class="links-filter" id="wiki-category-filter">
-    <button type="button" class="tag-chip active" data-category="">Tous</button>
-    <% categories.forEach(function (c) { %>
-      <button type="button" class="tag-chip" data-category="<%= c.key %>"><%= c.label %></button>
-    <% }) %>
-    <button type="button" class="tag-chip tag-chip-owned" data-category="__owned__">&#9733; Nos objets</button>
-  </div>
-
-  <% if (allTags.length) { %>
-    <div class="links-filter" id="wiki-tag-filter">
-      <button type="button" class="tag-chip active" data-tag="">Tous les tags</button>
-      <% allTags.forEach(function (tag) { %>
-        <button type="button" class="tag-chip" data-tag="<%= tag %>"><%= tag %></button>
+  <%# ─── FILTRES + TRI ────────────────────────────────────────────────── %>
+  <div class="wiki-controls">
+    <div class="links-filter" id="wiki-category-filter">
+      <button type="button" class="tag-chip active" data-category="">Tous</button>
+      <% categories.forEach(function (c) { %>
+        <button type="button" class="tag-chip" data-category="<%= c.key %>"><%= c.label %></button>
       <% }) %>
+      <button type="button" class="tag-chip tag-chip-owned" data-category="__owned__">&#9733; Nos objets</button>
     </div>
-  <% } %>
+
+    <% if (allTags.length) { %>
+      <div class="links-filter" id="wiki-tag-filter">
+        <button type="button" class="tag-chip active" data-tag="">Tous les tags</button>
+        <% allTags.forEach(function (tag) { %>
+          <button type="button" class="tag-chip" data-tag="<%= tag %>"><%= tag %></button>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <div class="wiki-sort-row">
+      <button type="button" id="wiki-ultra-toggle" class="wiki-ultra-btn">&#128274; Masquer Ultra</button>
+      <label class="wiki-sort-label" for="wiki-sort-select">Trier&nbsp;:</label>
+      <select id="wiki-sort-select" class="wiki-sort-select">
+        <option value="alpha-asc" selected>A &rarr; Z</option>
+        <option value="alpha-desc">Z &rarr; A</option>
+        <option value="date-desc">Plus r&eacute;cent</option>
+        <option value="date-asc">Plus ancien</option>
+        <option value="rating-desc">Mieux not&eacute;</option>
+        <option value="category">Cat&eacute;gorie</option>
+      </select>
+    </div>
+  </div>
 
   <%# ─── GRILLE ────────────────────────────────────────────────────────── %>
   <div class="wiki-grid" id="wiki-list">
@@ -211,7 +228,10 @@
       <a href="/wiki/<%= page.id %>" class="wiki-card"
         data-category="<%= page.category %>"
         data-owned="<%= page.owned ? '1' : '0' %>"
-        data-tags="<%= page.tags.join('|').toLowerCase() %>">
+        data-tags="<%= page.tags.join('|').toLowerCase() %>"
+        data-title="<%= page.title.toLowerCase() %>"
+        data-date="<%= new Date(page.updatedAt).getTime() %>"
+        data-rating="<%= page.rating || 0 %>">
         <% if (page.imagePaths && page.imagePaths.length) { %>
           <div class="wiki-card-image"><img src="<%= page.imagePaths[0] %>" alt="" class="wiki-card-img" /></div>
         <% } %>

@@ -10,6 +10,10 @@ const {
   reactWikiPage,
   deleteWikiPage,
   incrementWikiViews,
+  getWikiPageLinks,
+  getWikiBacklinks,
+  addWikiPageLink,
+  removeWikiPageLink,
   getWikiQuestionLinks,
   addWikiQuestionLink,
   removeWikiQuestionLink,
@@ -33,6 +37,7 @@ const FANTASMES_SUBCATS = [
   { key: "hardcore",   label: "Hardcore" },
   { key: "bdsm",       label: "BDSM" },
   { key: "classique",  label: "Classique" },
+  { key: "fantaisie",  label: "Fantaisie" },
 ];
 const CATEGORY_KEYS = CATEGORIES.map((c) => c.key);
 const OWNED_CATEGORIES = ["objets", "tenues"];
@@ -106,8 +111,10 @@ function parseMeta(category, body) {
   return {};
 }
 
+const PRESET_TAGS = ["fantaisie", "ultra"];
+
 function getAllTags(pages) {
-  return Array.from(new Set(pages.flatMap((p) => p.tags))).sort((a, b) =>
+  return Array.from(new Set([...PRESET_TAGS, ...pages.flatMap((p) => p.tags)])).sort((a, b) =>
     a.localeCompare(b, "fr")
   );
 }
@@ -133,7 +140,7 @@ function buildWikiRouter(config) {
   const CTX = { categories: CATEGORIES, fantasmesSubs: FANTASMES_SUBCATS };
 
   router.get("/", (req, res) => {
-    const pages = listWikiPages();
+    const pages = listWikiPages().sort((a, b) => a.title.localeCompare(b.title, "fr", { sensitivity: "base" }));
     res.render("wiki", { config, pages, allTags: getAllTags(pages), ...CTX });
   });
 
@@ -228,6 +235,29 @@ function buildWikiRouter(config) {
 
     updateWikiPage(id, { title, category, content, tags, imagePaths, owned, meta });
     res.redirect(`/wiki/${id}`);
+  });
+
+  // ── Liens entre pages wiki ─────────────────────────
+  router.get("/:id/page-links", (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.json({ links: [], backlinks: [] });
+    res.json({ links: getWikiPageLinks(id), backlinks: getWikiBacklinks(id) });
+  });
+
+  router.post("/:id/page-links", (req, res) => {
+    const id = Number(req.params.id);
+    const linked = Number(req.body.linked_page_id);
+    if (!Number.isInteger(id) || !Number.isInteger(linked)) return res.status(400).json({ ok: false });
+    addWikiPageLink(id, linked);
+    res.json({ ok: true });
+  });
+
+  router.delete("/:id/page-links", (req, res) => {
+    const id = Number(req.params.id);
+    const linked = Number(req.body.linked_page_id);
+    if (!Number.isInteger(id) || !Number.isInteger(linked)) return res.status(400).json({ ok: false });
+    removeWikiPageLink(id, linked);
+    res.json({ ok: true });
   });
 
   // ── Associations questions ──────────────────────────

@@ -60,6 +60,15 @@ try { db.exec("ALTER TABLE wiki_pages ADD COLUMN interested INTEGER NOT NULL DEF
 try { db.exec("ALTER TABLE wiki_pages ADD COLUMN views INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
 
 db.exec(`
+  CREATE TABLE IF NOT EXISTS wiki_page_links (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    page_id INTEGER NOT NULL,
+    linked_page_id INTEGER NOT NULL,
+    UNIQUE(page_id, linked_page_id)
+  )
+`);
+
+db.exec(`
   CREATE TABLE IF NOT EXISTS wiki_question_links (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     wiki_page_id INTEGER NOT NULL,
@@ -226,6 +235,35 @@ function deleteWikiPage(id) {
   db.prepare("DELETE FROM wiki_pages WHERE id = ?").run(id);
 }
 
+function getWikiPageLinks(pageId) {
+  return db.prepare(
+    `SELECT w.id, w.title, w.category FROM wiki_page_links pl
+     JOIN wiki_pages w ON w.id = pl.linked_page_id
+     WHERE pl.page_id = ? ORDER BY w.title`
+  ).all(pageId).map(rowToPageLink);
+}
+
+function getWikiBacklinks(pageId) {
+  return db.prepare(
+    `SELECT w.id, w.title, w.category FROM wiki_page_links pl
+     JOIN wiki_pages w ON w.id = pl.page_id
+     WHERE pl.linked_page_id = ? ORDER BY w.title`
+  ).all(pageId).map(rowToPageLink);
+}
+
+function rowToPageLink(row) {
+  return { id: row.id, title: row.title, category: row.category };
+}
+
+function addWikiPageLink(pageId, linkedPageId) {
+  if (pageId === linkedPageId) return;
+  db.prepare("INSERT OR IGNORE INTO wiki_page_links (page_id, linked_page_id) VALUES (?, ?)").run(pageId, linkedPageId);
+}
+
+function removeWikiPageLink(pageId, linkedPageId) {
+  db.prepare("DELETE FROM wiki_page_links WHERE page_id = ? AND linked_page_id = ?").run(pageId, linkedPageId);
+}
+
 function getWikiQuestionLinks(wikiPageId) {
   return db.prepare("SELECT section_key, question_id FROM wiki_question_links WHERE wiki_page_id = ? ORDER BY id").all(wikiPageId);
 }
@@ -275,6 +313,10 @@ module.exports = {
   getWikiPage,
   updateWikiPage,
   deleteWikiPage,
+  getWikiPageLinks,
+  getWikiBacklinks,
+  addWikiPageLink,
+  removeWikiPageLink,
   getWikiQuestionLinks,
   addWikiQuestionLink,
   removeWikiQuestionLink,

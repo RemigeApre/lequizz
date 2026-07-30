@@ -170,6 +170,69 @@
   document.querySelectorAll(".wiki-tags-widget").forEach(initTagWidget);
 
   // ══════════════════════════════════════════════════
+  // 3b. AVERTISSEMENT TITRE DUPLIQUÉ
+  // ══════════════════════════════════════════════════
+  (function () {
+    var titleInput = document.getElementById("wiki-new-title");
+    var warnBox    = document.getElementById("wiki-title-warn");
+    var pagesEl    = document.getElementById("wiki-existing-pages");
+    if (!titleInput || !warnBox || !pagesEl) return;
+
+    var existingPages = [];
+    try { existingPages = JSON.parse(pagesEl.textContent); } catch (_) {}
+
+    function normalize(s) {
+      return s.toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^\w\s]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function findSimilar(query) {
+      var q = normalize(query);
+      if (q.length < 2) return [];
+      return existingPages.filter(function (p) {
+        var t = normalize(p.title);
+        return t === q || t.includes(q) || q.includes(t);
+      });
+    }
+
+    var warnTimer;
+    titleInput.addEventListener("input", function () {
+      clearTimeout(warnTimer);
+      warnTimer = setTimeout(function () {
+        var matches = findSimilar(titleInput.value.trim());
+        if (!matches.length) { warnBox.hidden = true; warnBox.innerHTML = ""; return; }
+        var html = '<span class="wiki-warn-icon">&#9888;</span> Page similaire d\u00e9j\u00e0 existante&nbsp;: ';
+        html += matches.map(function (p) {
+          return '<a href="/wiki/' + p.id + '" target="_blank" class="wiki-warn-link">' + p.title + '</a>';
+        }).join(", ");
+        html += '<label class="wiki-warn-confirm"><input type="checkbox" id="wiki-title-confirm" /> Cr\u00e9er quand m\u00eame</label>';
+        warnBox.innerHTML = html;
+        warnBox.hidden = false;
+      }, 350);
+    });
+
+    // Bloque la soumission si warning non confirmé
+    var form = document.getElementById("wiki-new-form");
+    if (form) {
+      form.addEventListener("submit", function (e) {
+        if (!warnBox.hidden) {
+          var confirm = document.getElementById("wiki-title-confirm");
+          if (confirm && !confirm.checked) {
+            e.preventDefault();
+            warnBox.querySelector(".wiki-warn-confirm").style.outline = "2px solid #e53";
+            setTimeout(function () {
+              warnBox.querySelector(".wiki-warn-confirm").style.outline = "";
+            }, 1200);
+          }
+        }
+      }, true);
+    }
+  })();
+
+  // ══════════════════════════════════════════════════
   // 4. FLOW CRÉATION (étape 1 → étape 2)
   // ══════════════════════════════════════════════════
   var newBtn          = document.getElementById("wiki-new-btn");
@@ -331,22 +394,44 @@
   }
 
   // ══════════════════════════════════════════════════
-  // 6. FILTRES GRILLE (catégorie + tag)
+  // 6. FILTRES + TRI DE LA GRILLE
   // ══════════════════════════════════════════════════
   var categoryFilter = document.getElementById("wiki-category-filter");
   var tagFilter      = document.getElementById("wiki-tag-filter");
+  var sortSelect     = document.getElementById("wiki-sort-select");
+  var ultraToggle    = document.getElementById("wiki-ultra-toggle");
   var wikiList       = document.getElementById("wiki-list");
-  var activeCategory = "", activeTag = "";
+  var activeCategory = "", activeTag = "", activeSort = "alpha-asc";
+  var hideUltra = localStorage.getItem("wiki-hide-ultra") === "1";
 
   function applyFilters() {
     if (!wikiList) return;
-    wikiList.querySelectorAll(".wiki-card").forEach(function (card) {
+    var cards = Array.from(wikiList.querySelectorAll(".wiki-card"));
+
+    // Filtrage
+    cards.forEach(function (card) {
       var okCat = !activeCategory ||
         (activeCategory === "__owned__" ? card.dataset.owned === "1" : card.dataset.category === activeCategory);
       var cardTags = (card.dataset.tags || "").split("|");
-      var okTag  = !activeTag || cardTags.indexOf(activeTag) !== -1;
-      card.hidden = !(okCat && okTag);
+      var okTag = !activeTag || cardTags.indexOf(activeTag) !== -1;
+      var okUltra = !hideUltra || cardTags.indexOf("ultra") === -1;
+      card.hidden = !(okCat && okTag && okUltra);
     });
+
+    // Tri (uniquement les cartes visibles)
+    var visible = cards.filter(function (c) { return !c.hidden; });
+    visible.sort(function (a, b) {
+      switch (activeSort) {
+        case "alpha-asc":   return (a.dataset.title || "").localeCompare(b.dataset.title || "", "fr", { sensitivity: "base" });
+        case "alpha-desc":  return (b.dataset.title || "").localeCompare(a.dataset.title || "", "fr", { sensitivity: "base" });
+        case "date-desc":   return Number(b.dataset.date) - Number(a.dataset.date);
+        case "date-asc":    return Number(a.dataset.date) - Number(b.dataset.date);
+        case "rating-desc": return Number(b.dataset.rating) - Number(a.dataset.rating);
+        case "category":    return (a.dataset.category || "").localeCompare(b.dataset.category || "", "fr");
+        default:            return 0;
+      }
+    });
+    visible.forEach(function (card) { wikiList.appendChild(card); });
   }
 
   if (categoryFilter) {
@@ -368,6 +453,28 @@
         applyFilters();
       });
     });
+  }
+  if (sortSelect) {
+    sortSelect.addEventListener("change", function () {
+      activeSort = sortSelect.value;
+      applyFilters();
+    });
+  }
+
+  function syncUltraBtn() {
+    if (!ultraToggle) return;
+    ultraToggle.textContent = hideUltra ? "\uD83D\uDD13 Afficher Ultra" : "\uD83D\uDD12 Masquer Ultra";
+    ultraToggle.classList.toggle("active", hideUltra);
+  }
+  if (ultraToggle) {
+    ultraToggle.addEventListener("click", function () {
+      hideUltra = !hideUltra;
+      localStorage.setItem("wiki-hide-ultra", hideUltra ? "1" : "0");
+      syncUltraBtn();
+      applyFilters();
+    });
+    syncUltraBtn();
+    applyFilters(); // applique l'état sauvegardé au chargement
   }
 
   // ══════════════════════════════════════════════════
@@ -811,9 +918,121 @@
   })();
 
   // ══════════════════════════════════════════════════
-  // 12. QUESTIONS LIÉES AU QUIZZ
+  // 12. LIENS ENTRE PAGES WIKI
   // ══════════════════════════════════════════════════
-  var qlWidget = document.querySelector(".wiki-question-links");
+  (function () {
+    var widget = document.querySelector(".wiki-page-links");
+    if (!widget) return;
+    var pageId      = widget.dataset.pageId;
+    var linksArea   = widget.querySelector("[data-role='links']");
+    var backArea    = widget.querySelector("[data-role='backlinks']");
+    var backSection = widget.querySelector(".wiki-pl-backlinks-section");
+    var searchInput = widget.querySelector(".wiki-pl-search");
+    var resultsList = widget.querySelector(".wiki-pl-results");
+    var searchTimer;
+
+    // Hue de catégorie (doit rester cohérent avec le serveur)
+    var CAT_HUES = { fantasmes:330, partenaires:210, position:270, lieux:140, objets:28, tenues:175, autre:220 };
+
+    function makeCard(page, removable) {
+      var hue = CAT_HUES[page.category] || 220;
+      var a = document.createElement("a");
+      a.href = "/wiki/" + page.id;
+      a.className = "wiki-pl-card";
+      var badge = document.createElement("span");
+      badge.className = "wiki-pl-badge";
+      badge.style.background = "hsl(" + hue + ",55%,45%)";
+      badge.textContent = page.category;
+      var title = document.createElement("span");
+      title.className = "wiki-pl-title";
+      title.textContent = page.title;
+      a.appendChild(badge);
+      a.appendChild(title);
+      if (removable) {
+        var rm = document.createElement("button");
+        rm.type = "button";
+        rm.className = "wiki-pl-remove";
+        rm.innerHTML = "&#215;";
+        rm.title = "Retirer le lien";
+        rm.addEventListener("click", function (e) {
+          e.preventDefault();
+          fetch("/wiki/" + pageId + "/page-links", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ linked_page_id: page.id }),
+          }).then(load);
+        });
+        a.appendChild(rm);
+      }
+      return a;
+    }
+
+    function renderCards(container, pages, removable) {
+      container.innerHTML = "";
+      if (!pages.length) {
+        var em = document.createElement("span");
+        em.className = "wiki-pl-empty";
+        em.textContent = removable ? "Aucune page li\u00e9e" : "";
+        container.appendChild(em);
+      } else {
+        pages.forEach(function (p) { container.appendChild(makeCard(p, removable)); });
+      }
+    }
+
+    function load() {
+      fetch("/wiki/" + pageId + "/page-links")
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          renderCards(linksArea, data.links, true);
+          renderCards(backArea, data.backlinks, false);
+          backSection.hidden = data.backlinks.length === 0;
+        });
+    }
+
+    searchInput.addEventListener("input", function () {
+      clearTimeout(searchTimer);
+      var q = searchInput.value.trim();
+      if (!q) { resultsList.innerHTML = ""; return; }
+      searchTimer = setTimeout(function () {
+        fetch("/wiki/search?q=" + encodeURIComponent(q))
+          .then(function (r) { return r.json(); })
+          .then(function (pages) {
+            resultsList.innerHTML = "";
+            // Exclure la page courante
+            pages.filter(function (p) { return String(p.id) !== pageId; })
+              .forEach(function (p) {
+                var li = document.createElement("li");
+                li.className = "wiki-pl-result-item";
+                var hue = CAT_HUES[p.category] || 220;
+                li.innerHTML = '<span class="wiki-pl-result-badge" style="background:hsl(' + hue + ',55%,45%)">' + p.category + '</span><span>' + p.title + '</span>';
+                li.addEventListener("click", function () {
+                  fetch("/wiki/" + pageId + "/page-links", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ linked_page_id: p.id }),
+                  }).then(function () {
+                    searchInput.value = "";
+                    resultsList.innerHTML = "";
+                    load();
+                  });
+                });
+                resultsList.appendChild(li);
+              });
+          });
+      }, 200);
+    });
+
+    document.addEventListener("click", function (e) {
+      if (!widget.contains(e.target)) resultsList.innerHTML = "";
+    });
+
+    load();
+  })();
+
+  // ══════════════════════════════════════════════════
+  // 13. QUESTIONS LIÉES AU QUIZZ
+  // ══════════════════════════════════════════════════
+  var qlWidget = document.querySelector(".wiki-question-links");  // section 13
   if (qlWidget) {
     var qlPageId  = qlWidget.dataset.pageId;
     var qlList    = qlWidget.querySelector(".wiki-ql-list");

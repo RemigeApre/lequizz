@@ -7,7 +7,7 @@
   <%
     var pm = page.meta || {};
 
-    var FSUBS = { jeux_role: 'Jeux de r\u00f4le et comportement', hardcore: 'Hardcore', bdsm: 'BDSM', classique: 'Classique' };
+    var FSUBS = { jeux_role: 'Jeux de r\u00f4le et comportement', hardcore: 'Hardcore', bdsm: 'BDSM', classique: 'Classique', fantaisie: 'Fantaisie' };
     var nbF = pm.nb_femmes, nbH = pm.nb_hommes;
     var hasPartMeta = page.category === 'partenaires' && (nbF || nbH);
     var LIEU = { prive: 'Priv\u00e9', public: 'Public', cache: 'Cach\u00e9' };
@@ -161,6 +161,24 @@
         <div class="wiki-md"><span class="wiki-md-raw" hidden><%= page.content %></span></div>
       <% } %>
 
+    </div>
+
+    <%# ─ Pages liées ─ %>
+    <div class="wiki-page-links" data-page-id="<%= page.id %>">
+      <h3 class="wiki-pl-heading">Pages li&eacute;es</h3>
+      <div class="wiki-pl-body">
+        <div class="wiki-pl-section">
+          <div class="wiki-pl-cards" data-role="links"></div>
+        </div>
+        <div class="wiki-pl-section wiki-pl-backlinks-section" hidden>
+          <p class="wiki-pl-back-label">R&eacute;f&eacute;renc&eacute;e par</p>
+          <div class="wiki-pl-cards" data-role="backlinks"></div>
+        </div>
+      </div>
+      <div class="wiki-pl-add">
+        <input type="text" class="wiki-pl-search" placeholder="Lier une autre page&hellip;" autocomplete="off" />
+        <ul class="wiki-pl-results"></ul>
+      </div>
     </div>
 
     <%# ─ Questions liées au quizz ─ %>
