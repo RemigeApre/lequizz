@@ -51,6 +51,8 @@ db.exec(`
     updated_at TEXT NOT NULL
   )
 `);
+// Migration non destructive : ajoute la colonne meta si elle n'existe pas encore.
+try { db.exec("ALTER TABLE wiki_pages ADD COLUMN meta TEXT NOT NULL DEFAULT '{}'"); } catch (_) {}
 
 function insertSubmission(answers, scores) {
   const stmt = db.prepare(
@@ -140,19 +142,20 @@ function rowToWikiPage(row) {
     tags: JSON.parse(row.tags),
     imagePath: row.image_path,
     owned: !!row.owned,
+    meta: JSON.parse(row.meta || "{}"),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
 }
 
-function insertWikiPage({ title, category, content, tags, imagePath, owned }) {
+function insertWikiPage({ title, category, content, tags, imagePath, owned, meta }) {
   const now = new Date().toISOString();
   const info = db
     .prepare(
-      `INSERT INTO wiki_pages (title, category, content, tags, image_path, owned, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO wiki_pages (title, category, content, tags, image_path, owned, meta, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
-    .run(title, category, content, JSON.stringify(tags), imagePath || null, owned ? 1 : 0, now, now);
+    .run(title, category, content, JSON.stringify(tags), imagePath || null, owned ? 1 : 0, JSON.stringify(meta || {}), now, now);
   return info.lastInsertRowid;
 }
 
@@ -167,14 +170,14 @@ function getWikiPage(id) {
   return rowToWikiPage(row);
 }
 
-function updateWikiPage(id, { title, category, content, tags, imagePath, owned }) {
+function updateWikiPage(id, { title, category, content, tags, imagePath, owned, meta }) {
   const existing = db.prepare("SELECT image_path FROM wiki_pages WHERE id = ?").get(id);
   if (!existing) return false;
   const finalImagePath = imagePath !== undefined ? imagePath : existing.image_path;
   db.prepare(
-    `UPDATE wiki_pages SET title = ?, category = ?, content = ?, tags = ?, image_path = ?, owned = ?, updated_at = ?
+    `UPDATE wiki_pages SET title = ?, category = ?, content = ?, tags = ?, image_path = ?, owned = ?, meta = ?, updated_at = ?
      WHERE id = ?`
-  ).run(title, category, content, JSON.stringify(tags), finalImagePath, owned ? 1 : 0, new Date().toISOString(), id);
+  ).run(title, category, content, JSON.stringify(tags), finalImagePath, owned ? 1 : 0, JSON.stringify(meta || {}), new Date().toISOString(), id);
   return true;
 }
 

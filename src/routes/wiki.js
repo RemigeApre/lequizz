@@ -11,14 +11,16 @@ const {
 } = require("../db");
 
 const CATEGORIES = [
-  { key: "fantasmes", label: "Fantasmes" },
-  { key: "partenaires", label: "Type et nombre de partenaire" },
-  { key: "position", label: "Position" },
-  { key: "lieux", label: "Lieux" },
-  { key: "objets", label: "Objets" },
-  { key: "autre", label: "Autre" },
+  { key: "fantasmes",  label: "Fantasmes",   desc: "Sc\u00e9narios, d\u00e9sirs...",          hue: 330 },
+  { key: "partenaires",label: "Partenaires", desc: "Configurations, r\u00f4les...",       hue: 210 },
+  { key: "position",   label: "Position",    desc: "Kama-sutra, variantes...",        hue: 270 },
+  { key: "lieux",      label: "Lieux",       desc: "Endroits, contextes...",          hue: 140 },
+  { key: "objets",     label: "Objets",      desc: "Sex-toys, accessoires...",        hue:  28 },
+  { key: "tenues",     label: "Tenues",      desc: "Lingerie, costumes...",           hue: 175 },
+  { key: "autre",      label: "Autre",       desc: "Tout le reste",                  hue: 220 },
 ];
 const CATEGORY_KEYS = CATEGORIES.map((c) => c.key);
+const OWNED_CATEGORIES = ["objets", "tenues"];
 
 const uploadsDir = path.join(__dirname, "..", "..", "data", "uploads", "wiki");
 fs.mkdirSync(uploadsDir, { recursive: true });
@@ -41,7 +43,7 @@ const upload = multer({
 
 function parseTags(raw) {
   return String(raw || "")
-    .split(",")
+    .split(/[,;]+/)
     .map((t) => t.trim())
     .filter(Boolean);
 }
@@ -50,15 +52,28 @@ function normalizeCategory(value) {
   return CATEGORY_KEYS.includes(value) ? value : "autre";
 }
 
+function parseMeta(category, body) {
+  if (category !== "position") return {};
+  const canal = body.meta_canal;
+  return {
+    qui_dessus:  String(body.meta_qui_dessus  || ""),
+    canal:       Array.isArray(canal) ? canal : canal ? [canal] : [],
+    orientation: String(body.meta_orientation || ""),
+  };
+}
+
+function getAllTags(pages) {
+  return Array.from(new Set(pages.flatMap((p) => p.tags))).sort((a, b) =>
+    a.localeCompare(b, "fr")
+  );
+}
+
 function buildWikiRouter(config) {
   const router = express.Router();
 
   router.get("/", (req, res) => {
     const pages = listWikiPages();
-    const allTags = Array.from(new Set(pages.flatMap((p) => p.tags))).sort((a, b) =>
-      a.localeCompare(b, "fr")
-    );
-    res.render("wiki", { config, pages, allTags, categories: CATEGORIES });
+    res.render("wiki", { config, pages, allTags: getAllTags(pages), categories: CATEGORIES });
   });
 
   router.post("/", upload.single("image"), (req, res) => {
@@ -66,12 +81,13 @@ function buildWikiRouter(config) {
     if (!title) return res.redirect("/wiki");
 
     const category = normalizeCategory(req.body.category);
-    const content = String(req.body.content || "").trim();
-    const tags = parseTags(req.body.tags);
-    const owned = category === "objets" && req.body.owned === "on";
+    const content  = String(req.body.content || "").trim();
+    const tags     = parseTags(req.body.tags);
+    const owned    = OWNED_CATEGORIES.includes(category) && req.body.owned === "on";
+    const meta     = parseMeta(category, req.body);
     const imagePath = req.file ? `/uploads/wiki/${req.file.filename}` : null;
 
-    insertWikiPage({ title, category, content, tags, imagePath, owned });
+    insertWikiPage({ title, category, content, tags, imagePath, owned, meta });
     res.redirect("/wiki");
   });
 
@@ -86,10 +102,7 @@ function buildWikiRouter(config) {
     const id = Number(req.params.id);
     const page = Number.isInteger(id) ? getWikiPage(id) : null;
     if (!page) return res.redirect("/wiki");
-    const pages = listWikiPages();
-    const allTags = Array.from(new Set(pages.flatMap((p) => p.tags))).sort((a, b) =>
-      a.localeCompare(b, "fr")
-    );
+    const allTags = getAllTags(listWikiPages());
     res.render("wiki-form", { config, categories: CATEGORIES, page, allTags });
   });
 
@@ -98,11 +111,12 @@ function buildWikiRouter(config) {
     const existing = Number.isInteger(id) ? getWikiPage(id) : null;
     if (!existing) return res.redirect("/wiki");
 
-    const title = String(req.body.title || "").trim() || existing.title;
+    const title    = String(req.body.title || "").trim() || existing.title;
     const category = normalizeCategory(req.body.category);
-    const content = String(req.body.content || "").trim();
-    const tags = parseTags(req.body.tags);
-    const owned = category === "objets" && req.body.owned === "on";
+    const content  = String(req.body.content || "").trim();
+    const tags     = parseTags(req.body.tags);
+    const owned    = OWNED_CATEGORIES.includes(category) && req.body.owned === "on";
+    const meta     = parseMeta(category, req.body);
 
     let imagePath;
     if (req.file) {
@@ -110,9 +124,8 @@ function buildWikiRouter(config) {
     } else if (req.body.remove_image === "on") {
       imagePath = null;
     }
-    // undefined = conserver l'image existante
 
-    updateWikiPage(id, { title, category, content, tags, imagePath, owned });
+    updateWikiPage(id, { title, category, content, tags, imagePath, owned, meta });
     res.redirect(`/wiki/${id}`);
   });
 
@@ -122,9 +135,6 @@ function buildWikiRouter(config) {
     res.redirect("/wiki");
   });
 
-  // Filet de securite : une image trop lourde ou d'un type non accepte
-  // (erreur multer) renvoie simplement vers le wiki plutot qu'une page
-  // d'erreur brute.
   router.use((err, req, res, next) => {
     if (!err) return next();
     res.redirect("/wiki");

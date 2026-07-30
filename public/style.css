@@ -1169,12 +1169,21 @@ input[type="text"], input[type="password"] {
 }
 
 .link-tag-pill {
-  background: var(--bg);
-  border: 1px solid var(--border);
+  --h: 210;
+  background: hsl(var(--h), 55%, 92%);
+  color: hsl(var(--h), 55%, 30%);
+  border: 1px solid hsl(var(--h), 55%, 82%);
   border-radius: 999px;
-  padding: 0.2rem 0.6rem;
+  padding: 0.18rem 0.6rem;
   font-size: 0.75rem;
-  color: var(--muted);
+}
+
+@media (prefers-color-scheme: dark) {
+  .link-tag-pill {
+    background: hsl(var(--h), 35%, 20%);
+    color: hsl(var(--h), 55%, 78%);
+    border-color: hsl(var(--h), 35%, 32%);
+  }
 }
 
 .link-delete-form {
@@ -1202,6 +1211,348 @@ input[type="text"], input[type="password"] {
 .link-delete-btn:hover {
   border-color: #c0392b;
   color: #c0392b;
+}
+
+/* ══════════════════════════════════════════════════════════
+   WIKI — NOUVELLE PAGE : BOUTON + ÉTAPES
+   ══════════════════════════════════════════════════════════ */
+
+.wiki-new-wrap {
+  margin-bottom: 1.5rem;
+}
+
+.wiki-new-btn {
+  background: transparent;
+  border: 1px dashed var(--border);
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.wiki-new-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.wiki-step1 {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  padding: 1.1rem 1.2rem;
+  margin-bottom: 1.5rem;
+}
+.wiki-step1-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin: 0 0 0.85rem;
+}
+
+.wiki-cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.6rem;
+}
+
+.wiki-cat-card {
+  --ch: 210;
+  text-align: left;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-left: 3px solid hsl(var(--ch), 55%, 50%);
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  color: var(--fg);
+}
+.wiki-cat-card:hover {
+  background: var(--card);
+  border-color: hsl(var(--ch), 55%, 50%);
+}
+
+.wiki-cat-card-label {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+.wiki-cat-card-desc {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.wiki-step2 {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  padding: 1.1rem 1.2rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ══════════════════════════════════════════════════════════
+   WIKI — FORMULAIRE (création + édition)
+   ══════════════════════════════════════════════════════════ */
+
+.wiki-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.wiki-form-top-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.wiki-change-cat-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+.wiki-change-cat-btn:hover { color: var(--fg); }
+
+.wiki-cancel-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--muted);
+  padding: 0.65rem 1.1rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.wiki-cancel-btn:hover { border-color: var(--fg); color: var(--fg); }
+
+.wiki-form-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+/* Titre : input proéminent, sans label */
+.wiki-title-input {
+  width: 100%;
+  border: none;
+  border-bottom: 2px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  font-size: 1.35rem;
+  font-weight: 700;
+  padding: 0.2rem 0;
+  color: var(--fg);
+  font-family: inherit;
+  outline: none;
+}
+.wiki-title-input:focus { border-bottom-color: var(--accent); }
+.wiki-title-input::placeholder { color: var(--muted); font-weight: 400; }
+
+/* Sélecteur de catégorie discret (formulaire édition) */
+.wiki-cat-inline-select {
+  appearance: none;
+  border: none;
+  background: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  padding: 0.2rem 1.1rem 0.2rem 0.5rem;
+  border-radius: 6px;
+  outline: none;
+  color: var(--muted);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0 center;
+}
+.wiki-cat-inline-select:hover { color: var(--fg); }
+
+/* Chip "on possède" dans le formulaire */
+.wiki-owned-chip { width: fit-content; }
+
+/* ══════════════════════════════════════════════════════════
+   WIKI — WIDGET TAGS VISUELS
+   ══════════════════════════════════════════════════════════ */
+
+.wiki-tags-widget {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.wiki-tags-board {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  cursor: text;
+  min-height: 2.75rem;
+  transition: border-color 0.15s;
+}
+.wiki-tags-board:focus-within { border-color: var(--accent); }
+
+.wiki-tags-typing {
+  border: none;
+  background: transparent;
+  outline: none;
+  flex: 1;
+  min-width: 100px;
+  font-size: 0.9rem;
+  color: var(--fg);
+  font-family: inherit;
+  padding: 0.1rem 0;
+}
+.wiki-tags-typing::placeholder { color: var(--muted); }
+
+/* Chip éditables */
+.wiki-chip {
+  --h: 210;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.18rem 0.3rem 0.18rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  background: hsl(var(--h), 55%, 92%);
+  color: hsl(var(--h), 55%, 30%);
+  border: 1px solid hsl(var(--h), 55%, 80%);
+  cursor: default;
+  user-select: none;
+}
+@media (prefers-color-scheme: dark) {
+  .wiki-chip {
+    background: hsl(var(--h), 35%, 20%);
+    color: hsl(var(--h), 55%, 78%);
+    border-color: hsl(var(--h), 35%, 32%);
+  }
+}
+
+.wiki-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 50%;
+  border: none;
+  background: none;
+  color: hsl(var(--h), 45%, 50%);
+  cursor: pointer;
+  font-size: 0.78rem;
+  padding: 0;
+  line-height: 1;
+}
+.wiki-chip-remove:hover {
+  background: hsl(var(--h), 55%, 82%);
+}
+@media (prefers-color-scheme: dark) {
+  .wiki-chip-remove:hover { background: hsl(var(--h), 35%, 30%); }
+}
+
+/* Suggestions de tags */
+.wiki-tag-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.wiki-tag-suggest-chip {
+  --h: 210;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+}
+.wiki-tag-suggest-chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.wiki-tag-suggest-chip.active {
+  background: hsl(var(--h), 55%, 92%);
+  color: hsl(var(--h), 55%, 30%);
+  border-color: hsl(var(--h), 55%, 80%);
+}
+@media (prefers-color-scheme: dark) {
+  .wiki-tag-suggest-chip.active {
+    background: hsl(var(--h), 35%, 20%);
+    color: hsl(var(--h), 55%, 78%);
+    border-color: hsl(var(--h), 35%, 32%);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   WIKI — CHAMPS POSITION
+   ══════════════════════════════════════════════════════════ */
+
+.wiki-position-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.wiki-meta-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.wiki-meta-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin: 0;
+}
+
+.wiki-meta-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+/* Affichage des meta position dans la page détail */
+.wiki-position-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  padding: 0.7rem 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+.wiki-pos-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.wiki-pos-key {
+  color: var(--muted);
+  font-size: 0.78rem;
 }
 
 .wiki-category-select {
@@ -1282,13 +1633,13 @@ input[type="text"], input[type="password"] {
 .wiki-category-badge {
   display: inline-flex;
   border-radius: 999px;
-  padding: 0.2rem 0.6rem;
+  padding: 0.2rem 0.65rem;
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   color: #fff;
-  background: var(--accent);
+  background: var(--accent); /* fallback, écrasé par inline style */
 }
 
 .wiki-owned-badge {

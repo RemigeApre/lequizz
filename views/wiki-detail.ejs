@@ -1,27 +1,52 @@
-<%- include('partials/head', { title: page.title + ' — Wiki — ' + config.title }) %>
+<%- include('partials/head', { title: page.title + ' \u2014 Wiki \u2014 ' + config.title }) %>
 <main class="container">
   <%- include('partials/top-nav', { config: config }) %>
   <a href="/wiki" class="link-button">&larr; Retour au wiki</a>
 
   <% var cat = categories.find(function (c) { return c.key === page.category; }); %>
   <article class="wiki-detail">
+
     <% if (page.imagePath) { %>
       <img src="<%= page.imagePath %>" alt="" class="wiki-detail-image" />
     <% } %>
 
     <div class="wiki-detail-header">
-      <span class="wiki-category-badge"><%= cat ? cat.label : page.category %></span>
-      <% if (page.owned) { %><span class="wiki-owned-badge" title="Possede">&#9733; Possede</span><% } %>
+      <span class="wiki-category-badge" style="background: hsl(<%= cat ? cat.hue : 220 %>, 55%, 45%)"><%= cat ? cat.label : page.category %></span>
+      <% if (page.owned) { %><span class="wiki-owned-badge" title="Poss\u00e9d\u00e9">&#9733; Poss\u00e9d\u00e9</span><% } %>
     </div>
 
     <h1 class="wiki-detail-title"><%= page.title %></h1>
 
+    <%# ─ Tags ─ %>
     <% if (page.tags.length) { %>
       <div class="link-card-tags">
         <% page.tags.forEach(function (t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
       </div>
     <% } %>
 
+    <%# ─ Meta position ─ %>
+    <%
+      var pm = page.meta || {};
+      var QUI  = { femme: 'Femme', homme: 'Homme', les_deux: 'Les deux', aucun: 'Aucun / debout' };
+      var CAN  = { vagin: 'Vagin', anus: 'Anus', bouche: 'Bouche', mains: 'Mains', autre: 'Autre' };
+      var ORI  = { face_a_face: 'Face \u00e0 face', face_contre_dos: 'Face contre dos', acrobatique: 'Acrobatique', autre: 'Autre' };
+      var hasPosMeta = page.category === 'position' && (pm.qui_dessus || (pm.canal && pm.canal.length) || pm.orientation);
+    %>
+    <% if (hasPosMeta) { %>
+      <div class="wiki-position-info">
+        <% if (pm.qui_dessus && QUI[pm.qui_dessus]) { %>
+          <span class="wiki-pos-item"><span class="wiki-pos-key">Au-dessus</span><strong><%= QUI[pm.qui_dessus] %></strong></span>
+        <% } %>
+        <% if (pm.canal && pm.canal.length) { %>
+          <span class="wiki-pos-item"><span class="wiki-pos-key">Canal</span><strong><%= pm.canal.map(function(c){ return CAN[c] || c; }).join(' \u00b7 ') %></strong></span>
+        <% } %>
+        <% if (pm.orientation && ORI[pm.orientation]) { %>
+          <span class="wiki-pos-item"><span class="wiki-pos-key">Orientation</span><strong><%= ORI[pm.orientation] %></strong></span>
+        <% } %>
+      </div>
+    <% } %>
+
+    <%# ─ Contenu Markdown ─ %>
     <% if (page.content) { %>
       <div class="wiki-md"><span class="wiki-md-raw" hidden><%= page.content %></span></div>
     <% } %>

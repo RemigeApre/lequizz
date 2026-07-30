@@ -1,74 +1,125 @@
-<%- include('partials/head', { title: 'Wiki — ' + config.title }) %>
+<%- include('partials/head', { title: 'Wiki \u2014 ' + config.title }) %>
 <main class="container wide">
   <%- include('partials/top-nav', { config: config }) %>
   <h1 class="section-title-h1">Wiki</h1>
 
-  <details class="links-add-card">
-    <summary class="links-add-summary">Ajouter une page</summary>
-    <form method="POST" action="/wiki" enctype="multipart/form-data" class="links-add-form wiki-form">
-      <label class="links-field">
-        <span class="links-field-label">Titre</span>
-        <input type="text" name="title" required placeholder="Titre de la page" />
+  <%# ─── BOUTON NOUVELLE PAGE ─────────────────────────────────────────── %>
+  <div class="wiki-new-wrap">
+    <button type="button" id="wiki-new-btn" class="wiki-new-btn">+ Nouvelle page</button>
+  </div>
+
+  <%# ─── STEP 1 : CHOIX DE CATÉGORIE ─────────────────────────────────── %>
+  <div id="wiki-step1" class="wiki-step1" hidden>
+    <p class="wiki-step1-title">Quel type de page ?</p>
+    <div class="wiki-cat-grid">
+      <% categories.forEach(function(c) { %>
+        <button type="button" class="wiki-cat-card"
+          data-category="<%= c.key %>"
+          data-hue="<%= c.hue %>"
+          data-label="<%= c.label %>"
+          style="--ch: <%= c.hue %>">
+          <span class="wiki-cat-card-label"><%= c.label %></span>
+          <span class="wiki-cat-card-desc"><%= c.desc %></span>
+        </button>
+      <% }) %>
+    </div>
+  </div>
+
+  <%# ─── STEP 2 : FORMULAIRE ──────────────────────────────────────────── %>
+  <div id="wiki-step2" class="wiki-step2" hidden>
+    <form method="POST" action="/wiki" enctype="multipart/form-data" class="wiki-form" id="wiki-new-form">
+      <input type="hidden" name="category" id="wiki-new-cat-input" value="" />
+
+      <div class="wiki-form-top-row">
+        <span id="wiki-new-cat-badge" class="wiki-category-badge"></span>
+        <button type="button" class="wiki-change-cat-btn" id="wiki-change-cat">Changer</button>
+      </div>
+
+      <input type="text" name="title" class="wiki-title-input" required placeholder="Titre&hellip;" />
+
+      <label class="chip-option wiki-owned-chip" id="wiki-new-owned" hidden>
+        <input type="checkbox" name="owned" />
+        <span>On poss&egrave;de</span>
       </label>
 
-      <label class="links-field">
-        <span class="links-field-label">Cat&eacute;gorie</span>
-        <select name="category" id="wiki-category-select" class="wiki-category-select">
-          <% categories.forEach(function (c) { %>
-            <option value="<%= c.key %>"><%= c.label %></option>
-          <% }) %>
-        </select>
-      </label>
+      <div class="wiki-editor">
+        <div class="md-toolbar">
+          <button type="button" class="md-btn" data-md="bold" title="Gras (Ctrl+B)"><strong>B</strong></button>
+          <button type="button" class="md-btn md-btn-italic" data-md="italic" title="Italique (Ctrl+I)"><em>I</em></button>
+          <span class="md-sep"></span>
+          <button type="button" class="md-btn" data-md="h2">H2</button>
+          <button type="button" class="md-btn" data-md="h3">H3</button>
+          <span class="md-sep"></span>
+          <button type="button" class="md-btn" data-md="list">&#8226;&nbsp;Liste</button>
+          <button type="button" class="md-btn" data-md="hr">&mdash;</button>
+          <div class="md-toolbar-spacer"></div>
+          <button type="button" class="md-btn md-preview-btn">Aper&ccedil;u</button>
+        </div>
+        <textarea name="content" class="wiki-textarea" rows="7" placeholder="Description, notes\u2026 (Markdown support\u00e9)"></textarea>
+        <div class="wiki-md-preview wiki-md" hidden></div>
+      </div>
 
-      <label class="links-field wiki-owned-field" id="wiki-owned-field" hidden>
-        <span class="chip-option">
-          <input type="checkbox" name="owned" />
-          <span>On poss&egrave;de cet objet</span>
-        </span>
-      </label>
-
-      <div class="links-field">
-        <span class="links-field-label">Contenu <span class="wiki-md-hint">(Markdown support&eacute;)</span></span>
-        <div class="wiki-editor">
-          <div class="md-toolbar">
-            <button type="button" class="md-btn" data-md="bold" title="Gras (Ctrl+B)"><strong>B</strong></button>
-            <button type="button" class="md-btn md-btn-italic" data-md="italic" title="Italique (Ctrl+I)"><em>I</em></button>
-            <span class="md-sep"></span>
-            <button type="button" class="md-btn" data-md="h2" title="Titre">H2</button>
-            <button type="button" class="md-btn" data-md="h3" title="Sous-titre">H3</button>
-            <span class="md-sep"></span>
-            <button type="button" class="md-btn" data-md="list" title="Liste &agrave; puces">&#8226;&nbsp;Liste</button>
-            <button type="button" class="md-btn" data-md="hr" title="S&eacute;parateur">&mdash;</button>
-            <div class="md-toolbar-spacer"></div>
-            <button type="button" class="md-btn md-preview-btn" title="Aper&ccedil;u">Aper&ccedil;u</button>
+      <%# ─ Champs position ─ %>
+      <div class="wiki-position-meta" hidden>
+        <div class="wiki-meta-group">
+          <p class="wiki-meta-label">Qui est au-dessus&nbsp;?</p>
+          <div class="wiki-meta-options">
+            <label class="chip-option"><input type="radio" name="meta_qui_dessus" value="femme"><span>Femme</span></label>
+            <label class="chip-option"><input type="radio" name="meta_qui_dessus" value="homme"><span>Homme</span></label>
+            <label class="chip-option"><input type="radio" name="meta_qui_dessus" value="les_deux"><span>Les deux</span></label>
+            <label class="chip-option"><input type="radio" name="meta_qui_dessus" value="aucun"><span>Aucun&nbsp;/ debout</span></label>
           </div>
-          <textarea name="content" class="wiki-textarea" rows="6" placeholder="Description, notes... (Markdown support&eacute;)"></textarea>
-          <div class="wiki-md-preview wiki-md" hidden></div>
+        </div>
+        <div class="wiki-meta-group">
+          <p class="wiki-meta-label">Canal(aux)</p>
+          <div class="wiki-meta-options">
+            <label class="chip-option"><input type="checkbox" name="meta_canal" value="vagin"><span>Vagin</span></label>
+            <label class="chip-option"><input type="checkbox" name="meta_canal" value="anus"><span>Anus</span></label>
+            <label class="chip-option"><input type="checkbox" name="meta_canal" value="bouche"><span>Bouche</span></label>
+            <label class="chip-option"><input type="checkbox" name="meta_canal" value="mains"><span>Mains</span></label>
+            <label class="chip-option"><input type="checkbox" name="meta_canal" value="autre"><span>Autre</span></label>
+          </div>
+        </div>
+        <div class="wiki-meta-group">
+          <p class="wiki-meta-label">Orientation</p>
+          <div class="wiki-meta-options">
+            <label class="chip-option"><input type="radio" name="meta_orientation" value="face_a_face"><span>Face &agrave; face</span></label>
+            <label class="chip-option"><input type="radio" name="meta_orientation" value="face_contre_dos"><span>Face contre dos</span></label>
+            <label class="chip-option"><input type="radio" name="meta_orientation" value="acrobatique"><span>Acrobatique</span></label>
+            <label class="chip-option"><input type="radio" name="meta_orientation" value="autre"><span>Autre</span></label>
+          </div>
         </div>
       </div>
 
-      <div class="links-field">
-        <span class="links-field-label">Tags <span class="wiki-md-hint">(s&eacute;par&eacute;s par des virgules)</span></span>
-        <input type="text" id="wiki-tags-add" name="tags" placeholder="ex : exhib, pov, brunette" autocomplete="off" />
+      <%# ─ Tags ─ %>
+      <div class="wiki-tags-widget">
+        <div class="wiki-tags-board">
+          <input type="text" class="wiki-tags-typing" placeholder="Ajouter un tag&hellip;" autocomplete="off" />
+        </div>
+        <input type="hidden" name="tags" class="wiki-tags-hidden" value="" />
         <% if (allTags.length) { %>
-          <div class="wiki-tag-suggestions" data-for="wiki-tags-add">
-            <% allTags.forEach(function (t) { %>
-              <button type="button" class="wiki-tag-chip" data-tag="<%= t %>"><%= t %></button>
+          <div class="wiki-tag-suggestions">
+            <% allTags.forEach(function(t) { %>
+              <button type="button" class="wiki-tag-suggest-chip" data-tag="<%= t %>"><%= t %></button>
             <% }) %>
           </div>
         <% } %>
       </div>
 
-      <div class="links-field wiki-image-field">
-        <span class="links-field-label">Image (optionnel)</span>
+      <%# ─ Image ─ %>
+      <div class="wiki-image-field">
         <input type="file" name="image" accept="image/*" class="wiki-image-input" />
-        <img class="wiki-image-preview-new" hidden alt="Aper&ccedil;u" />
+        <img class="wiki-image-preview-new" hidden alt="" />
       </div>
 
-      <button type="submit">Ajouter</button>
+      <div class="wiki-form-actions">
+        <button type="submit">Ajouter</button>
+        <button type="button" class="wiki-cancel-btn" id="wiki-cancel-new">Annuler</button>
+      </div>
     </form>
-  </details>
+  </div>
 
+  <%# ─── FILTRES ──────────────────────────────────────────────────────── %>
   <div class="links-filter" id="wiki-category-filter">
     <button type="button" class="tag-chip active" data-category="">Tous</button>
     <% categories.forEach(function (c) { %>
@@ -86,24 +137,28 @@
     </div>
   <% } %>
 
+  <%# ─── GRILLE ────────────────────────────────────────────────────────── %>
   <div class="wiki-grid" id="wiki-list">
     <% if (!pages.length) { %>
       <p class="intro">Aucune page pour l&apos;instant.</p>
     <% } %>
     <% pages.forEach(function (page) { %>
       <% var cat = categories.find(function (c) { return c.key === page.category; }); %>
-      <a href="/wiki/<%= page.id %>" class="wiki-card" data-category="<%= page.category %>" data-owned="<%= page.owned ? '1' : '0' %>" data-tags="<%= page.tags.join('|').toLowerCase() %>">
+      <a href="/wiki/<%= page.id %>" class="wiki-card"
+        data-category="<%= page.category %>"
+        data-owned="<%= page.owned ? '1' : '0' %>"
+        data-tags="<%= page.tags.join('|').toLowerCase() %>">
         <% if (page.imagePath) { %>
           <div class="wiki-card-image" style="background-image: url('<%= page.imagePath %>')"></div>
         <% } %>
         <div class="wiki-card-body">
           <div class="wiki-card-header">
-            <span class="wiki-category-badge"><%= cat ? cat.label : page.category %></span>
-            <% if (page.owned) { %><span class="wiki-owned-badge" title="Possede">&#9733;</span><% } %>
+            <span class="wiki-category-badge" style="background: hsl(<%= cat ? cat.hue : 220 %>, 55%, 45%)"><%= cat ? cat.label : page.category %></span>
+            <% if (page.owned) { %><span class="wiki-owned-badge" title="Poss\u00e9d\u00e9">&#9733;</span><% } %>
           </div>
           <p class="wiki-card-title"><%= page.title %></p>
           <% if (page.content) { %>
-            <p class="wiki-card-excerpt"><%= page.content.slice(0, 120) %><%= page.content.length > 120 ? "&hellip;" : "" %></p>
+            <p class="wiki-card-excerpt"><%= page.content.replace(/[#*`_]/g, '').slice(0, 120) %><%= page.content.length > 120 ? "\u2026" : "" %></p>
           <% } %>
           <% if (page.tags.length) { %>
             <div class="link-card-tags">

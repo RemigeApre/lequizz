@@ -1,101 +1,266 @@
 (function () {
-  // =====================
-  // MARKDOWN RENDERER
-  // =====================
-  function esc(s) {
-    return s
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-  }
+  "use strict";
 
+  // ══════════════════════════════════════════════════
+  // 1. MARKDOWN RENDERER
+  // ══════════════════════════════════════════════════
+  function esc(s) {
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
   function inline(s) {
     return s
       .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-      .replace(/\*(.+?)\*/g, "<em>$1</em>")
-      .replace(/`(.+?)`/g, "<code>$1</code>");
+      .replace(/\*(.+?)\*/g,     "<em>$1</em>")
+      .replace(/`(.+?)`/g,       "<code>$1</code>");
   }
-
   function renderMarkdown(text) {
     if (!text) return "";
-    var lines = text.split("\n");
-    var out = [];
-    var inList = false;
-
-    function closeList() {
-      if (inList) { out.push("</ul>"); inList = false; }
-    }
-
-    lines.forEach(function (rawLine) {
-      var line = esc(rawLine);
-      if (/^## /.test(line)) {
-        closeList();
-        out.push("<h2>" + inline(line.slice(3)) + "</h2>");
-      } else if (/^### /.test(line)) {
-        closeList();
-        out.push("<h3>" + inline(line.slice(4)) + "</h3>");
-      } else if (/^---+\s*$/.test(line)) {
-        closeList();
-        out.push("<hr />");
-      } else if (/^- /.test(line)) {
-        if (!inList) { out.push("<ul>"); inList = true; }
-        out.push("<li>" + inline(line.slice(2)) + "</li>");
-      } else if (line.trim() === "") {
-        closeList();
-      } else {
-        closeList();
-        out.push("<p>" + inline(line) + "</p>");
-      }
+    var lines = text.split("\n"), out = [], inList = false;
+    function closeList() { if (inList) { out.push("</ul>"); inList = false; } }
+    lines.forEach(function (raw) {
+      var line = esc(raw);
+      if      (/^## /.test(line))   { closeList(); out.push("<h2>" + inline(line.slice(3)) + "</h2>"); }
+      else if (/^### /.test(line))  { closeList(); out.push("<h3>" + inline(line.slice(4)) + "</h3>"); }
+      else if (/^---+\s*$/.test(line)) { closeList(); out.push("<hr />"); }
+      else if (/^- /.test(line))    { if (!inList) { out.push("<ul>"); inList = true; } out.push("<li>" + inline(line.slice(2)) + "</li>"); }
+      else if (line.trim() === "")  { closeList(); }
+      else                          { closeList(); out.push("<p>" + inline(line) + "</p>"); }
     });
     closeList();
     return out.join("\n");
   }
 
-  // =====================
-  // RENDER DETAIL CONTENT
-  // =====================
+  // Rendu du contenu dans la page détail
   document.querySelectorAll(".wiki-md").forEach(function (el) {
     var raw = el.querySelector(".wiki-md-raw");
     if (!raw) return;
     el.innerHTML = renderMarkdown(raw.textContent || raw.innerText);
   });
 
-  // =====================
-  // CATEGORY / OWNED SYNC
-  // =====================
-  var categorySelect = document.getElementById("wiki-category-select");
-  var ownedField = document.getElementById("wiki-owned-field");
-
-  function syncOwnedVisibility() {
-    if (!categorySelect || !ownedField) return;
-    ownedField.hidden = categorySelect.value !== "objets";
+  // ══════════════════════════════════════════════════
+  // 2. COULEURS DES TAGS (hash → teinte HSL)
+  // ══════════════════════════════════════════════════
+  var TAG_HUES = [4, 28, 48, 140, 175, 210, 270, 330];
+  function tagHue(tag) {
+    var h = 0, s = tag.toLowerCase();
+    for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+    return TAG_HUES[Math.abs(h) % TAG_HUES.length];
   }
-  if (categorySelect) {
-    categorySelect.addEventListener("change", syncOwnedVisibility);
-    syncOwnedVisibility();
+  // Applique la couleur à tous les pills existants dans le DOM
+  function applyTagColors() {
+    document.querySelectorAll(".link-tag-pill").forEach(function (el) {
+      el.style.setProperty("--h", tagHue(el.textContent.trim()));
+    });
+  }
+  applyTagColors();
+
+  // ══════════════════════════════════════════════════
+  // 3. WIDGET TAGS VISUELS
+  // ══════════════════════════════════════════════════
+  function createChipEl(tag, onRemove) {
+    var hue = tagHue(tag);
+    var chip = document.createElement("span");
+    chip.className = "wiki-chip";
+    chip.style.setProperty("--h", hue);
+    chip.dataset.tag = tag;
+    var text = document.createElement("span");
+    text.textContent = tag;
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "wiki-chip-remove";
+    btn.innerHTML = "&#215;";
+    btn.title = "Retirer";
+    btn.addEventListener("click", function () { onRemove(tag); });
+    chip.appendChild(text);
+    chip.appendChild(btn);
+    return chip;
   }
 
-  // =====================
-  // CATEGORY / TAG FILTERS
-  // =====================
+  function initTagWidget(widget) {
+    var board   = widget.querySelector(".wiki-tags-board");
+    var typer   = widget.querySelector(".wiki-tags-typing");
+    var hidden  = widget.querySelector(".wiki-tags-hidden");
+    var suggestBox = widget.querySelector(".wiki-tag-suggestions");
+    if (!board || !typer || !hidden) return;
+
+    var tags = [];
+
+    // Initialise depuis la valeur cachée (formulaire d'édition)
+    var initVal = (hidden.value || "").trim();
+    if (initVal) {
+      initVal.split(/[,;]+/).forEach(function (t) {
+        var clean = t.trim();
+        if (clean && tags.indexOf(clean) === -1) tags.push(clean);
+      });
+    }
+
+    function syncHidden() {
+      hidden.value = tags.join(", ");
+    }
+
+    function renderBoard() {
+      // Supprime les chips existants (pas le typer)
+      Array.from(board.querySelectorAll(".wiki-chip")).forEach(function (c) { c.remove(); });
+      // Recrée dans l'ordre
+      tags.forEach(function (tag) {
+        var chip = createChipEl(tag, removeTag);
+        board.insertBefore(chip, typer);
+      });
+      syncSuggestions();
+    }
+
+    function syncSuggestions() {
+      if (!suggestBox) return;
+      suggestBox.querySelectorAll(".wiki-tag-suggest-chip").forEach(function (chip) {
+        chip.classList.toggle("active", tags.indexOf(chip.dataset.tag) !== -1);
+      });
+    }
+
+    function addTag(raw) {
+      raw.split(/[,;]+/).forEach(function (part) {
+        var t = part.trim();
+        if (t && tags.indexOf(t) === -1) tags.push(t);
+      });
+      renderBoard();
+    }
+
+    function removeTag(tag) {
+      var idx = tags.indexOf(tag);
+      if (idx !== -1) tags.splice(idx, 1);
+      renderBoard();
+    }
+
+    // Clavier dans le champ de saisie
+    typer.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === "," || e.key === ";") {
+        e.preventDefault();
+        var val = typer.value.trim();
+        if (val) { addTag(val); typer.value = ""; }
+      } else if (e.key === "Backspace" && typer.value === "" && tags.length) {
+        removeTag(tags[tags.length - 1]);
+      }
+    });
+
+    // Coller une liste séparée par virgules/points-virgules
+    typer.addEventListener("paste", function (e) {
+      e.preventDefault();
+      var pasted = (e.clipboardData || window.clipboardData).getData("text");
+      if (pasted) { addTag(pasted); typer.value = ""; }
+    });
+
+    // Clic sur le board (focus le typer)
+    board.addEventListener("click", function (e) {
+      if (e.target === board) typer.focus();
+    });
+
+    // Suggestions
+    if (suggestBox) {
+      suggestBox.querySelectorAll(".wiki-tag-suggest-chip").forEach(function (chip) {
+        chip.addEventListener("click", function () {
+          var tag = chip.dataset.tag;
+          if (tags.indexOf(tag) === -1) { addTag(tag); }
+          else { removeTag(tag); }
+        });
+      });
+    }
+
+    renderBoard();
+  }
+
+  document.querySelectorAll(".wiki-tags-widget").forEach(initTagWidget);
+
+  // ══════════════════════════════════════════════════
+  // 4. FLOW CRÉATION (étape 1 → étape 2)
+  // ══════════════════════════════════════════════════
+  var newBtn    = document.getElementById("wiki-new-btn");
+  var step1     = document.getElementById("wiki-step1");
+  var step2     = document.getElementById("wiki-step2");
+  var catInput  = document.getElementById("wiki-new-cat-input");
+  var catBadge  = document.getElementById("wiki-new-cat-badge");
+  var changeBtn = document.getElementById("wiki-change-cat");
+  var cancelBtn = document.getElementById("wiki-cancel-new");
+  var newOwned  = document.getElementById("wiki-new-owned");
+  var newPosMeta = step2 ? step2.querySelector(".wiki-position-meta") : null;
+
+  function showStep(n) {
+    if (!step1 || !step2) return;
+    step1.hidden = n !== 1;
+    step2.hidden = n !== 2;
+    if (newBtn) newBtn.textContent = n === 0 ? "+ Nouvelle page" : "Annuler";
+  }
+
+  if (newBtn) {
+    newBtn.addEventListener("click", function () {
+      if (!step1.hidden || !step2.hidden) { showStep(0); }
+      else { showStep(1); }
+    });
+  }
+
+  if (step1) {
+    step1.querySelectorAll(".wiki-cat-card").forEach(function (card) {
+      card.addEventListener("click", function () {
+        var key   = card.dataset.category;
+        var hue   = card.dataset.hue  || 220;
+        var label = card.dataset.label || key;
+        if (catInput)  catInput.value = key;
+        if (catBadge) {
+          catBadge.textContent = label;
+          catBadge.style.background = "hsl(" + hue + ", 55%, 45%)";
+        }
+        // Champs conditionnels
+        if (newOwned)  newOwned.hidden  = key !== "objets" && key !== "tenues";
+        if (newPosMeta) newPosMeta.hidden = key !== "position";
+        showStep(2);
+      });
+    });
+  }
+
+  if (changeBtn) {
+    changeBtn.addEventListener("click", function () { showStep(1); });
+  }
+  if (cancelBtn) {
+    cancelBtn.addEventListener("click", function () { showStep(0); });
+  }
+
+  // ══════════════════════════════════════════════════
+  // 5. FORMULAIRE ÉDITION : catégorie + champs conditionnels
+  // ══════════════════════════════════════════════════
+  var editCatSelect = document.getElementById("wiki-category-select");
+  var editOwned     = document.getElementById("wiki-owned-field");
+  var editPosMeta   = document.querySelector("#wiki-edit-form .wiki-position-meta");
+
+  function syncEditFields() {
+    if (!editCatSelect) return;
+    var cat = editCatSelect.value;
+    if (editOwned)   editOwned.hidden   = cat !== "objets" && cat !== "tenues";
+    if (editPosMeta) editPosMeta.hidden = cat !== "position";
+    // Couleur du select (optionnel, via data-hue)
+    var opt = editCatSelect.options[editCatSelect.selectedIndex];
+    if (opt && opt.dataset.hue) {
+      editCatSelect.style.color = "hsl(" + opt.dataset.hue + ", 55%, 40%)";
+    }
+  }
+  if (editCatSelect) {
+    editCatSelect.addEventListener("change", syncEditFields);
+    syncEditFields();
+  }
+
+  // ══════════════════════════════════════════════════
+  // 6. FILTRES GRILLE (catégorie + tag)
+  // ══════════════════════════════════════════════════
   var categoryFilter = document.getElementById("wiki-category-filter");
-  var tagFilter = document.getElementById("wiki-tag-filter");
-  var list = document.getElementById("wiki-list");
-  var activeCategory = "";
-  var activeTag = "";
+  var tagFilter      = document.getElementById("wiki-tag-filter");
+  var wikiList       = document.getElementById("wiki-list");
+  var activeCategory = "", activeTag = "";
 
   function applyFilters() {
-    if (!list) return;
-    list.querySelectorAll(".wiki-card").forEach(function (card) {
-      var matchesCategory =
-        !activeCategory ||
-        (activeCategory === "__owned__"
-          ? card.dataset.owned === "1"
-          : card.dataset.category === activeCategory);
-      var tags = (card.dataset.tags || "").split("|");
-      var matchesTag = !activeTag || tags.indexOf(activeTag) !== -1;
-      card.hidden = !(matchesCategory && matchesTag);
+    if (!wikiList) return;
+    wikiList.querySelectorAll(".wiki-card").forEach(function (card) {
+      var okCat = !activeCategory ||
+        (activeCategory === "__owned__" ? card.dataset.owned === "1" : card.dataset.category === activeCategory);
+      var cardTags = (card.dataset.tags || "").split("|");
+      var okTag  = !activeTag || cardTags.indexOf(activeTag) !== -1;
+      card.hidden = !(okCat && okTag);
     });
   }
 
@@ -109,7 +274,6 @@
       });
     });
   }
-
   if (tagFilter) {
     tagFilter.querySelectorAll(".tag-chip").forEach(function (chip) {
       chip.addEventListener("click", function () {
@@ -121,26 +285,25 @@
     });
   }
 
-  // =====================
-  // AUTO-RESIZE TEXTAREA
-  // =====================
+  // ══════════════════════════════════════════════════
+  // 7. AUTO-RESIZE TEXTAREA
+  // ══════════════════════════════════════════════════
   function autoResize(ta) {
     ta.style.height = "auto";
     ta.style.height = ta.scrollHeight + "px";
   }
-
   document.querySelectorAll(".wiki-textarea").forEach(function (ta) {
     ta.addEventListener("input", function () { autoResize(ta); });
     autoResize(ta);
   });
 
-  // =====================
-  // IMAGE PREVIEW
-  // =====================
+  // ══════════════════════════════════════════════════
+  // 8. PREVIEW IMAGE + SUPPRESSION
+  // ══════════════════════════════════════════════════
   document.querySelectorAll(".wiki-image-field").forEach(function (wrapper) {
-    var input = wrapper.querySelector(".wiki-image-input");
-    var preview = wrapper.querySelector(".wiki-image-preview-new");
-    var removeChk = wrapper.querySelector("#wiki-remove-image");
+    var input      = wrapper.querySelector(".wiki-image-input");
+    var preview    = wrapper.querySelector(".wiki-image-preview-new");
+    var removeChk  = wrapper.querySelector("#wiki-remove-image");
     var currentImg = wrapper.querySelector("#wiki-current-image");
     if (!input || !preview) return;
 
@@ -148,7 +311,6 @@
       if (input.files && input.files[0]) {
         preview.src = URL.createObjectURL(input.files[0]);
         preview.hidden = false;
-        // Si on uploade une nouvelle image, la case "supprimer" devient inutile
         if (removeChk) removeChk.checked = false;
       } else {
         preview.hidden = true;
@@ -156,7 +318,6 @@
       }
     });
 
-    // Masquer l'image actuelle quand on coche "supprimer"
     if (removeChk && currentImg) {
       removeChk.addEventListener("change", function () {
         currentImg.style.opacity = removeChk.checked ? "0.3" : "1";
@@ -164,53 +325,13 @@
     }
   });
 
-  // =====================
-  // TAG SUGGESTIONS
-  // =====================
-  document.querySelectorAll(".wiki-tag-suggestions").forEach(function (container) {
-    var inputId = container.dataset.for;
-    var input = document.getElementById(inputId);
-    if (!input) return;
-
-    function currentTags() {
-      return input.value.split(",").map(function (t) { return t.trim(); }).filter(Boolean);
-    }
-
-    function syncChips() {
-      var current = currentTags();
-      container.querySelectorAll(".wiki-tag-chip").forEach(function (chip) {
-        chip.classList.toggle("active", current.indexOf(chip.dataset.tag) !== -1);
-      });
-    }
-
-    container.querySelectorAll(".wiki-tag-chip").forEach(function (chip) {
-      chip.addEventListener("click", function () {
-        var tag = chip.dataset.tag;
-        var current = currentTags();
-        var idx = current.indexOf(tag);
-        if (idx === -1) {
-          current.push(tag);
-        } else {
-          current.splice(idx, 1);
-        }
-        input.value = current.join(", ");
-        syncChips();
-      });
-    });
-
-    input.addEventListener("input", syncChips);
-    syncChips();
-  });
-
-  // =====================
-  // MARKDOWN TOOLBAR
-  // =====================
+  // ══════════════════════════════════════════════════
+  // 9. TOOLBAR MARKDOWN
+  // ══════════════════════════════════════════════════
   function insertMd(ta, action) {
-    var start = ta.selectionStart;
-    var end = ta.selectionEnd;
-    var sel = ta.value.slice(start, end);
-    var before = ta.value.slice(0, start);
-    var after = ta.value.slice(end);
+    var start = ta.selectionStart, end = ta.selectionEnd;
+    var sel   = ta.value.slice(start, end);
+    var before = ta.value.slice(0, start), after = ta.value.slice(end);
     var insert, cursor;
 
     switch (action) {
@@ -224,62 +345,46 @@
         break;
       case "h2": {
         var ls = before.lastIndexOf("\n") + 1;
-        var lineText = before.slice(ls).replace(/^#{1,6}\s*/, "");
-        before = before.slice(0, ls) + "## " + lineText;
+        var lt = before.slice(ls).replace(/^#{1,6}\s*/, "");
+        before = before.slice(0, ls) + "## " + lt;
         ta.value = before + sel + after;
-        cursor = before.length + sel.length;
-        autoResize(ta);
-        ta.selectionStart = ta.selectionEnd = cursor;
-        ta.focus();
-        return;
+        ta.selectionStart = ta.selectionEnd = before.length + sel.length;
+        autoResize(ta); ta.focus(); return;
       }
       case "h3": {
         var ls3 = before.lastIndexOf("\n") + 1;
-        var lineText3 = before.slice(ls3).replace(/^#{1,6}\s*/, "");
-        before = before.slice(0, ls3) + "### " + lineText3;
+        var lt3 = before.slice(ls3).replace(/^#{1,6}\s*/, "");
+        before = before.slice(0, ls3) + "### " + lt3;
         ta.value = before + sel + after;
-        cursor = before.length + sel.length;
-        autoResize(ta);
-        ta.selectionStart = ta.selectionEnd = cursor;
-        ta.focus();
-        return;
+        ta.selectionStart = ta.selectionEnd = before.length + sel.length;
+        autoResize(ta); ta.focus(); return;
       }
       case "list":
-        if (sel) {
-          insert = sel.split("\n").map(function (l) { return "- " + l; }).join("\n");
-        } else {
-          insert = "- ";
-        }
+        insert = sel ? sel.split("\n").map(function (l) { return "- " + l; }).join("\n") : "- ";
         cursor = start + insert.length;
         break;
       case "hr":
         insert = (before === "" || before.endsWith("\n") ? "" : "\n") + "---\n";
         cursor = start + insert.length;
         break;
-      default:
-        return;
+      default: return;
     }
-
     ta.value = before + insert + after;
     ta.selectionStart = ta.selectionEnd = cursor;
-    autoResize(ta);
-    ta.focus();
+    autoResize(ta); ta.focus();
   }
 
   document.querySelectorAll(".md-toolbar").forEach(function (toolbar) {
-    var editor = toolbar.closest(".wiki-editor");
+    var editor  = toolbar.closest(".wiki-editor");
     if (!editor) return;
-    var ta = editor.querySelector(".wiki-textarea");
-    var previewPane = editor.querySelector(".wiki-md-preview");
-    var previewBtn = toolbar.querySelector(".md-preview-btn");
-    var isPreview = false;
+    var ta      = editor.querySelector(".wiki-textarea");
+    var preview = editor.querySelector(".wiki-md-preview");
+    var prevBtn = toolbar.querySelector(".md-preview-btn");
+    var showing = false;
     if (!ta) return;
 
     toolbar.querySelectorAll("[data-md]").forEach(function (btn) {
-      btn.addEventListener("click", function (e) {
-        e.preventDefault();
-        insertMd(ta, btn.dataset.md);
-      });
+      btn.addEventListener("click", function (e) { e.preventDefault(); insertMd(ta, btn.dataset.md); });
     });
 
     ta.addEventListener("keydown", function (e) {
@@ -288,36 +393,31 @@
       if (e.key === "i") { e.preventDefault(); insertMd(ta, "italic"); }
     });
 
-    if (previewBtn && previewPane) {
-      previewBtn.addEventListener("click", function (e) {
+    if (prevBtn && preview) {
+      prevBtn.addEventListener("click", function (e) {
         e.preventDefault();
-        isPreview = !isPreview;
-        if (isPreview) {
-          var rendered = renderMarkdown(ta.value);
-          previewPane.innerHTML = rendered || "<p class=\"wiki-md-empty\">Rien &agrave; afficher.</p>";
-          ta.hidden = true;
-          previewPane.hidden = false;
-          previewBtn.textContent = "\u00c9diter";
-          previewBtn.classList.add("active");
+        showing = !showing;
+        if (showing) {
+          preview.innerHTML = renderMarkdown(ta.value) || "<p class=\"wiki-md-empty\">Rien \u00e0 afficher.</p>";
+          ta.hidden = true; preview.hidden = false;
+          prevBtn.textContent = "\u00c9diter"; prevBtn.classList.add("active");
         } else {
-          ta.hidden = false;
-          previewPane.hidden = true;
-          previewBtn.textContent = "Aper\u00e7u";
-          previewBtn.classList.remove("active");
+          ta.hidden = false; preview.hidden = true;
+          prevBtn.textContent = "Aper\u00e7u"; prevBtn.classList.remove("active");
         }
       });
     }
   });
 
-  // =====================
-  // SUBMIT GUARDS
-  // =====================
+  // ══════════════════════════════════════════════════
+  // 10. SOUMISSION
+  // ══════════════════════════════════════════════════
   document.querySelectorAll(".wiki-form").forEach(function (form) {
     form.addEventListener("submit", function () {
-      // S'assurer que la textarea est visible pour que son contenu soit soumis
+      // Réaffiche la textarea si en mode aperçu (sinon son contenu ne part pas)
       var ta = form.querySelector(".wiki-textarea");
       if (ta) ta.hidden = false;
-      var btn = form.querySelector('button[type="submit"]');
+      var btn = form.querySelector("button[type=\"submit\"]");
       if (btn) { btn.disabled = true; btn.textContent = "Enregistrement\u2026"; }
     });
   });
@@ -327,4 +427,5 @@
       if (!window.confirm("Supprimer cette page ?")) e.preventDefault();
     });
   });
+
 })();
