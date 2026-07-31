@@ -2277,6 +2277,49 @@ input[type="text"], input[type="password"] {
   .wiki-detail-banner-title { font-size: 1.15rem; }
 }
 
+/* ── Infobarre façon Wikipedia : catégorie + note, teinte élégante ──
+   Collée au bandeau du dessus (annule le gap du flex parent) pour
+   former un seul bloc d'en-tête cohérent. */
+.wiki-detail-banner + .wiki-detail-infobar {
+  margin-top: -1.1rem;
+}
+.wiki-detail-infobar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0 -1.25rem;
+  padding: 0.55rem 1.25rem;
+  background: color-mix(in srgb, hsl(var(--ch-hue, 220), 55%, 45%) 12%, var(--card));
+  border-bottom: 1px solid color-mix(in srgb, hsl(var(--ch-hue, 220), 55%, 45%) 25%, var(--border));
+}
+
+.wiki-detail-infobar-cat {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 0.22rem 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #fff;
+}
+
+.wiki-detail-infobar-rating {
+  display: flex;
+  gap: 0.05rem;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+.wiki-detail-infobar-star {
+  color: var(--muted);
+  opacity: 0.5;
+}
+.wiki-detail-infobar-star.filled {
+  color: #f5a623;
+  opacity: 1;
+}
+
 /* ── Image principale ────────────────────────────── */
 .wiki-detail-main-images {
   border-radius: 14px;
@@ -2386,12 +2429,15 @@ input[type="text"], input[type="password"] {
   object-fit: contain;
 }
 
-/* ── Navigation entre pages wiki ───────────────── */
+/* ── Navigation entre pages wiki ───────────────────────────────────
+   PC : rangée discrète juste sous le bandeau (dans le flux normal).
+   Téléphone : les deux flèches se détachent en position fixe, à
+   mi-hauteur d'écran, et suivent le scroll — juste des pastilles
+   discrètes de chaque côté, sans texte. ────────────────────────── */
 .wiki-page-nav {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 1rem;
 }
 
 .wiki-page-nav-btn {
@@ -2419,9 +2465,32 @@ input[type="text"], input[type="password"] {
 .wiki-page-nav-arrow { font-size: 1rem; flex-shrink: 0; opacity: 0.6; }
 .wiki-page-nav-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
+  .wiki-page-nav {
+    position: fixed;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    justify-content: space-between;
+    gap: 0;
+    padding: 0 0.4rem;
+    pointer-events: none;
+    z-index: 6;
+  }
   .wiki-page-nav-label { display: none; }
-  .wiki-page-nav-btn { flex: 0 0 auto; padding: 0.3rem 0.7rem; }
+  .wiki-page-nav-btn {
+    flex: 0 0 auto;
+    pointer-events: auto;
+    width: 2.3rem;
+    height: 2.3rem;
+    justify-content: center;
+    padding: 0;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--card) 65%, transparent);
+    opacity: 0.55;
+  }
+  .wiki-page-nav-btn:hover, .wiki-page-nav-btn:active { opacity: 1; }
   .wiki-page-nav-arrow { font-size: 1.2rem; opacity: 1; }
 }
 
@@ -2498,6 +2567,18 @@ input[type="text"], input[type="password"] {
   padding: 0.1em 0.4em;
   font-size: 0.88em;
   font-family: ui-monospace, monospace;
+}
+
+/* Lien [[Titre]] vers une autre page : discret, s'intègre dans une
+   phrase (pas de couleur criarde ni de soulignement plein). */
+.wiki-inline-link {
+  color: var(--wiki-gold);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--wiki-gold);
+  transition: border-bottom-style 0.15s;
+}
+.wiki-inline-link:hover {
+  border-bottom-style: solid;
 }
 
 .wiki-md hr {
@@ -2634,15 +2715,6 @@ input[type="text"], input[type="password"] {
   width: fit-content;
 }
 
-/* Detail page meta */
-.wiki-detail-meta {
-  font-size: 0.78rem;
-  color: var(--muted);
-  margin: 0;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--border);
-}
-
 /* ── Widget réactions ──────────────────────────── */
 .wiki-react {
   display: flex;
@@ -2704,13 +2776,16 @@ input[type="text"], input[type="password"] {
   line-height: 1;
   padding: 0.1rem;
   cursor: pointer;
-  color: var(--border);
-  transition: color 0.1s, transform 0.1s;
+  /* Une étoile vide doit rester bien visible, pas se fondre dans le fond */
+  color: var(--muted);
+  opacity: 0.6;
+  transition: color 0.1s, opacity 0.1s, transform 0.1s;
 }
 
 .wiki-star.active,
 .wiki-star:hover {
   color: #f5a623;
+  opacity: 1;
 }
 
 .wiki-star:active { transform: scale(1.25); }
@@ -2787,7 +2862,8 @@ input[type="text"], input[type="password"] {
 
 .wiki-card-star {
   font-size: 0.75rem;
-  color: var(--border);
+  color: var(--muted);
+  opacity: 0.6;
 }
 
 .wiki-card-star.filled {
@@ -2904,12 +2980,19 @@ input[type="text"], input[type="password"] {
   margin-bottom: 0.75rem;
 }
 
+/* Carrousel horizontal plutôt qu'une liste qui s'empile et prend de
+   la hauteur : chaque carte garde sa largeur naturelle et défile. */
 .wiki-pl-cards {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  gap: 0.5rem;
   min-height: 1.5rem;
+  padding-bottom: 0.15rem;
+  scrollbar-width: none;
 }
+.wiki-pl-cards::-webkit-scrollbar { display: none; }
 
 .wiki-pl-empty {
   font-size: 0.82rem;
@@ -2922,6 +3005,8 @@ input[type="text"], input[type="password"] {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
   padding: 0.3rem 0.6rem 0.3rem 0.4rem;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -3039,14 +3124,19 @@ input[type="text"], input[type="password"] {
   margin: 0 0 0.75rem;
 }
 
+/* Carrousel horizontal, comme les pages liées */
 .wiki-ql-list {
   list-style: none;
   margin: 0 0 0.75rem;
-  padding: 0;
+  padding: 0 0 0.15rem;
   display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  gap: 0.5rem;
+  scrollbar-width: none;
 }
+.wiki-ql-list::-webkit-scrollbar { display: none; }
 
 .wiki-ql-empty {
   font-size: 0.82rem;
@@ -3059,6 +3149,8 @@ input[type="text"], input[type="password"] {
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
+  flex: 0 0 220px;
+  scroll-snap-align: start;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 6px;

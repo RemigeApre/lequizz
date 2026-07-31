@@ -7,11 +7,34 @@
   function esc(s) {
     return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
   }
+
+  // Table titre (minuscules) → id, lue depuis #wiki-existing-pages si présent
+  // sur la page (détail d'une page, formulaire d'édition/création).
+  var wikiTitleMap = null;
+  function getWikiTitleMap() {
+    if (wikiTitleMap) return wikiTitleMap;
+    wikiTitleMap = {};
+    var el = document.getElementById("wiki-existing-pages");
+    if (el) {
+      try {
+        JSON.parse(el.textContent || el.innerText).forEach(function (p) {
+          wikiTitleMap[String(p.title).toLowerCase().trim()] = p.id;
+        });
+      } catch (_) {}
+    }
+    return wikiTitleMap;
+  }
+
   function inline(s) {
     return s
       .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
       .replace(/\*(.+?)\*/g,     "<em>$1</em>")
-      .replace(/`(.+?)`/g,       "<code>$1</code>");
+      .replace(/`(.+?)`/g,       "<code>$1</code>")
+      // [[Titre d'une autre page]] → lien élégant, intégrable dans une phrase
+      .replace(/\[\[(.+?)\]\]/g, function (m, title) {
+        var id = getWikiTitleMap()[title.toLowerCase().trim()];
+        return id ? '<a class="wiki-inline-link" href="/wiki/' + id + '">' + title + '</a>' : title;
+      });
   }
   // Rend une suite de lignes (déjà échappées) en HTML ; ## n'est pas géré
   // ici, il sert de séparateur de section plus haut dans renderMarkdown.
@@ -1128,6 +1151,10 @@
       case "hr":
         insert = (before === "" || before.endsWith("\n") ? "" : "\n") + "---\n";
         cursor = start + insert.length;
+        break;
+      case "link":
+        insert = "[[" + (sel || "titre de la page") + "]]";
+        cursor = sel ? start + insert.length : start + 2;
         break;
       default: return;
     }

@@ -294,15 +294,16 @@ function buildWikiRouter(config) {
     const nextPage = idx < allPages.length - 1 ? { id: allPages[idx + 1].id, title: allPages[idx + 1].title } : null;
     const suggestions = computeSuggestions(page, allPages);
     const back = wikiBackTarget(req);
-    res.render("wiki-detail", { config, page, suggestions, prevPage, nextPage, backHref: back.href, backLabel: back.label, ...CTX });
+    res.render("wiki-detail", { config, page, pages: allPages, suggestions, prevPage, nextPage, backHref: back.href, backLabel: back.label, ...CTX });
   });
 
   router.get("/:id/edit", (req, res) => {
     const id = Number(req.params.id);
     const page = Number.isInteger(id) ? getWikiPage(id) : null;
     if (!page) return res.redirect("/wiki");
-    const allTags = getAllTags(listWikiPages());
-    res.render("wiki-form", { config, page, allTags, ...CTX });
+    const pages = sortedPages();
+    const allTags = getAllTags(pages);
+    res.render("wiki-form", { config, page, pages, allTags, ...CTX });
   });
 
   router.post("/:id", upload.array("images", 10), (req, res) => {

@@ -5,6 +5,8 @@
 
   <% var cat = categories.find(function(c) { return c.key === page.category; }); %>
 
+  <script id="wiki-existing-pages" type="application/json"><%- JSON.stringify(pages.map(function(p){ return { id: p.id, title: p.title }; })) %></script>
+
   <form method="POST" action="/wiki/<%= page.id %>" enctype="multipart/form-data" class="wiki-form" id="wiki-edit-form">
 
     <%# ─ Catégorie : sélecteur discret ─ %>
@@ -36,6 +38,8 @@
         <span class="md-sep"></span>
         <button type="button" class="md-btn" data-md="list">&#8226;&nbsp;Liste</button>
         <button type="button" class="md-btn" data-md="hr">&mdash;</button>
+        <span class="md-sep"></span>
+        <button type="button" class="md-btn" data-md="link" title="Lien vers une autre page du wiki">&#128279;</button>
         <div class="md-toolbar-spacer"></div>
         <button type="button" class="md-btn md-preview-btn">Aper&ccedil;u</button>
       </div>
