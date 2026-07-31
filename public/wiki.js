@@ -458,6 +458,14 @@
   var searchQuery     = localStorage.getItem("wiki-filter-search") || "";
   var advMinRating    = Number(localStorage.getItem("wiki-filter-rating")) || 0;
 
+  // La recherche du sommaire (page d'accueil) arrive ici en ?q=... : elle
+  // prend le pas sur la recherche mémorisée et devient la nouvelle valeur.
+  var urlSearchQuery = new URLSearchParams(window.location.search).get("q");
+  if (urlSearchQuery !== null) {
+    searchQuery = urlSearchQuery;
+    localStorage.setItem("wiki-filter-search", searchQuery);
+  }
+
   // Normalise une chaîne : minuscules + sans accents
   function norm(s) {
     return (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");

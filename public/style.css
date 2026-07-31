@@ -1628,6 +1628,12 @@ input[type="text"], input[type="password"] {
   gap: 0.4rem;
 }
 
+.wiki-new-center {
+  display: flex;
+  justify-content: center;
+  margin: 0.25rem 0 1.75rem;
+}
+
 .wiki-new-btn {
   background: transparent;
   border: 1px dashed var(--border);
@@ -4351,8 +4357,16 @@ input[type="text"], input[type="password"] {
 }
 
 @media (max-width: 640px) {
+  /* Sur mobile, le message déborde du cadre du conteneur : plein bord,
+     sans coins arrondis, comme s'il continuait hors de l'écran. */
   .wiki-hero {
-    padding: 1.05rem 1.1rem;
+    margin: 0 -1.25rem 1.75rem;
+    width: calc(100% + 2.5rem);
+    border-left: none;
+    border-right: none;
+    border-radius: 0;
+    border-top: 3px solid var(--wiki-gold);
+    padding: 1.15rem 1.25rem;
   }
   .wiki-hero-lead {
     font-size: 0.98rem;
@@ -4538,6 +4552,87 @@ input[type="text"], input[type="password"] {
 .wiki-chapter-empty {
   margin: 0;
   font-size: 0.88rem;
+}
+
+/* ── Page d'une catégorie (chapitre ouvert) : identité propre à son thème ── */
+.wiki-chapter-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+  padding: 1.6rem 1.8rem 1.5rem;
+  margin-bottom: 1.5rem;
+  border-radius: 16px;
+  background: linear-gradient(100deg, hsl(var(--ch-hue, 220), 38%, 24%), hsl(var(--ch-hue, 220), 34%, 32%));
+  border-top: 3px solid color-mix(in srgb, var(--wiki-gold) 65%, transparent);
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(40, 30, 10, 0.06);
+}
+
+.wiki-chapter-hero-back {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  margin-bottom: 0.3rem;
+}
+.wiki-chapter-hero-back:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.wiki-chapter-hero-title {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-size: 1.7rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #fff;
+}
+
+.wiki-chapter-hero-desc {
+  margin: 0.15rem 0 0;
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.wiki-chapter-hero-count {
+  margin-top: 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+}
+
+@media (max-width: 640px) {
+  .wiki-chapter-hero {
+    padding: 1.2rem 1.25rem 1.15rem;
+    border-radius: 0;
+    margin: 0 -1.25rem 1.5rem;
+    width: calc(100% + 2.5rem);
+  }
+  .wiki-chapter-hero-title {
+    font-size: 1.35rem;
+  }
+}
+
+/* Les contrôles de la page reprennent la teinte de la catégorie ouverte,
+   au lieu du violet générique de l'appli. */
+.wiki-locked .wiki-search-input:focus {
+  border-color: hsl(var(--ch-hue, 220), 55%, 45%);
+  box-shadow: 0 0 0 2px color-mix(in srgb, hsl(var(--ch-hue, 220), 55%, 45%) 25%, transparent);
+}
+.wiki-locked #wiki-tag-filter .tag-chip:hover {
+  border-color: hsl(var(--ch-hue, 220), 55%, 45%);
+  color: hsl(var(--ch-hue, 220), 55%, 40%);
+}
+.wiki-locked #wiki-tag-filter .tag-chip.active {
+  background: hsl(var(--ch-hue, 220), 55%, 45%);
+  border-color: hsl(var(--ch-hue, 220), 55%, 45%);
 }
 
 .bd-sort-remove input { display: none; }

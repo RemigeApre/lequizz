@@ -1,11 +1,20 @@
-<%- include('partials/head', { title: (lockedCategory ? lockedCategory.label : 'Toutes les pages') + ' — Wiki — ' + config.title }) %>
-<main class="container wide">
+<%- include('partials/head', { title: (lockedCategory ? lockedCategory.label : 'Toutes les pages') + ' — Wiki' }) %>
+<main class="container wide<%= lockedCategory ? ' wiki-locked' : '' %>"<% if (lockedCategory) { %> style="--ch-hue: <%= lockedCategory.hue %>"<% } %>>
   <%- include('partials/top-nav', { config: config }) %>
 
-  <div class="wiki-page-header">
-    <a href="/wiki" class="link-button">&larr; Sommaire</a>
-    <h1 class="section-title-h1"><%= lockedCategory ? lockedCategory.label : "Toutes les pages" %></h1>
-  </div>
+  <% if (lockedCategory) { %>
+    <div class="wiki-chapter-hero">
+      <a href="/wiki" class="wiki-chapter-hero-back">&larr; Sommaire</a>
+      <h1 class="wiki-chapter-hero-title"><%= lockedCategory.label %></h1>
+      <% if (lockedCategory.desc) { %><p class="wiki-chapter-hero-desc"><%= lockedCategory.desc %></p><% } %>
+      <span class="wiki-chapter-hero-count"><%= pages.length %> page<%= pages.length === 1 ? '' : 's' %></span>
+    </div>
+  <% } else { %>
+    <div class="wiki-page-header">
+      <a href="/wiki" class="link-button">&larr; Sommaire</a>
+      <h1 class="section-title-h1">Toutes les pages</h1>
+    </div>
+  <% } %>
 
   <%# ─── RECHERCHE ───────────────────────────────────────────────────── %>
   <div class="wiki-search-wrap">

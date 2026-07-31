@@ -1,11 +1,6 @@
-<%- include('partials/head', { title: 'Wiki — ' + config.title }) %>
+<%- include('partials/head', { title: 'Wiki' }) %>
 <main class="container wide">
   <%- include('partials/top-nav', { config: config }) %>
-
-  <div class="wiki-page-header">
-    <h1 class="section-title-h1">Wiki</h1>
-    <button type="button" id="wiki-new-btn" class="wiki-new-btn">+ Nouvelle page</button>
-  </div>
 
   <%# ─── MESSAGE D'INTRODUCTION ───────────────────────────────────────── %>
   <section class="wiki-hero">
@@ -21,6 +16,14 @@
     </p>
   </section>
 
+  <%# ─── RECHERCHE : renvoie vers la vue globale, déjà filtrée ────────── %>
+  <form action="/wiki/tous" method="GET" class="wiki-search-wrap">
+    <div class="wiki-search-bar">
+      <span class="wiki-search-icon">&#128269;</span>
+      <input type="search" name="q" class="wiki-search-input" placeholder="Rechercher une page, un tag, un terme&hellip;" autocomplete="off" />
+    </div>
+  </form>
+
   <%# ─── FILTRE RAPIDE : recentrer le sommaire ou tout voir en cartes ── %>
   <div class="wiki-toc-filter" id="wiki-toc-filter">
     <button type="button" class="wiki-toc-chip active" data-filter="">Tous les chapitres</button>
@@ -28,6 +31,10 @@
       <button type="button" class="wiki-toc-chip" data-filter="<%= c.key %>" style="--ch-hue: <%= c.hue %>"><%= c.label %></button>
     <% }) %>
     <a href="/wiki/tous" class="wiki-toc-chip wiki-toc-chip-all">Tout afficher en cartes &rarr;</a>
+  </div>
+
+  <div class="wiki-new-center">
+    <button type="button" id="wiki-new-btn" class="wiki-new-btn">+ Nouvelle page</button>
   </div>
 
   <%# ─── STEP 1 : CHOIX DE CATÉGORIE ─────────────────────────────────── %>
