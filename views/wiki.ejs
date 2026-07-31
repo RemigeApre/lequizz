@@ -86,7 +86,7 @@
       <p class="intro">Aucune page pour l&apos;instant.</p>
     <% } %>
     <% pages.forEach(function (page) { %>
-      <%- include('partials/wiki-card', { page: page, categories: categories }) %>
+      <%- include('partials/wiki-card', { page: page, categories: categories, showCategoryBadge: !lockedCategory }) %>
     <% }) %>
   </div>
 </main>

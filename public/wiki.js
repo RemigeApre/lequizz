@@ -1497,6 +1497,30 @@
   });
 
   // ══════════════════════════════════════════════════
+  // 6b. MESSAGE D'INTRO RÉDUCTIBLE (sommaire du wiki)
+  // ══════════════════════════════════════════════════
+  (function () {
+    var hero    = document.getElementById("wiki-hero");
+    var toggle  = document.getElementById("wiki-hero-toggle");
+    if (!hero || !toggle) return;
+    var KEY = "wiki-hero-collapsed";
+
+    function apply(collapsed) {
+      hero.classList.toggle("collapsed", collapsed);
+      toggle.innerHTML = collapsed ? "&#43;" : "&#8722;";
+      toggle.title = collapsed ? "Agrandir le message" : "Réduire le message";
+    }
+
+    apply(localStorage.getItem(KEY) === "1");
+
+    toggle.addEventListener("click", function () {
+      var collapsed = !hero.classList.contains("collapsed");
+      localStorage.setItem(KEY, collapsed ? "1" : "0");
+      apply(collapsed);
+    });
+  })();
+
+  // ══════════════════════════════════════════════════
   // 7. FILTRE RAPIDE DU SOMMAIRE (page d'accueil du wiki)
   // ══════════════════════════════════════════════════
   (function () {

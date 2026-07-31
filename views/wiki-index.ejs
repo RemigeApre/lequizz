@@ -2,18 +2,21 @@
 <main class="container wide">
   <%- include('partials/top-nav', { config: config }) %>
 
-  <%# ─── MESSAGE D'INTRODUCTION ───────────────────────────────────────── %>
-  <section class="wiki-hero">
-    <p class="wiki-hero-lead">
-      Le wiki est un espace pour apprendre, confirmer mais aussi noter et d&eacute;couvrir de nombreuses
-      choses li&eacute;es &agrave; la sexualit&eacute;. Il a pour objectif d&rsquo;&eacute;voluer&nbsp;:
-      tu peux noter, mettre en favoris, et bien plus.
-    </p>
-    <p class="wiki-hero-note">
-      <span class="wiki-hero-note-icon" aria-hidden="true">&#9888;</span><span class="wiki-hero-note-text">Il a pour but d&rsquo;&ecirc;tre exhaustif sur tout ce qui existe&nbsp;: les pratiques les plus
-      extr&ecirc;mes sont cat&eacute;goris&eacute;es en <strong>ULTRA</strong> et peuvent &ecirc;tre
-      masqu&eacute;es &mdash; elles le sont par d&eacute;faut dans ce sommaire.</span>
-    </p>
+  <%# ─── MESSAGE D'INTRODUCTION : réductible, l'état est mémorisé ─────── %>
+  <section class="wiki-hero" id="wiki-hero">
+    <button type="button" class="wiki-hero-toggle" id="wiki-hero-toggle" title="R&eacute;duire le message" aria-label="R&eacute;duire le message">&#8722;</button>
+    <div class="wiki-hero-content" id="wiki-hero-content">
+      <p class="wiki-hero-lead">
+        Le wiki est un espace pour apprendre, confirmer mais aussi noter et d&eacute;couvrir de nombreuses
+        choses li&eacute;es &agrave; la sexualit&eacute;. Il a pour objectif d&rsquo;&eacute;voluer&nbsp;:
+        tu peux noter, mettre en favoris, et bien plus.
+      </p>
+      <p class="wiki-hero-note">
+        <span class="wiki-hero-note-icon" aria-hidden="true">&#9888;</span><span class="wiki-hero-note-text">Il a pour but d&rsquo;&ecirc;tre exhaustif sur tout ce qui existe&nbsp;: les pratiques les plus
+        extr&ecirc;mes sont cat&eacute;goris&eacute;es en <strong>ULTRA</strong> et peuvent &ecirc;tre
+        masqu&eacute;es &mdash; elles le sont par d&eacute;faut dans ce sommaire.</span>
+      </p>
+    </div>
   </section>
 
   <%# ─── RECHERCHE : renvoie vers la vue globale, déjà filtrée ────────── %>
@@ -248,23 +251,24 @@
     </form>
   </div>
 
-  <%# ─── SOMMAIRE PAR CHAPITRE ───────────────────────────────────────── %>
+  <%# ─── SOMMAIRE PAR CHAPITRE : la carte entière mène au chapitre,
+       pas besoin d'un bouton dédié ("Voir tout" retiré) ──────────── %>
   <div class="wiki-toc" id="wiki-toc">
     <% chapters.forEach(function (ch) { %>
       <section class="wiki-chapter" data-chapter="<%= ch.key %>" style="--ch-hue: <%= ch.hue %>">
-        <div class="wiki-chapter-header">
-          <h2 class="wiki-chapter-title">
-            <%= ch.label %>
+        <a href="/wiki/categorie/<%= ch.key %>" class="wiki-chapter-link-wrap">
+          <div class="wiki-chapter-header">
+            <span class="wiki-chapter-header-arrow" aria-hidden="true">&rarr;</span>
+            <h2 class="wiki-chapter-title"><%= ch.label %></h2>
             <span class="wiki-chapter-count"><%= ch.count %></span>
-          </h2>
-          <a href="/wiki/categorie/<%= ch.key %>" class="wiki-chapter-link">Voir tout &rarr;</a>
-        </div>
-        <div class="wiki-chapter-body">
+          </div>
           <% if (ch.desc) { %><p class="wiki-chapter-desc"><%= ch.desc %></p><% } %>
+        </a>
+        <div class="wiki-chapter-body">
           <% if (ch.preview.length) { %>
             <div class="wiki-chapter-strip">
               <% ch.preview.forEach(function (page) { %>
-                <%- include('partials/wiki-card', { page: page, categories: categories }) %>
+                <%- include('partials/wiki-card', { page: page, categories: categories, showCategoryBadge: false }) %>
               <% }) %>
             </div>
           <% } else { %>

@@ -1,5 +1,28 @@
 <%
   var cat = categories.find(function (c) { return c.key === page.category; });
+  var wcShowBadge = typeof showCategoryBadge !== 'undefined' ? showCategoryBadge : true;
+
+  // Une ou plusieurs teintes (catégorie principale + catégories
+  // supplémentaires) pour le filet d'accent en haut de la carte :
+  // uni, bicolore ou tricolore selon le nombre de chapitres concernés.
+  var wcHues = [cat ? cat.hue : 220].concat(
+    (page.extraCategories || []).map(function (eck) {
+      var ecat = categories.find(function (c) { return c.key === eck; });
+      return ecat ? ecat.hue : 220;
+    })
+  ).slice(0, 3);
+  var wcAccent;
+  if (wcHues.length === 1) {
+    wcAccent = 'hsl(' + wcHues[0] + ', 55%, 45%)';
+  } else {
+    var wcStep = 100 / wcHues.length;
+    var wcStops = wcHues.map(function (h, i) {
+      var from = Math.round(i * wcStep);
+      var to = Math.round((i + 1) * wcStep);
+      return 'hsl(' + h + ', 55%, 45%) ' + from + '%, hsl(' + h + ', 55%, 45%) ' + to + '%';
+    });
+    wcAccent = 'linear-gradient(90deg, ' + wcStops.join(', ') + ')';
+  }
 %>
 <a href="/wiki/<%= page.id %>" class="wiki-card"
   data-category="<%= page.category %>"
@@ -17,13 +40,23 @@
   data-fantaisie="<%= page.tags.indexOf('fantaisie') !== -1 ? '1' : '0' %>"
   data-extra-cats="<%= (page.extraCategories || []).join('|') %>">
 
-  <%# Si image : image pleine + overlay avec badge et réactions %>
+  <%# Filet d'accent : identité de couleur du/des chapitre(s), à la
+       place du badge texte (retiré quand la page est déjà dans un
+       contexte de chapitre — sommaire, page de catégorie). %>
+  <span class="wiki-card-accent" style="background: <%= wcAccent %>"></span>
+
+  <%# Si image : image pleine + overlay avec badge (optionnel) et réactions %>
   <% if (page.imagePaths && page.imagePaths.length) { %>
     <div class="wiki-card-image">
       <img src="<%= page.imagePaths[0] %>" alt="" class="wiki-card-img" />
       <div class="wiki-card-overlay">
-        <span class="wiki-category-badge" style="background: hsl(<%= cat ? cat.hue : 220 %>, 55%, 45%)"><%= cat ? cat.label : page.category %></span>
+        <% if (wcShowBadge) { %><span class="wiki-category-badge" style="background: hsl(<%= cat ? cat.hue : 220 %>, 55%, 45%)"><%= cat ? cat.label : page.category %></span><% } %>
         <span class="wiki-card-badges">
+          <% if (page.rating) { %>
+            <span class="wiki-card-mini-stars">
+              <% for (var si = 1; si <= 5; si++) { %><span class="wiki-card-star<%= si <= page.rating ? ' filled' : '' %>">&#9733;</span><% } %>
+            </span>
+          <% } %>
           <% if (page.owned) { %><span class="wiki-owned-badge" title="Possédé">&#9733;</span><% } %>
           <% if (page.flame) { %><span class="wiki-card-react-badge" title="J'adore">&#128293;</span><% } %>
           <% if (page.interested) { %><span class="wiki-card-react-badge" title="Ça m'intéresse">&#10024;</span><% } %>
@@ -33,8 +66,13 @@
   <% } else { %>
     <%# Sans image : header classique %>
     <div class="wiki-card-header">
-      <span class="wiki-category-badge" style="background: hsl(<%= cat ? cat.hue : 220 %>, 55%, 45%)"><%= cat ? cat.label : page.category %></span>
+      <% if (wcShowBadge) { %><span class="wiki-category-badge" style="background: hsl(<%= cat ? cat.hue : 220 %>, 55%, 45%)"><%= cat ? cat.label : page.category %></span><% } %>
       <span class="wiki-card-badges">
+        <% if (page.rating) { %>
+          <span class="wiki-card-mini-stars">
+            <% for (var si2 = 1; si2 <= 5; si2++) { %><span class="wiki-card-star<%= si2 <= page.rating ? ' filled' : '' %>">&#9733;</span><% } %>
+          </span>
+        <% } %>
         <% if (page.owned) { %><span class="wiki-owned-badge" title="Possédé">&#9733;</span><% } %>
         <% if (page.flame) { %><span class="wiki-card-react-badge">&#128293;</span><% } %>
         <% if (page.interested) { %><span class="wiki-card-react-badge">&#10024;</span><% } %>
@@ -43,11 +81,6 @@
   <% } %>
 
   <div class="wiki-card-body">
-    <% if (page.rating) { %>
-      <div class="wiki-card-stars">
-        <% for (var si = 1; si <= 5; si++) { %><span class="wiki-card-star<%= si <= page.rating ? ' filled' : '' %>">&#9733;</span><% } %>
-      </div>
-    <% } %>
     <p class="wiki-card-title"><%= page.title %></p>
   </div>
 </a>
