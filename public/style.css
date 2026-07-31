@@ -135,17 +135,23 @@ body.nav-drawer-locked {
 .nav-drawer-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.9rem;
   padding: 1.1rem 1.25rem;
   border-bottom: 1px solid var(--border);
 }
 
-.nav-drawer-title {
+/* "Accueil" à côté de la croix, plus de titre du site en double dans
+   le tiroir (déjà visible dans l'en-tête de la page). */
+.nav-drawer-home {
   font-family: Georgia, "Times New Roman", serif;
-  font-weight: 700;
   font-style: italic;
-  font-size: 1.15rem;
-  letter-spacing: 0.03em;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--fg);
+  text-decoration: none;
+}
+.nav-drawer-home:hover {
+  color: var(--wiki-gold);
 }
 
 .nav-drawer-close {
@@ -164,8 +170,8 @@ body.nav-drawer-locked {
 }
 
 .nav-drawer-close:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: var(--wiki-gold);
+  color: var(--wiki-gold);
 }
 
 .nav-drawer-body {
@@ -177,6 +183,7 @@ body.nav-drawer-locked {
 }
 
 .nav-drawer-link {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -185,19 +192,32 @@ body.nav-drawer-locked {
   color: var(--fg);
   text-decoration: none;
   font-size: 0.95rem;
+  transition: background 0.15s, padding-left 0.15s;
 }
 
 .nav-drawer-link:hover {
   background: var(--bg);
+  padding-left: 0.9rem;
+}
+/* Petit chevron discret qui apparaît au survol : même langage visuel
+   que le groupe Quizz, pour signaler "ça mène ailleurs". */
+.nav-drawer-link::after {
+  content: "\276F";
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--wiki-gold);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.nav-drawer-link:hover::after {
+  opacity: 1;
 }
 
-.nav-drawer-link-home {
-  font-weight: 700;
-  font-size: 1.05rem;
-  margin-bottom: 0.5rem;
-  padding-bottom: 0.85rem;
-  border-bottom: 1px solid var(--border);
-  border-radius: 0;
+/* Sépare la liste plate du groupe Quizz, plus riche (sous-liste) */
+.nav-drawer-body > .nav-drawer-group {
+  margin-top: 0.6rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--border);
 }
 
 .nav-drawer-group {
