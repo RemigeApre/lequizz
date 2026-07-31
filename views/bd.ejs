@@ -17,37 +17,30 @@
   <% } else { %>
     <div class="bd-grid" id="bd-grid">
       <% books.forEach(function(book) { %>
-        <% var bookIsUltra = book.tags.indexOf('ultra') !== -1; %>
-        <div class="bd-card" data-id="<%= book.id %>" data-ultra="<%= bookIsUltra ? '1' : '0' %>">
-          <div class="bd-card-actions">
-            <button type="button" class="bd-ultra-toggle-btn<%= bookIsUltra ? ' active' : '' %>" title="<%= bookIsUltra ? 'Retirer Ultra' : 'Marquer Ultra' %>">&#128274;</button>
-            <form method="POST" action="/bd/<%= book.id %>/delete" class="bd-delete-form" onsubmit="return confirm('Supprimer cette BD ?')">
-              <button type="submit" class="bd-delete-btn" title="Supprimer">&#215;</button>
-            </form>
-          </div>
-          <a href="/bd/<%= book.id %>" class="bd-card-link">
-            <% if (book.imagePaths && book.imagePaths.length) { %>
-              <div class="bd-card-cover">
-                <img src="<%= book.imagePaths[0] %>" alt="" class="bd-card-img" loading="lazy" />
-                <span class="bd-page-count"><%= book.imagePaths.length %>&nbsp;p.</span>
-              </div>
-            <% } else { %>
-              <div class="bd-card-cover bd-card-cover-empty">
-                <span class="bd-card-empty-icon">&#128214;</span>
+        <a href="/bd/<%= book.id %>" class="bd-card"
+          data-ultra="<%= book.tags.indexOf('ultra') !== -1 ? '1' : '0' %>">
+          <% if (book.imagePaths && book.imagePaths.length) { %>
+            <div class="bd-card-cover">
+              <img src="<%= book.imagePaths[0] %>" alt="" class="bd-card-img" loading="lazy" />
+              <span class="bd-page-count"><%= book.imagePaths.length %>&nbsp;p.</span>
+            </div>
+          <% } else { %>
+            <div class="bd-card-cover bd-card-cover-empty">
+              <span class="bd-card-empty-icon">&#128214;</span>
+            </div>
+          <% } %>
+          <div class="bd-card-body">
+            <p class="bd-card-title"><%= book.title %></p>
+            <% if (book.tags.length) { %>
+              <div class="bd-card-tags">
+                <% book.tags.slice(0,3).forEach(function(t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
               </div>
             <% } %>
-            <div class="bd-card-body">
-              <p class="bd-card-title"><%= book.title %></p>
-              <% if (book.tags.length) { %>
-                <div class="bd-card-tags">
-                  <% book.tags.slice(0,3).forEach(function(t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
-                </div>
-              <% } %>
-            </div>
-          </a>
-        </div>
+          </div>
+        </a>
       <% }) %>
     </div>
   <% } %>
 </main>
+<script src="/bd.js?v=<%= assetVersion %>"></script>
 <%- include('partials/foot') %>

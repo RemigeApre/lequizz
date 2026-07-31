@@ -26,12 +26,21 @@
       <% } %>
     </div>
 
+    <label class="chip-option wiki-owned-chip">
+      <input type="checkbox" name="ultra" <%= image.tags.some(function(t){ return t.toLowerCase() === 'ultra'; }) ? 'checked' : '' %> />
+      <span>&#128274;&nbsp;Marquer Ultra</span>
+    </label>
+
     <textarea name="notes" class="wiki-textarea gallery-notes-input" rows="4" placeholder="Notes&hellip;"><%= image.notes %></textarea>
 
     <div class="wiki-form-actions">
       <button type="submit">Enregistrer</button>
       <a href="/galerie" class="link-button">Annuler</a>
     </div>
+  </form>
+
+  <form method="POST" action="/galerie/<%= image.id %>/delete" class="gallery-delete-form-page" onsubmit="return confirm('Supprimer cette image definitivement ?')">
+    <button type="submit" class="link-delete-btn-text">Supprimer cette image</button>
   </form>
 </main>
 <script src="/wiki.js?v=<%= assetVersion %>"></script>

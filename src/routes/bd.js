@@ -27,14 +27,13 @@ function parseTags(raw) {
   return String(raw || "").split(/[,;]+/).map((t) => t.trim()).filter(Boolean);
 }
 
-function hasUltra(tags) {
-  return tags.some((t) => t.toLowerCase() === "ultra");
-}
-
-function toggleUltraTags(tags) {
-  return hasUltra(tags)
-    ? { tags: tags.filter((t) => t.toLowerCase() !== "ultra"), ultra: false }
-    : { tags: [...tags, "ultra"], ultra: true };
+// Fusionne la case a cocher "Marquer Ultra" du formulaire avec les tags
+// tapes a la main, sans jamais faire de doublon.
+function applyUltraCheckbox(tags, checked) {
+  const has = tags.some((t) => t.toLowerCase() === "ultra");
+  if (checked && !has) return [...tags, "ultra"];
+  if (!checked && has) return tags.filter((t) => t.toLowerCase() !== "ultra");
+  return tags;
 }
 
 function applyImageOrder(existing, newFiles, orderRaw) {
@@ -71,7 +70,7 @@ function buildBdRouter(config) {
     const title = String(req.body.title || "").trim();
     if (!title) return res.redirect("/bd/new");
     const description = String(req.body.description || "").trim();
-    const tags = parseTags(req.body.tags);
+    const tags = applyUltraCheckbox(parseTags(req.body.tags), req.body.ultra === "on");
     const newFiles = (req.files || []).map((f) => `/uploads/bd/${f.filename}`);
     const imagePaths = applyImageOrder([], newFiles, req.body.image_order);
     const id = insertBdBook({ title, description, tags, imagePaths });
@@ -82,15 +81,6 @@ function buildBdRouter(config) {
     const book = getBdBook(Number(req.params.id));
     if (!book) return res.redirect("/bd");
     res.render("bd-form", { config, book });
-  });
-
-  router.post("/:id/toggle-ultra", (req, res) => {
-    const id = Number(req.params.id);
-    const book = Number.isInteger(id) ? getBdBook(id) : null;
-    if (!book) return res.status(404).json({ ok: false });
-    const { tags, ultra } = toggleUltraTags(book.tags);
-    updateBdBook(id, { title: book.title, description: book.description, tags, imagePaths: book.imagePaths });
-    res.json({ ok: true, ultra });
   });
 
   router.post("/:id/delete", (req, res) => {
@@ -112,7 +102,7 @@ function buildBdRouter(config) {
 
     const title = String(req.body.title || "").trim() || book.title;
     const description = String(req.body.description || "").trim();
-    const tags = parseTags(req.body.tags);
+    const tags = applyUltraCheckbox(parseTags(req.body.tags), req.body.ultra === "on");
 
     const toRemove = new Set([].concat(req.body.remove_image || []));
     for (const src of toRemove) {

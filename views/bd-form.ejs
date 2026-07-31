@@ -21,6 +21,11 @@
       <input type="hidden" name="tags" class="wiki-tags-hidden" value="<%= book ? book.tags.join(', ') : '' %>" />
     </div>
 
+    <label class="chip-option wiki-owned-chip">
+      <input type="checkbox" name="ultra" <%= (book && book.tags.some(function(t){ return t.toLowerCase() === 'ultra'; })) ? 'checked' : '' %> />
+      <span>&#128274;&nbsp;Marquer Ultra</span>
+    </label>
+
     <%# Tri + images existantes %>
     <% if (book && book.imagePaths && book.imagePaths.length) { %>
       <div class="bd-form-section">

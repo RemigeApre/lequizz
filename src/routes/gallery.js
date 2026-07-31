@@ -46,14 +46,13 @@ function parseTags(raw) {
   return String(raw || "").split(/[,;]+/).map((t) => t.trim()).filter(Boolean);
 }
 
-function hasUltra(tags) {
-  return tags.some((t) => t.toLowerCase() === "ultra");
-}
-
-function toggleUltraTags(tags) {
-  return hasUltra(tags)
-    ? { tags: tags.filter((t) => t.toLowerCase() !== "ultra"), ultra: false }
-    : { tags: [...tags, "ultra"], ultra: true };
+// Fusionne la case a cocher "Marquer Ultra" du formulaire avec les tags
+// tapes a la main, sans jamais faire de doublon.
+function applyUltraCheckbox(tags, checked) {
+  const has = tags.some((t) => t.toLowerCase() === "ultra");
+  if (checked && !has) return [...tags, "ultra"];
+  if (!checked && has) return tags.filter((t) => t.toLowerCase() !== "ultra");
+  return tags;
 }
 
 function buildItems(galleryImages, wikiPages) {
@@ -126,21 +125,13 @@ function buildGalleryRouter(config) {
     const id = Number(req.params.id);
     const image = Number.isInteger(id) ? getGalleryImage(id) : null;
     if (!image) return res.redirect("/galerie");
+    const tags = applyUltraCheckbox(parseTags(req.body.tags), req.body.ultra === "on");
     updateGalleryImage(id, {
       title: String(req.body.title || "").trim(),
-      tags: parseTags(req.body.tags),
+      tags,
       notes: String(req.body.notes || "").trim(),
     });
     res.redirect("/galerie");
-  });
-
-  router.post("/:id/toggle-ultra", (req, res) => {
-    const id = Number(req.params.id);
-    const image = Number.isInteger(id) ? getGalleryImage(id) : null;
-    if (!image) return res.status(404).json({ ok: false });
-    const { tags, ultra } = toggleUltraTags(image.tags);
-    updateGalleryImage(id, { title: image.title, tags, notes: image.notes });
-    res.json({ ok: true, ultra });
   });
 
   router.post("/:id/delete", (req, res) => {
