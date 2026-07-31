@@ -49,20 +49,5 @@
       </div>
     <% } %>
     <p class="wiki-card-title"><%= page.title %></p>
-    <% var pm2 = page.meta || {}; %>
-    <% if (pm2.termes_derives && pm2.termes_derives.length) { %>
-      <p class="wiki-card-derived"><%= pm2.termes_derives.slice(0,3).join(' · ') %></p>
-    <% } %>
-    <% if (page.extraCategories && page.extraCategories.length) { %>
-      <% var ecatObjs = page.extraCategories.map(function(eck) { return categories.find(function(c){ return c.key === eck; }) || { key: eck, label: eck, hue: 220 }; }); %>
-      <div class="wiki-card-extra-cats" title="Aussi dans&nbsp;: <%= ecatObjs.map(function(c){ return c.label; }).join(', ') %>"><span class="wiki-card-extra-cats-dots"><% ecatObjs.forEach(function(ecat) { %><span class="wiki-extra-cat-dot" style="background: hsl(<%= ecat.hue %>, 60%, 48%)"></span><% }) %></span><span class="wiki-card-extra-cats-label">Aussi&nbsp;: <%= ecatObjs.map(function(c){ return c.label; }).join(', ') %></span></div>
-    <% } %>
-    <% if (page.tags.length) { %>
-      <div class="wiki-card-tags">
-        <% if (pm2.anglais) { %><span class="wiki-anglais-badge wiki-anglais-badge-sm">&#127468;&#127463;</span><% } %>
-        <% page.tags.slice(0,4).forEach(function (t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
-        <% if (page.tags.length > 4) { %><span class="wiki-card-tags-more">+<%= page.tags.length - 4 %></span><% } %>
-      </div>
-    <% } %>
   </div>
 </a>

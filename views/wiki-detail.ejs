@@ -11,7 +11,7 @@
     <% } else { %>
       <span class="wiki-page-nav-btn wiki-page-nav-prev wiki-page-nav-disabled"></span>
     <% } %>
-    <a href="/wiki" class="link-button wiki-page-nav-back">&#8592; Wiki</a>
+    <a href="<%= backHref %>" class="link-button wiki-page-nav-back">&#8592; <%= backLabel %></a>
     <% if (nextPage) { %>
       <a href="/wiki/<%= nextPage.id %>" class="wiki-page-nav-btn wiki-page-nav-next" id="wiki-nav-next" title="<%= nextPage.title %>">
         <span class="wiki-page-nav-label"><%= nextPage.title %></span>
@@ -64,16 +64,6 @@
     <%
       var hasAnyTags = page.tags.length || (pm.termes_derives && pm.termes_derives.length) || pm.anglais;
     %>
-    <% if (hasAnyTags) { %>
-      <div class="link-card-tags wiki-detail-tags">
-        <% if (pm.anglais) { %><span class="wiki-anglais-badge">&#127468;&#127463; Anglais</span><% } %>
-        <% page.tags.forEach(function (t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
-        <% if (pm.termes_derives && pm.termes_derives.length) { %>
-          <span class="wiki-derived-sep">&mdash;</span>
-          <% pm.termes_derives.forEach(function (t) { %><span class="wiki-derived-pill"><%= t %></span><% }) %>
-        <% } %>
-      </div>
-    <% } %>
 
     <%# ─ Corps : infobox flottante + texte ─ %>
     <div class="wiki-body">
@@ -85,18 +75,6 @@
           <% if (hasImages) { %>
             <div class="wiki-infobox-images">
               <img src="<%= page.imagePaths[0] %>" alt="" class="wiki-infobox-img" />
-            </div>
-          <% } %>
-
-          <%# Tags (dupliqués ici pour l'ordre mobile) %>
-          <% if (hasAnyTags) { %>
-            <div class="wiki-infobox-tags">
-              <% if (pm.anglais) { %><span class="wiki-anglais-badge">&#127468;&#127463; Anglais</span><% } %>
-              <% page.tags.forEach(function (t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
-              <% if (pm.termes_derives && pm.termes_derives.length) { %>
-                <span class="wiki-derived-sep">&mdash;</span>
-                <% pm.termes_derives.forEach(function (t) { %><span class="wiki-derived-pill"><%= t %></span><% }) %>
-              <% } %>
             </div>
           <% } %>
 
@@ -222,39 +200,20 @@
       </div>
     <% } %>
 
-    <%# ─ Pages liées ─ %>
-    <div class="wiki-page-links" data-page-id="<%= page.id %>">
-      <h3 class="wiki-pl-heading">Pages li&eacute;es</h3>
-      <div class="wiki-pl-body">
-        <div class="wiki-pl-section">
-          <div class="wiki-pl-cards" data-role="links"></div>
-        </div>
-        <div class="wiki-pl-section wiki-pl-backlinks-section" hidden>
-          <p class="wiki-pl-back-label">R&eacute;f&eacute;renc&eacute;e par</p>
-          <div class="wiki-pl-cards" data-role="backlinks"></div>
-        </div>
+    <%# ─ Tags et mots dérivés : en toute fin de page, jamais en tête ─ %>
+    <% if (hasAnyTags) { %>
+      <div class="link-card-tags wiki-detail-tags wiki-detail-tags-end">
+        <% if (pm.anglais) { %><span class="wiki-anglais-badge">&#127468;&#127463; Anglais</span><% } %>
+        <% page.tags.forEach(function (t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
+        <% if (pm.termes_derives && pm.termes_derives.length) { %>
+          <span class="wiki-derived-sep">&mdash;</span>
+          <% pm.termes_derives.forEach(function (t) { %><span class="wiki-derived-pill"><%= t %></span><% }) %>
+        <% } %>
       </div>
-      <div class="wiki-pl-add">
-        <input type="text" class="wiki-pl-search" placeholder="Lier une autre page&hellip;" autocomplete="off" />
-        <ul class="wiki-pl-results"></ul>
-      </div>
-    </div>
-
-    <%# ─ Questions liées au quizz ─ %>
-    <div class="wiki-question-links" data-page-id="<%= page.id %>">
-      <h3 class="wiki-ql-heading">Questions du quizz li&eacute;es</h3>
-      <ul class="wiki-ql-list"></ul>
-      <div class="wiki-ql-add">
-        <input type="text" class="wiki-ql-search" placeholder="Associer une question&hellip;" autocomplete="off" />
-        <ul class="wiki-ql-results"></ul>
-      </div>
-    </div>
+    <% } %>
 
     <div class="wiki-detail-actions">
-      <a href="/wiki/<%= page.id %>/edit" class="link-button">Modifier</a>
-      <form method="POST" action="/wiki/<%= page.id %>/delete" class="link-delete-form-inline">
-        <button type="submit" class="link-delete-btn-text">Supprimer</button>
-      </form>
+      <a href="/wiki/<%= page.id %>/edit" class="wiki-edit-btn">&#9998; Modifier</a>
     </div>
 
     <p class="wiki-detail-meta">Mis &agrave; jour le <%= new Date(page.updatedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) %></p>

@@ -2128,14 +2128,6 @@ input[type="text"], input[type="password"] {
   line-height: 1.3;
 }
 
-.wiki-card-derived {
-  margin: 0;
-  font-size: 0.75rem;
-  font-style: italic;
-  color: var(--muted);
-  line-height: 1.2;
-}
-
 .wiki-card-tags {
   display: flex;
   flex-wrap: wrap;
@@ -2150,50 +2142,9 @@ input[type="text"], input[type="password"] {
   align-self: center;
 }
 
-.wiki-anglais-badge-sm {
-  font-size: 0.7rem;
-  padding: 0.1rem 0.35rem;
-}
-
-/* ── Extra catégories ───────────────────────────── */
-.wiki-category-badge-sm {
-  font-size: 0.63rem;
-  padding: 0.15rem 0.5rem;
-}
+/* ── Extra catégories (badge affiché sur la page détail) ─────────── */
 .wiki-category-badge-extra {
   opacity: 0.85;
-}
-
-/* Résumé compact "aussi dans…" : pastilles de couleur + texte tronqué
-   sur une seule ligne, pour ne jamais casser la mise en page de la carte
-   même avec 3+ catégories supplémentaires (voir title= pour le détail). */
-.wiki-card-extra-cats {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  margin-top: 0.1rem;
-  min-width: 0;
-  overflow: hidden;
-}
-.wiki-card-extra-cats-dots {
-  display: flex;
-  align-items: center;
-  gap: 0.2rem;
-  flex-shrink: 0;
-}
-.wiki-extra-cat-dot {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.wiki-card-extra-cats-label {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.72rem;
-  color: var(--muted);
 }
 .wiki-extra-cats-field {
   margin: 0.5rem 0;
@@ -2213,14 +2164,6 @@ input[type="text"], input[type="password"] {
 }
 .wiki-card[data-ultra="1"] .wiki-card-header {
   background: transparent;
-}
-.wiki-card[data-ultra="1"] .wiki-card-derived {
-  color: #9070c0;
-}
-.wiki-card[data-ultra="1"] .link-tag-pill {
-  background: rgba(100,50,180,0.35);
-  border: 1px solid rgba(140,80,220,0.4);
-  color: #c0a0e8;
 }
 .wiki-card[data-ultra="1"]::before {
   content: "Ultra";
@@ -2245,16 +2188,8 @@ input[type="text"], input[type="password"] {
 .wiki-card[data-fantaisie="1"] .wiki-card-title {
   color: #6a2f9a;
 }
-.wiki-card[data-fantaisie="1"] .wiki-card-derived {
-  color: #9a60b8;
-}
 .wiki-card[data-fantaisie="1"] .wiki-card-header {
   background: transparent;
-}
-.wiki-card[data-fantaisie="1"] .link-tag-pill {
-  background: rgba(160,80,200,0.12);
-  border: 1px solid rgba(180,100,220,0.35);
-  color: #7a3fa8;
 }
 .wiki-card[data-fantaisie="1"]::after {
   content: "✨";
@@ -2276,12 +2211,6 @@ input[type="text"], input[type="password"] {
     background: linear-gradient(150deg, #1e0f2a 0%, #260e38 50%, #200e28 100%);
   }
   .wiki-card[data-fantaisie="1"] .wiki-card-title { color: #d8a8f8; }
-  .wiki-card[data-fantaisie="1"] .wiki-card-derived { color: #a870d0; }
-  .wiki-card[data-fantaisie="1"] .link-tag-pill {
-    background: rgba(160,80,200,0.2);
-    border-color: rgba(180,100,220,0.4);
-    color: #c090e0;
-  }
 }
 
 .wiki-detail {
@@ -2318,16 +2247,11 @@ input[type="text"], input[type="password"] {
   font-size: 0.85rem;
 }
 
-/* Tags mobiles dans l'infobox : cachés sur desktop */
-.wiki-infobox-tags { display: none; }
-
 /* Dots carrousel : cachés par défaut (mobile les ré-active plus bas) */
 .wiki-carousel-dots { display: none; }
 
 @media (max-width: 640px) {
   /* ── Layout mobile : flux vertical ─────────────────────────────── */
-  .wiki-detail-tags { display: none !important; } /* version desktop masquée */
-
   .wiki-body {
     display: flex;
     flex-direction: column;
@@ -2342,7 +2266,6 @@ input[type="text"], input[type="password"] {
 
   /* ── Ordre des sections ─────────────────────────────────────────── */
   .wiki-infobox-images:not(.wiki-infobox-images-rest) { order: 1; }
-  .wiki-infobox-tags   { order: 2; display: flex; flex-wrap: wrap; gap: 0.35rem; }
   .wiki-infobox-params { order: 3; }
   .wiki-infobox-react  { order: 4; }
   .wiki-md             { order: 5; }
@@ -2538,7 +2461,7 @@ input[type="text"], input[type="password"] {
   transition: border-color 0.15s, background 0.15s;
   overflow: hidden;
 }
-.wiki-page-nav-btn:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--card)); }
+.wiki-page-nav-btn:hover { border-color: var(--wiki-gold); background: color-mix(in srgb, var(--wiki-gold) 8%, var(--card)); }
 .wiki-page-nav-disabled { visibility: hidden; pointer-events: none; }
 
 .wiki-page-nav-prev { justify-content: flex-start; }
@@ -2576,6 +2499,8 @@ input[type="text"], input[type="password"] {
 /* Markdown rendered content */
 .wiki-md {
   line-height: 1.75;
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 .wiki-md h2 {
@@ -3234,6 +3159,13 @@ input[type="text"], input[type="password"] {
   color: var(--fg);
 }
 
+/* Tags/mots dérivés relégués en toute fin de page, après les suggestions */
+.wiki-detail-tags-end {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--border);
+}
+
 .wiki-detail-actions {
   display: flex;
   align-items: center;
@@ -3241,8 +3173,29 @@ input[type="text"], input[type="password"] {
   margin-top: 0.5rem;
 }
 
+/* Seule action visible en lecture : éditer. Le supprimer ne vit que
+   dans le formulaire d'édition, pour éviter tout miss-click. */
+.wiki-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.3rem;
+  border: 1px solid var(--wiki-gold);
+  border-radius: 999px;
+  color: var(--wiki-gold);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+.wiki-edit-btn:hover {
+  background: var(--wiki-gold);
+  color: #fff;
+}
+
 .link-delete-form-inline {
-  margin: 0;
+  margin: 2rem 0 0;
+  text-align: center;
 }
 
 .link-delete-btn-text {

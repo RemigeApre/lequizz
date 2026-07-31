@@ -211,7 +211,42 @@
       <div class="wiki-new-previews"></div>
     </div>
 
-    <button type="submit">Enregistrer</button>
+    <div class="wiki-form-actions">
+      <button type="submit">Enregistrer</button>
+      <a href="/wiki/<%= page.id %>" class="link-button">Annuler</a>
+    </div>
+  </form>
+
+  <%# ─ Pages liées : gérées ici, jamais affichées en lecture ─ %>
+  <div class="wiki-page-links" data-page-id="<%= page.id %>">
+    <h3 class="wiki-pl-heading">Pages li&eacute;es</h3>
+    <div class="wiki-pl-body">
+      <div class="wiki-pl-section">
+        <div class="wiki-pl-cards" data-role="links"></div>
+      </div>
+      <div class="wiki-pl-section wiki-pl-backlinks-section" hidden>
+        <p class="wiki-pl-back-label">R&eacute;f&eacute;renc&eacute;e par</p>
+        <div class="wiki-pl-cards" data-role="backlinks"></div>
+      </div>
+    </div>
+    <div class="wiki-pl-add">
+      <input type="text" class="wiki-pl-search" placeholder="Lier une autre page&hellip;" autocomplete="off" />
+      <ul class="wiki-pl-results"></ul>
+    </div>
+  </div>
+
+  <%# ─ Questions liées au quizz : idem ─ %>
+  <div class="wiki-question-links" data-page-id="<%= page.id %>">
+    <h3 class="wiki-ql-heading">Questions du quizz li&eacute;es</h3>
+    <ul class="wiki-ql-list"></ul>
+    <div class="wiki-ql-add">
+      <input type="text" class="wiki-ql-search" placeholder="Associer une question&hellip;" autocomplete="off" />
+      <ul class="wiki-ql-results"></ul>
+    </div>
+  </div>
+
+  <form method="POST" action="/wiki/<%= page.id %>/delete" class="link-delete-form-inline">
+    <button type="submit" class="link-delete-btn-text">Supprimer la page</button>
   </form>
 </main>
 <script src="/wiki.js?v=<%= assetVersion %>"></script>

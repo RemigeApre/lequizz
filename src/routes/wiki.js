@@ -178,6 +178,26 @@ function buildWikiRouter(config) {
     return (page.tags || []).some((t) => String(t).toLowerCase() === "ultra");
   }
 
+  // Le bouton "retour" d'une page doit ramener a l'endroit precis d'ou l'on
+  // vient (sommaire, vue globale ou chapitre d'une categorie), pas toujours
+  // au sommaire general.
+  function wikiBackTarget(req) {
+    const fallback = { href: "/wiki", label: "Sommaire" };
+    const ref = req.get("referer");
+    if (!ref) return fallback;
+    try {
+      const url = new URL(ref);
+      if (url.pathname === "/wiki") return fallback;
+      if (url.pathname === "/wiki/tous") return { href: "/wiki/tous" + url.search, label: "Toutes les pages" };
+      const m = url.pathname.match(/^\/wiki\/categorie\/([^/]+)$/);
+      if (m) {
+        const cat = CATEGORIES.find((c) => c.key === m[1]);
+        if (cat) return { href: url.pathname, label: cat.label };
+      }
+    } catch (_) {}
+    return fallback;
+  }
+
   // ── Sommaire : une "etagere" par categorie, comme les chapitres d'un livre ──
   // Vue d'accueil/decouverte : les pages ULTRA restent masquees ici par defaut
   // (elles restent consultables via /wiki/categorie/:key et /wiki/tous).
@@ -273,7 +293,8 @@ function buildWikiRouter(config) {
     const prevPage = idx > 0 ? { id: allPages[idx - 1].id, title: allPages[idx - 1].title } : null;
     const nextPage = idx < allPages.length - 1 ? { id: allPages[idx + 1].id, title: allPages[idx + 1].title } : null;
     const suggestions = computeSuggestions(page, allPages);
-    res.render("wiki-detail", { config, page, suggestions, prevPage, nextPage, ...CTX });
+    const back = wikiBackTarget(req);
+    res.render("wiki-detail", { config, page, suggestions, prevPage, nextPage, backHref: back.href, backLabel: back.label, ...CTX });
   });
 
   router.get("/:id/edit", (req, res) => {
