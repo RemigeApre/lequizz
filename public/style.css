@@ -1437,6 +1437,43 @@ input[type="text"], input[type="password"] {
    WIKI — NOUVELLE PAGE : BOUTON + ÉTAPES
    ══════════════════════════════════════════════════════════ */
 
+/* Volet filtres/tri : replié par défaut, s'ouvre en accordéon comme
+   les sections de description, pour ne pas encombrer la page. */
+.wiki-filters-panel {
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  overflow: hidden;
+}
+.wiki-filters-summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--fg);
+}
+.wiki-filters-summary::-webkit-details-marker { display: none; }
+.wiki-filters-summary::before {
+  content: "\25B8";
+  display: inline-block;
+  font-size: 0.75em;
+  color: var(--wiki-gold);
+  transition: transform 0.15s ease;
+}
+.wiki-filters-panel[open] > .wiki-filters-summary::before {
+  transform: rotate(90deg);
+}
+.wiki-filters-body {
+  padding: 0 1rem 1rem;
+  border-top: 1px solid var(--border);
+  padding-top: 0.85rem;
+}
+
 .wiki-controls {
   display: flex;
   flex-direction: column;
@@ -4568,12 +4605,11 @@ input[type="text"], input[type="password"] {
 }
 
 /* ── Page d'une catégorie (chapitre ouvert) : identité propre à son thème ── */
+/* Même logique que le bandeau de la page de lecture : flèche sans
+   texte à gauche, titre centré, nombre de pages simple et discret à
+   droite (pas un badge), description centrée en dessous. */
 .wiki-chapter-hero {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.3rem;
-  padding: 1.6rem 1.8rem 1.5rem;
+  padding: 1.5rem 1.6rem 1.4rem;
   margin-bottom: 1.5rem;
   border-radius: 16px;
   background: linear-gradient(100deg, hsl(var(--ch-hue, 220), 38%, 24%), hsl(var(--ch-hue, 220), 34%, 32%));
@@ -4582,54 +4618,63 @@ input[type="text"], input[type="password"] {
   box-shadow: 0 1px 3px rgba(40, 30, 10, 0.06);
 }
 
+.wiki-chapter-hero-top {
+  display: grid;
+  grid-template-columns: 1.8rem 1fr 1.8rem;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .wiki-chapter-hero-back {
-  font-size: 0.82rem;
-  font-weight: 600;
+  grid-column: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
   color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
-  margin-bottom: 0.3rem;
 }
 .wiki-chapter-hero-back:hover {
   color: #fff;
-  text-decoration: underline;
 }
 
 .wiki-chapter-hero-title {
+  grid-column: 2;
   margin: 0;
+  text-align: center;
   font-family: Georgia, "Times New Roman", serif;
   font-style: italic;
-  font-size: 1.7rem;
+  font-size: 1.6rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   color: #fff;
 }
 
-.wiki-chapter-hero-desc {
-  margin: 0.15rem 0 0;
-  font-size: 0.92rem;
-  color: rgba(255, 255, 255, 0.82);
+.wiki-chapter-hero-count {
+  grid-column: 3;
+  text-align: right;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
 }
 
-.wiki-chapter-hero-count {
-  margin-top: 0.55rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  border-radius: 999px;
-  padding: 0.15rem 0.6rem;
+.wiki-chapter-hero-desc {
+  margin: 0.6rem 0 0;
+  text-align: center;
+  font-size: 0.9rem;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.82);
 }
 
 @media (max-width: 640px) {
   .wiki-chapter-hero {
-    padding: 1.2rem 1.25rem 1.15rem;
+    padding: 1.15rem 1.1rem 1.1rem;
     border-radius: 0;
     margin: 0 -1.25rem 1.5rem;
     width: calc(100% + 2.5rem);
   }
   .wiki-chapter-hero-title {
-    font-size: 1.35rem;
+    font-size: 1.3rem;
   }
 }
 

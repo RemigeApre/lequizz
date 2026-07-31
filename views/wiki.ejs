@@ -4,10 +4,12 @@
 
   <% if (lockedCategory) { %>
     <div class="wiki-chapter-hero">
-      <a href="/wiki" class="wiki-chapter-hero-back">&larr; Sommaire</a>
-      <h1 class="wiki-chapter-hero-title"><%= lockedCategory.label %></h1>
+      <div class="wiki-chapter-hero-top">
+        <a href="/wiki" class="wiki-chapter-hero-back" title="Retour au sommaire" aria-label="Retour au sommaire">&larr;</a>
+        <h1 class="wiki-chapter-hero-title"><%= lockedCategory.label %></h1>
+        <span class="wiki-chapter-hero-count"><%= pages.length %></span>
+      </div>
       <% if (lockedCategory.desc) { %><p class="wiki-chapter-hero-desc"><%= lockedCategory.desc %></p><% } %>
-      <span class="wiki-chapter-hero-count"><%= pages.length %> page<%= pages.length === 1 ? '' : 's' %></span>
     </div>
   <% } else { %>
     <div class="wiki-page-header">
@@ -16,69 +18,76 @@
     </div>
   <% } %>
 
-  <%# ─── RECHERCHE ───────────────────────────────────────────────────── %>
+  <%# ─── RECHERCHE : toujours visible ──────────────────────────────────── %>
   <div class="wiki-search-wrap">
     <div class="wiki-search-bar">
       <span class="wiki-search-icon">&#128269;</span>
       <input type="search" id="wiki-search-input" class="wiki-search-input" placeholder="<%= lockedCategory ? 'Rechercher dans ' + lockedCategory.label + '…' : 'Rechercher une page…' %>" autocomplete="off" />
       <button type="button" id="wiki-search-clear" class="wiki-search-clear" hidden>&#215;</button>
     </div>
-    <button type="button" id="wiki-adv-toggle" class="wiki-adv-toggle">Filtres avancés &#9662;</button>
     <span id="wiki-result-count" class="wiki-result-count" hidden></span>
   </div>
 
-  <div id="wiki-adv-panel" class="wiki-adv-panel" hidden>
-    <div class="wiki-adv-row">
-      <label class="wiki-adv-label">Note min.</label>
-      <div class="wiki-adv-stars" id="wiki-adv-stars">
-        <% for (var si = 1; si <= 5; si++) { %>
-          <button type="button" class="wiki-adv-star" data-value="<%= si %>">&#9734;</button>
+  <%# ─── FILTRES + TRI : replié par défaut, s'ouvre si un filtre est actif ─── %>
+  <details class="wiki-filters-panel" id="wiki-filters-panel">
+    <summary class="wiki-filters-summary">Filtres &amp; tri</summary>
+
+    <div class="wiki-filters-body">
+      <button type="button" id="wiki-adv-toggle" class="wiki-adv-toggle">Filtres avancés &#9662;</button>
+
+      <div id="wiki-adv-panel" class="wiki-adv-panel" hidden>
+        <div class="wiki-adv-row">
+          <label class="wiki-adv-label">Note min.</label>
+          <div class="wiki-adv-stars" id="wiki-adv-stars">
+            <% for (var si = 1; si <= 5; si++) { %>
+              <button type="button" class="wiki-adv-star" data-value="<%= si %>">&#9734;</button>
+            <% } %>
+            <button type="button" class="wiki-adv-star-reset" id="wiki-adv-star-reset">&#10006;</button>
+          </div>
+        </div>
+        <div class="wiki-adv-checks">
+          <label class="chip-option"><input type="checkbox" id="adv-owned" /><span>&#9733; Poss&eacute;d&eacute;</span></label>
+          <label class="chip-option"><input type="checkbox" id="adv-flame" /><span>&#128293; J&apos;adore</span></label>
+          <label class="chip-option"><input type="checkbox" id="adv-interested" /><span>&#10024; Int&eacute;ress&eacute;e</span></label>
+          <label class="chip-option"><input type="checkbox" id="adv-anglais" /><span>&#127468;&#127463; Anglais</span></label>
+        </div>
+      </div>
+
+      <div class="wiki-controls">
+        <% if (!lockedCategory) { %>
+          <div class="links-filter" id="wiki-category-filter">
+            <button type="button" class="tag-chip active" data-category="">Tous</button>
+            <% categories.forEach(function (c) { %>
+              <button type="button" class="tag-chip" data-category="<%= c.key %>"><%= c.label %></button>
+            <% }) %>
+            <button type="button" class="tag-chip tag-chip-owned" data-category="__owned__">&#9733; Nos objets</button>
+          </div>
         <% } %>
-        <button type="button" class="wiki-adv-star-reset" id="wiki-adv-star-reset">&#10006;</button>
+
+        <% if (allTags.length) { %>
+          <div class="links-filter" id="wiki-tag-filter">
+            <button type="button" class="tag-chip active" data-tag="">Tous les tags</button>
+            <% allTags.forEach(function (tag) { %>
+              <button type="button" class="tag-chip" data-tag="<%= tag %>"><%= tag %></button>
+            <% }) %>
+          </div>
+        <% } %>
+
+        <div class="wiki-sort-row">
+          <button type="button" id="wiki-ultra-toggle" class="wiki-ultra-btn">&#128274; Masquer Ultra</button>
+          <label class="wiki-sort-label" for="wiki-sort-select">Trier&nbsp;:</label>
+          <select id="wiki-sort-select" class="wiki-sort-select">
+            <option value="alpha-asc" selected>A &rarr; Z</option>
+            <option value="alpha-desc">Z &rarr; A</option>
+            <option value="date-desc">Plus r&eacute;cent</option>
+            <option value="date-asc">Plus ancien</option>
+            <option value="rating-desc">Mieux not&eacute;</option>
+            <% if (!lockedCategory) { %><option value="category">Cat&eacute;gorie</option><% } %>
+          </select>
+        </div>
       </div>
     </div>
-    <div class="wiki-adv-checks">
-      <label class="chip-option"><input type="checkbox" id="adv-owned" /><span>&#9733; Poss&eacute;d&eacute;</span></label>
-      <label class="chip-option"><input type="checkbox" id="adv-flame" /><span>&#128293; J&apos;adore</span></label>
-      <label class="chip-option"><input type="checkbox" id="adv-interested" /><span>&#10024; Int&eacute;ress&eacute;e</span></label>
-      <label class="chip-option"><input type="checkbox" id="adv-anglais" /><span>&#127468;&#127463; Anglais</span></label>
-    </div>
-  </div>
-
-  <%# ─── FILTRES + TRI ────────────────────────────────────────────────── %>
-  <div class="wiki-controls">
-    <% if (!lockedCategory) { %>
-      <div class="links-filter" id="wiki-category-filter">
-        <button type="button" class="tag-chip active" data-category="">Tous</button>
-        <% categories.forEach(function (c) { %>
-          <button type="button" class="tag-chip" data-category="<%= c.key %>"><%= c.label %></button>
-        <% }) %>
-        <button type="button" class="tag-chip tag-chip-owned" data-category="__owned__">&#9733; Nos objets</button>
-      </div>
-    <% } %>
-
-    <% if (allTags.length) { %>
-      <div class="links-filter" id="wiki-tag-filter">
-        <button type="button" class="tag-chip active" data-tag="">Tous les tags</button>
-        <% allTags.forEach(function (tag) { %>
-          <button type="button" class="tag-chip" data-tag="<%= tag %>"><%= tag %></button>
-        <% }) %>
-      </div>
-    <% } %>
-
-    <div class="wiki-sort-row">
-      <button type="button" id="wiki-ultra-toggle" class="wiki-ultra-btn">&#128274; Masquer Ultra</button>
-      <label class="wiki-sort-label" for="wiki-sort-select">Trier&nbsp;:</label>
-      <select id="wiki-sort-select" class="wiki-sort-select">
-        <option value="alpha-asc" selected>A &rarr; Z</option>
-        <option value="alpha-desc">Z &rarr; A</option>
-        <option value="date-desc">Plus r&eacute;cent</option>
-        <option value="date-asc">Plus ancien</option>
-        <option value="rating-desc">Mieux not&eacute;</option>
-        <% if (!lockedCategory) { %><option value="category">Cat&eacute;gorie</option><% } %>
-      </select>
-    </div>
-  </div>
+  </details>
 
   <%# ─── GRILLE ────────────────────────────────────────────────────────── %>
   <div class="wiki-grid" id="wiki-list">

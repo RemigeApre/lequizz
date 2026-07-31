@@ -768,16 +768,19 @@
     if (searchClear) searchClear.hidden = false;
   }
   // Ouvre le panneau avancé si un filtre avancé est actif
-  if (advPanel) {
-    var anyAdv = advMinRating > 0 ||
+  var anyAdv = advMinRating > 0 ||
       (advOwned && advOwned.checked) ||
       (advFlame && advFlame.checked) ||
       (advInterested && advInterested.checked) ||
       (advAnglais && advAnglais.checked);
-    if (anyAdv) {
-      advPanel.hidden = false;
-      if (advToggle) advToggle.innerHTML = "Filtres avanc\u00e9s &#9652;";
-    }
+  if (advPanel && anyAdv) {
+    advPanel.hidden = false;
+    if (advToggle) advToggle.innerHTML = "Filtres avanc\u00e9s &#9652;";
+  }
+
+  var filtersPanel = document.getElementById("wiki-filters-panel");
+  if (filtersPanel && (anyAdv || activeCategory || activeTag || activeSort !== "alpha-asc" || !hideUltra)) {
+    filtersPanel.open = true;
   }
 
   applyFilters(); // toujours appelé au chargement
