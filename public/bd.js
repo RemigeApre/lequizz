@@ -277,4 +277,26 @@
   syncUltraBtn();
   applyUltra();
 
+  // ══════════════════════════════════════════════════
+  // BASCULE ULTRA PAR BD (bouton sur chaque carte)
+  // ══════════════════════════════════════════════════
+  document.querySelectorAll(".bd-ultra-toggle-btn").forEach(function (btn) {
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var card = btn.closest(".bd-card");
+      var id = card ? card.dataset.id : "";
+      if (!id) return;
+      fetch("/bd/" + id + "/toggle-ultra", { method: "POST" })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (!d.ok) return;
+          btn.classList.toggle("active", d.ultra);
+          btn.title = d.ultra ? "Retirer Ultra" : "Marquer Ultra";
+          card.dataset.ultra = d.ultra ? "1" : "0";
+          applyUltra();
+        });
+    });
+  });
+
 })();

@@ -3851,9 +3851,19 @@ input[type="text"], input[type="password"] {
   color: #fff;
   font-size: 0.75rem;
   text-decoration: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   transition: background 0.12s;
 }
 .gallery-card-btn:hover { background: rgba(0,0,0,0.75); }
+
+.gallery-ultra-toggle-btn.active {
+  background: color-mix(in srgb, #8b5cf6 65%, rgba(0,0,0,0.5));
+}
+.gallery-ultra-toggle-btn.active:hover {
+  background: color-mix(in srgb, #8b5cf6 80%, rgba(0,0,0,0.5));
+}
 
 .gallery-card-body {
   padding: 0.4rem 0.6rem 0.55rem;
@@ -4015,8 +4025,7 @@ input[type="text"], input[type="password"] {
 }
 
 .bd-card {
-  text-decoration: none;
-  color: var(--text);
+  position: relative;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -4028,6 +4037,52 @@ input[type="text"], input[type="password"] {
   border-color: var(--accent);
   box-shadow: 0 2px 12px color-mix(in srgb, var(--accent) 20%, transparent);
 }
+
+.bd-card-link {
+  display: block;
+  text-decoration: none;
+  color: var(--fg);
+}
+
+.bd-card-actions {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  z-index: 2;
+  display: flex;
+  gap: 0.3rem;
+  opacity: 0.85;
+  transition: opacity 0.15s;
+}
+.bd-card:hover .bd-card-actions { opacity: 1; }
+
+.bd-ultra-toggle-btn,
+.bd-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: #fff;
+  background: rgba(0,0,0,0.55);
+  transition: background 0.12s;
+}
+.bd-ultra-toggle-btn:hover { background: rgba(0,0,0,0.8); }
+.bd-ultra-toggle-btn.active {
+  background: color-mix(in srgb, #8b5cf6 65%, rgba(0,0,0,0.55));
+}
+.bd-ultra-toggle-btn.active:hover {
+  background: color-mix(in srgb, #8b5cf6 80%, rgba(0,0,0,0.55));
+}
+
+.bd-delete-form { margin: 0; }
+.bd-delete-btn { background: rgba(180,30,30,0.75); }
+.bd-delete-btn:hover { background: rgba(180,30,30,0.95); }
 
 .bd-card-cover {
   width: 100%;

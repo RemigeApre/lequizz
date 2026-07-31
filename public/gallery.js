@@ -314,4 +314,30 @@
     });
   });
 
+  // ══════════════════════════════════════════════════
+  // 6. BASCULE ULTRA PAR IMAGE (bouton sur chaque carte)
+  // ══════════════════════════════════════════════════
+  document.querySelectorAll(".gallery-ultra-toggle-btn").forEach(function (btn) {
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var card = btn.closest(".gallery-card");
+      var id = card ? card.dataset.galleryId : "";
+      if (!id) return;
+      fetch("/galerie/" + id + "/toggle-ultra", { method: "POST" })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (!d.ok) return;
+          btn.classList.toggle("active", d.ultra);
+          btn.title = d.ultra ? "Retirer Ultra" : "Marquer Ultra";
+          var tags = (card.dataset.tags || "").split("|").filter(Boolean);
+          if (d.ultra && tags.indexOf("ultra") === -1) tags.push("ultra");
+          if (!d.ultra) tags = tags.filter(function (t) { return t !== "ultra"; });
+          card.dataset.tags = tags.join("|");
+          card.dataset.ultra = d.ultra ? "1" : "0";
+          applyFilters();
+        });
+    });
+  });
+
 })();

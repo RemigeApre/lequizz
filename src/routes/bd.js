@@ -27,6 +27,16 @@ function parseTags(raw) {
   return String(raw || "").split(/[,;]+/).map((t) => t.trim()).filter(Boolean);
 }
 
+function hasUltra(tags) {
+  return tags.some((t) => t.toLowerCase() === "ultra");
+}
+
+function toggleUltraTags(tags) {
+  return hasUltra(tags)
+    ? { tags: tags.filter((t) => t.toLowerCase() !== "ultra"), ultra: false }
+    : { tags: [...tags, "ultra"], ultra: true };
+}
+
 function applyImageOrder(existing, newFiles, orderRaw) {
   if (!orderRaw) return [...existing, ...newFiles];
   const entries = String(orderRaw).split(",").map((s) => s.trim()).filter(Boolean);
@@ -72,6 +82,15 @@ function buildBdRouter(config) {
     const book = getBdBook(Number(req.params.id));
     if (!book) return res.redirect("/bd");
     res.render("bd-form", { config, book });
+  });
+
+  router.post("/:id/toggle-ultra", (req, res) => {
+    const id = Number(req.params.id);
+    const book = Number.isInteger(id) ? getBdBook(id) : null;
+    if (!book) return res.status(404).json({ ok: false });
+    const { tags, ultra } = toggleUltraTags(book.tags);
+    updateBdBook(id, { title: book.title, description: book.description, tags, imagePaths: book.imagePaths });
+    res.json({ ok: true, ultra });
   });
 
   router.post("/:id/delete", (req, res) => {

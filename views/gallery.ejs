@@ -90,6 +90,7 @@
           <% } %>
           <div class="gallery-card-btns">
             <% if (item.type === 'gallery' && item.id) { %>
+              <button type="button" class="gallery-card-btn gallery-ultra-toggle-btn<%= item.tags.indexOf('ultra') !== -1 ? ' active' : '' %>" title="<%= item.tags.indexOf('ultra') !== -1 ? 'Retirer Ultra' : 'Marquer Ultra' %>">&#128274;</button>
               <a href="/galerie/<%= item.id %>/edit" class="gallery-card-btn" title="Modifier">&#9998;</a>
             <% } %>
             <% if (item.type === 'wiki' && item.wikiPageId) { %>

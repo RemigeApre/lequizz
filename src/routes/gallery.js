@@ -46,6 +46,16 @@ function parseTags(raw) {
   return String(raw || "").split(/[,;]+/).map((t) => t.trim()).filter(Boolean);
 }
 
+function hasUltra(tags) {
+  return tags.some((t) => t.toLowerCase() === "ultra");
+}
+
+function toggleUltraTags(tags) {
+  return hasUltra(tags)
+    ? { tags: tags.filter((t) => t.toLowerCase() !== "ultra"), ultra: false }
+    : { tags: [...tags, "ultra"], ultra: true };
+}
+
 function buildItems(galleryImages, wikiPages) {
   const wikiItems = wikiPages.flatMap((page) =>
     page.imagePaths.map((src) => ({
@@ -122,6 +132,15 @@ function buildGalleryRouter(config) {
       notes: String(req.body.notes || "").trim(),
     });
     res.redirect("/galerie");
+  });
+
+  router.post("/:id/toggle-ultra", (req, res) => {
+    const id = Number(req.params.id);
+    const image = Number.isInteger(id) ? getGalleryImage(id) : null;
+    if (!image) return res.status(404).json({ ok: false });
+    const { tags, ultra } = toggleUltraTags(image.tags);
+    updateGalleryImage(id, { title: image.title, tags, notes: image.notes });
+    res.json({ ok: true, ultra });
   });
 
   router.post("/:id/delete", (req, res) => {
