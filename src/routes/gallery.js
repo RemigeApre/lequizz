@@ -13,6 +13,7 @@ const {
 
 const CATEGORIES = [
   { key: "fantasmes",   label: "Fantasmes",   hue: 330 },
+  { key: "jeu_de_role", label: "Jeu de rôle", hue:  60 },
   { key: "partenaires", label: "Partenaires", hue: 210 },
   { key: "pratique",    label: "Pratique",    hue:   5 },
   { key: "position",    label: "Position",    hue: 270 },

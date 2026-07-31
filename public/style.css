@@ -1349,27 +1349,6 @@ input[type="text"], input[type="password"] {
   }
 }
 
-/* Pastille "Anglais" */
-.wiki-anglais-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.2rem;
-  background: #e8f0ff;
-  color: #1a3a80;
-  border: 1px solid #b0c8f0;
-  border-radius: 999px;
-  padding: 0.18rem 0.65rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-@media (prefers-color-scheme: dark) {
-  .wiki-anglais-badge {
-    background: #0d1a40;
-    color: #7090e0;
-    border-color: #2040a0;
-  }
-}
-
 /* Termes dérivés */
 .wiki-derived-sep {
   color: var(--muted);
@@ -1384,6 +1363,12 @@ input[type="text"], input[type="password"] {
   padding: 0.18rem 0.6rem;
   font-size: 0.75rem;
   font-style: italic;
+}
+/* Petit drapeau à côté d'un synonyme marqué anglais (par terme, plus
+   un réglage global pour toute la page) */
+.wiki-derived-en {
+  font-style: normal;
+  font-size: 0.85em;
 }
 
 /* Ligne termes dérivés dans le formulaire */
@@ -1400,10 +1385,24 @@ input[type="text"], input[type="password"] {
 .wiki-derived-widget .wiki-meta-label {
   margin-bottom: 0.35rem;
 }
-.wiki-anglais-chip {
-  flex: 0 0 auto;
-  align-self: flex-end;
-  margin-bottom: 0.15rem;
+
+/* Bouton "EN" sur une puce de synonyme : marque ce terme précis comme
+   anglais, indépendamment des autres synonymes de la même page. */
+.wiki-chip-en {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.15rem 0.35rem;
+  cursor: pointer;
+}
+.wiki-chip-en.active {
+  background: var(--wiki-gold);
+  border-color: var(--wiki-gold);
+  color: #fff;
 }
 
 .link-delete-form {
@@ -2973,7 +2972,8 @@ input[type="text"], input[type="password"] {
 }
 
 /* ── Liens entre pages wiki ────────────────────────── */
-.wiki-page-links {
+.wiki-page-links,
+.wiki-page-links-view {
   margin: 2rem 0 0;
   border-top: 1px solid var(--border);
   padding-top: 1.25rem;
@@ -3124,7 +3124,8 @@ input[type="text"], input[type="password"] {
 }
 
 /* ── Questions liées ───────────────────────────────── */
-.wiki-question-links {
+.wiki-question-links,
+.wiki-question-links-view {
   margin: 2rem 0 1.25rem;
   border-top: 1px solid var(--border);
   padding-top: 1.25rem;
@@ -4500,11 +4501,11 @@ input[type="text"], input[type="password"] {
 
 /* Titre centré au-dessus du sommaire des chapitres */
 .wiki-chapters-title {
-  margin: 0 0 1.1rem;
+  margin: 1.75rem 0 1.1rem;
   text-align: center;
   font-family: Georgia, "Times New Roman", serif;
   font-style: italic;
-  font-size: 1.3rem;
+  font-size: 1.9rem;
   color: var(--fg);
 }
 

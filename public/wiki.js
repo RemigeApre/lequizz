@@ -104,21 +104,37 @@
   // ══════════════════════════════════════════════════
   // 3. WIDGET TAGS VISUELS
   // ══════════════════════════════════════════════════
-  function createChipEl(tag, onRemove) {
-    var hue = tagHue(tag);
+  // isDerived : widget des synonymes, où chaque terme peut être marqué
+  // "anglais" individuellement via un petit bouton EN sur sa puce
+  // (remplace l'ancien réglage global qui s'appliquait à tort à tous
+  // les synonymes en même temps).
+  function createChipEl(item, onRemove, isDerived, onToggleEn) {
+    var hue = tagHue(item.term);
     var chip = document.createElement("span");
     chip.className = "wiki-chip";
     chip.style.setProperty("--h", hue);
-    chip.dataset.tag = tag;
+    chip.dataset.tag = item.term;
     var text = document.createElement("span");
-    text.textContent = tag;
+    text.textContent = item.term;
+    chip.appendChild(text);
+    if (isDerived) {
+      var enBtn = document.createElement("button");
+      enBtn.type = "button";
+      enBtn.className = "wiki-chip-en" + (item.en ? " active" : "");
+      enBtn.textContent = "EN";
+      enBtn.title = item.en ? "Terme anglais (cliquer pour retirer)" : "Marquer comme terme anglais";
+      enBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        onToggleEn(item.term);
+      });
+      chip.appendChild(enBtn);
+    }
     var btn = document.createElement("button");
     btn.type = "button";
     btn.className = "wiki-chip-remove";
     btn.innerHTML = "&#215;";
     btn.title = "Retirer";
-    btn.addEventListener("click", function () { onRemove(tag); });
-    chip.appendChild(text);
+    btn.addEventListener("click", function () { onRemove(item.term); });
     chip.appendChild(btn);
     return chip;
   }
@@ -130,27 +146,39 @@
     var suggestBox = widget.querySelector(".wiki-tag-suggestions");
     if (!board || !typer || !hidden) return;
 
-    var tags = [];
+    var isDerived = widget.classList.contains("wiki-derived-widget");
+    var tags = []; // { term, en }
 
-    // Initialise depuis la valeur cachée (formulaire d'édition)
+    function findTag(term) {
+      for (var i = 0; i < tags.length; i++) if (tags[i].term === term) return tags[i];
+      return null;
+    }
+
+    // Initialise depuis la valeur cachée (formulaire d'édition) ; un
+    // terme dérivé anglais porte le suffixe interne "::en".
     var initVal = (hidden.value || "").trim();
     if (initVal) {
-      initVal.split(/[,;]+/).forEach(function (t) {
-        var clean = t.trim();
-        if (clean && tags.indexOf(clean) === -1) tags.push(clean);
+      initVal.split(/[,;]+/).forEach(function (raw) {
+        var t = raw.trim();
+        if (!t) return;
+        var en = false;
+        if (isDerived && /::en$/.test(t)) { en = true; t = t.replace(/::en$/, "").trim(); }
+        if (t && !findTag(t)) tags.push({ term: t, en: en });
       });
     }
 
     function syncHidden() {
-      hidden.value = tags.join(", ");
+      hidden.value = tags.map(function (t) {
+        return isDerived && t.en ? t.term + "::en" : t.term;
+      }).join(", ");
     }
 
     function renderBoard() {
       // Supprime les chips existants (pas le typer)
       Array.from(board.querySelectorAll(".wiki-chip")).forEach(function (c) { c.remove(); });
       // Recrée dans l'ordre
-      tags.forEach(function (tag) {
-        var chip = createChipEl(tag, removeTag);
+      tags.forEach(function (t) {
+        var chip = createChipEl(t, removeTag, isDerived, toggleEn);
         board.insertBefore(chip, typer);
       });
       syncHidden();
@@ -160,22 +188,28 @@
     function syncSuggestions() {
       if (!suggestBox) return;
       suggestBox.querySelectorAll(".wiki-tag-suggest-chip").forEach(function (chip) {
-        chip.classList.toggle("active", tags.indexOf(chip.dataset.tag) !== -1);
+        chip.classList.toggle("active", !!findTag(chip.dataset.tag));
       });
     }
 
     function addTag(raw) {
       raw.split(/[,;]+/).forEach(function (part) {
         var t = part.trim();
-        if (t && tags.indexOf(t) === -1) tags.push(t);
+        if (t && !findTag(t)) tags.push({ term: t, en: false });
       });
       renderBoard();
     }
 
-    function removeTag(tag) {
-      var idx = tags.indexOf(tag);
+    function removeTag(term) {
+      var idx = -1;
+      for (var i = 0; i < tags.length; i++) if (tags[i].term === term) { idx = i; break; }
       if (idx !== -1) tags.splice(idx, 1);
       renderBoard();
+    }
+
+    function toggleEn(term) {
+      var item = findTag(term);
+      if (item) { item.en = !item.en; renderBoard(); }
     }
 
     // Clavier dans le champ de saisie
@@ -185,7 +219,7 @@
         var val = typer.value.trim();
         if (val) { addTag(val); typer.value = ""; }
       } else if (e.key === "Backspace" && typer.value === "" && tags.length) {
-        removeTag(tags[tags.length - 1]);
+        removeTag(tags[tags.length - 1].term);
       }
     });
 
@@ -206,7 +240,7 @@
       suggestBox.querySelectorAll(".wiki-tag-suggest-chip").forEach(function (chip) {
         chip.addEventListener("click", function () {
           var tag = chip.dataset.tag;
-          if (tags.indexOf(tag) === -1) { addTag(tag); }
+          if (!findTag(tag)) { addTag(tag); }
           else { removeTag(tag); }
         });
       });
@@ -1301,7 +1335,7 @@
     var searchTimer;
 
     // Hue de catégorie (doit rester cohérent avec le serveur)
-    var CAT_HUES = { fantasmes:330, partenaires:210, pratique:5, position:270, lieux:140, objets:28, tenues:175, autre:220 };
+    var CAT_HUES = { fantasmes:330, jeu_de_role:60, partenaires:210, pratique:5, position:270, lieux:140, objets:28, tenues:175, autre:220 };
 
     function makeCard(page, removable) {
       var hue = CAT_HUES[page.category] || 220;
@@ -1505,6 +1539,74 @@
   });
 
   // ══════════════════════════════════════════════════
+  // 14. PAGES LIÉES / QUESTIONS LIÉES — LECTURE SEULE
+  // Affichage sur la page de lecture (contrairement à l'édition, pas
+  // de recherche/ajout/suppression ici). Section masquée s'il n'y a
+  // rien à montrer, pour ne pas afficher un bloc vide.
+  // ══════════════════════════════════════════════════
+  (function () {
+    var widget = document.querySelector(".wiki-page-links-view");
+    if (!widget) return;
+    var pageId = widget.dataset.pageId;
+    var area = widget.querySelector("[data-role='links']");
+    var CAT_HUES = { fantasmes:330, jeu_de_role:60, partenaires:210, pratique:5, position:270, lieux:140, objets:28, tenues:175, autre:220 };
+
+    fetch("/wiki/" + pageId + "/page-links")
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var links = (data && data.links) || [];
+        if (!links.length) return;
+        links.forEach(function (p) {
+          var hue = CAT_HUES[p.category] || 220;
+          var a = document.createElement("a");
+          a.href = "/wiki/" + p.id;
+          a.className = "wiki-pl-card";
+          var badge = document.createElement("span");
+          badge.className = "wiki-pl-badge";
+          badge.style.background = "hsl(" + hue + ",55%,45%)";
+          badge.textContent = p.category;
+          var title = document.createElement("span");
+          title.className = "wiki-pl-title";
+          title.textContent = p.title;
+          a.appendChild(badge);
+          a.appendChild(title);
+          area.appendChild(a);
+        });
+        widget.hidden = false;
+      });
+  })();
+
+  (function () {
+    var widget = document.querySelector(".wiki-question-links-view");
+    if (!widget) return;
+    var pageId = widget.dataset.pageId;
+    var list = widget.querySelector(".wiki-ql-list");
+
+    fetch("/wiki/" + pageId + "/question-links")
+      .then(function (r) { return r.json(); })
+      .then(function (links) {
+        if (!links || !links.length) return;
+        links.forEach(function (lk) {
+          var li = document.createElement("li");
+          li.className = "wiki-ql-item";
+          var label = document.createElement("span");
+          label.className = "wiki-ql-label";
+          var section = document.createElement("span");
+          section.className = "wiki-ql-section";
+          section.textContent = lk.section_title;
+          var text = document.createElement("span");
+          text.className = "wiki-ql-text";
+          text.textContent = lk.question_text;
+          label.appendChild(section);
+          label.appendChild(text);
+          li.appendChild(label);
+          list.appendChild(li);
+        });
+        widget.hidden = false;
+      });
+  })();
+
+  // ══════════════════════════════════════════════════
   // 6b. MESSAGE D'INTRO RÉDUCTIBLE (sommaire du wiki)
   // Pas de bouton dédié : un clic/tap n'importe où sur le bloc réduit
   // ou rouvre le message. Réduit, seul l'intitulé "Information" reste.
@@ -1530,6 +1632,30 @@
       if (e.key !== "Enter" && e.key !== " ") return;
       e.preventDefault();
       hero.click();
+    });
+  })();
+
+  // ══════════════════════════════════════════════════
+  // 6c. FILTRES DE RECHERCHE DU SOMMAIRE (volet replié)
+  // Ces réglages ne filtrent rien ici : ils sont mémorisés dans les
+  // mêmes clés localStorage que "/wiki/tous", qui les applique tout
+  // seul en arrivant (comme s'ils avaient été réglés là-bas).
+  // ══════════════════════════════════════════════════
+  (function () {
+    var form = document.getElementById("wiki-hero-search-form");
+    if (!form) return;
+    var rating      = document.getElementById("wiki-hero-rating");
+    var owned       = document.getElementById("wiki-hero-owned");
+    var flame       = document.getElementById("wiki-hero-flame");
+    var interested  = document.getElementById("wiki-hero-interested");
+    var anglais     = document.getElementById("wiki-hero-anglais");
+
+    form.addEventListener("submit", function () {
+      if (rating)     localStorage.setItem("wiki-filter-rating", rating.value);
+      if (owned)      localStorage.setItem("wiki-filter-owned", owned.checked ? "1" : "0");
+      if (flame)      localStorage.setItem("wiki-filter-flame", flame.checked ? "1" : "0");
+      if (interested) localStorage.setItem("wiki-filter-interested", interested.checked ? "1" : "0");
+      if (anglais)    localStorage.setItem("wiki-filter-anglais", anglais.checked ? "1" : "0");
     });
   })();
 

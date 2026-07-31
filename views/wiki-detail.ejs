@@ -18,7 +18,12 @@
     var hasPosMeta = page.category === 'position' && (pm.qui_dessus || (pm.canal && pm.canal.length) || pmOri.length);
 
     var hasImages = page.imagePaths && page.imagePaths.length;
-    var hasAnyTags = page.tags.length || (pm.termes_derives && pm.termes_derives.length) || pm.anglais;
+    // Compat : anciennes pages où termes_derives est un tableau de
+    // chaînes brutes, avant le passage au marquage anglais par terme.
+    var derivedTerms = (pm.termes_derives || []).map(function (t) {
+      return typeof t === 'string' ? { term: t, en: false } : t;
+    });
+    var hasAnyTags = page.tags.length || derivedTerms.length;
   %>
 
   <script id="wiki-existing-pages" type="application/json"><%- JSON.stringify(pages.map(function(p){ return { id: p.id, title: p.title }; })) %></script>
@@ -169,16 +174,27 @@
       </div>
     <% } %>
 
+    <%# ─ Pages liées : lecture seule, en carrousel (édition dans "Modifier") ─ %>
+    <div class="wiki-page-links-view" data-page-id="<%= page.id %>" hidden>
+      <h3 class="wiki-pl-heading">Pages li&eacute;es</h3>
+      <div class="wiki-pl-cards" data-role="links"></div>
+    </div>
+
+    <%# ─ Questions du quizz liées : idem, lecture seule ─ %>
+    <div class="wiki-question-links-view" data-page-id="<%= page.id %>" hidden>
+      <h3 class="wiki-ql-heading">Questions du quizz li&eacute;es</h3>
+      <ul class="wiki-ql-list"></ul>
+    </div>
+
     <%# ─ Tag : tags + mots dérivés, dans un espace réduit et centré ─ %>
     <% if (hasAnyTags) { %>
       <div class="wiki-detail-tag-block">
         <p class="wiki-detail-tag-label">Tag</p>
         <div class="link-card-tags wiki-detail-tags">
-          <% if (pm.anglais) { %><span class="wiki-anglais-badge">&#127468;&#127463; Anglais</span><% } %>
           <% page.tags.forEach(function (t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
-          <% if (pm.termes_derives && pm.termes_derives.length) { %>
+          <% if (derivedTerms.length) { %>
             <span class="wiki-derived-sep">&mdash;</span>
-            <% pm.termes_derives.forEach(function (t) { %><span class="wiki-derived-pill"><%= t %></span><% }) %>
+            <% derivedTerms.forEach(function (t) { %><span class="wiki-derived-pill"><%= t.term %><% if (t.en) { %> <span class="wiki-derived-en" title="Terme anglais">&#127468;&#127463;</span><% } %></span><% }) %>
           <% } %>
         </div>
       </div>

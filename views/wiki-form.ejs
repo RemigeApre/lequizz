@@ -159,19 +159,21 @@
       </div>
     </div>
 
-    <%# ─ Termes dérivés + Anglais ─ %>
+    <%# ─ Termes dérivés : chaque synonyme a son propre bouton "EN" ─ %>
+    <%
+      var pmDerivedValue = (pm.termes_derives || []).map(function (t) {
+        if (typeof t === 'string') return t;
+        return t.term + (t.en ? '::en' : '');
+      }).join(', ');
+    %>
     <div class="wiki-derived-row">
       <div class="wiki-tags-widget wiki-derived-widget">
-        <p class="wiki-meta-label">Synonymes&nbsp;/ termes d&eacute;riv&eacute;s</p>
+        <p class="wiki-meta-label">Synonymes&nbsp;/ termes d&eacute;riv&eacute;s <span class="wiki-md-hint">(bouton EN sur un terme pour le marquer anglais)</span></p>
         <div class="wiki-tags-board">
           <input type="text" class="wiki-tags-typing" placeholder="Ajouter un terme&hellip;" autocomplete="off" />
         </div>
-        <input type="hidden" name="meta_termes_derives" class="wiki-tags-hidden" value="<%= (pm.termes_derives || []).join(', ') %>" />
+        <input type="hidden" name="meta_termes_derives" class="wiki-tags-hidden" value="<%= pmDerivedValue %>" />
       </div>
-      <label class="chip-option wiki-anglais-chip">
-        <input type="checkbox" name="meta_anglais" <%= pm.anglais ? 'checked' : '' %> />
-        <span>&#127468;&#127463;&nbsp;Terme anglais</span>
-      </label>
     </div>
 
     <%# ─ Tags ─ %>

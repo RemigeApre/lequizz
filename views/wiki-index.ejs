@@ -22,18 +22,42 @@
   </section>
 
   <%# ─── RECHERCHE : renvoie vers la vue globale, déjà filtrée ────────── %>
-  <form action="/wiki/tous" method="GET" class="wiki-search-wrap">
+  <form action="/wiki/tous" method="GET" class="wiki-search-wrap" id="wiki-hero-search-form">
     <div class="wiki-search-bar">
       <span class="wiki-search-icon">&#128269;</span>
       <input type="search" name="q" class="wiki-search-input" placeholder="Rechercher une page, un tag, un terme&hellip;" autocomplete="off" />
     </div>
   </form>
 
+  <%# ─── Volet replié : filtres de recherche avancés, transmis à "tous" ── %>
+  <details class="wiki-filters-panel" id="wiki-hero-filters-panel">
+    <summary class="wiki-filters-summary">Filtres de recherche</summary>
+    <div class="wiki-filters-body">
+      <div class="wiki-adv-row">
+        <label class="wiki-adv-label" for="wiki-hero-rating">Note min.</label>
+        <select id="wiki-hero-rating" class="wiki-sort-select">
+          <option value="0" selected>Toutes</option>
+          <option value="1">1 &#9733;</option>
+          <option value="2">2 &#9733;</option>
+          <option value="3">3 &#9733;</option>
+          <option value="4">4 &#9733;</option>
+          <option value="5">5 &#9733;</option>
+        </select>
+      </div>
+      <div class="wiki-adv-checks">
+        <label class="chip-option"><input type="checkbox" id="wiki-hero-owned" /><span>&#9733; Poss&eacute;d&eacute;</span></label>
+        <label class="chip-option"><input type="checkbox" id="wiki-hero-flame" /><span>&#128293; J&apos;adore</span></label>
+        <label class="chip-option"><input type="checkbox" id="wiki-hero-interested" /><span>&#10024; Int&eacute;ress&eacute;e</span></label>
+        <label class="chip-option"><input type="checkbox" id="wiki-hero-anglais" /><span>&#127468;&#127463; Anglais</span></label>
+      </div>
+    </div>
+  </details>
+
+  <h2 class="wiki-chapters-title">Chapitres</h2>
+
   <div class="wiki-new-center">
     <button type="button" id="wiki-new-btn" class="wiki-new-btn">+ Nouvelle page</button>
   </div>
-
-  <h2 class="wiki-chapters-title">Chapitres</h2>
 
   <%# ─── STEP 1 : CHOIX DE CATÉGORIE ─────────────────────────────────── %>
   <div id="wiki-step1" class="wiki-step1" hidden>
@@ -196,19 +220,15 @@
         </div>
       </div>
 
-      <%# ─ Termes dérivés + Anglais ─ %>
+      <%# ─ Termes dérivés : chaque synonyme a son propre bouton "EN" ─ %>
       <div class="wiki-derived-row">
         <div class="wiki-tags-widget wiki-derived-widget">
-          <p class="wiki-meta-label">Synonymes&nbsp;/ termes d&eacute;riv&eacute;s</p>
+          <p class="wiki-meta-label">Synonymes&nbsp;/ termes d&eacute;riv&eacute;s <span class="wiki-md-hint">(bouton EN sur un terme pour le marquer anglais)</span></p>
           <div class="wiki-tags-board">
             <input type="text" class="wiki-tags-typing" placeholder="Ajouter un terme&hellip;" autocomplete="off" />
           </div>
           <input type="hidden" name="meta_termes_derives" class="wiki-tags-hidden" value="" />
         </div>
-        <label class="chip-option wiki-anglais-chip">
-          <input type="checkbox" name="meta_anglais" />
-          <span>&#127468;&#127463;&nbsp;Terme anglais</span>
-        </label>
       </div>
 
       <%# ─ Tags ─ %>

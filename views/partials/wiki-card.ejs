@@ -23,6 +23,12 @@
     });
     wcAccent = 'linear-gradient(90deg, ' + wcStops.join(', ') + ')';
   }
+
+  // Compat : anciennes pages où termes_derives est un tableau de
+  // chaînes brutes, avant le marquage anglais par terme.
+  var wcDerived = ((page.meta && page.meta.termes_derives) || []).map(function (t) {
+    return typeof t === 'string' ? { term: t, en: false } : t;
+  });
 %>
 <a href="/wiki/<%= page.id %>" class="wiki-card"
   data-category="<%= page.category %>"
@@ -33,8 +39,8 @@
   data-rating="<%= page.rating || 0 %>"
   data-flame="<%= page.flame ? '1' : '0' %>"
   data-interested="<%= page.interested ? '1' : '0' %>"
-  data-anglais="<%= (page.meta && page.meta.anglais) ? '1' : '0' %>"
-  data-derived="<%= ((page.meta && page.meta.termes_derives) || []).join('|').toLowerCase() %>"
+  data-anglais="<%= wcDerived.some(function (t) { return t.en; }) ? '1' : '0' %>"
+  data-derived="<%= wcDerived.map(function (t) { return t.term; }).join('|').toLowerCase() %>"
   data-content="<%= (page.content || '').toLowerCase().replace(/"/g,'').replace(/\s+/g,' ').slice(0, 400) %>"
   data-ultra="<%= page.tags.indexOf('ultra') !== -1 ? '1' : '0' %>"
   data-fantaisie="<%= page.tags.indexOf('fantaisie') !== -1 ? '1' : '0' %>"

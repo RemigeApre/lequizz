@@ -24,6 +24,7 @@ const {
 
 const CATEGORIES = [
   { key: "fantasmes",  label: "Fantasmes",   desc: "Sc\u00e9narios, d\u00e9sirs...",          hue: 330 },
+  { key: "jeu_de_role",label: "Jeu de r\u00f4le", desc: "Sc\u00e9narios jou\u00e9s, personnages...", hue:  60 },
   { key: "partenaires",label: "Partenaires", desc: "Configurations, r\u00f4les...",       hue: 210 },
   { key: "pratique",   label: "Pratique",    desc: "Actes et gestes sexuels...",      hue:   5 },
   { key: "position",   label: "Position",    desc: "Kama-sutra, variantes...",        hue: 270 },
@@ -33,12 +34,13 @@ const CATEGORIES = [
   { key: "autre",      label: "Autre",       desc: "Tout le reste",                  hue: 220 },
 ];
 
+// "Fantaisie" et "Jeux de r\u00f4le" ne sont plus des sous-cat\u00e9gories : la
+// premi\u00e8re existe d\u00e9j\u00e0 comme tag, le second est devenu un chapitre
+// complet \u00e0 part enti\u00e8re (cat\u00e9gorie "jeu_de_role").
 const FANTASMES_SUBCATS = [
-  { key: "jeux_role",  label: "Jeux de r\u00f4le et comportement" },
   { key: "hardcore",   label: "Hardcore" },
   { key: "bdsm",       label: "BDSM" },
   { key: "classique",  label: "Classique" },
-  { key: "fantaisie",  label: "Fantaisie" },
 ];
 const CATEGORY_KEYS = CATEGORIES.map((c) => c.key);
 const OWNED_CATEGORIES = ["objets", "tenues"];
@@ -69,6 +71,22 @@ function parseTags(raw) {
     .filter(Boolean);
 }
 
+// Chaque synonyme peut être marqué "anglais" individuellement (suffixe
+// interne "::en" ajouté par le widget côté client, jamais tapé par
+// l'utilisateur) — remplace l'ancien réglage global "Terme anglais"
+// qui s'appliquait à tort à tous les synonymes à la fois.
+function parseDerivedTerms(raw) {
+  return String(raw || "")
+    .split(/[,;]+/)
+    .map((t) => t.trim())
+    .filter(Boolean)
+    .map((t) => {
+      const en = /::en$/.test(t);
+      return { term: en ? t.slice(0, -4).trim() : t, en };
+    })
+    .filter((t) => t.term);
+}
+
 function normalizeCategory(value) {
   return CATEGORY_KEYS.includes(value) ? value : "autre";
 }
@@ -78,8 +96,7 @@ function arr(v) { return Array.isArray(v) ? v : v ? [v] : []; }
 function parseMeta(category, body) {
   // Champs transversaux (toutes catégories)
   const base = {
-    termes_derives: parseTags(body.meta_termes_derives || ""),
-    anglais: body.meta_anglais === "on",
+    termes_derives: parseDerivedTerms(body.meta_termes_derives || ""),
   };
 
   let specific = {};
