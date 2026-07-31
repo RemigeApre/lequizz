@@ -539,7 +539,6 @@
   var advOwned        = document.getElementById("adv-owned");
   var advFlame        = document.getElementById("adv-flame");
   var advInterested   = document.getElementById("adv-interested");
-  var advAnglais      = document.getElementById("adv-anglais");
 
   var activeCategory  = localStorage.getItem("wiki-filter-cat") || "";
   var activeTag       = localStorage.getItem("wiki-filter-tag") || "";
@@ -593,8 +592,7 @@
     var hasAdv  = advMinRating > 0 ||
                   (advOwned && advOwned.checked) ||
                   (advFlame && advFlame.checked) ||
-                  (advInterested && advInterested.checked) ||
-                  (advAnglais && advAnglais.checked);
+                  (advInterested && advInterested.checked);
 
     var scores = new Map();
 
@@ -618,9 +616,8 @@
       var okOwned      = !(advOwned && advOwned.checked) || card.dataset.owned === "1";
       var okFlame      = !(advFlame && advFlame.checked) || card.dataset.flame === "1";
       var okInterested = !(advInterested && advInterested.checked) || card.dataset.interested === "1";
-      var okAnglais    = !(advAnglais && advAnglais.checked) || card.dataset.anglais === "1";
 
-      card.hidden = !(okCat && okTag && okUltra && okSearch && okRating && okOwned && okFlame && okInterested && okAnglais);
+      card.hidden = !(okCat && okTag && okUltra && okSearch && okRating && okOwned && okFlame && okInterested);
     });
 
     // Tri
@@ -716,7 +713,6 @@
     [advOwned,      "wiki-filter-owned"],
     [advFlame,      "wiki-filter-flame"],
     [advInterested, "wiki-filter-interested"],
-    [advAnglais,    "wiki-filter-anglais"],
   ];
   advCbMap.forEach(function (pair) {
     var cb = pair[0], key = pair[1];
@@ -805,8 +801,7 @@
   var anyAdv = advMinRating > 0 ||
       (advOwned && advOwned.checked) ||
       (advFlame && advFlame.checked) ||
-      (advInterested && advInterested.checked) ||
-      (advAnglais && advAnglais.checked);
+      (advInterested && advInterested.checked);
   if (advPanel && anyAdv) {
     advPanel.hidden = false;
     if (advToggle) advToggle.innerHTML = "Filtres avanc\u00e9s &#9652;";
@@ -1648,14 +1643,12 @@
     var owned       = document.getElementById("wiki-hero-owned");
     var flame       = document.getElementById("wiki-hero-flame");
     var interested  = document.getElementById("wiki-hero-interested");
-    var anglais     = document.getElementById("wiki-hero-anglais");
 
     form.addEventListener("submit", function () {
       if (rating)     localStorage.setItem("wiki-filter-rating", rating.value);
       if (owned)      localStorage.setItem("wiki-filter-owned", owned.checked ? "1" : "0");
       if (flame)      localStorage.setItem("wiki-filter-flame", flame.checked ? "1" : "0");
       if (interested) localStorage.setItem("wiki-filter-interested", interested.checked ? "1" : "0");
-      if (anglais)    localStorage.setItem("wiki-filter-anglais", anglais.checked ? "1" : "0");
     });
   })();
 

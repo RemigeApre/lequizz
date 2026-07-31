@@ -39,7 +39,6 @@
   data-rating="<%= page.rating || 0 %>"
   data-flame="<%= page.flame ? '1' : '0' %>"
   data-interested="<%= page.interested ? '1' : '0' %>"
-  data-anglais="<%= wcDerived.some(function (t) { return t.en; }) ? '1' : '0' %>"
   data-derived="<%= wcDerived.map(function (t) { return t.term; }).join('|').toLowerCase() %>"
   data-content="<%= (page.content || '').toLowerCase().replace(/"/g,'').replace(/\s+/g,' ').slice(0, 400) %>"
   data-ultra="<%= page.tags.indexOf('ultra') !== -1 ? '1' : '0' %>"
