@@ -1,12 +1,26 @@
 <%- include('partials/head', { title: 'Wiki — ' + config.title }) %>
 <main class="container wide">
   <%- include('partials/top-nav', { config: config }) %>
-  <h1 class="section-title-h1">Wiki</h1>
 
-  <%# ─── BOUTON NOUVELLE PAGE ─────────────────────────────────────────── %>
-  <div class="wiki-new-wrap">
+  <div class="wiki-page-header">
+    <h1 class="section-title-h1">Wiki</h1>
     <button type="button" id="wiki-new-btn" class="wiki-new-btn">+ Nouvelle page</button>
   </div>
+
+  <%# ─── MESSAGE D'INTRODUCTION ───────────────────────────────────────── %>
+  <section class="wiki-hero">
+    <p class="wiki-hero-lead">
+      Le wiki est un espace pour apprendre, confirmer mais aussi noter et d&eacute;couvrir de nombreuses
+      choses li&eacute;es &agrave; la sexualit&eacute;. Il a pour objectif d&rsquo;&eacute;voluer&nbsp;:
+      tu peux noter, mettre en favoris, et bien plus.
+    </p>
+    <p class="wiki-hero-note">
+      <span class="wiki-hero-note-icon" aria-hidden="true">&#9888;</span>
+      Il a pour but d&rsquo;&ecirc;tre exhaustif sur tout ce qui existe&nbsp;: les pratiques les plus
+      extr&ecirc;mes sont cat&eacute;goris&eacute;es en <strong>ULTRA</strong> et peuvent &ecirc;tre
+      masqu&eacute;es &mdash; elles le sont par d&eacute;faut dans ce sommaire.
+    </p>
+  </section>
 
   <%# ─── STEP 1 : CHOIX DE CATÉGORIE ─────────────────────────────────── %>
   <div id="wiki-step1" class="wiki-step1" hidden>
@@ -216,7 +230,7 @@
   <%# ─── SOMMAIRE PAR CHAPITRE ───────────────────────────────────────── %>
   <div class="wiki-toc">
     <% chapters.forEach(function (ch) { %>
-      <section class="wiki-chapter">
+      <section class="wiki-chapter" style="--ch-hue: <%= ch.hue %>">
         <div class="wiki-chapter-header">
           <h2 class="wiki-chapter-title">
             <span class="wiki-chapter-dot" style="background: hsl(<%= ch.hue %>, 55%, 45%)"></span>
@@ -225,6 +239,7 @@
           </h2>
           <a href="/wiki/categorie/<%= ch.key %>" class="wiki-chapter-link">Voir tout &rarr;</a>
         </div>
+        <% if (ch.desc) { %><p class="wiki-chapter-desc"><%= ch.desc %></p><% } %>
         <% if (ch.preview.length) { %>
           <div class="wiki-chapter-strip">
             <% ch.preview.forEach(function (page) { %>

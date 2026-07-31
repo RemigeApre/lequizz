@@ -173,11 +173,19 @@ function buildWikiRouter(config) {
     return pages.filter((p) => p.category === key || (p.extraCategories || []).includes(key));
   }
 
+  // Une page "ULTRA" porte un simple tag libre "ultra" (insensible a la casse).
+  function isUltra(page) {
+    return (page.tags || []).some((t) => String(t).toLowerCase() === "ultra");
+  }
+
   // ── Sommaire : une "etagere" par categorie, comme les chapitres d'un livre ──
+  // Vue d'accueil/decouverte : les pages ULTRA restent masquees ici par defaut
+  // (elles restent consultables via /wiki/categorie/:key et /wiki/tous).
   router.get("/", (req, res) => {
     const pages = sortedPages();
+    const visiblePages = pages.filter((p) => !isUltra(p));
     const chapters = CATEGORIES.map((cat) => {
-      const catPages = pagesForCategory(pages, cat.key);
+      const catPages = pagesForCategory(visiblePages, cat.key);
       return { ...cat, pages: catPages, count: catPages.length, preview: catPages.slice(0, 6) };
     });
     res.render("wiki-index", { config, chapters, pages, allTags: getAllTags(pages), totalCount: pages.length, ...CTX });
