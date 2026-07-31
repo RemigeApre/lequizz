@@ -410,17 +410,22 @@
 
   // ══════════════════════════════════════════════════
   // 6. RÉACTIONS (étoiles, flamme, intérêt)
+  // La note (étoiles) vit désormais dans son propre bloc, au-dessus de
+  // l'image principale ; flamme/intérêt restent dans .wiki-react plus
+  // bas. Les deux partagent le même data-id et sont sauvegardés
+  // ensemble via le même endpoint.
   // ══════════════════════════════════════════════════
-  var reactWidget = document.querySelector(".wiki-react");
-  if (reactWidget) {
-    var reactId       = reactWidget.dataset.id;
-    var reactRating   = Number(reactWidget.dataset.rating) || 0;
-    var reactFlame    = reactWidget.dataset.flame === "1";
-    var reactInterest = reactWidget.dataset.interested === "1";
+  var ratingWidget = document.querySelector(".wiki-detail-rating");
+  var reactWidget  = document.querySelector(".wiki-react");
+  if (ratingWidget || reactWidget) {
+    var reactId       = (ratingWidget || reactWidget).dataset.id;
+    var reactRating   = Number((ratingWidget || reactWidget).dataset.rating) || 0;
+    var reactFlame    = reactWidget ? reactWidget.dataset.flame === "1" : false;
+    var reactInterest = reactWidget ? reactWidget.dataset.interested === "1" : false;
 
-    var starBtns = reactWidget.querySelectorAll(".wiki-star");
-    var flamBtn  = reactWidget.querySelector("[data-key='flame']");
-    var intrBtn  = reactWidget.querySelector("[data-key='interested']");
+    var starBtns = (ratingWidget || reactWidget).querySelectorAll(".wiki-star");
+    var flamBtn  = reactWidget ? reactWidget.querySelector("[data-key='flame']") : null;
+    var intrBtn  = reactWidget ? reactWidget.querySelector("[data-key='interested']") : null;
 
     function save() {
       fetch("/wiki/" + reactId + "/react", {
@@ -1511,6 +1516,70 @@
         });
       });
     });
+  })();
+
+  // ══════════════════════════════════════════════════
+  // 8. NAVIGATION CONTEXTUELLE PRÉCÉDENT / SUIVANT
+  // Les flèches de la page de lecture doivent suivre la position dans
+  // la liste qu'on parcourait (résultats de recherche, chapitre d'une
+  // catégorie…), pas toujours l'ordre alphabétique global. On mémorise
+  // donc, au clic sur une carte, la liste déjà filtrée/triée où elle
+  // se trouvait ; la page de lecture s'en sert si elle y retrouve son
+  // propre id, sinon elle garde le repli alphabétique du serveur.
+  // ══════════════════════════════════════════════════
+  (function () {
+    var NAV_KEY = "wikiNavContext";
+
+    document.addEventListener("click", function (e) {
+      var card = e.target.closest ? e.target.closest("a.wiki-card") : null;
+      if (!card) return;
+      var list = card.closest("#wiki-list, .wiki-chapter-strip");
+      if (!list) return;
+      var cards = Array.prototype.slice.call(list.querySelectorAll("a.wiki-card")).filter(function (c) {
+        return !c.hidden;
+      });
+      var entries = cards.map(function (c) {
+        var m = (c.getAttribute("href") || "").match(/^\/wiki\/(\d+)$/);
+        if (!m) return null;
+        var titleEl = c.querySelector(".wiki-card-title");
+        return { id: Number(m[1]), title: titleEl ? titleEl.textContent : "" };
+      }).filter(Boolean);
+      try { sessionStorage.setItem(NAV_KEY, JSON.stringify(entries)); } catch (_) {}
+    }, true);
+
+    var prevBtn = document.getElementById("wiki-nav-prev");
+    var nextBtn = document.getElementById("wiki-nav-next");
+    if (!prevBtn || !nextBtn) return;
+
+    var pageMatch = location.pathname.match(/^\/wiki\/(\d+)$/);
+    if (!pageMatch) return;
+    var currentId = Number(pageMatch[1]);
+
+    var context = null;
+    try { context = JSON.parse(sessionStorage.getItem(NAV_KEY) || "null"); } catch (_) { context = null; }
+    if (!Array.isArray(context)) return;
+
+    var idx = -1;
+    context.forEach(function (entry, i) { if (entry && entry.id === currentId) idx = i; });
+    if (idx === -1) return;
+
+    function applyBtn(btn, entry) {
+      var label = btn.querySelector(".wiki-page-nav-label");
+      if (!entry) {
+        btn.classList.add("wiki-page-nav-disabled");
+        btn.removeAttribute("href");
+        btn.title = "";
+        if (label) label.textContent = "";
+        return;
+      }
+      btn.classList.remove("wiki-page-nav-disabled");
+      btn.href = "/wiki/" + entry.id;
+      btn.title = entry.title;
+      if (label) label.textContent = entry.title;
+    }
+
+    applyBtn(prevBtn, context[idx - 1] || null);
+    applyBtn(nextBtn, context[idx + 1] || null);
   })();
 
 })();

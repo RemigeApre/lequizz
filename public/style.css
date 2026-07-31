@@ -2277,47 +2277,47 @@ input[type="text"], input[type="password"] {
   .wiki-detail-banner-title { font-size: 1.15rem; }
 }
 
-/* ── Infobarre façon Wikipedia : catégorie + note, teinte élégante ──
-   Collée au bandeau du dessus (annule le gap du flex parent) pour
-   former un seul bloc d'en-tête cohérent. */
-.wiki-detail-banner + .wiki-detail-infobar {
-  margin-top: -1.1rem;
-}
-.wiki-detail-infobar {
+/* ── Note : grosse, centrée, fonctionnelle, juste au-dessus de l'image ── */
+.wiki-detail-rating {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin: 0 -1.25rem;
-  padding: 0.55rem 1.25rem;
-  background: color-mix(in srgb, hsl(var(--ch-hue, 220), 55%, 45%) 12%, var(--card));
-  border-bottom: 1px solid color-mix(in srgb, hsl(var(--ch-hue, 220), 55%, 45%) 25%, var(--border));
+  justify-content: center;
+  gap: 0.3rem;
+}
+.wiki-star-lg {
+  font-size: 2.1rem;
 }
 
-.wiki-detail-infobar-cat {
-  display: inline-flex;
-  border-radius: 999px;
-  padding: 0.22rem 0.75rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+/* ── Bandeau d'information façon Wikipedia : catégorie + reste ──────
+   Vraie mini-infobox : titre plein coloré, puis table de faits. */
+.wiki-infotable {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--card);
+}
+.wiki-infotable-head {
+  padding: 0.5rem 0.9rem;
   color: #fff;
+  font-weight: 700;
+  font-size: 0.88rem;
+  text-align: center;
+  letter-spacing: 0.02em;
 }
-
-.wiki-detail-infobar-rating {
+.wiki-infotable-body {
+  margin: 0;
+  padding: 0;
   display: flex;
-  gap: 0.05rem;
-  font-size: 0.9rem;
-  flex-shrink: 0;
+  flex-direction: column;
 }
-.wiki-detail-infobar-star {
-  color: var(--muted);
-  opacity: 0.5;
+.wiki-infotable-body .wiki-infobox-row {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  border-top: 1px solid var(--border);
+  padding: 0.5rem 0.9rem;
 }
-.wiki-detail-infobar-star.filled {
-  color: #f5a623;
-  opacity: 1;
+.wiki-infotable-body .wiki-infobox-row:nth-child(even) {
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
 }
 
 /* ── Image principale ────────────────────────────── */
@@ -2731,19 +2731,13 @@ input[type="text"], input[type="password"] {
 .wiki-detail-react {
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   flex-wrap: wrap;
   gap: 0.85rem;
-  padding: 1rem 1.25rem;
+  padding: 0.85rem 1.25rem;
   border: 1px solid var(--border);
   border-radius: 14px;
   background: color-mix(in srgb, var(--card) 94%, var(--wiki-gold) 6%);
-}
-.wiki-detail-react .wiki-react-stars {
-  gap: 0.2rem;
-}
-.wiki-detail-react .wiki-star {
-  font-size: 1.7rem;
 }
 .wiki-detail-react .wiki-react-toggles {
   flex-wrap: nowrap;
@@ -2756,11 +2750,10 @@ input[type="text"], input[type="password"] {
   font-size: 0.88rem;
 }
 @media (max-width: 480px) {
-  .wiki-detail-react {
+  .wiki-detail-react .wiki-react-toggles {
     flex-direction: column;
-    align-items: stretch;
+    width: 100%;
   }
-  .wiki-detail-react .wiki-react-stars { justify-content: center; }
 }
 
 .wiki-react-stars {

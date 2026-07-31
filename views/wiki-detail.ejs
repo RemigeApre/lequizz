@@ -45,34 +45,30 @@
       <% } %>
     </div>
 
-    <%# ─ Infobarre style Wikipedia : catégorie + note d'un coup d'œil ─ %>
-    <div class="wiki-detail-infobar">
-      <span class="wiki-detail-infobar-cat" style="background: hsl(<%= cat ? cat.hue : 220 %>, 55%, 45%)"><%= cat ? cat.label : page.category %></span>
-      <span class="wiki-detail-infobar-rating">
-        <% for (var ri = 1; ri <= 5; ri++) { %><span class="wiki-detail-infobar-star<%= ri <= page.rating ? ' filled' : '' %>">&#9733;</span><% } %>
-      </span>
-    </div>
-
-    <%# ─ Navigation alphabétique : sous le bandeau sur PC, discrète et
-         flottante à mi-hauteur sur téléphone (voir CSS) ─ %>
+    <%# ─ Navigation : sous le bandeau sur PC, discrète et flottante à
+         mi-hauteur sur téléphone (voir CSS). Suit la position dans le
+         contexte de navigation courant (recherche, chapitre…), avec
+         repli sur l'ordre alphabétique global si aucun contexte. ─ %>
+    <%# Toujours la même structure (a + arrow + label), même sans page
+         précédente/suivante : le JS de contexte (recherche, chapitre…)
+         doit pouvoir l'activer/la remplir sans reconstruire le DOM. ─ %>
     <nav class="wiki-page-nav" aria-label="Navigation entre pages">
-      <% if (prevPage) { %>
-        <a href="/wiki/<%= prevPage.id %>" class="wiki-page-nav-btn wiki-page-nav-prev" id="wiki-nav-prev" title="<%= prevPage.title %>">
-          <span class="wiki-page-nav-arrow">&#8592;</span>
-          <span class="wiki-page-nav-label"><%= prevPage.title %></span>
-        </a>
-      <% } else { %>
-        <span class="wiki-page-nav-btn wiki-page-nav-prev wiki-page-nav-disabled"></span>
-      <% } %>
-      <% if (nextPage) { %>
-        <a href="/wiki/<%= nextPage.id %>" class="wiki-page-nav-btn wiki-page-nav-next" id="wiki-nav-next" title="<%= nextPage.title %>">
-          <span class="wiki-page-nav-label"><%= nextPage.title %></span>
-          <span class="wiki-page-nav-arrow">&#8594;</span>
-        </a>
-      <% } else { %>
-        <span class="wiki-page-nav-btn wiki-page-nav-next wiki-page-nav-disabled"></span>
-      <% } %>
+      <a href="<%= prevPage ? '/wiki/' + prevPage.id : '#' %>" class="wiki-page-nav-btn wiki-page-nav-prev<%= prevPage ? '' : ' wiki-page-nav-disabled' %>" id="wiki-nav-prev" title="<%= prevPage ? prevPage.title : '' %>">
+        <span class="wiki-page-nav-arrow">&#8592;</span>
+        <span class="wiki-page-nav-label"><%= prevPage ? prevPage.title : '' %></span>
+      </a>
+      <a href="<%= nextPage ? '/wiki/' + nextPage.id : '#' %>" class="wiki-page-nav-btn wiki-page-nav-next<%= nextPage ? '' : ' wiki-page-nav-disabled' %>" id="wiki-nav-next" title="<%= nextPage ? nextPage.title : '' %>">
+        <span class="wiki-page-nav-label"><%= nextPage ? nextPage.title : '' %></span>
+        <span class="wiki-page-nav-arrow">&#8594;</span>
+      </a>
     </nav>
+
+    <%# ─ Note : grosse, centrée, fonctionnelle — c'est ici qu'on note ─ %>
+    <div class="wiki-detail-rating" data-id="<%= page.id %>" data-rating="<%= page.rating %>">
+      <% for (var i = 1; i <= 5; i++) { %>
+        <button type="button" class="wiki-star wiki-star-lg" data-value="<%= i %>"><%- i <= page.rating ? '&#9733;' : '&#9734;' %></button>
+      <% } %>
+    </div>
 
     <%# ─ Image principale ─ %>
     <% if (hasImages) { %>
@@ -81,81 +77,78 @@
       </div>
     <% } %>
 
-    <%# ─ Paramètres ─ %>
-    <% if (hasMeta) { %>
-      <dl class="wiki-infobox-params wiki-detail-params">
+    <%# ─ Vrai bandeau d'information façon Wikipedia : catégorie + reste ─ %>
+    <div class="wiki-infotable">
+      <div class="wiki-infotable-head" style="background: hsl(<%= cat ? cat.hue : 220 %>, 42%, 30%)"><%= cat ? cat.label : page.category %></div>
+      <% if (hasMeta) { %>
+        <dl class="wiki-infotable-body">
 
-        <% if (page.category === 'fantasmes' && pm.sous_cat && FSUBS[pm.sous_cat]) { %>
-          <div class="wiki-infobox-row">
-            <dt>Cat&eacute;gorie</dt>
-            <dd><%= FSUBS[pm.sous_cat] %></dd>
-          </div>
-        <% } %>
-
-        <% if (hasPartMeta) { %>
-          <% if (nbF) { %>
+          <% if (page.category === 'fantasmes' && pm.sous_cat && FSUBS[pm.sous_cat]) { %>
             <div class="wiki-infobox-row">
-              <dt>Femmes</dt>
-              <dd><%= nbF === 'nombreux' ? 'Nombreuses' : nbF %></dd>
+              <dt>Cat&eacute;gorie</dt>
+              <dd><%= FSUBS[pm.sous_cat] %></dd>
             </div>
           <% } %>
-          <% if (nbH) { %>
+
+          <% if (hasPartMeta) { %>
+            <% if (nbF) { %>
+              <div class="wiki-infobox-row">
+                <dt>Femmes</dt>
+                <dd><%= nbF === 'nombreux' ? 'Nombreuses' : nbF %></dd>
+              </div>
+            <% } %>
+            <% if (nbH) { %>
+              <div class="wiki-infobox-row">
+                <dt>Hommes</dt>
+                <dd><%= nbH === 'nombreux' ? 'Nombreux' : nbH %></dd>
+              </div>
+            <% } %>
+          <% } %>
+
+          <% if (page.category === 'objets' && pm.type_gode && GODE[pm.type_gode]) { %>
             <div class="wiki-infobox-row">
-              <dt>Hommes</dt>
-              <dd><%= nbH === 'nombreux' ? 'Nombreux' : nbH %></dd>
+              <dt>Type</dt>
+              <dd><%= GODE[pm.type_gode] %></dd>
             </div>
           <% } %>
-        <% } %>
 
-        <% if (page.category === 'objets' && pm.type_gode && GODE[pm.type_gode]) { %>
-          <div class="wiki-infobox-row">
-            <dt>Type</dt>
-            <dd><%= GODE[pm.type_gode] %></dd>
-          </div>
-        <% } %>
-
-        <% if (page.category === 'lieux' && pm.type_lieu && LIEU[pm.type_lieu]) { %>
-          <div class="wiki-infobox-row">
-            <dt>Type</dt>
-            <dd><%= LIEU[pm.type_lieu] %></dd>
-          </div>
-        <% } %>
-
-        <% if (hasPosMeta) { %>
-          <% if (pm.qui_dessus && QUI[pm.qui_dessus]) { %>
+          <% if (page.category === 'lieux' && pm.type_lieu && LIEU[pm.type_lieu]) { %>
             <div class="wiki-infobox-row">
-              <dt>Au-dessus</dt>
-              <dd><%= QUI[pm.qui_dessus] %></dd>
+              <dt>Type</dt>
+              <dd><%= LIEU[pm.type_lieu] %></dd>
             </div>
           <% } %>
-          <% if (pm.canal && pm.canal.length) { %>
-            <div class="wiki-infobox-row">
-              <dt>Canal</dt>
-              <dd><%= pm.canal.map(function(c){ return CAN[c] || c; }).join(' · ') %></dd>
-            </div>
-          <% } %>
-          <% if (pmOri.length) { %>
-            <div class="wiki-infobox-row">
-              <dt>Orientation</dt>
-              <dd><%= pmOri.map(function(o){ return ORI[o] || o; }).join(' · ') %></dd>
-            </div>
-          <% } %>
-        <% } %>
 
-      </dl>
-    <% } %>
+          <% if (hasPosMeta) { %>
+            <% if (pm.qui_dessus && QUI[pm.qui_dessus]) { %>
+              <div class="wiki-infobox-row">
+                <dt>Au-dessus</dt>
+                <dd><%= QUI[pm.qui_dessus] %></dd>
+              </div>
+            <% } %>
+            <% if (pm.canal && pm.canal.length) { %>
+              <div class="wiki-infobox-row">
+                <dt>Canal</dt>
+                <dd><%= pm.canal.map(function(c){ return CAN[c] || c; }).join(' · ') %></dd>
+              </div>
+            <% } %>
+            <% if (pmOri.length) { %>
+              <div class="wiki-infobox-row">
+                <dt>Orientation</dt>
+                <dd><%= pmOri.map(function(o){ return ORI[o] || o; }).join(' · ') %></dd>
+              </div>
+            <% } %>
+          <% } %>
 
-    <%# ─ Réactions : mises en valeur ─ %>
+        </dl>
+      <% } %>
+    </div>
+
+    <%# ─ Réactions : flamme / intérêt (la note a rejoint le haut de page) ─ %>
     <div class="wiki-react wiki-detail-react"
       data-id="<%= page.id %>"
-      data-rating="<%= page.rating %>"
       data-flame="<%= page.flame ? '1' : '0' %>"
       data-interested="<%= page.interested ? '1' : '0' %>">
-      <div class="wiki-react-stars">
-        <% for (var i = 1; i <= 5; i++) { %>
-          <button type="button" class="wiki-star" data-value="<%= i %>"><%- i <= page.rating ? '&#9733;' : '&#9734;' %></button>
-        <% } %>
-      </div>
       <div class="wiki-react-toggles">
         <button type="button" class="wiki-react-btn wiki-react-flame<%= page.flame ? ' active' : '' %>" data-key="flame">
           <span class="wiki-react-icon">&#128293;</span><span class="wiki-react-label">J&apos;adore</span>
