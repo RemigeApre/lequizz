@@ -58,7 +58,7 @@ body {
   justify-content: space-between;
   background: var(--bg);
   border-bottom: 1px solid var(--border);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .top-nav-brand {
@@ -4358,15 +4358,19 @@ input[type="text"], input[type="password"] {
 
 @media (max-width: 640px) {
   /* Sur mobile, le message déborde du cadre du conteneur : plein bord,
-     sans coins arrondis, comme s'il continuait hors de l'écran. */
+     sans coins arrondis, comme s'il continuait hors de l'écran. Pas de
+     bordure/ombre en haut : le top-nav a déjà sa propre séparation juste
+     au-dessus, superposer les deux créait un empilement de liserés. */
   .wiki-hero {
     margin: 0 -1.25rem 1.75rem;
     width: calc(100% + 2.5rem);
     border-left: none;
     border-right: none;
+    border-top: none;
+    border-bottom: 3px solid var(--wiki-gold);
     border-radius: 0;
-    border-top: 3px solid var(--wiki-gold);
-    padding: 1.15rem 1.25rem;
+    box-shadow: none;
+    padding: 1.25rem 1.25rem 1.1rem;
   }
   .wiki-hero-lead {
     font-size: 0.98rem;
@@ -4378,6 +4382,15 @@ input[type="text"], input[type="password"] {
 
 /* Barre de filtre rapide : recentrer le sommaire sur un seul chapitre,
    ou filer vers la vue globale en cartes. */
+.wiki-toc-filter-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
 .wiki-toc-filter {
   display: flex;
   flex-wrap: wrap;
@@ -4425,8 +4438,9 @@ input[type="text"], input[type="password"] {
   color: var(--bg);
 }
 
+/* Même gabarit que les autres chips : un bouton parmi d'autres, pas un
+   pavé isolé qui casse le rythme de la barre. */
 .wiki-toc-chip-all {
-  margin-left: auto;
   border-color: var(--wiki-gold);
   color: var(--wiki-gold);
   text-decoration: none;
@@ -4435,14 +4449,6 @@ input[type="text"], input[type="password"] {
 .wiki-toc-chip-all:hover {
   background: var(--wiki-gold);
   color: #fff;
-}
-
-@media (max-width: 640px) {
-  .wiki-toc-chip-all {
-    margin-left: 0;
-    width: 100%;
-    justify-content: center;
-  }
 }
 
 .wiki-toc {
