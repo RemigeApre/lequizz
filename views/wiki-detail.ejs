@@ -11,7 +11,6 @@
     <% } else { %>
       <span class="wiki-page-nav-btn wiki-page-nav-prev wiki-page-nav-disabled"></span>
     <% } %>
-    <a href="<%= backHref %>" class="link-button wiki-page-nav-back">&#8592; <%= backLabel %></a>
     <% if (nextPage) { %>
       <a href="/wiki/<%= nextPage.id %>" class="wiki-page-nav-btn wiki-page-nav-next" id="wiki-nav-next" title="<%= nextPage.title %>">
         <span class="wiki-page-nav-label"><%= nextPage.title %></span>
@@ -26,14 +25,14 @@
   <%
     var pm = page.meta || {};
 
-    var FSUBS = { jeux_role: 'Jeux de r\u00f4le et comportement', hardcore: 'Hardcore', bdsm: 'BDSM', classique: 'Classique', fantaisie: 'Fantaisie' };
+    var FSUBS = { jeux_role: 'Jeux de rôle et comportement', hardcore: 'Hardcore', bdsm: 'BDSM', classique: 'Classique', fantaisie: 'Fantaisie' };
     var nbF = pm.nb_femmes, nbH = pm.nb_hommes;
     var hasPartMeta = page.category === 'partenaires' && (nbF || nbH);
-    var LIEU = { prive: 'Priv\u00e9', public: 'Public', cache: 'Cach\u00e9' };
+    var LIEU = { prive: 'Privé', public: 'Public', cache: 'Caché' };
     var GODE = { animal: 'Animal', monstre: 'Monstre', fantaisiste: 'Fantaisiste', ethnique: 'Ethnique', autre: 'Autre' };
-    var QUI  = { femme: 'Femme', homme: 'Homme', variable: 'Variable', aucun: 'Aucun\u00a0/ debout' };
+    var QUI  = { femme: 'Femme', homme: 'Homme', variable: 'Variable', aucun: 'Aucun / debout' };
     var CAN  = { vagin: 'Vagin', anus: 'Anus', bouche: 'Bouche', mains: 'Mains', autre: 'Autre' };
-    var ORI  = { face_a_face: 'Face \u00e0 face', face_contre_dos: 'Face contre dos', acrobatique: 'Acrobatique', autre: 'Autre' };
+    var ORI  = { face_a_face: 'Face à face', face_contre_dos: 'Face contre dos', acrobatique: 'Acrobatique', autre: 'Autre' };
     var pmOri = Array.isArray(pm.orientation) ? pm.orientation : (pm.orientation ? [pm.orientation] : []);
     var hasPosMeta = page.category === 'position' && (pm.qui_dessus || (pm.canal && pm.canal.length) || pmOri.length);
 
@@ -44,139 +43,144 @@
                || (page.category === 'objets' && pm.type_gode && GODE[pm.type_gode]);
 
     var hasImages = page.imagePaths && page.imagePaths.length;
-    var hasInfobox = hasImages || hasMeta;
+    var hasAnyTags = page.tags.length || (pm.termes_derives && pm.termes_derives.length) || pm.anglais;
   %>
 
-  <article class="wiki-detail">
+  <article class="wiki-detail" style="--ch-hue: <%= cat ? cat.hue : 220 %>">
 
-    <div class="wiki-detail-header">
-      <span class="wiki-category-badge" style="background: hsl(<%= cat ? cat.hue : 220 %>, 55%, 45%)"><%= cat ? cat.label : page.category %></span>
-      <% if (page.extraCategories && page.extraCategories.length) { %>
-        <% page.extraCategories.forEach(function(eck) { var ecat = categories.find(function(c){ return c.key === eck; }); %>
-          <span class="wiki-category-badge wiki-category-badge-extra" style="background: hsl(<%= ecat ? ecat.hue : 220 %>, 55%, 45%)"><%= ecat ? ecat.label : eck %></span>
-        <% }) %>
+    <%# ─ Bandeau : couleur du chapitre, retour à gauche, titre centré ─ %>
+    <div class="wiki-detail-banner">
+      <a href="<%= backHref %>" class="wiki-detail-banner-back" title="<%= backLabel %>" aria-label="<%= backLabel %>">&#8592;</a>
+      <h1 class="wiki-detail-banner-title"><%= page.title %></h1>
+      <% if ((page.extraCategories && page.extraCategories.length) || page.owned) { %>
+        <div class="wiki-detail-banner-sub">
+          <% if (page.owned) { %><span>&#9733; Poss&eacute;d&eacute;</span><% } %>
+          <% (page.extraCategories || []).forEach(function (eck) { var ecat = categories.find(function (c) { return c.key === eck; }); %>
+            <span><%= ecat ? ecat.label : eck %></span>
+          <% }) %>
+        </div>
       <% } %>
-      <% if (page.owned) { %><span class="wiki-owned-badge" title="Poss\u00e9d\u00e9">&#9733; Poss\u00e9d\u00e9</span><% } %>
     </div>
 
-    <h1 class="wiki-detail-title"><%= page.title %></h1>
+    <%# ─ Image(s) : mêmes classes que l'ancien encart pour garder
+         lightbox et carrousel mobile fonctionnels sans toucher au JS ─ %>
+    <% if (hasImages) { %>
+      <div class="wiki-infobox-images wiki-detail-main-images">
+        <img src="<%= page.imagePaths[0] %>" alt="" class="wiki-infobox-img" />
+      </div>
+      <% if (page.imagePaths.length > 1) { %>
+        <div class="wiki-infobox-images wiki-infobox-images-rest">
+          <% page.imagePaths.slice(1).forEach(function (src) { %>
+            <img src="<%= src %>" alt="" class="wiki-infobox-img" />
+          <% }) %>
+        </div>
+      <% } %>
+    <% } %>
 
-    <%
-      var hasAnyTags = page.tags.length || (pm.termes_derives && pm.termes_derives.length) || pm.anglais;
-    %>
+    <%# ─ Paramètres ─ %>
+    <% if (hasMeta) { %>
+      <dl class="wiki-infobox-params wiki-detail-params">
 
-    <%# ─ Corps : infobox flottante + texte ─ %>
-    <div class="wiki-body">
-
-      <% if (hasInfobox) { %>
-        <aside class="wiki-infobox">
-
-          <%# Première image %>
-          <% if (hasImages) { %>
-            <div class="wiki-infobox-images">
-              <img src="<%= page.imagePaths[0] %>" alt="" class="wiki-infobox-img" />
-            </div>
-          <% } %>
-
-          <%# Paramètres sous la première image %>
-          <% if (hasMeta) { %>
-            <dl class="wiki-infobox-params">
-
-              <% if (page.category === 'fantasmes' && pm.sous_cat && FSUBS[pm.sous_cat]) { %>
-                <div class="wiki-infobox-row">
-                  <dt>Cat\u00e9gorie</dt>
-                  <dd><%= FSUBS[pm.sous_cat] %></dd>
-                </div>
-              <% } %>
-
-              <% if (hasPartMeta) { %>
-                <% if (nbF) { %>
-                  <div class="wiki-infobox-row">
-                    <dt>Femmes</dt>
-                    <dd><%= nbF === 'nombreux' ? 'Nombreuses' : nbF %></dd>
-                  </div>
-                <% } %>
-                <% if (nbH) { %>
-                  <div class="wiki-infobox-row">
-                    <dt>Hommes</dt>
-                    <dd><%= nbH === 'nombreux' ? 'Nombreux' : nbH %></dd>
-                  </div>
-                <% } %>
-              <% } %>
-
-              <% if (page.category === 'objets' && pm.type_gode && GODE[pm.type_gode]) { %>
-                <div class="wiki-infobox-row">
-                  <dt>Type</dt>
-                  <dd><%= GODE[pm.type_gode] %></dd>
-                </div>
-              <% } %>
-
-              <% if (page.category === 'lieux' && pm.type_lieu && LIEU[pm.type_lieu]) { %>
-                <div class="wiki-infobox-row">
-                  <dt>Type</dt>
-                  <dd><%= LIEU[pm.type_lieu] %></dd>
-                </div>
-              <% } %>
-
-              <% if (hasPosMeta) { %>
-                <% if (pm.qui_dessus && QUI[pm.qui_dessus]) { %>
-                  <div class="wiki-infobox-row">
-                    <dt>Au-dessus</dt>
-                    <dd><%= QUI[pm.qui_dessus] %></dd>
-                  </div>
-                <% } %>
-                <% if (pm.canal && pm.canal.length) { %>
-                  <div class="wiki-infobox-row">
-                    <dt>Canal</dt>
-                    <dd><%= pm.canal.map(function(c){ return CAN[c] || c; }).join('\u00a0\u00b7 ') %></dd>
-                  </div>
-                <% } %>
-                <% if (pmOri.length) { %>
-                  <div class="wiki-infobox-row">
-                    <dt>Orientation</dt>
-                    <dd><%= pmOri.map(function(o){ return ORI[o] || o; }).join('\u00a0\u00b7 ') %></dd>
-                  </div>
-                <% } %>
-              <% } %>
-
-            </dl>
-          <% } %>
-
-          <%# Réactions dans l'infobox %>
-          <div class="wiki-react wiki-infobox-react"
-            data-id="<%= page.id %>"
-            data-rating="<%= page.rating %>"
-            data-flame="<%= page.flame ? '1' : '0' %>"
-            data-interested="<%= page.interested ? '1' : '0' %>">
-            <div class="wiki-react-stars">
-              <% for (var i = 1; i <= 5; i++) { %>
-                <button type="button" class="wiki-star" data-value="<%= i %>"><%- i <= page.rating ? '&#9733;' : '&#9734;' %></button>
-              <% } %>
-            </div>
-            <button type="button" class="wiki-react-btn wiki-react-flame<%= page.flame ? ' active' : '' %>" data-key="flame">
-              <span class="wiki-react-icon">&#128293;</span><span class="wiki-react-label">J&apos;adore</span>
-            </button>
-            <button type="button" class="wiki-react-btn wiki-react-interest<%= page.interested ? ' active' : '' %>" data-key="interested">
-              <span class="wiki-react-icon">&#10024;</span><span class="wiki-react-label">Int&eacute;ress&eacute;e</span>
-            </button>
+        <% if (page.category === 'fantasmes' && pm.sous_cat && FSUBS[pm.sous_cat]) { %>
+          <div class="wiki-infobox-row">
+            <dt>Cat&eacute;gorie</dt>
+            <dd><%= FSUBS[pm.sous_cat] %></dd>
           </div>
+        <% } %>
 
-          <%# Images suivantes après les caractéristiques %>
-          <% if (hasImages && page.imagePaths.length > 1) { %>
-            <div class="wiki-infobox-images wiki-infobox-images-rest">
-              <% page.imagePaths.slice(1).forEach(function(src) { %>
-                <img src="<%= src %>" alt="" class="wiki-infobox-img" />
-              <% }) %>
+        <% if (hasPartMeta) { %>
+          <% if (nbF) { %>
+            <div class="wiki-infobox-row">
+              <dt>Femmes</dt>
+              <dd><%= nbF === 'nombreux' ? 'Nombreuses' : nbF %></dd>
             </div>
           <% } %>
-        </aside>
-      <% } %>
+          <% if (nbH) { %>
+            <div class="wiki-infobox-row">
+              <dt>Hommes</dt>
+              <dd><%= nbH === 'nombreux' ? 'Nombreux' : nbH %></dd>
+            </div>
+          <% } %>
+        <% } %>
 
-      <% if (page.content) { %>
-        <div class="wiki-md"><span class="wiki-md-raw" hidden><%= page.content %></span></div>
-      <% } %>
+        <% if (page.category === 'objets' && pm.type_gode && GODE[pm.type_gode]) { %>
+          <div class="wiki-infobox-row">
+            <dt>Type</dt>
+            <dd><%= GODE[pm.type_gode] %></dd>
+          </div>
+        <% } %>
 
+        <% if (page.category === 'lieux' && pm.type_lieu && LIEU[pm.type_lieu]) { %>
+          <div class="wiki-infobox-row">
+            <dt>Type</dt>
+            <dd><%= LIEU[pm.type_lieu] %></dd>
+          </div>
+        <% } %>
+
+        <% if (hasPosMeta) { %>
+          <% if (pm.qui_dessus && QUI[pm.qui_dessus]) { %>
+            <div class="wiki-infobox-row">
+              <dt>Au-dessus</dt>
+              <dd><%= QUI[pm.qui_dessus] %></dd>
+            </div>
+          <% } %>
+          <% if (pm.canal && pm.canal.length) { %>
+            <div class="wiki-infobox-row">
+              <dt>Canal</dt>
+              <dd><%= pm.canal.map(function(c){ return CAN[c] || c; }).join(' · ') %></dd>
+            </div>
+          <% } %>
+          <% if (pmOri.length) { %>
+            <div class="wiki-infobox-row">
+              <dt>Orientation</dt>
+              <dd><%= pmOri.map(function(o){ return ORI[o] || o; }).join(' · ') %></dd>
+            </div>
+          <% } %>
+        <% } %>
+
+      </dl>
+    <% } %>
+
+    <%# ─ Réactions : mises en valeur ─ %>
+    <div class="wiki-react wiki-detail-react"
+      data-id="<%= page.id %>"
+      data-rating="<%= page.rating %>"
+      data-flame="<%= page.flame ? '1' : '0' %>"
+      data-interested="<%= page.interested ? '1' : '0' %>">
+      <div class="wiki-react-stars">
+        <% for (var i = 1; i <= 5; i++) { %>
+          <button type="button" class="wiki-star" data-value="<%= i %>"><%- i <= page.rating ? '&#9733;' : '&#9734;' %></button>
+        <% } %>
+      </div>
+      <div class="wiki-react-toggles">
+        <button type="button" class="wiki-react-btn wiki-react-flame<%= page.flame ? ' active' : '' %>" data-key="flame">
+          <span class="wiki-react-icon">&#128293;</span><span class="wiki-react-label">J&apos;adore</span>
+        </button>
+        <button type="button" class="wiki-react-btn wiki-react-interest<%= page.interested ? ' active' : '' %>" data-key="interested">
+          <span class="wiki-react-icon">&#10024;</span><span class="wiki-react-label">Int&eacute;ress&eacute;e</span>
+        </button>
+      </div>
     </div>
+
+    <%# ─ Description : section principale + sections repliables ─ %>
+    <% if (page.content) { %>
+      <div class="wiki-md"><span class="wiki-md-raw" hidden><%= page.content %></span></div>
+    <% } %>
+
+    <%# ─ Tag : tags + mots dérivés, dans un espace réduit et centré ─ %>
+    <% if (hasAnyTags) { %>
+      <div class="wiki-detail-tag-block">
+        <p class="wiki-detail-tag-label">Tag</p>
+        <div class="link-card-tags wiki-detail-tags">
+          <% if (pm.anglais) { %><span class="wiki-anglais-badge">&#127468;&#127463; Anglais</span><% } %>
+          <% page.tags.forEach(function (t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
+          <% if (pm.termes_derives && pm.termes_derives.length) { %>
+            <span class="wiki-derived-sep">&mdash;</span>
+            <% pm.termes_derives.forEach(function (t) { %><span class="wiki-derived-pill"><%= t %></span><% }) %>
+          <% } %>
+        </div>
+      </div>
+    <% } %>
 
     <%# ─ Suggestions ─ %>
     <% if (suggestions && suggestions.length) { %>
@@ -200,20 +204,8 @@
       </div>
     <% } %>
 
-    <%# ─ Tags et mots dérivés : en toute fin de page, jamais en tête ─ %>
-    <% if (hasAnyTags) { %>
-      <div class="link-card-tags wiki-detail-tags wiki-detail-tags-end">
-        <% if (pm.anglais) { %><span class="wiki-anglais-badge">&#127468;&#127463; Anglais</span><% } %>
-        <% page.tags.forEach(function (t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
-        <% if (pm.termes_derives && pm.termes_derives.length) { %>
-          <span class="wiki-derived-sep">&mdash;</span>
-          <% pm.termes_derives.forEach(function (t) { %><span class="wiki-derived-pill"><%= t %></span><% }) %>
-        <% } %>
-      </div>
-    <% } %>
-
     <div class="wiki-detail-actions">
-      <a href="/wiki/<%= page.id %>/edit" class="wiki-edit-btn">&#9998; Modifier</a>
+      <a href="/wiki/<%= page.id %>/edit" class="wiki-edit-icon-btn" title="Modifier" aria-label="Modifier">&#9998;</a>
     </div>
 
     <p class="wiki-detail-meta">Mis &agrave; jour le <%= new Date(page.updatedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) %></p>

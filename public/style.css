@@ -2216,203 +2216,152 @@ input[type="text"], input[type="password"] {
 .wiki-detail {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 1.1rem;
   margin-top: 1rem;
+  position: relative;
 }
 
-/* ── Corps article ──────────────────────────────── */
-.wiki-body {
-  display: block;
-  /* clearfix pour contenir le float de l'infobox */
-}
-.wiki-body::after {
-  content: "";
-  display: table;
-  clear: both;
-}
-
-/* ── Infobox Wikipedia ───────────────────────────
-   Desktop : flotte à droite, largeur fixe
-   Mobile  : pleine largeur, en haut
-   ────────────────────────────────────────────── */
-.wiki-infobox {
-  float: right;
-  clear: right;
-  width: 220px;
-  margin: 0 0 1.25rem 1.5rem;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  overflow: hidden;
-  background: var(--card);
-  font-size: 0.85rem;
+/* ── Bandeau : couleur du chapitre, retour à gauche, titre centré ──── */
+.wiki-detail-banner {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr 2.5rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.1rem 1rem;
+  margin: 0 -1.25rem;
+  background: linear-gradient(100deg, hsl(var(--ch-hue, 220), 38%, 24%), hsl(var(--ch-hue, 220), 34%, 32%));
+  border-top: 2px solid color-mix(in srgb, var(--wiki-gold) 65%, transparent);
+  color: #fff;
 }
 
-/* Dots carrousel : cachés par défaut (mobile les ré-active plus bas) */
-.wiki-carousel-dots { display: none; }
+.wiki-detail-banner-back {
+  grid-column: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.2rem;
+  background: rgba(255, 255, 255, 0.12);
+  transition: background 0.15s;
+}
+.wiki-detail-banner-back:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.wiki-detail-banner-title {
+  grid-column: 2;
+  margin: 0;
+  text-align: center;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  font-size: 1.35rem;
+  letter-spacing: 0.01em;
+}
+
+.wiki-detail-banner-sub {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.82);
+}
 
 @media (max-width: 640px) {
-  /* ── Layout mobile : flux vertical ─────────────────────────────── */
-  .wiki-body {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-  }
-  .wiki-body::after { display: none; } /* clearfix inutile en flex */
-
-  /* L'infobox se "dissout" : ses enfants deviennent flex-items de .wiki-body */
-  .wiki-infobox {
-    display: contents;
-  }
-
-  /* ── Ordre des sections ─────────────────────────────────────────── */
-  .wiki-infobox-images:not(.wiki-infobox-images-rest) { order: 1; }
-  .wiki-infobox-params { order: 3; }
-  .wiki-infobox-react  { order: 4; }
-  .wiki-md             { order: 5; }
-  .wiki-infobox-images-rest { order: 6; }
-
-  /* ── Première image : pleine largeur ────────────────────────────── */
-  .wiki-infobox-images:not(.wiki-infobox-images-rest) {
-    border-radius: 10px;
-    overflow: hidden;
-    background: var(--bg);
-  }
-  .wiki-infobox-images:not(.wiki-infobox-images-rest) .wiki-infobox-img {
-    width: 100%;
-    max-height: 68vw;
-    border-radius: 10px;
-  }
-
-  /* ── Paramètres : pills horizontales ────────────────────────────── */
-  .wiki-infobox-params {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-  }
-  .wiki-infobox-row {
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 0.2rem 0.65rem;
-    border-top: 1px solid var(--border);
-    font-size: 0.78rem;
-  }
-  .wiki-infobox-row dt {
-    min-width: 0;
-    font-size: 0.72rem;
-  }
-  .wiki-infobox-row dt::after { content: " :"; }
-
-  /* ── Réactions : ligne horizontale ─────────────────────────────── */
-  .wiki-infobox-react {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    padding: 0;
-    border-top: none;
-    background: transparent;
-    align-items: center;
-  }
-  .wiki-react-stars { justify-content: flex-start; flex: 0 0 auto; }
-  .wiki-react-btn { width: auto; flex: 1 1 auto; }
-
-  /* ── Séparateurs entre images supprimés (carousel) ──────────────── */
-  .wiki-infobox-img + .wiki-infobox-img { border-top: none; }
-
-  /* ── Carrousel images suivantes ─────────────────────────────────── */
-  .wiki-infobox-images-rest {
-    display: flex;
-    flex-direction: row;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    gap: 0.6rem;
-    padding: 0.25rem 0 0.5rem;
-    border-top: none;
-    scrollbar-width: none;
-  }
-  .wiki-infobox-images-rest::-webkit-scrollbar { display: none; }
-  .wiki-infobox-images-rest .wiki-infobox-img {
-    flex: 0 0 82%;
-    height: 54vw;
-    object-fit: contain;
-    scroll-snap-align: center;
-    border-radius: 8px;
-    border-top: none;
-    cursor: zoom-in;
-  }
-
-  /* ── Dots du carrousel ──────────────────────────── */
-  .wiki-carousel-dots {
-    order: 7;
-    display: flex;
-    justify-content: center;
-    gap: 0.4rem;
-    padding: 0.1rem 0 0.25rem;
-  }
-  .wiki-carousel-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    border: none;
-    background: var(--border);
-    cursor: pointer;
-    padding: 0;
-    transition: background 0.2s, transform 0.2s;
-  }
-  .wiki-carousel-dot.active {
-    background: var(--accent);
-    transform: scale(1.3);
-  }
+  .wiki-detail-banner-title { font-size: 1.15rem; }
 }
 
-.wiki-infobox-images {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+/* ── Image principale ────────────────────────────── */
+.wiki-detail-main-images {
+  border-radius: 14px;
+  overflow: hidden;
   background: var(--bg);
+}
+.wiki-detail-main-images .wiki-infobox-img {
+  width: 100%;
+  max-height: 60vh;
 }
 
 .wiki-infobox-img {
-  width: 100%;
-  height: auto;
   display: block;
   object-fit: contain;
   cursor: zoom-in;
 }
 
-/* séparateur entre images si plusieurs dans le même bloc */
-.wiki-infobox-img + .wiki-infobox-img {
-  border-top: 1px solid var(--border);
-}
-
-/* images suivantes : séparateur avec le bloc paramètres */
+/* ── Galerie des images suivantes : rangée défilante + dots ───────── */
 .wiki-infobox-images-rest {
-  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  gap: 0.6rem;
+  padding: 0.1rem 0 0.4rem;
+  scrollbar-width: none;
+}
+.wiki-infobox-images-rest::-webkit-scrollbar { display: none; }
+.wiki-infobox-images-rest .wiki-infobox-img {
+  flex: 0 0 min(78%, 320px);
+  height: 220px;
+  scroll-snap-align: center;
+  border-radius: 10px;
+  background: var(--bg);
 }
 
-/* ── Paramètres sous les images ─────────────── */
+.wiki-carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: -0.6rem;
+}
+.wiki-carousel-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: none;
+  background: var(--border);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s, transform 0.2s;
+}
+.wiki-carousel-dot.active {
+  background: var(--wiki-gold);
+  transform: scale(1.3);
+}
+
+/* ── Paramètres : pills horizontales, toujours (plus de version
+   "encart étroit" séparée puisque la page est désormais linéaire) ──── */
 .wiki-infobox-params {
   margin: 0;
   padding: 0;
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .wiki-infobox-row {
   display: flex;
   align-items: baseline;
-  gap: 0.4rem;
-  padding: 0.45rem 0.75rem;
-  border-top: 1px solid var(--border);
+  gap: 0.35rem;
+  padding: 0.35rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--card);
 }
 
 .wiki-infobox-row dt {
   flex-shrink: 0;
   font-size: 0.75rem;
   color: var(--muted);
-  min-width: 5rem;
 }
+.wiki-infobox-row dt::after { content: " :"; }
 
 .wiki-infobox-row dd {
   margin: 0;
@@ -2470,30 +2419,14 @@ input[type="text"], input[type="password"] {
 .wiki-page-nav-arrow { font-size: 1rem; flex-shrink: 0; opacity: 0.6; }
 .wiki-page-nav-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-.wiki-page-nav-back {
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-
 @media (max-width: 480px) {
   .wiki-page-nav-label { display: none; }
   .wiki-page-nav-btn { flex: 0 0 auto; padding: 0.3rem 0.7rem; }
   .wiki-page-nav-arrow { font-size: 1.2rem; opacity: 1; }
 }
 
-.wiki-detail-header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
 .wiki-detail-title {
   margin: 0;
-}
-
-.wiki-detail-content {
-  white-space: pre-wrap;
-  line-height: 1.6;
 }
 
 /* Markdown rendered content */
@@ -2503,13 +2436,40 @@ input[type="text"], input[type="password"] {
   text-justify: inter-word;
 }
 
-.wiki-md h2 {
-  font-size: 1.1rem;
+/* Sections repliables : tout "## Titre" après le texte principal.
+   Le texte avant le premier "##" n'est jamais enveloppé, donc jamais
+   repliable — c'est la section principale. */
+.wiki-section {
+  margin-top: 1.1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--border);
+  text-align: left;
+}
+.wiki-section-summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  margin: 1.5rem 0 0.4rem;
-  padding-bottom: 0.3rem;
-  border-bottom: 1px solid var(--border);
   color: var(--fg);
+}
+.wiki-section-summary::-webkit-details-marker { display: none; }
+.wiki-section-summary::before {
+  content: "\25B8";
+  display: inline-block;
+  font-size: 0.8em;
+  color: hsl(var(--ch-hue, 220), 55%, 45%);
+  transition: transform 0.15s ease;
+}
+.wiki-section[open] > .wiki-section-summary::before {
+  transform: rotate(90deg);
+}
+.wiki-section-body {
+  margin-top: 0.6rem;
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 .wiki-md h3 {
@@ -2691,6 +2651,44 @@ input[type="text"], input[type="password"] {
   padding: 0.7rem 0.75rem;
   border-top: 1px solid var(--border);
   background: var(--card);
+}
+
+/* Réactions mises en valeur sur la page de lecture : vraie carte,
+   étoiles plus grandes, boutons plus généreux (au lieu de l'ancien
+   encart étroit où la place manquait). */
+.wiki-detail-react {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--card) 94%, var(--wiki-gold) 6%);
+}
+.wiki-detail-react .wiki-react-stars {
+  gap: 0.2rem;
+}
+.wiki-detail-react .wiki-star {
+  font-size: 1.7rem;
+}
+.wiki-detail-react .wiki-react-toggles {
+  flex-wrap: nowrap;
+  gap: 0.6rem;
+}
+.wiki-detail-react .wiki-react-btn {
+  width: auto;
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;
+  font-size: 0.88rem;
+}
+@media (max-width: 480px) {
+  .wiki-detail-react {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .wiki-detail-react .wiki-react-stars { justify-content: center; }
 }
 
 .wiki-react-stars {
@@ -3159,36 +3157,50 @@ input[type="text"], input[type="password"] {
   color: var(--fg);
 }
 
-/* Tags/mots dérivés relégués en toute fin de page, après les suggestions */
-.wiki-detail-tags-end {
-  margin-top: 1.5rem;
-  padding-top: 1rem;
+/* Tags/mots dérivés : espace réduit et centré, "Tag", avant les
+   suggestions (jamais en tête ni mêlés à la description) */
+.wiki-detail-tag-block {
+  text-align: center;
+  padding: 0.75rem 0;
   border-top: 1px dashed var(--border);
+  border-bottom: 1px dashed var(--border);
+}
+.wiki-detail-tag-label {
+  margin: 0 0 0.55rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.wiki-detail-tags {
+  justify-content: center;
+  margin-top: 0;
 }
 
 .wiki-detail-actions {
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  justify-content: center;
   margin-top: 0.5rem;
 }
 
-/* Seule action visible en lecture : éditer. Le supprimer ne vit que
-   dans le formulaire d'édition, pour éviter tout miss-click. */
-.wiki-edit-btn {
+/* Seule action visible en lecture : éditer, réduite à une icône
+   discrète et centrée. Le supprimer ne vit que dans le formulaire
+   d'édition, pour éviter tout miss-click. */
+.wiki-edit-icon-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.55rem 1.3rem;
+  justify-content: center;
+  width: 2.9rem;
+  height: 2.9rem;
+  border-radius: 50%;
   border: 1px solid var(--wiki-gold);
-  border-radius: 999px;
   color: var(--wiki-gold);
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: 1.25rem;
   text-decoration: none;
   transition: background 0.15s, color 0.15s;
 }
-.wiki-edit-btn:hover {
+.wiki-edit-icon-btn:hover {
   background: var(--wiki-gold);
   color: #fff;
 }

@@ -13,14 +13,13 @@
       .replace(/\*(.+?)\*/g,     "<em>$1</em>")
       .replace(/`(.+?)`/g,       "<code>$1</code>");
   }
-  function renderMarkdown(text) {
-    if (!text) return "";
-    var lines = text.split("\n"), out = [], inList = false;
+  // Rend une suite de lignes (déjà échappées) en HTML ; ## n'est pas géré
+  // ici, il sert de séparateur de section plus haut dans renderMarkdown.
+  function renderLines(lines) {
+    var out = [], inList = false;
     function closeList() { if (inList) { out.push("</ul>"); inList = false; } }
-    lines.forEach(function (raw) {
-      var line = esc(raw);
-      if      (/^## /.test(line))   { closeList(); out.push("<h2>" + inline(line.slice(3)) + "</h2>"); }
-      else if (/^### /.test(line))  { closeList(); out.push("<h3>" + inline(line.slice(4)) + "</h3>"); }
+    lines.forEach(function (line) {
+      if      (/^### /.test(line))  { closeList(); out.push("<h3>" + inline(line.slice(4)) + "</h3>"); }
       else if (/^---+\s*$/.test(line)) { closeList(); out.push("<hr />"); }
       else if (/^- /.test(line))    { if (!inList) { out.push("<ul>"); inList = true; } out.push("<li>" + inline(line.slice(2)) + "</li>"); }
       else if (line.trim() === "")  { closeList(); }
@@ -28,6 +27,31 @@
     });
     closeList();
     return out.join("\n");
+  }
+
+  // Un "## Titre" démarre une nouvelle section repliable (accordéon) ;
+  // tout ce qui précède le premier "##" est la section principale,
+  // toujours affichée, jamais repliable.
+  function renderMarkdown(text) {
+    if (!text) return "";
+    var lines = text.split("\n");
+    var sections = [{ heading: null, lines: [] }];
+    lines.forEach(function (raw) {
+      var line = esc(raw);
+      if (/^## /.test(line)) {
+        sections.push({ heading: inline(line.slice(3)), lines: [] });
+      } else {
+        sections[sections.length - 1].lines.push(line);
+      }
+    });
+    return sections.map(function (sec, i) {
+      var body = renderLines(sec.lines);
+      if (i === 0) return body;
+      return '<details class="wiki-section">' +
+        '<summary class="wiki-section-summary">' + sec.heading + '</summary>' +
+        '<div class="wiki-section-body">' + body + '</div>' +
+      '</details>';
+    }).join("\n");
   }
 
   // Rendu du contenu dans la page détail
