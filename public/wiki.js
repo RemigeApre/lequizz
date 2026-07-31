@@ -1498,52 +1498,35 @@
 
   // ══════════════════════════════════════════════════
   // 6b. MESSAGE D'INTRO RÉDUCTIBLE (sommaire du wiki)
+  // Pas de bouton dédié : un clic/tap n'importe où sur le bloc réduit
+  // ou rouvre le message. Réduit, seul l'intitulé "Information" reste.
   // ══════════════════════════════════════════════════
   (function () {
-    var hero    = document.getElementById("wiki-hero");
-    var toggle  = document.getElementById("wiki-hero-toggle");
-    if (!hero || !toggle) return;
+    var hero = document.getElementById("wiki-hero");
+    if (!hero) return;
     var KEY = "wiki-hero-collapsed";
 
     function apply(collapsed) {
       hero.classList.toggle("collapsed", collapsed);
-      toggle.innerHTML = collapsed ? "&#43;" : "&#8722;";
-      toggle.title = collapsed ? "Agrandir le message" : "Réduire le message";
+      hero.setAttribute("aria-expanded", collapsed ? "false" : "true");
     }
 
     apply(localStorage.getItem(KEY) === "1");
 
-    toggle.addEventListener("click", function () {
+    hero.addEventListener("click", function () {
       var collapsed = !hero.classList.contains("collapsed");
       localStorage.setItem(KEY, collapsed ? "1" : "0");
       apply(collapsed);
     });
-  })();
-
-  // ══════════════════════════════════════════════════
-  // 7. FILTRE RAPIDE DU SOMMAIRE (page d'accueil du wiki)
-  // ══════════════════════════════════════════════════
-  (function () {
-    var tocFilter = document.getElementById("wiki-toc-filter");
-    var toc       = document.getElementById("wiki-toc");
-    if (!tocFilter || !toc) return;
-
-    var tocChips    = Array.prototype.slice.call(tocFilter.querySelectorAll(".wiki-toc-chip[data-filter]"));
-    var tocChapters = Array.prototype.slice.call(toc.querySelectorAll(".wiki-chapter[data-chapter]"));
-
-    tocChips.forEach(function (chip) {
-      chip.addEventListener("click", function () {
-        var key = chip.getAttribute("data-filter");
-        tocChips.forEach(function (c) { c.classList.toggle("active", c === chip); });
-        tocChapters.forEach(function (section) {
-          section.hidden = !!key && section.getAttribute("data-chapter") !== key;
-        });
-      });
+    hero.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      e.preventDefault();
+      hero.click();
     });
   })();
 
   // ══════════════════════════════════════════════════
-  // 8. NAVIGATION CONTEXTUELLE PRÉCÉDENT / SUIVANT
+  // 7. NAVIGATION CONTEXTUELLE PRÉCÉDENT / SUIVANT
   // Les flèches de la page de lecture doivent suivre la position dans
   // la liste qu'on parcourait (résultats de recherche, chapitre d'une
   // catégorie…), pas toujours l'ordre alphabétique global. On mémorise

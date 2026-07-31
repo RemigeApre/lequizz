@@ -2,9 +2,11 @@
 <main class="container wide">
   <%- include('partials/top-nav', { config: config }) %>
 
-  <%# ─── MESSAGE D'INTRODUCTION : réductible, l'état est mémorisé ─────── %>
-  <section class="wiki-hero" id="wiki-hero">
-    <button type="button" class="wiki-hero-toggle" id="wiki-hero-toggle" title="R&eacute;duire le message" aria-label="R&eacute;duire le message">&#8722;</button>
+  <%# ─── MESSAGE D'INTRODUCTION : clic/tap n'importe où pour réduire ou
+       rouvrir, l'état est mémorisé. Réduit, ne reste qu'un intitulé
+       "Information" avec un indicateur d'ouverture. ─────────────────── %>
+  <section class="wiki-hero" id="wiki-hero" role="button" tabindex="0" aria-expanded="true">
+    <p class="wiki-hero-collapsed-label">Information <span class="wiki-hero-indicator" aria-hidden="true">&#9662;</span></p>
     <div class="wiki-hero-content" id="wiki-hero-content">
       <p class="wiki-hero-lead">
         Le wiki est un espace pour apprendre, confirmer mais aussi noter et d&eacute;couvrir de nombreuses
@@ -27,22 +29,11 @@
     </div>
   </form>
 
-  <%# ─── FILTRE RAPIDE : recentrer le sommaire ou tout voir en cartes ── %>
-  <p class="wiki-toc-filter-label">Filtrer par th&egrave;me</p>
-  <div class="wiki-toc-filter" id="wiki-toc-filter">
-    <button type="button" class="wiki-toc-chip wiki-toc-chip-reset active" data-filter="">Tous les chapitres</button>
-    <div class="wiki-toc-grid">
-      <% categories.forEach(function(c) { %>
-        <button type="button" class="wiki-toc-chip" data-filter="<%= c.key %>" style="--ch-hue: <%= c.hue %>"><%= c.label %></button>
-      <% }) %>
-    </div>
-  </div>
-
-  <a href="/wiki/tous" class="wiki-toc-all-link">Tout afficher en cartes &rarr;</a>
-
   <div class="wiki-new-center">
     <button type="button" id="wiki-new-btn" class="wiki-new-btn">+ Nouvelle page</button>
   </div>
+
+  <h2 class="wiki-chapters-title">Chapitres</h2>
 
   <%# ─── STEP 1 : CHOIX DE CATÉGORIE ─────────────────────────────────── %>
   <div id="wiki-step1" class="wiki-step1" hidden>
@@ -258,11 +249,9 @@
       <section class="wiki-chapter" data-chapter="<%= ch.key %>" style="--ch-hue: <%= ch.hue %>">
         <a href="/wiki/categorie/<%= ch.key %>" class="wiki-chapter-link-wrap">
           <div class="wiki-chapter-header">
-            <span class="wiki-chapter-header-arrow" aria-hidden="true">&rarr;</span>
             <h2 class="wiki-chapter-title"><%= ch.label %></h2>
             <span class="wiki-chapter-count"><%= ch.count %></span>
           </div>
-          <% if (ch.desc) { %><p class="wiki-chapter-desc"><%= ch.desc %></p><% } %>
         </a>
         <div class="wiki-chapter-body">
           <% if (ch.preview.length) { %>

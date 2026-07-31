@@ -4364,27 +4364,24 @@ input[type="text"], input[type="password"] {
   box-shadow: 0 1px 3px rgba(40, 30, 10, 0.06);
 }
 
-/* Bouton discret pour réduire/agrandir le message */
-.wiki-hero-toggle {
-  position: absolute;
-  top: 0.6rem;
-  right: 0.7rem;
-  width: 1.6rem;
-  height: 1.6rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  background: var(--card);
-  color: var(--muted);
-  font-size: 0.9rem;
-  line-height: 1;
+/* Pas de bouton : tout le bloc se clique pour réduire/rouvrir */
+.wiki-hero {
   cursor: pointer;
 }
-.wiki-hero-toggle:hover {
-  border-color: var(--wiki-gold);
+
+.wiki-hero-collapsed-label {
+  display: none;
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--muted);
+  align-items: center;
+  gap: 0.4rem;
+}
+.wiki-hero-indicator {
+  font-size: 0.7rem;
   color: var(--wiki-gold);
+  transition: transform 0.15s ease;
 }
 
 .wiki-hero.collapsed {
@@ -4393,6 +4390,12 @@ input[type="text"], input[type="password"] {
 }
 .wiki-hero.collapsed .wiki-hero-content {
   display: none;
+}
+.wiki-hero.collapsed .wiki-hero-collapsed-label {
+  display: flex;
+}
+.wiki-hero.collapsed .wiki-hero-indicator {
+  transform: rotate(-90deg);
 }
 
 .wiki-hero-lead {
@@ -4458,100 +4461,14 @@ input[type="text"], input[type="password"] {
   }
 }
 
-/* Barre de filtre rapide : recentrer le sommaire sur un seul chapitre,
-   ou filer vers la vue globale en cartes. */
-.wiki-toc-filter-label {
-  margin: 0 0 0.6rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--muted);
-}
-
-/* Trois rôles bien séparés au lieu d'une seule rangée hétéroclite :
-   1) réinitialiser (chip isolée), 2) choisir un thème (grille propre,
-   cellules égales), 3) plus loin, changer de vue (lien à part). */
-.wiki-toc-filter {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  margin-bottom: 1.1rem;
-}
-
-.wiki-toc-chip-reset {
-  align-self: flex-start;
-}
-
-.wiki-toc-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
-  gap: 0.55rem;
-}
-
-.wiki-toc-chip {
-  border: 1px solid var(--border);
-  background: var(--card);
-  color: var(--muted);
-  border-radius: 999px;
-  padding: 0.45rem 0.9rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  white-space: nowrap;
-  transition: border-color 0.15s, color 0.15s, background 0.15s;
-}
-.wiki-toc-chip::before {
-  content: "";
-  width: 0.55rem;
-  height: 0.55rem;
-  border-radius: 50%;
-  background: hsl(var(--ch-hue, 220), 55%, 45%);
-  flex-shrink: 0;
-}
-.wiki-toc-chip[data-filter=""]::before {
-  display: none;
-}
-.wiki-toc-chip:hover {
-  border-color: hsl(var(--ch-hue, 220), 55%, 45%);
+/* Titre centré au-dessus du sommaire des chapitres */
+.wiki-chapters-title {
+  margin: 0 0 1.1rem;
+  text-align: center;
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-size: 1.3rem;
   color: var(--fg);
-}
-.wiki-toc-chip.active {
-  background: hsl(var(--ch-hue, 220), 55%, 45%);
-  border-color: hsl(var(--ch-hue, 220), 55%, 45%);
-  color: #fff;
-}
-.wiki-toc-chip[data-filter=""].active {
-  background: var(--fg);
-  border-color: var(--fg);
-  color: var(--bg);
-}
-
-/* Lien de vue globale : à part du filtre, pour ne pas se faire passer
-   pour une catégorie parmi d'autres. */
-.wiki-toc-all-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  margin: 0 0 1.75rem;
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--wiki-gold);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--wiki-gold);
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition: background 0.15s, color 0.15s;
-}
-.wiki-toc-all-link:hover {
-  background: var(--wiki-gold);
-  color: #fff;
 }
 
 .wiki-toc {
@@ -4597,12 +4514,6 @@ input[type="text"], input[type="password"] {
   color: #fff;
 }
 
-.wiki-chapter-header-arrow {
-  grid-column: 1;
-  font-size: 1rem;
-  opacity: 0.85;
-}
-
 .wiki-chapter-title {
   grid-column: 2;
   margin: 0;
@@ -4620,15 +4531,6 @@ input[type="text"], input[type="password"] {
   font-size: 0.85rem;
   font-weight: 700;
   color: #fff;
-}
-
-.wiki-chapter-desc {
-  margin: 0;
-  padding: 0.5rem 1.1rem;
-  font-size: 0.76rem;
-  font-style: italic;
-  color: var(--muted);
-  background: var(--card);
 }
 
 .wiki-chapter-body {
