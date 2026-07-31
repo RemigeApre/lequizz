@@ -1,4 +1,4 @@
-<%- include('partials/head', { title: (lockedCategory ? lockedCategory.label : 'Toutes les pages') + ' — Wiki' }) %>
+<%- include('partials/head', { title: lockedCategory ? lockedCategory.label : 'Toutes les pages' }) %>
 <main class="container wide<%= lockedCategory ? ' wiki-locked' : '' %>"<% if (lockedCategory) { %> style="--ch-hue: <%= lockedCategory.hue %>"<% } %>>
   <%- include('partials/top-nav', { config: config }) %>
 

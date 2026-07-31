@@ -27,12 +27,15 @@
   <%# ─── FILTRE RAPIDE : recentrer le sommaire ou tout voir en cartes ── %>
   <p class="wiki-toc-filter-label">Filtrer par th&egrave;me</p>
   <div class="wiki-toc-filter" id="wiki-toc-filter">
-    <button type="button" class="wiki-toc-chip active" data-filter="">Tous les chapitres</button>
-    <% categories.forEach(function(c) { %>
-      <button type="button" class="wiki-toc-chip" data-filter="<%= c.key %>" style="--ch-hue: <%= c.hue %>"><%= c.label %></button>
-    <% }) %>
-    <a href="/wiki/tous" class="wiki-toc-chip wiki-toc-chip-all">Tout afficher en cartes &rarr;</a>
+    <button type="button" class="wiki-toc-chip wiki-toc-chip-reset active" data-filter="">Tous les chapitres</button>
+    <div class="wiki-toc-grid">
+      <% categories.forEach(function(c) { %>
+        <button type="button" class="wiki-toc-chip" data-filter="<%= c.key %>" style="--ch-hue: <%= c.hue %>"><%= c.label %></button>
+      <% }) %>
+    </div>
   </div>
+
+  <a href="/wiki/tous" class="wiki-toc-all-link">Tout afficher en cartes &rarr;</a>
 
   <div class="wiki-new-center">
     <button type="button" id="wiki-new-btn" class="wiki-new-btn">+ Nouvelle page</button>

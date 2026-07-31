@@ -4306,6 +4306,16 @@ input[type="text"], input[type="password"] {
   font-style: italic;
 }
 
+/* Le top-nav a son propre écart en bas (utile partout ailleurs sur le
+   site), mais ici on veut coller le contenu juste sous le header, sans
+   le moindre pixel. Le menu (backdrop + tiroir) est en position fixed
+   entre les deux dans le DOM mais hors du flux normal : on cible donc
+   avec ~ (et pas +) tout ce qui suit le top-nav. */
+.top-nav ~ .wiki-hero,
+.top-nav ~ .wiki-chapter-hero {
+  margin-top: -1.5rem;
+}
+
 /* Message d'intro : présente l'esprit du wiki + la règle Ultra */
 .wiki-hero {
   background: color-mix(in srgb, var(--card) 92%, var(--wiki-gold) 8%);
@@ -4383,7 +4393,7 @@ input[type="text"], input[type="password"] {
 /* Barre de filtre rapide : recentrer le sommaire sur un seul chapitre,
    ou filer vers la vue globale en cartes. */
 .wiki-toc-filter-label {
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.6rem;
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -4391,11 +4401,24 @@ input[type="text"], input[type="password"] {
   color: var(--muted);
 }
 
+/* Trois rôles bien séparés au lieu d'une seule rangée hétéroclite :
+   1) réinitialiser (chip isolée), 2) choisir un thème (grille propre,
+   cellules égales), 3) plus loin, changer de vue (lien à part). */
 .wiki-toc-filter {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1.75rem;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1.1rem;
+}
+
+.wiki-toc-chip-reset {
+  align-self: flex-start;
+}
+
+.wiki-toc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: 0.55rem;
 }
 
 .wiki-toc-chip {
@@ -4403,13 +4426,15 @@ input[type="text"], input[type="password"] {
   background: var(--card);
   color: var(--muted);
   border-radius: 999px;
-  padding: 0.4rem 0.9rem;
+  padding: 0.45rem 0.9rem;
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.4rem;
+  white-space: nowrap;
   transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
 .wiki-toc-chip::before {
@@ -4438,15 +4463,25 @@ input[type="text"], input[type="password"] {
   color: var(--bg);
 }
 
-/* Même gabarit que les autres chips : un bouton parmi d'autres, pas un
-   pavé isolé qui casse le rythme de la barre. */
-.wiki-toc-chip-all {
-  border-color: var(--wiki-gold);
+/* Lien de vue globale : à part du filtre, pour ne pas se faire passer
+   pour une catégorie parmi d'autres. */
+.wiki-toc-all-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin: 0 0 1.75rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--wiki-gold);
+  border-radius: 999px;
+  background: transparent;
   color: var(--wiki-gold);
+  font-size: 0.85rem;
+  font-weight: 600;
   text-decoration: none;
+  transition: background 0.15s, color 0.15s;
 }
-.wiki-toc-chip-all::before { display: none; }
-.wiki-toc-chip-all:hover {
+.wiki-toc-all-link:hover {
   background: var(--wiki-gold);
   color: #fff;
 }
