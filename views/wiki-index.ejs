@@ -15,10 +15,9 @@
       tu peux noter, mettre en favoris, et bien plus.
     </p>
     <p class="wiki-hero-note">
-      <span class="wiki-hero-note-icon" aria-hidden="true">&#9888;</span>
-      Il a pour but d&rsquo;&ecirc;tre exhaustif sur tout ce qui existe&nbsp;: les pratiques les plus
+      <span class="wiki-hero-note-icon" aria-hidden="true">&#9888;</span><span class="wiki-hero-note-text">Il a pour but d&rsquo;&ecirc;tre exhaustif sur tout ce qui existe&nbsp;: les pratiques les plus
       extr&ecirc;mes sont cat&eacute;goris&eacute;es en <strong>ULTRA</strong> et peuvent &ecirc;tre
-      masqu&eacute;es &mdash; elles le sont par d&eacute;faut dans ce sommaire.
+      masqu&eacute;es &mdash; elles le sont par d&eacute;faut dans ce sommaire.</span>
     </p>
   </section>
 
@@ -233,22 +232,23 @@
       <section class="wiki-chapter" style="--ch-hue: <%= ch.hue %>">
         <div class="wiki-chapter-header">
           <h2 class="wiki-chapter-title">
-            <span class="wiki-chapter-dot" style="background: hsl(<%= ch.hue %>, 55%, 45%)"></span>
             <%= ch.label %>
             <span class="wiki-chapter-count"><%= ch.count %></span>
           </h2>
           <a href="/wiki/categorie/<%= ch.key %>" class="wiki-chapter-link">Voir tout &rarr;</a>
         </div>
-        <% if (ch.desc) { %><p class="wiki-chapter-desc"><%= ch.desc %></p><% } %>
-        <% if (ch.preview.length) { %>
-          <div class="wiki-chapter-strip">
-            <% ch.preview.forEach(function (page) { %>
-              <%- include('partials/wiki-card', { page: page, categories: categories }) %>
-            <% }) %>
-          </div>
-        <% } else { %>
-          <p class="intro wiki-chapter-empty">Aucune page pour l&apos;instant.</p>
-        <% } %>
+        <div class="wiki-chapter-body">
+          <% if (ch.desc) { %><p class="wiki-chapter-desc"><%= ch.desc %></p><% } %>
+          <% if (ch.preview.length) { %>
+            <div class="wiki-chapter-strip">
+              <% ch.preview.forEach(function (page) { %>
+                <%- include('partials/wiki-card', { page: page, categories: categories }) %>
+              <% }) %>
+            </div>
+          <% } else { %>
+            <p class="intro wiki-chapter-empty">Aucune page pour l&apos;instant.</p>
+          <% } %>
+        </div>
       </section>
     <% }) %>
   </div>

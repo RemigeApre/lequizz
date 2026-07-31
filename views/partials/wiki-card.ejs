@@ -54,11 +54,8 @@
       <p class="wiki-card-derived"><%= pm2.termes_derives.slice(0,3).join(' · ') %></p>
     <% } %>
     <% if (page.extraCategories && page.extraCategories.length) { %>
-      <div class="wiki-card-extra-cats">
-        <% page.extraCategories.forEach(function(eck) { var ecat = categories.find(function(c){ return c.key === eck; }); %>
-          <span class="wiki-category-badge wiki-category-badge-sm" style="background: hsl(<%= ecat ? ecat.hue : 220 %>, 55%, 45%)"><%= ecat ? ecat.label : eck %></span>
-        <% }) %>
-      </div>
+      <% var ecatObjs = page.extraCategories.map(function(eck) { return categories.find(function(c){ return c.key === eck; }) || { key: eck, label: eck, hue: 220 }; }); %>
+      <div class="wiki-card-extra-cats" title="Aussi dans&nbsp;: <%= ecatObjs.map(function(c){ return c.label; }).join(', ') %>"><span class="wiki-card-extra-cats-dots"><% ecatObjs.forEach(function(ecat) { %><span class="wiki-extra-cat-dot" style="background: hsl(<%= ecat.hue %>, 60%, 48%)"></span><% }) %></span><span class="wiki-card-extra-cats-label">Aussi&nbsp;: <%= ecatObjs.map(function(c){ return c.label; }).join(', ') %></span></div>
     <% } %>
     <% if (page.tags.length) { %>
       <div class="wiki-card-tags">

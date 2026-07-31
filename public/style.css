@@ -2155,11 +2155,37 @@ input[type="text"], input[type="password"] {
 .wiki-category-badge-extra {
   opacity: 0.85;
 }
+
+/* Résumé compact "aussi dans…" : pastilles de couleur + texte tronqué
+   sur une seule ligne, pour ne jamais casser la mise en page de la carte
+   même avec 3+ catégories supplémentaires (voir title= pour le détail). */
 .wiki-card-extra-cats {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
+  align-items: center;
+  gap: 0.35rem;
   margin-top: 0.1rem;
+  min-width: 0;
+  overflow: hidden;
+}
+.wiki-card-extra-cats-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  flex-shrink: 0;
+}
+.wiki-extra-cat-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.wiki-card-extra-cats-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  color: var(--muted);
 }
 .wiki-extra-cats-field {
   margin: 0.5rem 0;
@@ -4301,9 +4327,30 @@ input[type="text"], input[type="password"] {
   line-height: 1.4;
 }
 
+/* Tout le texte est dans un seul span : sinon le <strong> qu'il contient
+   coupe le flux en plusieurs "items" flex qui s'affichent côte à côte
+   comme des colonnes au lieu de s'enchaîner normalement. */
+.wiki-hero-note-text {
+  flex: 1;
+  min-width: 0;
+}
+
 .wiki-hero-note strong {
   color: var(--fg);
   letter-spacing: 0.02em;
+}
+
+@media (max-width: 640px) {
+  .wiki-hero {
+    padding: 1.05rem 1.1rem;
+    border-radius: 12px;
+  }
+  .wiki-hero-lead {
+    font-size: 0.94rem;
+  }
+  .wiki-hero-note {
+    font-size: 0.83rem;
+  }
 }
 
 .wiki-toc {
@@ -4313,12 +4360,13 @@ input[type="text"], input[type="password"] {
   margin-top: 1.5rem;
 }
 
+/* Chaque chapitre est une vraie carte colorée : bandeau plein dans la
+   teinte de la catégorie (pas juste un liseret discret). */
 .wiki-chapter {
   background: var(--card);
   border: 1px solid var(--border);
-  border-top: 3px solid hsl(var(--ch-hue, 220), 55%, 45%);
   border-radius: 16px;
-  padding: 1.3rem 1.4rem 1.2rem;
+  overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   transition: box-shadow 0.2s ease;
 }
@@ -4331,7 +4379,9 @@ input[type="text"], input[type="password"] {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 0.3rem;
+  padding: 0.85rem 1.4rem;
+  background: linear-gradient(100deg, hsl(var(--ch-hue, 220), 62%, 42%), hsl(var(--ch-hue, 220), 62%, 50%));
+  color: #fff;
 }
 
 .wiki-chapter-title {
@@ -4342,21 +4392,15 @@ input[type="text"], input[type="password"] {
   font-size: 1.1rem;
   font-weight: 700;
   letter-spacing: 0.01em;
-}
-
-.wiki-chapter-dot {
-  width: 0.7rem;
-  height: 0.7rem;
-  border-radius: 50%;
-  flex-shrink: 0;
+  color: #fff;
 }
 
 .wiki-chapter-count {
   font-size: 0.78rem;
   font-weight: 600;
-  color: var(--muted);
-  background: var(--bg);
-  border: 1px solid var(--border);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 999px;
   padding: 0.1rem 0.5rem;
 }
@@ -4365,11 +4409,16 @@ input[type="text"], input[type="password"] {
   flex-shrink: 0;
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--accent);
+  color: #fff;
   text-decoration: none;
   white-space: nowrap;
+  opacity: 0.92;
 }
-.wiki-chapter-link:hover { text-decoration: underline; }
+.wiki-chapter-link:hover { opacity: 1; text-decoration: underline; }
+
+.wiki-chapter-body {
+  padding: 1.1rem 1.4rem 1.2rem;
+}
 
 .wiki-chapter-desc {
   margin: 0 0 0.9rem;
@@ -4388,6 +4437,18 @@ input[type="text"], input[type="password"] {
 .wiki-chapter-strip .wiki-card {
   flex: 0 0 190px;
   scroll-snap-align: start;
+}
+
+@media (max-width: 640px) {
+  .wiki-chapter-header {
+    padding: 0.7rem 1rem;
+  }
+  .wiki-chapter-title {
+    font-size: 1rem;
+  }
+  .wiki-chapter-body {
+    padding: 0.9rem 1rem 1rem;
+  }
 }
 
 .wiki-chapter-empty {
