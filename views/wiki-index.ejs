@@ -1,0 +1,246 @@
+<%- include('partials/head', { title: 'Wiki — ' + config.title }) %>
+<main class="container wide">
+  <%- include('partials/top-nav', { config: config }) %>
+  <h1 class="section-title-h1">Wiki</h1>
+
+  <%# ─── BOUTON NOUVELLE PAGE ─────────────────────────────────────────── %>
+  <div class="wiki-new-wrap">
+    <button type="button" id="wiki-new-btn" class="wiki-new-btn">+ Nouvelle page</button>
+  </div>
+
+  <%# ─── STEP 1 : CHOIX DE CATÉGORIE ─────────────────────────────────── %>
+  <div id="wiki-step1" class="wiki-step1" hidden>
+    <p class="wiki-step1-title">Quel type de page ?</p>
+    <div class="wiki-cat-grid">
+      <% categories.forEach(function(c) { %>
+        <button type="button" class="wiki-cat-card"
+          data-category="<%= c.key %>"
+          data-hue="<%= c.hue %>"
+          data-label="<%= c.label %>"
+          style="--ch: <%= c.hue %>">
+          <span class="wiki-cat-card-label"><%= c.label %></span>
+          <span class="wiki-cat-card-desc"><%= c.desc %></span>
+        </button>
+      <% }) %>
+    </div>
+  </div>
+
+  <%# ─── STEP 2 : FORMULAIRE ──────────────────────────────────────────── %>
+  <script id="wiki-existing-pages" type="application/json"><%- JSON.stringify(pages.map(function(p){ return { id: p.id, title: p.title }; })) %></script>
+  <div id="wiki-step2" class="wiki-step2" hidden>
+    <form method="POST" action="/wiki" enctype="multipart/form-data" class="wiki-form" id="wiki-new-form">
+      <input type="hidden" name="category" id="wiki-new-cat-input" value="" />
+
+      <div class="wiki-form-top-row">
+        <button type="button" id="wiki-new-cat-badge" class="wiki-category-badge wiki-badge-btn" title="Changer de type"></button>
+      </div>
+
+      <input type="text" name="title" class="wiki-title-input" id="wiki-new-title" required placeholder="Titre&hellip;" autocomplete="off" />
+      <div id="wiki-title-warn" class="wiki-title-warn" hidden></div>
+
+      <label class="chip-option wiki-owned-chip" id="wiki-new-owned" hidden>
+        <input type="checkbox" name="owned" />
+        <span>On poss&egrave;de</span>
+      </label>
+
+      <div class="wiki-editor">
+        <div class="md-toolbar">
+          <button type="button" class="md-btn" data-md="bold" title="Gras (Ctrl+B)"><strong>B</strong></button>
+          <button type="button" class="md-btn md-btn-italic" data-md="italic" title="Italique (Ctrl+I)"><em>I</em></button>
+          <span class="md-sep"></span>
+          <button type="button" class="md-btn" data-md="h2">H2</button>
+          <button type="button" class="md-btn" data-md="h3">H3</button>
+          <span class="md-sep"></span>
+          <button type="button" class="md-btn" data-md="list">&#8226;&nbsp;Liste</button>
+          <button type="button" class="md-btn" data-md="hr">&mdash;</button>
+          <div class="md-toolbar-spacer"></div>
+          <button type="button" class="md-btn md-preview-btn">Aper&ccedil;u</button>
+        </div>
+        <textarea name="content" class="wiki-textarea" rows="7" placeholder="Description, notes&hellip; (Markdown support&eacute;)"></textarea>
+        <div class="wiki-md-preview wiki-md" hidden></div>
+      </div>
+
+      <%# ─ Champs fantasmes ─ %>
+      <div class="wiki-fantasmes-meta" hidden>
+        <div class="wiki-meta-group">
+          <p class="wiki-meta-label">Sous-cat&eacute;gorie</p>
+          <div class="wiki-meta-options">
+            <% fantasmesSubs.forEach(function(s) { %>
+              <label class="chip-option"><input type="radio" name="meta_sous_cat" value="<%= s.key %>"><span><%= s.label %></span></label>
+            <% }) %>
+          </div>
+        </div>
+      </div>
+
+      <%# ─ Champs partenaires ─ %>
+      <div class="wiki-partenaires-meta" hidden>
+        <div class="wiki-meta-group">
+          <p class="wiki-meta-label">Nombre de femmes</p>
+          <div class="wiki-meta-options">
+            <label class="chip-option"><input type="radio" name="meta_nb_femmes" value="0"><span>0</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_femmes" value="1"><span>1</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_femmes" value="2"><span>2</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_femmes" value="3"><span>3</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_femmes" value="nombreux"><span>Nombreuses</span></label>
+          </div>
+        </div>
+        <div class="wiki-meta-group">
+          <p class="wiki-meta-label">Nombre d&apos;hommes</p>
+          <div class="wiki-meta-options">
+            <label class="chip-option"><input type="radio" name="meta_nb_hommes" value="0"><span>0</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_hommes" value="1"><span>1</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_hommes" value="2"><span>2</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_hommes" value="3"><span>3</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_hommes" value="nombreux"><span>Nombreux</span></label>
+          </div>
+        </div>
+      </div>
+
+      <%# ─ Champs objets ─ %>
+      <div class="wiki-objets-meta" hidden>
+        <div class="wiki-meta-group">
+          <p class="wiki-meta-label">Type de gode</p>
+          <div class="wiki-meta-options">
+            <label class="chip-option"><input type="radio" name="meta_type_gode" value="animal"><span>Animal</span></label>
+            <label class="chip-option"><input type="radio" name="meta_type_gode" value="monstre"><span>Monstre</span></label>
+            <label class="chip-option"><input type="radio" name="meta_type_gode" value="fantaisiste"><span>Fantaisiste</span></label>
+            <label class="chip-option"><input type="radio" name="meta_type_gode" value="ethnique"><span>Ethnique</span></label>
+            <label class="chip-option"><input type="radio" name="meta_type_gode" value="autre"><span>Autre</span></label>
+          </div>
+        </div>
+      </div>
+
+      <%# ─ Champs lieux ─ %>
+      <div class="wiki-lieux-meta" hidden>
+        <div class="wiki-meta-group">
+          <p class="wiki-meta-label">Type de lieu</p>
+          <div class="wiki-meta-options">
+            <label class="chip-option"><input type="radio" name="meta_type_lieu" value="prive"><span>Priv&eacute;</span></label>
+            <label class="chip-option"><input type="radio" name="meta_type_lieu" value="public"><span>Public</span></label>
+            <label class="chip-option"><input type="radio" name="meta_type_lieu" value="cache"><span>Cach&eacute;</span></label>
+          </div>
+        </div>
+      </div>
+
+      <%# ─ Champs position ─ %>
+      <div class="wiki-position-meta" hidden>
+        <div class="wiki-meta-group">
+          <p class="wiki-meta-label">Qui est au-dessus&nbsp;?</p>
+          <div class="wiki-meta-options">
+            <label class="chip-option"><input type="radio" name="meta_qui_dessus" value="femme"><span>Femme</span></label>
+            <label class="chip-option"><input type="radio" name="meta_qui_dessus" value="homme"><span>Homme</span></label>
+            <label class="chip-option"><input type="radio" name="meta_qui_dessus" value="variable"><span>Variable</span></label>
+            <label class="chip-option"><input type="radio" name="meta_qui_dessus" value="aucun"><span>Aucun&nbsp;/ debout</span></label>
+          </div>
+        </div>
+        <div class="wiki-meta-group">
+          <p class="wiki-meta-label">Canal(aux)</p>
+          <div class="wiki-meta-options">
+            <label class="chip-option"><input type="checkbox" name="meta_canal" value="vagin"><span>Vagin</span></label>
+            <label class="chip-option"><input type="checkbox" name="meta_canal" value="anus"><span>Anus</span></label>
+            <label class="chip-option"><input type="checkbox" name="meta_canal" value="bouche"><span>Bouche</span></label>
+            <label class="chip-option"><input type="checkbox" name="meta_canal" value="mains"><span>Mains</span></label>
+            <label class="chip-option"><input type="checkbox" name="meta_canal" value="autre"><span>Autre</span></label>
+          </div>
+        </div>
+        <div class="wiki-meta-group">
+          <p class="wiki-meta-label">Orientation</p>
+          <div class="wiki-meta-options">
+            <label class="chip-option"><input type="checkbox" name="meta_orientation" value="face_a_face"><span>Face &agrave; face</span></label>
+            <label class="chip-option"><input type="checkbox" name="meta_orientation" value="face_contre_dos"><span>Face contre dos</span></label>
+            <label class="chip-option"><input type="checkbox" name="meta_orientation" value="acrobatique"><span>Acrobatique</span></label>
+            <label class="chip-option"><input type="checkbox" name="meta_orientation" value="autre"><span>Autre</span></label>
+          </div>
+        </div>
+      </div>
+
+      <%# ─ Catégories supplémentaires ─ %>
+      <div class="wiki-extra-cats-field" id="wiki-new-extra-cats">
+        <p class="wiki-meta-label">Aussi dans&hellip;</p>
+        <div class="wiki-meta-options">
+          <% categories.forEach(function(c) { %>
+            <label class="chip-option wiki-extra-cat-option" data-cat="<%= c.key %>">
+              <input type="checkbox" name="extra_categories" value="<%= c.key %>" />
+              <span><%= c.label %></span>
+            </label>
+          <% }) %>
+        </div>
+      </div>
+
+      <%# ─ Termes dérivés + Anglais ─ %>
+      <div class="wiki-derived-row">
+        <div class="wiki-tags-widget wiki-derived-widget">
+          <p class="wiki-meta-label">Synonymes&nbsp;/ termes d&eacute;riv&eacute;s</p>
+          <div class="wiki-tags-board">
+            <input type="text" class="wiki-tags-typing" placeholder="Ajouter un terme&hellip;" autocomplete="off" />
+          </div>
+          <input type="hidden" name="meta_termes_derives" class="wiki-tags-hidden" value="" />
+        </div>
+        <label class="chip-option wiki-anglais-chip">
+          <input type="checkbox" name="meta_anglais" />
+          <span>&#127468;&#127463;&nbsp;Terme anglais</span>
+        </label>
+      </div>
+
+      <%# ─ Tags ─ %>
+      <div class="wiki-tags-widget">
+        <div class="wiki-tags-board">
+          <input type="text" class="wiki-tags-typing" placeholder="Ajouter un tag&hellip;" autocomplete="off" />
+        </div>
+        <input type="hidden" name="tags" class="wiki-tags-hidden" value="" />
+        <% if (allTags.length) { %>
+          <div class="wiki-tag-suggestions">
+            <% allTags.forEach(function(t) { %>
+              <button type="button" class="wiki-tag-suggest-chip" data-tag="<%= t %>"><%= t %></button>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+
+      <%# ─ Image ─ %>
+      <div class="wiki-image-field">
+        <label class="wiki-image-add-label">
+          <span>+ Ajouter des images</span>
+          <input type="file" name="images" accept="image/*" multiple class="wiki-image-input" />
+        </label>
+        <div class="wiki-new-previews"></div>
+      </div>
+
+      <div class="wiki-form-actions">
+        <button type="submit">Ajouter</button>
+        <button type="button" class="wiki-cancel-btn" id="wiki-cancel-new">Annuler</button>
+      </div>
+    </form>
+  </div>
+
+  <%# ─── SOMMAIRE PAR CHAPITRE ───────────────────────────────────────── %>
+  <div class="wiki-toc">
+    <% chapters.forEach(function (ch) { %>
+      <section class="wiki-chapter">
+        <div class="wiki-chapter-header">
+          <h2 class="wiki-chapter-title">
+            <span class="wiki-chapter-dot" style="background: hsl(<%= ch.hue %>, 55%, 45%)"></span>
+            <%= ch.label %>
+            <span class="wiki-chapter-count"><%= ch.count %></span>
+          </h2>
+          <a href="/wiki/categorie/<%= ch.key %>" class="wiki-chapter-link">Voir tout &rarr;</a>
+        </div>
+        <% if (ch.preview.length) { %>
+          <div class="wiki-chapter-strip">
+            <% ch.preview.forEach(function (page) { %>
+              <%- include('partials/wiki-card', { page: page, categories: categories }) %>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <p class="intro wiki-chapter-empty">Aucune page pour l&apos;instant.</p>
+        <% } %>
+      </section>
+    <% }) %>
+  </div>
+
+  <div class="wiki-all-link-wrap">
+    <a href="/wiki/tous" class="link-button">Voir toutes les pages, toutes cat&eacute;gories confondues &rarr;</a>
+  </div>
+</main>
+<script src="/wiki.js?v=<%= assetVersion %>"></script>
+<%- include('partials/foot') %>

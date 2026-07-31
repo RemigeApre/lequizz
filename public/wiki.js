@@ -1229,7 +1229,7 @@
     var searchTimer;
 
     // Hue de catégorie (doit rester cohérent avec le serveur)
-    var CAT_HUES = { fantasmes:330, partenaires:210, position:270, lieux:140, objets:28, tenues:175, autre:220 };
+    var CAT_HUES = { fantasmes:330, partenaires:210, pratique:5, position:270, lieux:140, objets:28, tenues:175, autre:220 };
 
     function makeCard(page, removable) {
       var hue = CAT_HUES[page.category] || 220;

@@ -14,6 +14,7 @@ const {
 const CATEGORIES = [
   { key: "fantasmes",   label: "Fantasmes",   hue: 330 },
   { key: "partenaires", label: "Partenaires", hue: 210 },
+  { key: "pratique",    label: "Pratique",    hue:   5 },
   { key: "position",    label: "Position",    hue: 270 },
   { key: "lieux",       label: "Lieux",       hue: 140 },
   { key: "objets",      label: "Objets",      hue:  28 },

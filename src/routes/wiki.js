@@ -25,6 +25,7 @@ const {
 const CATEGORIES = [
   { key: "fantasmes",  label: "Fantasmes",   desc: "Sc\u00e9narios, d\u00e9sirs...",          hue: 330 },
   { key: "partenaires",label: "Partenaires", desc: "Configurations, r\u00f4les...",       hue: 210 },
+  { key: "pratique",   label: "Pratique",    desc: "Actes et gestes sexuels...",      hue:   5 },
   { key: "position",   label: "Position",    desc: "Kama-sutra, variantes...",        hue: 270 },
   { key: "lieux",      label: "Lieux",       desc: "Endroits, contextes...",          hue: 140 },
   { key: "objets",     label: "Objets",      desc: "Sex-toys, accessoires...",        hue:  28 },
@@ -161,9 +162,39 @@ function buildWikiRouter(config) {
 
   const CTX = { categories: CATEGORIES, fantasmesSubs: FANTASMES_SUBCATS };
 
+  function sortedPages() {
+    return listWikiPages().sort((a, b) => a.title.localeCompare(b.title, "fr", { sensitivity: "base" }));
+  }
+
+  // Une page appartient a une categorie si c'est sa categorie principale
+  // OU une de ses categories supplementaires : une carte "aussi dans..."
+  // doit apparaitre dans chaque chapitre concerne, pas seulement le sien.
+  function pagesForCategory(pages, key) {
+    return pages.filter((p) => p.category === key || (p.extraCategories || []).includes(key));
+  }
+
+  // ── Sommaire : une "etagere" par categorie, comme les chapitres d'un livre ──
   router.get("/", (req, res) => {
-    const pages = listWikiPages().sort((a, b) => a.title.localeCompare(b.title, "fr", { sensitivity: "base" }));
-    res.render("wiki", { config, pages, allTags: getAllTags(pages), ...CTX });
+    const pages = sortedPages();
+    const chapters = CATEGORIES.map((cat) => {
+      const catPages = pagesForCategory(pages, cat.key);
+      return { ...cat, pages: catPages, count: catPages.length, preview: catPages.slice(0, 6) };
+    });
+    res.render("wiki-index", { config, chapters, pages, allTags: getAllTags(pages), totalCount: pages.length, ...CTX });
+  });
+
+  // ── Vue "tout" : toutes les pages, toutes categories melangees ──
+  router.get("/tous", (req, res) => {
+    const pages = sortedPages();
+    res.render("wiki", { config, pages, allTags: getAllTags(pages), lockedCategory: null, ...CTX });
+  });
+
+  // ── Vue par categorie : un "chapitre" du livre ──
+  router.get("/categorie/:key", (req, res) => {
+    const cat = CATEGORIES.find((c) => c.key === req.params.key);
+    if (!cat) return res.redirect("/wiki");
+    const pages = pagesForCategory(sortedPages(), cat.key);
+    res.render("wiki", { config, pages, allTags: getAllTags(pages), lockedCategory: cat, ...CTX });
   });
 
   router.post("/", upload.array("images", 10), (req, res) => {
