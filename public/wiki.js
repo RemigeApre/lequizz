@@ -1432,4 +1432,26 @@
     });
   });
 
+  // ══════════════════════════════════════════════════
+  // 7. FILTRE RAPIDE DU SOMMAIRE (page d'accueil du wiki)
+  // ══════════════════════════════════════════════════
+  (function () {
+    var tocFilter = document.getElementById("wiki-toc-filter");
+    var toc       = document.getElementById("wiki-toc");
+    if (!tocFilter || !toc) return;
+
+    var tocChips    = Array.prototype.slice.call(tocFilter.querySelectorAll(".wiki-toc-chip[data-filter]"));
+    var tocChapters = Array.prototype.slice.call(toc.querySelectorAll(".wiki-chapter[data-chapter]"));
+
+    tocChips.forEach(function (chip) {
+      chip.addEventListener("click", function () {
+        var key = chip.getAttribute("data-filter");
+        tocChips.forEach(function (c) { c.classList.toggle("active", c === chip); });
+        tocChapters.forEach(function (section) {
+          section.hidden = !!key && section.getAttribute("data-chapter") !== key;
+        });
+      });
+    });
+  })();
+
 })();

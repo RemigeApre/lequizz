@@ -21,6 +21,15 @@
     </p>
   </section>
 
+  <%# ─── FILTRE RAPIDE : recentrer le sommaire ou tout voir en cartes ── %>
+  <div class="wiki-toc-filter" id="wiki-toc-filter">
+    <button type="button" class="wiki-toc-chip active" data-filter="">Tous les chapitres</button>
+    <% categories.forEach(function(c) { %>
+      <button type="button" class="wiki-toc-chip" data-filter="<%= c.key %>" style="--ch-hue: <%= c.hue %>"><%= c.label %></button>
+    <% }) %>
+    <a href="/wiki/tous" class="wiki-toc-chip wiki-toc-chip-all">Tout afficher en cartes &rarr;</a>
+  </div>
+
   <%# ─── STEP 1 : CHOIX DE CATÉGORIE ─────────────────────────────────── %>
   <div id="wiki-step1" class="wiki-step1" hidden>
     <p class="wiki-step1-title">Quel type de page ?</p>
@@ -227,9 +236,9 @@
   </div>
 
   <%# ─── SOMMAIRE PAR CHAPITRE ───────────────────────────────────────── %>
-  <div class="wiki-toc">
+  <div class="wiki-toc" id="wiki-toc">
     <% chapters.forEach(function (ch) { %>
-      <section class="wiki-chapter" style="--ch-hue: <%= ch.hue %>">
+      <section class="wiki-chapter" data-chapter="<%= ch.key %>" style="--ch-hue: <%= ch.hue %>">
         <div class="wiki-chapter-header">
           <h2 class="wiki-chapter-title">
             <%= ch.label %>
@@ -251,10 +260,6 @@
         </div>
       </section>
     <% }) %>
-  </div>
-
-  <div class="wiki-all-link-wrap">
-    <a href="/wiki/tous" class="link-button">Voir toutes les pages, toutes cat&eacute;gories confondues &rarr;</a>
   </div>
 </main>
 <script src="/wiki.js?v=<%= assetVersion %>"></script>
