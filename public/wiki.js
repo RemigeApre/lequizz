@@ -442,6 +442,11 @@
         btn.classList.toggle("active", v <= reactRating);
       });
     }
+    // Sans cet appel initial, les étoiles déjà notées gardaient la
+    // couleur "vide" tant qu'on n'avait pas survolé/cliqué une fois :
+    // le glyphe ★ était bon mais la classe "active" (donc l'or) ne
+    // s'appliquait qu'après une première interaction.
+    renderStars();
 
     // Étoiles : hover pour preview, clic pour valider
     // Si on reclique la même étoile → remet à 0
