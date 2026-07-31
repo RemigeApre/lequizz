@@ -17,12 +17,6 @@
     var pmOri = Array.isArray(pm.orientation) ? pm.orientation : (pm.orientation ? [pm.orientation] : []);
     var hasPosMeta = page.category === 'position' && (pm.qui_dessus || (pm.canal && pm.canal.length) || pmOri.length);
 
-    var hasMeta = (page.category === 'fantasmes' && pm.sous_cat && FSUBS[pm.sous_cat])
-               || hasPartMeta
-               || (page.category === 'lieux' && pm.type_lieu && LIEU[pm.type_lieu])
-               || hasPosMeta
-               || (page.category === 'objets' && pm.type_gode && GODE[pm.type_gode]);
-
     var hasImages = page.imagePaths && page.imagePaths.length;
     var hasAnyTags = page.tags.length || (pm.termes_derives && pm.termes_derives.length) || pm.anglais;
   %>
@@ -77,79 +71,81 @@
       </div>
     <% } %>
 
-    <%# ─ Vrai bandeau d'information façon Wikipedia : catégorie + reste ─ %>
+    <%# ─ Bandeau d'information façon Wikipedia, collé au pied de
+         l'image : un simple filet coloré (plus de nom de catégorie en
+         titre, elle apparaît comme une ligne d'info parmi les autres),
+         puis les faits, puis j'adore/intéressée dans le même bloc ─ %>
     <div class="wiki-infotable">
-      <div class="wiki-infotable-head" style="background: hsl(<%= cat ? cat.hue : 220 %>, 42%, 30%)"><%= cat ? cat.label : page.category %></div>
-      <% if (hasMeta) { %>
-        <dl class="wiki-infotable-body">
+      <dl class="wiki-infotable-body">
 
-          <% if (page.category === 'fantasmes' && pm.sous_cat && FSUBS[pm.sous_cat]) { %>
+        <div class="wiki-infobox-row">
+          <dt>Cat&eacute;gorie</dt>
+          <dd><%= cat ? cat.label : page.category %></dd>
+        </div>
+
+        <% if (page.category === 'fantasmes' && pm.sous_cat && FSUBS[pm.sous_cat]) { %>
+          <div class="wiki-infobox-row">
+            <dt>Sous-cat&eacute;gorie</dt>
+            <dd><%= FSUBS[pm.sous_cat] %></dd>
+          </div>
+        <% } %>
+
+        <% if (hasPartMeta) { %>
+          <% if (nbF) { %>
             <div class="wiki-infobox-row">
-              <dt>Cat&eacute;gorie</dt>
-              <dd><%= FSUBS[pm.sous_cat] %></dd>
+              <dt>Femmes</dt>
+              <dd><%= nbF === 'nombreux' ? 'Nombreuses' : nbF %></dd>
             </div>
           <% } %>
-
-          <% if (hasPartMeta) { %>
-            <% if (nbF) { %>
-              <div class="wiki-infobox-row">
-                <dt>Femmes</dt>
-                <dd><%= nbF === 'nombreux' ? 'Nombreuses' : nbF %></dd>
-              </div>
-            <% } %>
-            <% if (nbH) { %>
-              <div class="wiki-infobox-row">
-                <dt>Hommes</dt>
-                <dd><%= nbH === 'nombreux' ? 'Nombreux' : nbH %></dd>
-              </div>
-            <% } %>
-          <% } %>
-
-          <% if (page.category === 'objets' && pm.type_gode && GODE[pm.type_gode]) { %>
+          <% if (nbH) { %>
             <div class="wiki-infobox-row">
-              <dt>Type</dt>
-              <dd><%= GODE[pm.type_gode] %></dd>
+              <dt>Hommes</dt>
+              <dd><%= nbH === 'nombreux' ? 'Nombreux' : nbH %></dd>
             </div>
           <% } %>
+        <% } %>
 
-          <% if (page.category === 'lieux' && pm.type_lieu && LIEU[pm.type_lieu]) { %>
+        <% if (page.category === 'objets' && pm.type_gode && GODE[pm.type_gode]) { %>
+          <div class="wiki-infobox-row">
+            <dt>Type</dt>
+            <dd><%= GODE[pm.type_gode] %></dd>
+          </div>
+        <% } %>
+
+        <% if (page.category === 'lieux' && pm.type_lieu && LIEU[pm.type_lieu]) { %>
+          <div class="wiki-infobox-row">
+            <dt>Type</dt>
+            <dd><%= LIEU[pm.type_lieu] %></dd>
+          </div>
+        <% } %>
+
+        <% if (hasPosMeta) { %>
+          <% if (pm.qui_dessus && QUI[pm.qui_dessus]) { %>
             <div class="wiki-infobox-row">
-              <dt>Type</dt>
-              <dd><%= LIEU[pm.type_lieu] %></dd>
+              <dt>Au-dessus</dt>
+              <dd><%= QUI[pm.qui_dessus] %></dd>
             </div>
           <% } %>
-
-          <% if (hasPosMeta) { %>
-            <% if (pm.qui_dessus && QUI[pm.qui_dessus]) { %>
-              <div class="wiki-infobox-row">
-                <dt>Au-dessus</dt>
-                <dd><%= QUI[pm.qui_dessus] %></dd>
-              </div>
-            <% } %>
-            <% if (pm.canal && pm.canal.length) { %>
-              <div class="wiki-infobox-row">
-                <dt>Canal</dt>
-                <dd><%= pm.canal.map(function(c){ return CAN[c] || c; }).join(' · ') %></dd>
-              </div>
-            <% } %>
-            <% if (pmOri.length) { %>
-              <div class="wiki-infobox-row">
-                <dt>Orientation</dt>
-                <dd><%= pmOri.map(function(o){ return ORI[o] || o; }).join(' · ') %></dd>
-              </div>
-            <% } %>
+          <% if (pm.canal && pm.canal.length) { %>
+            <div class="wiki-infobox-row">
+              <dt>Canal</dt>
+              <dd><%= pm.canal.map(function(c){ return CAN[c] || c; }).join(' · ') %></dd>
+            </div>
           <% } %>
+          <% if (pmOri.length) { %>
+            <div class="wiki-infobox-row">
+              <dt>Orientation</dt>
+              <dd><%= pmOri.map(function(o){ return ORI[o] || o; }).join(' · ') %></dd>
+            </div>
+          <% } %>
+        <% } %>
 
-        </dl>
-      <% } %>
-    </div>
+      </dl>
 
-    <%# ─ Réactions : flamme / intérêt (la note a rejoint le haut de page) ─ %>
-    <div class="wiki-react wiki-detail-react"
-      data-id="<%= page.id %>"
-      data-flame="<%= page.flame ? '1' : '0' %>"
-      data-interested="<%= page.interested ? '1' : '0' %>">
-      <div class="wiki-react-toggles">
+      <div class="wiki-react wiki-infotable-reactions"
+        data-id="<%= page.id %>"
+        data-flame="<%= page.flame ? '1' : '0' %>"
+        data-interested="<%= page.interested ? '1' : '0' %>">
         <button type="button" class="wiki-react-btn wiki-react-flame<%= page.flame ? ' active' : '' %>" data-key="flame">
           <span class="wiki-react-icon">&#128293;</span><span class="wiki-react-label">J&apos;adore</span>
         </button>

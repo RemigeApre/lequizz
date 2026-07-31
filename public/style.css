@@ -2287,21 +2287,18 @@ input[type="text"], input[type="password"] {
   font-size: 2.1rem;
 }
 
-/* ── Bandeau d'information façon Wikipedia : catégorie + reste ──────
-   Vraie mini-infobox : titre plein coloré, puis table de faits. */
+/* ── Bandeau d'information façon Wikipedia : filet coloré collé au
+   pied de l'image, catégorie + reste comme simples lignes de faits,
+   j'adore/intéressée intégrés dans le même bloc (pas une carte à part). */
+.wiki-detail-main-images + .wiki-infotable {
+  margin-top: -1.1rem; /* annule le gap du flex parent : colle à l'image */
+}
 .wiki-infotable {
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-top: 4px solid hsl(var(--ch-hue, 220), 55%, 45%);
+  border-radius: 0 0 10px 10px;
   overflow: hidden;
   background: var(--card);
-}
-.wiki-infotable-head {
-  padding: 0.5rem 0.9rem;
-  color: #fff;
-  font-weight: 700;
-  font-size: 0.88rem;
-  text-align: center;
-  letter-spacing: 0.02em;
 }
 .wiki-infotable-body {
   margin: 0;
@@ -2320,9 +2317,25 @@ input[type="text"], input[type="password"] {
   background: color-mix(in srgb, var(--bg) 60%, transparent);
 }
 
-/* ── Image principale ────────────────────────────── */
+/* J'adore/intéressée : une rangée de plus dans le même bloc, pas une
+   carte séparée. */
+.wiki-infotable-reactions {
+  flex-direction: row;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.9rem;
+  border-top: 1px solid var(--border);
+}
+.wiki-infotable-reactions .wiki-react-btn {
+  width: auto;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+
+/* ── Image principale : coins bas carrés pour se souder à l'infotable ── */
 .wiki-detail-main-images {
-  border-radius: 14px;
+  border-radius: 14px 14px 0 0;
   overflow: hidden;
   background: var(--bg);
 }
@@ -2725,43 +2738,6 @@ input[type="text"], input[type="password"] {
   background: var(--card);
 }
 
-/* Réactions mises en valeur sur la page de lecture : vraie carte,
-   étoiles plus grandes, boutons plus généreux (au lieu de l'ancien
-   encart étroit où la place manquait). */
-.wiki-detail-react {
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 0.85rem;
-  padding: 0.85rem 1.25rem;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--card) 94%, var(--wiki-gold) 6%);
-}
-.wiki-detail-react .wiki-react-toggles {
-  flex-wrap: nowrap;
-  gap: 0.6rem;
-}
-.wiki-detail-react .wiki-react-btn {
-  width: auto;
-  padding: 0.5rem 1.1rem;
-  border-radius: 999px;
-  font-size: 0.88rem;
-}
-@media (max-width: 480px) {
-  .wiki-detail-react .wiki-react-toggles {
-    flex-direction: column;
-    width: 100%;
-  }
-}
-
-.wiki-react-stars {
-  display: flex;
-  justify-content: center;
-  gap: 0.1rem;
-}
-
 .wiki-star {
   background: none;
   border: none;
@@ -2782,12 +2758,6 @@ input[type="text"], input[type="password"] {
 }
 
 .wiki-star:active { transform: scale(1.25); }
-
-.wiki-react-toggles {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
 
 .wiki-react-btn {
   display: flex;
