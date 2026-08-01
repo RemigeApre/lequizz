@@ -70,16 +70,6 @@
     });
   });
 
-  document.querySelectorAll(".item-fav-toggle").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      var hidden = btn.closest(".item-title-row").querySelector(".fav-hidden");
-      var isOn = hidden.value !== "1";
-      hidden.value = isOn ? "1" : "0";
-      btn.classList.toggle("active", isOn);
-      btn.innerHTML = isOn ? "&#9733;" : "&#9734;";
-      hidden.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-  });
 
   document.querySelectorAll(".group-done-toggle").forEach(function (btn) {
     btn.addEventListener("click", function (e) {
@@ -124,5 +114,134 @@
       target.classList.add("wiki-link-highlight");
       setTimeout(function () { target.classList.remove("wiki-link-highlight"); }, 2500);
     }, 50);
+  })();
+
+  // Pages wiki liées à une question (bouton "?", remplace l'ancienne
+  // étoile favori) : un seul popover partagé par toutes les questions.
+  (function () {
+    var toggles = document.querySelectorAll(".item-wiki-toggle");
+    if (!toggles.length) return;
+
+    var popover   = document.getElementById("item-wiki-popover");
+    var backdrop  = document.getElementById("item-wiki-popover-backdrop");
+    var closeBtn  = document.getElementById("item-wiki-popover-close");
+    var listEl    = document.getElementById("item-wiki-popover-list");
+    var searchEl  = document.getElementById("item-wiki-popover-search");
+    var resultsEl = document.getElementById("item-wiki-popover-results");
+    if (!popover || !backdrop || !closeBtn || !listEl || !searchEl || !resultsEl) return;
+
+    var CAT_HUES = { fantasmes:330, jeu_de_role:60, partenaires:210, pratique:5, position:270, lieux:140, objets:28, tenues:175, autre:220 };
+    var current = null; // { sectionKey, questionId, btn }
+    var searchTimer;
+
+    function syncButton(count) {
+      if (current && current.btn) current.btn.classList.toggle("has-link", count > 0);
+    }
+
+    function load() {
+      if (!current) return;
+      listEl.innerHTML = "<p class=\"item-wiki-popover-loading\">Chargement\u2026</p>";
+      fetch("/wiki/question-links/lookup?section_key=" + encodeURIComponent(current.sectionKey) + "&question_id=" + encodeURIComponent(current.questionId))
+        .then(function (r) { return r.json(); })
+        .then(function (pages) {
+          listEl.innerHTML = "";
+          if (!pages.length) {
+            var em = document.createElement("p");
+            em.className = "item-wiki-popover-empty";
+            em.textContent = "Aucune page li\u00e9e pour l'instant.";
+            listEl.appendChild(em);
+          }
+          pages.forEach(function (p) {
+            var hue = CAT_HUES[p.category] || 220;
+            var row = document.createElement("div");
+            row.className = "item-wiki-popover-row";
+            var a = document.createElement("a");
+            a.href = "/wiki/" + p.id;
+            a.target = "_blank";
+            a.rel = "noopener";
+            a.className = "wiki-pl-card";
+            var badge = document.createElement("span");
+            badge.className = "wiki-pl-badge";
+            badge.style.background = "hsl(" + hue + ",55%,45%)";
+            badge.textContent = p.category;
+            var title = document.createElement("span");
+            title.className = "wiki-pl-title";
+            title.textContent = p.title;
+            a.appendChild(badge);
+            a.appendChild(title);
+            var rm = document.createElement("button");
+            rm.type = "button";
+            rm.className = "item-wiki-popover-remove";
+            rm.innerHTML = "&#215;";
+            rm.title = "Retirer le lien";
+            rm.addEventListener("click", function () {
+              fetch("/wiki/" + p.id + "/question-links", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ section_key: current.sectionKey, question_id: current.questionId }),
+              }).then(load);
+            });
+            row.appendChild(a);
+            row.appendChild(rm);
+            listEl.appendChild(row);
+          });
+          syncButton(pages.length);
+        });
+    }
+
+    function open(sectionKey, questionId, btn) {
+      current = { sectionKey: sectionKey, questionId: questionId, btn: btn };
+      searchEl.value = "";
+      resultsEl.innerHTML = "";
+      popover.hidden = false;
+      backdrop.hidden = false;
+      load();
+    }
+
+    function close() {
+      popover.hidden = true;
+      backdrop.hidden = true;
+      current = null;
+    }
+
+    toggles.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        open(btn.dataset.sectionKey, btn.dataset.questionId, btn);
+      });
+    });
+
+    closeBtn.addEventListener("click", close);
+    backdrop.addEventListener("click", close);
+
+    searchEl.addEventListener("input", function () {
+      clearTimeout(searchTimer);
+      var q = searchEl.value.trim();
+      if (!q) { resultsEl.innerHTML = ""; return; }
+      searchTimer = setTimeout(function () {
+        fetch("/wiki/search?q=" + encodeURIComponent(q))
+          .then(function (r) { return r.json(); })
+          .then(function (pages) {
+            resultsEl.innerHTML = "";
+            pages.forEach(function (p) {
+              var hue = CAT_HUES[p.category] || 220;
+              var li = document.createElement("li");
+              li.className = "wiki-pl-result-item";
+              li.innerHTML = '<span class="wiki-pl-result-badge" style="background:hsl(' + hue + ',55%,45%)">' + p.category + '</span><span>' + p.title + '</span>';
+              li.addEventListener("click", function () {
+                fetch("/wiki/" + p.id + "/question-links", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ section_key: current.sectionKey, question_id: current.questionId }),
+                }).then(function () {
+                  searchEl.value = "";
+                  resultsEl.innerHTML = "";
+                  load();
+                });
+              });
+              resultsEl.appendChild(li);
+            });
+          });
+      }, 200);
+    });
   })();
 })();

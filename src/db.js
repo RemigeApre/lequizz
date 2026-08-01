@@ -312,6 +312,26 @@ function removeWikiQuestionLink(wikiPageId, sectionKey, questionId) {
   db.prepare("DELETE FROM wiki_question_links WHERE wiki_page_id = ? AND section_key = ? AND question_id = ?").run(wikiPageId, sectionKey, questionId);
 }
 
+// Sens inverse : depuis une question du quizz, quelles pages wiki y sont liées.
+function getPagesForQuestion(sectionKey, questionId) {
+  return db.prepare(`
+    SELECT wp.id, wp.title, wp.category
+    FROM wiki_question_links wql
+    JOIN wiki_pages wp ON wp.id = wql.wiki_page_id
+    WHERE wql.section_key = ? AND wql.question_id = ?
+    ORDER BY wp.title COLLATE NOCASE
+  `).all(sectionKey, questionId);
+}
+
+// Pour une section entière : quelles questions ont au moins un lien, afin
+// d'afficher le bouton "?" différemment sans faire un aller-retour par
+// question au chargement de la page.
+function getLinkedQuestionIds(sectionKey) {
+  return db.prepare("SELECT DISTINCT question_id FROM wiki_question_links WHERE section_key = ?")
+    .all(sectionKey)
+    .map((r) => r.question_id);
+}
+
 function incrementWikiViews(id) {
   db.prepare("UPDATE wiki_pages SET views = views + 1 WHERE id = ?").run(id);
 }
@@ -434,6 +454,8 @@ module.exports = {
   getWikiQuestionLinks,
   addWikiQuestionLink,
   removeWikiQuestionLink,
+  getPagesForQuestion,
+  getLinkedQuestionIds,
   incrementWikiViews,
   getImageLinks,
   addImageLink,

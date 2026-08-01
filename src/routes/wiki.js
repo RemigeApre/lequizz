@@ -17,6 +17,7 @@ const {
   getWikiQuestionLinks,
   addWikiQuestionLink,
   removeWikiQuestionLink,
+  getPagesForQuestion,
   getImageLinks,
   addImageLink,
   removeImageLink,
@@ -381,6 +382,16 @@ function buildWikiRouter(config) {
   });
 
   // ── Associations questions ──────────────────────────
+  // Sens inverse : depuis une question du quizz, quelles pages wiki y sont
+  // déjà liées (utilisé par le bouton "?" sur les questions).
+  router.get("/question-links/lookup", (req, res) => {
+    const sectionKey = String(req.query.section_key || "");
+    const questionId = String(req.query.question_id || "");
+    if (!sectionKey || !questionId) return res.json([]);
+    const pages = getPagesForQuestion(sectionKey, questionId);
+    res.json(pages.map((p) => ({ id: p.id, title: p.title, category: p.category })));
+  });
+
   router.get("/:id/question-links", (req, res) => {
     const id = Number(req.params.id);
     if (!Number.isInteger(id)) return res.json([]);

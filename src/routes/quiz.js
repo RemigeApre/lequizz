@@ -5,6 +5,7 @@ const {
   getAttempt,
   saveAttempt,
   listFeaturedWikiPages,
+  getLinkedQuestionIds,
 } = require("../db");
 const csvLog = require("../csvLog");
 
@@ -97,6 +98,10 @@ function parseSectionSubmission(config, section, body) {
 function applySectionSubmission(config, attempt, section, idx, body) {
   attempt.data[section.key] = parseSectionSubmission(config, section, body);
 
+  // __bookmarks.favorite n'est plus alimenté depuis le quizz (l'étoile
+  // favori a été retirée au profit du lien wiki), mais on garde la
+  // structure et les données déjà enregistrées pour ne rien casser côté
+  // admin/résultats.
   attempt.data.__bookmarks = Object.assign(
     { favorite: {} },
     attempt.data.__bookmarks || {}
@@ -104,12 +109,6 @@ function applySectionSubmission(config, attempt, section, idx, body) {
   attempt.data.__doneGroups = attempt.data.__doneGroups || {};
 
   if (section.type === "matrix") {
-    const rawItems = flattenItemsRaw(section);
-    rawItems.forEach((item) => {
-      const key = `${section.key}:${item.id}`;
-      if (body[`fav_${item.id}`] === "1") attempt.data.__bookmarks.favorite[key] = true;
-      else delete attempt.data.__bookmarks.favorite[key];
-    });
     section.groups.forEach((group) => {
       const gkey = `${section.key}:${group.id}`;
       if (body[`done_${group.id}`] === "1") attempt.data.__doneGroups[gkey] = true;
@@ -140,6 +139,11 @@ function buildQuizRouter(config) {
     const section = config.sections[idx];
     const existing = attempt.data[section.key] || null;
 
+    // Pour marquer d'un coup d'œil les questions déjà liées à une page
+    // wiki, sans un aller-retour par question.
+    const linkedQuestions = {};
+    getLinkedQuestionIds(section.key).forEach((qid) => { linkedQuestions[qid] = true; });
+
     res.render("section", {
       config,
       section,
@@ -147,8 +151,8 @@ function buildQuizRouter(config) {
       idx,
       total: config.sections.length,
       existing,
-      bookmarks: Object.assign({ favorite: {} }, attempt.data.__bookmarks || {}),
       doneGroups: attempt.data.__doneGroups || {},
+      linkedQuestions,
     });
   });
 

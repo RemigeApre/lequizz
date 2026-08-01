@@ -741,7 +741,10 @@ body.nav-drawer-locked {
   flex-shrink: 0;
 }
 
-.item-fav-toggle {
+/* Bouton "?" : pages wiki liées à cette question (remplace l'ancienne
+   étoile favori, devenue inutile). Rempli en or dès qu'un lien existe,
+   pour le repérer d'un coup d'œil sans ouvrir le popover. */
+.item-wiki-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -760,15 +763,135 @@ body.nav-drawer-locked {
   cursor: pointer;
 }
 
-.item-fav-toggle:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+.item-wiki-toggle:hover {
+  border-color: var(--wiki-gold);
+  color: var(--wiki-gold);
 }
 
-.item-fav-toggle.active {
-  border-color: #d9a441;
-  background: #d9a441;
+.item-wiki-toggle.has-link {
+  border-color: var(--wiki-gold);
+  background: var(--wiki-gold);
   color: #fff;
+}
+
+/* ── Popover partagé "pages wiki liées" ────────────── */
+.item-wiki-popover-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 120;
+}
+
+.item-wiki-popover {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(92vw, 420px);
+  max-height: 80vh;
+  overflow-y: auto;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--wiki-gold);
+  border-radius: 14px;
+  padding: 1.25rem 1.4rem;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  z-index: 121;
+}
+
+.item-wiki-popover-close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.7rem;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.item-wiki-popover-close:hover {
+  border-color: var(--wiki-gold);
+  color: var(--wiki-gold);
+}
+
+.item-wiki-popover-title {
+  margin: 0 1.8rem 0.9rem 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.item-wiki-popover-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.item-wiki-popover-empty,
+.item-wiki-popover-loading {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.item-wiki-popover-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.item-wiki-popover-row .wiki-pl-card {
+  flex: 1;
+  min-width: 0;
+}
+
+.item-wiki-popover-remove {
+  flex-shrink: 0;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--muted);
+  cursor: pointer;
+}
+.item-wiki-popover-remove:hover {
+  border-color: #e53;
+  color: #e53;
+}
+
+.item-wiki-popover-add {
+  position: relative;
+  border-top: 1px solid var(--border);
+  padding-top: 0.9rem;
+}
+
+.item-wiki-popover-search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--fg);
+  outline: none;
+}
+.item-wiki-popover-search:focus {
+  border-color: var(--wiki-gold);
+}
+
+.item-wiki-popover-results {
+  list-style: none;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  max-height: 40vh;
+  overflow-y: auto;
 }
 
 .level-picker {

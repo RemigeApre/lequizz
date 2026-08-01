@@ -61,19 +61,15 @@
           </summary>
           <div class="item-cards">
             <% group.items.forEach(function (item) { %>
-              <% var itemKey = section.key + ":" + item.id; %>
-              <% var favorited = !!bookmarks.favorite[itemKey]; %>
               <div class="item-card">
                 <div class="item-header">
                   <div class="item-title-row">
                     <span class="item-name"><%= item.text %></span>
                     <div class="item-actions">
-                      <%# Icone "?" reservee pour plus tard : n'apparaitra que si un lien wiki existe pour cette pratique. %>
-                      <button type="button" class="item-fav-toggle<%= favorited ? ' active' : '' %>" title="Favori">
-                        <%- favorited ? "&#9733;" : "&#9734;" %>
-                      </button>
+                      <button type="button" class="item-wiki-toggle<%= linkedQuestions[item.id] ? ' has-link' : '' %>"
+                        data-section-key="<%= section.key %>" data-question-id="<%= item.id %>"
+                        title="Pages wiki li&eacute;es">?</button>
                     </div>
-                    <input type="hidden" name="fav_<%= item.id %>" class="fav-hidden" value="<%= favorited ? 1 : 0 %>" />
                   </div>
                 </div>
 
@@ -213,6 +209,19 @@
     </div>
   </form>
   <div id="autosave-status" class="autosave-status"></div>
+
+  <%# ─ Popover partagé : pages wiki liées à la question sur laquelle on a
+       cliqué "?", avec recherche pour en lier une nouvelle ─ %>
+  <div class="item-wiki-popover-backdrop" id="item-wiki-popover-backdrop" hidden></div>
+  <div class="item-wiki-popover" id="item-wiki-popover" hidden>
+    <button type="button" class="item-wiki-popover-close" id="item-wiki-popover-close" aria-label="Fermer">&#215;</button>
+    <p class="item-wiki-popover-title">Pages wiki li&eacute;es</p>
+    <div class="item-wiki-popover-list" id="item-wiki-popover-list"></div>
+    <div class="item-wiki-popover-add">
+      <input type="text" class="item-wiki-popover-search" id="item-wiki-popover-search" placeholder="Lier une page wiki&hellip;" autocomplete="off" />
+      <ul class="item-wiki-popover-results" id="item-wiki-popover-results"></ul>
+    </div>
+  </div>
 </main>
 <script>
   window.DEFAULT_SCALE = <%- JSON.stringify(config.scaleLabels) %>;
