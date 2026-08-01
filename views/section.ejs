@@ -189,7 +189,7 @@
     <% } else if (section.type === "profile") { %>
       <% var existingFields = (existing && existing.fields) || {}; %>
       <% section.fields.forEach(function (f) { %>
-        <div class="extra-card">
+        <div class="extra-card" data-field-id="<%= f.id %>">
           <p class="extra-card-title"><%= f.label %></p>
           <div class="multiselect-options">
             <% f.options.forEach(function (opt, optIndex) { %>

@@ -95,4 +95,34 @@
       hidden.dispatchEvent(new Event("change", { bubbles: true }));
     });
   });
+
+  // Arrivée depuis "Questions liées" d'une page wiki (?q=...) : ouvre le
+  // groupe concerné s'il était replié, puis défile jusqu'à la question et
+  // la met brièvement en évidence.
+  (function () {
+    var q = new URLSearchParams(window.location.search).get("q");
+    if (!q) return;
+
+    var target = null;
+    if (q.indexOf("spectrum:") === 0) {
+      target = document.querySelector('[data-spectrum-id="' + CSS.escape(q.slice(9)) + '"]');
+    } else if (q.indexOf("ranking:") === 0) {
+      target = document.querySelector('[data-ranking-id="' + CSS.escape(q.slice(8)) + '"]');
+    } else if (q.indexOf("multiselect:") === 0) {
+      target = document.querySelector('[data-multiselect-id="' + CSS.escape(q.slice(12)) + '"]');
+    } else {
+      var picker = document.querySelector('.level-picker[data-item-id="' + CSS.escape(q) + '"]');
+      target = picker ? picker.closest(".item-card") : document.querySelector('[data-field-id="' + CSS.escape(q) + '"]');
+    }
+    if (!target) return;
+
+    var group = target.closest("details.matrix-group");
+    if (group && !group.open) group.open = true;
+
+    setTimeout(function () {
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+      target.classList.add("wiki-link-highlight");
+      setTimeout(function () { target.classList.remove("wiki-link-highlight"); }, 2500);
+    }, 50);
+  })();
 })();

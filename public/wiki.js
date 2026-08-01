@@ -1453,8 +1453,17 @@
           links.forEach(function (lk) {
             var li = document.createElement("li");
             li.className = "wiki-ql-item";
-            var label = document.createElement("span");
+            // Ouvre dans un nouvel onglet : on est en cours d'édition, pas
+            // question de perdre les modifications en cours en changeant de page.
+            var label = (typeof lk.section_index === "number" && lk.section_index >= 0)
+              ? document.createElement("a")
+              : document.createElement("span");
             label.className = "wiki-ql-label";
+            if (label.tagName === "A") {
+              label.href = "/section/" + lk.section_index + "?q=" + encodeURIComponent(lk.question_id);
+              label.target = "_blank";
+              label.rel = "noopener";
+            }
             var section = document.createElement("span");
             section.className = "wiki-ql-section";
             section.textContent = lk.section_title;
@@ -1584,8 +1593,16 @@
         links.forEach(function (lk) {
           var li = document.createElement("li");
           li.className = "wiki-ql-item";
-          var label = document.createElement("span");
+          // Sans lien réel, cliquer ne menait nulle part : on renvoie vers
+          // la section, avec ?q=... pour que section.js défile jusqu'à la
+          // question précise et la mette en évidence.
+          var label = (typeof lk.section_index === "number" && lk.section_index >= 0)
+            ? document.createElement("a")
+            : document.createElement("span");
           label.className = "wiki-ql-label";
+          if (label.tagName === "A") {
+            label.href = "/section/" + lk.section_index + "?q=" + encodeURIComponent(lk.question_id);
+          }
           var section = document.createElement("span");
           section.className = "wiki-ql-section";
           section.textContent = lk.section_title;

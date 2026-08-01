@@ -704,6 +704,16 @@ body.nav-drawer-locked {
   background: var(--bg);
 }
 
+/* Brève mise en évidence en arrivant depuis "Questions liées" du wiki */
+.wiki-link-highlight {
+  animation: wiki-link-pulse 2.5s ease;
+}
+@keyframes wiki-link-pulse {
+  0%   { box-shadow: 0 0 0 3px var(--wiki-gold); }
+  70%  { box-shadow: 0 0 0 3px var(--wiki-gold); }
+  100% { box-shadow: none; }
+}
+
 .item-header {
   margin-bottom: 0.75rem;
 }
@@ -3200,6 +3210,12 @@ input[type="text"], input[type="password"] {
   align-items: baseline;
   flex-wrap: wrap;
   min-width: 0;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+a.wiki-ql-label:hover .wiki-ql-text {
+  text-decoration: underline;
 }
 
 .wiki-ql-section {

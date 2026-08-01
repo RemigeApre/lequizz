@@ -1,5 +1,5 @@
 <% var existingSpectrumVal = (existing && existing.spectrums && existing.spectrums[sp.id]) || 3; %>
-<div class="extra-card">
+<div class="extra-card" data-spectrum-id="<%= sp.id %>">
   <p class="extra-card-title"><%= sp.label %></p>
   <div class="spectrum-scale">
     <% sp.scaleLabels.forEach(function (label, li) { %>

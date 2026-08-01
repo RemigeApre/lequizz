@@ -389,6 +389,7 @@ function buildWikiRouter(config) {
       const found = ALL_QUESTIONS.find((x) => x.section_key === l.section_key && x.question_id === l.question_id);
       return {
         section_key:    l.section_key,
+        section_index:  config.sections.findIndex((s) => s.key === l.section_key),
         section_title:  found ? found.section_title  : l.section_key,
         question_id:    l.question_id,
         question_text:  found ? found.question_text  : l.question_id,
