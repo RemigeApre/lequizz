@@ -4016,16 +4016,10 @@ a.wiki-ql-label:hover .wiki-ql-text {
 }
 
 /* ── Filtres ────────────────────────────────────── */
-.gallery-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
 .gallery-search-bar {
   position: relative;
   max-width: 340px;
+  margin-bottom: 0.85rem;
 }
 .gallery-search-bar .wiki-search-icon {
   position: absolute;
@@ -4071,6 +4065,9 @@ a.wiki-ql-label:hover .wiki-ql-text {
   object-fit: cover;
 }
 
+/* Toujours visible (comme les cartes du wiki) : catégorie, note et
+   réactions doivent se voir d'un coup d'œil, pas seulement au survol
+   (inutilisable au doigt sur mobile sinon). */
 .gallery-card-overlay {
   position: absolute;
   top: 0; left: 0; right: 0;
@@ -4080,10 +4077,7 @@ a.wiki-ql-label:hover .wiki-ql-text {
   align-items: flex-start;
   justify-content: space-between;
   gap: 0.3rem;
-  opacity: 0;
-  transition: opacity 0.15s;
 }
-.gallery-card:hover .gallery-card-overlay { opacity: 1; }
 
 .gallery-source-badge {
   font-size: 0.6rem;
@@ -4095,7 +4089,6 @@ a.wiki-ql-label:hover .wiki-ql-text {
   border-radius: 999px;
   padding: 0.15rem 0.5rem;
 }
-.gallery-source-own { background: var(--accent); }
 
 .gallery-card-btns {
   display: flex;
@@ -4134,31 +4127,6 @@ a.wiki-ql-label:hover .wiki-ql-text {
   color: var(--fg);
   line-height: 1.2;
 }
-
-.gallery-delete-form {
-  position: absolute;
-  bottom: 0.3rem;
-  right: 0.3rem;
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-.gallery-card:hover .gallery-delete-form { opacity: 1; }
-
-.gallery-delete-btn {
-  width: 1.3rem;
-  height: 1.3rem;
-  border-radius: 50%;
-  background: rgba(180,30,30,0.75);
-  color: #fff;
-  border: none;
-  font-size: 0.8rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-}
-.gallery-delete-btn:hover { background: rgba(180,30,30,0.95); }
 
 /* ── Lightbox ───────────────────────────────────── */
 .gallery-lightbox {
@@ -4241,18 +4209,118 @@ a.wiki-ql-label:hover .wiki-ql-text {
 
 .gallery-lb-wiki-link { align-self: flex-start; }
 
-/* Edit form */
-.gallery-edit-preview {
-  margin: 1rem 0;
-  border-radius: 10px;
-  overflow: hidden;
-  max-width: 400px;
+/* Dots de l'album, dans la lightbox */
+.gallery-lb-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0;
 }
-.gallery-edit-img {
-  width: 100%;
-  display: block;
-  object-fit: cover;
+.gallery-lb-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.35);
+  cursor: pointer;
+  padding: 0;
 }
+.gallery-lb-dot.active { background: var(--wiki-gold); }
+
+/* Badge "plusieurs images" sur la couverture d'un album */
+.gallery-album-badge {
+  position: absolute;
+  bottom: 0.4rem;
+  right: 0.4rem;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.15rem 0.5rem;
+}
+
+/* Case à cocher de sélection groupée : coin haut-gauche, cliquable
+   sans ouvrir la lightbox */
+.gallery-select-check {
+  position: absolute;
+  top: 0.4rem;
+  left: 0.4rem;
+  z-index: 2;
+  cursor: pointer;
+}
+.gallery-select-input {
+  position: absolute;
+  opacity: 0;
+  width: 1.4rem;
+  height: 1.4rem;
+  margin: 0;
+  cursor: pointer;
+}
+.gallery-select-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.7);
+  background: rgba(0,0,0,0.35);
+  color: transparent;
+  font-size: 0.85rem;
+}
+.gallery-select-input:checked + .gallery-select-mark {
+  background: var(--wiki-gold);
+  border-color: var(--wiki-gold);
+  color: #fff;
+}
+
+.gallery-select-toggle {
+  margin-bottom: 0.85rem;
+}
+
+/* Barre d'actions groupées, fixée en bas pendant la sélection */
+.gallery-bulk-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 0.9rem;
+  margin-bottom: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+.gallery-bulk-count {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--muted);
+  margin-right: auto;
+}
+.gallery-bulk-delete {
+  border-color: #e53;
+  color: #e53;
+}
+.gallery-bulk-delete:hover {
+  background: #e53;
+  color: #fff;
+}
+
+/* Lier une page wiki depuis le formulaire d'édition */
+.gallery-wiki-link-field {
+  margin: 0.25rem 0;
+}
+.gallery-wiki-link-current {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.gallery-wiki-link-current .wiki-pl-card { flex: 1; min-width: 0; }
+.gallery-wiki-link-search-wrap { position: relative; }
 
 @media (max-width: 640px) {
   .gallery-grid { columns: 140px; }

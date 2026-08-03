@@ -72,6 +72,15 @@ db.exec(`
     updated_at TEXT NOT NULL
   )
 `);
+// Migrations non destructives (même approche que wiki_pages) : catégorie,
+// réactions, lien vers une page wiki, et plusieurs images par entrée
+// (album) au lieu d'une seule image par ligne.
+try { db.exec("ALTER TABLE gallery_images ADD COLUMN category TEXT NOT NULL DEFAULT ''"); } catch (_) {}
+try { db.exec("ALTER TABLE gallery_images ADD COLUMN rating INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
+try { db.exec("ALTER TABLE gallery_images ADD COLUMN flame INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
+try { db.exec("ALTER TABLE gallery_images ADD COLUMN interested INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
+try { db.exec("ALTER TABLE gallery_images ADD COLUMN wiki_page_id INTEGER"); } catch (_) {}
+try { db.exec("ALTER TABLE gallery_images ADD COLUMN image_paths TEXT NOT NULL DEFAULT '[]'"); } catch (_) {}
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS bd_books (
@@ -392,12 +401,21 @@ function deleteBdBook(id) {
 }
 
 function rowToGalleryImage(row) {
+  let imagePaths = [];
+  try { imagePaths = JSON.parse(row.image_paths || "[]"); } catch (_) {}
+  if (!imagePaths.length && row.filename) imagePaths = [row.filename];
   return {
     id: row.id,
-    filename: row.filename,
+    filename: imagePaths[0] || row.filename,
+    imagePaths,
     title: row.title || "",
+    category: row.category || "",
     tags: (() => { try { return JSON.parse(row.tags || "[]"); } catch(_) { return []; } })(),
     notes: row.notes || "",
+    rating: row.rating || 0,
+    flame: !!row.flame,
+    interested: !!row.interested,
+    wikiPageId: row.wiki_page_id || null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -412,18 +430,36 @@ function getGalleryImage(id) {
   return row ? rowToGalleryImage(row) : null;
 }
 
-function insertGalleryImage({ filename, title, tags, notes }) {
+function insertGalleryImage({ imagePaths, title, tags, notes, category, wikiPageId }) {
   const now = new Date().toISOString();
+  const paths = imagePaths || [];
   const info = db.prepare(
-    `INSERT INTO gallery_images (filename, title, tags, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`
-  ).run(filename, title || "", JSON.stringify(tags || []), notes || "", now, now);
+    `INSERT INTO gallery_images (filename, image_paths, title, tags, notes, category, wiki_page_id, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run(paths[0] || "", JSON.stringify(paths), title || "", JSON.stringify(tags || []), notes || "", category || "", wikiPageId || null, now, now);
   return info.lastInsertRowid;
 }
 
-function updateGalleryImage(id, { title, tags, notes }) {
+function updateGalleryImage(id, { title, category, tags, notes, imagePaths, wikiPageId }) {
+  const existing = db.prepare("SELECT image_paths, filename FROM gallery_images WHERE id = ?").get(id);
+  if (!existing) return false;
+  // Si imagePaths n'est pas fourni, conserver les images existantes
+  let finalImagePaths = imagePaths;
+  if (finalImagePaths === undefined) {
+    finalImagePaths = JSON.parse(existing.image_paths || "[]");
+    if (!finalImagePaths.length && existing.filename) finalImagePaths = [existing.filename];
+  }
   db.prepare(
-    `UPDATE gallery_images SET title = ?, tags = ?, notes = ?, updated_at = ? WHERE id = ?`
-  ).run(title || "", JSON.stringify(tags || []), notes || "", new Date().toISOString(), id);
+    `UPDATE gallery_images SET title = ?, category = ?, tags = ?, notes = ?, filename = ?, image_paths = ?, wiki_page_id = ?, updated_at = ?
+     WHERE id = ?`
+  ).run(title || "", category || "", JSON.stringify(tags || []), notes || "", finalImagePaths[0] || "", JSON.stringify(finalImagePaths), wikiPageId || null, new Date().toISOString(), id);
+  return true;
+}
+
+function reactGalleryImage(id, { rating, flame, interested }) {
+  const r = Math.max(0, Math.min(5, Number(rating) || 0));
+  db.prepare("UPDATE gallery_images SET rating = ?, flame = ?, interested = ? WHERE id = ?")
+    .run(r, flame ? 1 : 0, interested ? 1 : 0, id);
 }
 
 function deleteGalleryImage(id) {
@@ -464,6 +500,7 @@ module.exports = {
   getGalleryImage,
   insertGalleryImage,
   updateGalleryImage,
+  reactGalleryImage,
   deleteGalleryImage,
   setWikiPageFeatured,
   listFeaturedWikiPages,

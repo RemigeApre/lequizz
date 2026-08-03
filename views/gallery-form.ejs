@@ -3,11 +3,16 @@
   <%- include('partials/top-nav', { config: config }) %>
   <a href="/galerie" class="link-button">&larr; Retour à la galerie</a>
 
-  <form method="POST" action="/galerie/<%= image.id %>" class="wiki-form">
+  <form method="POST" action="/galerie/<%= image.id %>" enctype="multipart/form-data" class="wiki-form">
     <h2 class="wiki-detail-title">Modifier l&apos;image</h2>
 
-    <div class="gallery-edit-preview">
-      <img src="<%= image.filename %>" alt="" class="gallery-edit-img" />
+    <div class="wiki-form-top-row">
+      <select name="category" class="wiki-cat-inline-select">
+        <option value="">Sans cat&eacute;gorie</option>
+        <% categories.forEach(function (c) { %>
+          <option value="<%= c.key %>" data-hue="<%= c.hue %>" <%= c.key === image.category ? 'selected' : '' %>><%= c.label %></option>
+        <% }) %>
+      </select>
     </div>
 
     <input type="text" name="title" class="wiki-title-input" value="<%= image.title %>" placeholder="Titre&hellip;" />
@@ -31,7 +36,76 @@
       <span>&#128274;&nbsp;Marquer Ultra</span>
     </label>
 
+    <%# ─ Note et réactions ─ %>
+    <div class="wiki-meta-group">
+      <p class="wiki-meta-label">Note</p>
+      <div class="wiki-meta-options">
+        <% for (var ri = 0; ri <= 5; ri++) { %>
+          <label class="chip-option">
+            <input type="radio" name="rating" value="<%= ri %>" <%= (image.rating || 0) === ri ? 'checked' : '' %> />
+            <span><%= ri === 0 ? "Aucune" : ri + " ★" %></span>
+          </label>
+        <% } %>
+      </div>
+    </div>
+    <div class="wiki-derived-row">
+      <label class="chip-option">
+        <input type="checkbox" name="flame" <%= image.flame ? 'checked' : '' %> />
+        <span>&#128293;&nbsp;J&apos;adore</span>
+      </label>
+      <label class="chip-option">
+        <input type="checkbox" name="interested" <%= image.interested ? 'checked' : '' %> />
+        <span>&#10024;&nbsp;Int&eacute;ress&eacute;e</span>
+      </label>
+    </div>
+
+    <%# ─ Page wiki liée ─ %>
+    <div class="gallery-wiki-link-field">
+      <p class="wiki-meta-label">Page wiki li&eacute;e</p>
+      <input type="hidden" name="wiki_page_id" id="gallery-wiki-link-hidden" value="<%= image.wikiPageId || '' %>" />
+      <div class="gallery-wiki-link-current" id="gallery-wiki-link-current" <%= linkedPage ? '' : 'hidden' %>>
+        <% if (linkedPage) { %>
+          <% var lcat = categories.find(function (c) { return c.key === linkedPage.category; }); %>
+          <a href="/wiki/<%= linkedPage.id %>" class="wiki-pl-card" target="_blank" rel="noopener">
+            <span class="wiki-pl-badge" style="background: hsl(<%= lcat ? lcat.hue : 220 %>, 55%, 45%)"><%= lcat ? lcat.label : linkedPage.category %></span>
+            <span class="wiki-pl-title"><%= linkedPage.title %></span>
+          </a>
+          <button type="button" class="item-wiki-popover-remove" id="gallery-wiki-link-remove" title="Retirer le lien">&#215;</button>
+        <% } %>
+      </div>
+      <div class="gallery-wiki-link-search-wrap" id="gallery-wiki-link-search-wrap" <%= linkedPage ? 'hidden' : '' %>>
+        <input type="text" class="wiki-pl-search" id="gallery-wiki-link-search" placeholder="Lier une page wiki&hellip;" autocomplete="off" />
+        <ul class="wiki-pl-results" id="gallery-wiki-link-results"></ul>
+      </div>
+    </div>
+
     <textarea name="notes" class="wiki-textarea gallery-notes-input" rows="4" placeholder="Notes&hellip;"><%= image.notes %></textarea>
+
+    <%# ─ Images de l'album ─ %>
+    <div class="wiki-image-field">
+      <% if (image.imagePaths && image.imagePaths.length) { %>
+        <div class="wiki-images-existing">
+          <% image.imagePaths.forEach(function(src, idx) { %>
+            <div class="wiki-existing-img-wrap">
+              <img src="<%= src %>" alt="" class="wiki-form-existing-image" />
+              <label class="wiki-cover-radio-label" title="D&eacute;finir comme couverture">
+                <input type="radio" name="cover_image" value="<%= src %>" class="wiki-cover-radio" <%= idx === 0 ? 'checked' : '' %> />
+                <span class="wiki-cover-badge-icon">&#9733;</span>
+              </label>
+              <label class="wiki-img-remove-label">
+                <input type="checkbox" name="remove_image" value="<%= src %>" />
+                <span>&#215;</span>
+              </label>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+      <label class="wiki-image-add-label">
+        <span>+ Ajouter des images &agrave; cet album</span>
+        <input type="file" name="images" accept="image/*" multiple class="wiki-image-input" />
+      </label>
+      <div class="wiki-new-previews"></div>
+    </div>
 
     <div class="wiki-form-actions">
       <button type="submit">Enregistrer</button>
@@ -44,4 +118,5 @@
   </form>
 </main>
 <script src="/wiki.js?v=<%= assetVersion %>"></script>
+<script src="/gallery.js?v=<%= assetVersion %>"></script>
 <%- include('partials/foot') %>

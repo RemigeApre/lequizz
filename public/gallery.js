@@ -1,6 +1,8 @@
 (function () {
   "use strict";
 
+  var CAT_HUES = { fantasmes:330, jeu_de_role:60, partenaires:210, pratique:5, position:270, lieux:140, objets:28, tenues:175, autre:220 };
+
   // ══════════════════════════════════════════════════
   // 1. TAG WIDGET (même logique que wiki.js)
   // ══════════════════════════════════════════════════
@@ -107,18 +109,21 @@
   }
 
   // ══════════════════════════════════════════════════
-  // 3. FILTRES
+  // 3. FILTRES (source, catégorie, tag, recherche, ultra)
   // ══════════════════════════════════════════════════
-  var grid         = document.getElementById("gallery-grid");
-  var tagFilter    = document.getElementById("gallery-tag-filter");
-  var sourceFilter = document.getElementById("gallery-source-filter");
-  var searchInput  = document.getElementById("gallery-search");
-  var countEl      = document.getElementById("gallery-count");
+  var grid            = document.getElementById("gallery-grid");
+  var tagFilter        = document.getElementById("gallery-tag-filter");
+  var sourceFilter     = document.getElementById("gallery-source-filter");
+  var categoryFilter   = document.getElementById("gallery-category-filter");
+  var searchInput      = document.getElementById("gallery-search");
+  var countEl          = document.getElementById("gallery-count");
+  var filtersPanel     = document.getElementById("gallery-filters-panel");
 
-  var activeTag    = "";
-  var activeSource = "";
-  var searchQ      = "";
-  var hideUltra    = localStorage.getItem("gallery-hide-ultra") !== "0";
+  var activeTag      = "";
+  var activeSource    = "";
+  var activeCategory  = "";
+  var searchQ         = "";
+  var hideUltra        = localStorage.getItem("gallery-hide-ultra") !== "0";
 
   function norm(s) {
     return (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -134,17 +139,18 @@
       var cardTags   = (card.dataset.tags || "").split("|").filter(Boolean);
       var okTag      = !activeTag || cardTags.indexOf(activeTag) !== -1;
       var okSource   = !activeSource || card.dataset.source === activeSource;
+      var okCategory = !activeCategory || card.dataset.category === activeCategory;
       var okSearch   = !q || norm(card.dataset.title).includes(q) ||
                        cardTags.some(function(t){ return norm(t).includes(q); });
       var okUltra    = !hideUltra || card.dataset.ultra !== "1";
-      card.hidden = !(okTag && okSource && okSearch && okUltra);
+      card.hidden = !(okTag && okSource && okCategory && okSearch && okUltra);
       if (!card.hidden) shown++;
     });
 
     if (countEl) {
-      var hasFilter = activeTag || activeSource || q || hideUltra;
+      var hasFilter = activeTag || activeSource || activeCategory || q || hideUltra;
       countEl.hidden = !hasFilter;
-      if (hasFilter) countEl.textContent = shown + "\u00a0image" + (shown > 1 ? "s" : "");
+      if (hasFilter) countEl.textContent = shown + " image" + (shown > 1 ? "s" : "");
     }
   }
 
@@ -170,6 +176,17 @@
     });
   }
 
+  if (categoryFilter) {
+    categoryFilter.querySelectorAll(".tag-chip").forEach(function (chip) {
+      chip.addEventListener("click", function () {
+        categoryFilter.querySelectorAll(".tag-chip").forEach(function(c){ c.classList.remove("active"); });
+        chip.classList.add("active");
+        activeCategory = chip.dataset.category || "";
+        applyFilters();
+      });
+    });
+  }
+
   if (searchInput) {
     searchInput.addEventListener("input", function () {
       searchQ = searchInput.value;
@@ -180,7 +197,7 @@
   var ultraToggle = document.getElementById("gallery-ultra-toggle");
   function syncUltraBtn() {
     if (!ultraToggle) return;
-    ultraToggle.textContent = hideUltra ? "\uD83D\uDD12 Masquer Ultra" : "\uD83D\uDD13 Afficher Ultra";
+    ultraToggle.textContent = hideUltra ? "🔒 Masquer Ultra" : "🔓 Afficher Ultra";
     ultraToggle.classList.toggle("active", hideUltra);
   }
   if (ultraToggle) {
@@ -193,11 +210,19 @@
   }
   syncUltraBtn();
 
+  // Ouvre le volet filtres tout seul si un filtre est déjà actif au chargement
+  if (filtersPanel && (activeTag || activeSource || activeCategory || searchQ || hideUltra)) {
+    filtersPanel.open = true;
+  }
+
+  applyFilters();
+
   // ══════════════════════════════════════════════════
-  // 4. LIGHTBOX
+  // 4. LIGHTBOX (album-aware : plusieurs images par carte)
   // ══════════════════════════════════════════════════
   var lightbox  = document.getElementById("gallery-lightbox");
   var lbImg     = lightbox ? lightbox.querySelector(".gallery-lb-img")       : null;
+  var lbDots    = document.getElementById("gallery-lb-dots");
   var lbTitle   = lightbox ? lightbox.querySelector(".gallery-lb-title")     : null;
   var lbTags    = lightbox ? lightbox.querySelector(".gallery-lb-tags")      : null;
   var lbLink    = lightbox ? lightbox.querySelector(".gallery-lb-wiki-link") : null;
@@ -206,8 +231,9 @@
   var lbPrev    = lightbox ? lightbox.querySelector(".gallery-lb-prev")      : null;
   var lbNext    = lightbox ? lightbox.querySelector(".gallery-lb-next")      : null;
 
-  var lbVisible = []; // cards currently visible
-  var lbIndex   = 0;
+  var lbVisible    = []; // cartes actuellement visibles
+  var lbCardIndex  = 0;
+  var lbImgIndex   = 0;  // position dans l'album de la carte courante
 
   function buildVisible() {
     if (!grid) return;
@@ -221,18 +247,24 @@
     return "hsl(" + TAG_HUES[Math.abs(h) % TAG_HUES.length] + ", 55%, 42%)";
   }
 
-  function openLightbox(idx) {
-    if (!lightbox || !lbVisible.length) return;
-    lbIndex = Math.max(0, Math.min(idx, lbVisible.length - 1));
-    var card = lbVisible[lbIndex];
-    var src     = card.dataset.src || "";
+  function currentCard() { return lbVisible[lbCardIndex]; }
+  function currentImages() {
+    var card = currentCard();
+    return card ? (card.dataset.images || "").split("|").filter(Boolean) : [];
+  }
+
+  function renderLightbox() {
+    var card = currentCard();
+    if (!lightbox || !card) return;
+    var images  = currentImages();
+    var src     = images[lbImgIndex] || "";
     var title   = card.dataset.title || "";
     var tags    = (card.dataset.tags || "").split("|").filter(Boolean);
     var wikiId  = card.dataset.wikiId || "";
 
-    if (lbImg)   lbImg.src = src;
+    if (lbImg) lbImg.src = src;
     if (lbTitle) lbTitle.textContent = title || "";
-    if (lbTags)  {
+    if (lbTags) {
       lbTags.innerHTML = "";
       tags.forEach(function(t) {
         var pill = document.createElement("span");
@@ -248,9 +280,30 @@
       if (wikiId) lbLink.href = "/wiki/" + wikiId;
     }
 
-    lbPrev.hidden = lbIndex === 0;
-    lbNext.hidden = lbIndex === lbVisible.length - 1;
+    if (lbDots) {
+      lbDots.innerHTML = "";
+      lbDots.hidden = images.length <= 1;
+      images.forEach(function (_, i) {
+        var d = document.createElement("button");
+        d.type = "button";
+        d.className = "gallery-lb-dot" + (i === lbImgIndex ? " active" : "");
+        d.addEventListener("click", function () { lbImgIndex = i; renderLightbox(); });
+        lbDots.appendChild(d);
+      });
+    }
 
+    var atFirst = lbCardIndex === 0 && lbImgIndex === 0;
+    var atLast  = lbCardIndex === lbVisible.length - 1 && lbImgIndex === images.length - 1;
+    if (lbPrev) lbPrev.hidden = atFirst;
+    if (lbNext) lbNext.hidden = atLast;
+  }
+
+  function openLightbox(cardIdx, imgIdx) {
+    if (!lightbox || !lbVisible.length) return;
+    lbCardIndex = Math.max(0, Math.min(cardIdx, lbVisible.length - 1));
+    var images = currentImages();
+    lbImgIndex = Math.max(0, Math.min(imgIdx || 0, Math.max(images.length - 1, 0)));
+    renderLightbox();
     lightbox.hidden = false;
     document.body.style.overflow = "hidden";
   }
@@ -263,7 +316,19 @@
   }
 
   function navigate(dir) {
-    openLightbox(lbIndex + dir);
+    var images = currentImages();
+    var nextImgIdx = lbImgIndex + dir;
+    if (nextImgIdx >= 0 && nextImgIdx < images.length) {
+      lbImgIndex = nextImgIdx;
+      renderLightbox();
+      return;
+    }
+    var nextCardIdx = lbCardIndex + dir;
+    if (nextCardIdx < 0 || nextCardIdx >= lbVisible.length) return;
+    lbCardIndex = nextCardIdx;
+    var nextImages = currentImages();
+    lbImgIndex = dir > 0 ? 0 : Math.max(nextImages.length - 1, 0);
+    renderLightbox();
   }
 
   if (lbClose)  lbClose.addEventListener("click", closeLightbox);
@@ -297,21 +362,147 @@
     grid.addEventListener("click", function (e) {
       var card = e.target.closest(".gallery-card");
       if (!card) return;
-      // Ne pas ouvrir si on clique sur un lien/bouton/form
-      if (e.target.closest("a, button, form")) return;
+      // Ne pas ouvrir si on clique sur un lien/bouton/form/case à cocher
+      if (e.target.closest("a, button, form, label, input")) return;
       buildVisible();
       var idx = lbVisible.indexOf(card);
-      if (idx !== -1) openLightbox(idx);
+      if (idx !== -1) openLightbox(idx, 0);
     });
   }
 
   // ══════════════════════════════════════════════════
-  // 5. CONFIRMATION SUPPRESSION
+  // 5. SÉLECTION GROUPÉE (cartes de galerie uniquement, jamais le wiki)
   // ══════════════════════════════════════════════════
-  document.querySelectorAll(".gallery-delete-form").forEach(function (form) {
-    form.addEventListener("submit", function (e) {
-      if (!confirm("Supprimer cette image définitivement ?")) e.preventDefault();
+  (function () {
+    var selectToggle = document.getElementById("gallery-select-toggle");
+    var bulkBar       = document.getElementById("gallery-bulk-bar");
+    var bulkCount     = document.getElementById("gallery-bulk-count");
+    var bulkCancel    = document.getElementById("gallery-bulk-cancel");
+    var bulkDelete    = document.getElementById("gallery-bulk-delete");
+    var bulkUltraOn   = document.getElementById("gallery-bulk-ultra-on");
+    var bulkUltraOff  = document.getElementById("gallery-bulk-ultra-off");
+    if (!grid || !bulkBar) return;
+
+    var checkboxes = Array.from(grid.querySelectorAll(".gallery-select-input"));
+    if (selectToggle) selectToggle.hidden = checkboxes.length === 0;
+
+    function selectedIds() {
+      return checkboxes.filter(function (cb) { return cb.checked; }).map(function (cb) { return cb.value; });
+    }
+
+    function syncBar() {
+      var ids = selectedIds();
+      bulkBar.hidden = ids.length === 0;
+      if (bulkCount) bulkCount.textContent = ids.length + " sélectionnée" + (ids.length > 1 ? "s" : "");
+    }
+
+    checkboxes.forEach(function (cb) {
+      cb.addEventListener("change", syncBar);
     });
-  });
+
+    if (bulkCancel) {
+      bulkCancel.addEventListener("click", function () {
+        checkboxes.forEach(function (cb) { cb.checked = false; });
+        syncBar();
+      });
+    }
+
+    function runBulk(action) {
+      var ids = selectedIds();
+      if (!ids.length) return;
+      fetch("/galerie/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: ids, action: action }),
+      }).then(function () { window.location.reload(); });
+    }
+
+    if (bulkDelete) {
+      bulkDelete.addEventListener("click", function () {
+        if (window.confirm("Supprimer les images sélectionnées ?")) runBulk("delete");
+      });
+    }
+    if (bulkUltraOn)  bulkUltraOn.addEventListener("click", function () { runBulk("ultra-on"); });
+    if (bulkUltraOff) bulkUltraOff.addEventListener("click", function () { runBulk("ultra-off"); });
+  })();
+
+  // ══════════════════════════════════════════════════
+  // 6. LIER UNE PAGE WIKI (formulaire d'édition d'une image)
+  // ══════════════════════════════════════════════════
+  (function () {
+    var hidden     = document.getElementById("gallery-wiki-link-hidden");
+    var currentBox = document.getElementById("gallery-wiki-link-current");
+    var removeBtn  = document.getElementById("gallery-wiki-link-remove");
+    var searchWrap = document.getElementById("gallery-wiki-link-search-wrap");
+    var searchIn   = document.getElementById("gallery-wiki-link-search");
+    var resultsEl  = document.getElementById("gallery-wiki-link-results");
+    if (!hidden || !searchWrap || !searchIn || !resultsEl) return;
+
+    var searchTimer;
+
+    if (removeBtn) {
+      removeBtn.addEventListener("click", function () {
+        hidden.value = "";
+        if (currentBox) currentBox.hidden = true;
+        searchWrap.hidden = false;
+      });
+    }
+
+    searchIn.addEventListener("input", function () {
+      clearTimeout(searchTimer);
+      var q = searchIn.value.trim();
+      if (!q) { resultsEl.innerHTML = ""; return; }
+      searchTimer = setTimeout(function () {
+        fetch("/wiki/search?q=" + encodeURIComponent(q))
+          .then(function (r) { return r.json(); })
+          .then(function (pages) {
+            resultsEl.innerHTML = "";
+            pages.forEach(function (p) {
+              var hue = CAT_HUES[p.category] || 220;
+              var li = document.createElement("li");
+              li.className = "wiki-pl-result-item";
+              li.innerHTML = '<span class="wiki-pl-result-badge" style="background:hsl(' + hue + ',55%,45%)">' + p.category + '</span><span>' + p.title + '</span>';
+              li.addEventListener("click", function () {
+                hidden.value = p.id;
+                searchIn.value = "";
+                resultsEl.innerHTML = "";
+                searchWrap.hidden = true;
+                if (currentBox) {
+                  currentBox.hidden = false;
+                  currentBox.innerHTML = "";
+                  var a = document.createElement("a");
+                  a.href = "/wiki/" + p.id;
+                  a.target = "_blank";
+                  a.rel = "noopener";
+                  a.className = "wiki-pl-card";
+                  var badge = document.createElement("span");
+                  badge.className = "wiki-pl-badge";
+                  badge.style.background = "hsl(" + hue + ",55%,45%)";
+                  badge.textContent = p.category;
+                  var titleEl = document.createElement("span");
+                  titleEl.className = "wiki-pl-title";
+                  titleEl.textContent = p.title;
+                  a.appendChild(badge);
+                  a.appendChild(titleEl);
+                  var rm = document.createElement("button");
+                  rm.type = "button";
+                  rm.className = "item-wiki-popover-remove";
+                  rm.title = "Retirer le lien";
+                  rm.innerHTML = "&#215;";
+                  rm.addEventListener("click", function () {
+                    hidden.value = "";
+                    currentBox.hidden = true;
+                    searchWrap.hidden = false;
+                  });
+                  currentBox.appendChild(a);
+                  currentBox.appendChild(rm);
+                }
+              });
+              resultsEl.appendChild(li);
+            });
+          });
+      }, 200);
+    });
+  })();
 
 })();

@@ -7,8 +7,10 @@ const {
   getGalleryImage,
   insertGalleryImage,
   updateGalleryImage,
+  reactGalleryImage,
   deleteGalleryImage,
   listWikiPages,
+  getWikiPage,
 } = require("../db");
 
 const CATEGORIES = [
@@ -48,6 +50,12 @@ function parseTags(raw) {
   return String(raw || "").split(/[,;]+/).map((t) => t.trim()).filter(Boolean);
 }
 
+// La catégorie est optionnelle pour une image de galerie (contrairement au
+// wiki) : une chaîne vide veut dire "pas de catégorie", pas "autre".
+function normalizeCategory(value) {
+  return CATEGORIES.some((c) => c.key === value) ? value : "";
+}
+
 // Fusionne la case a cocher "Marquer Ultra" du formulaire avec les tags
 // tapes a la main, sans jamais faire de doublon.
 function applyUltraCheckbox(tags, checked) {
@@ -57,31 +65,45 @@ function applyUltraCheckbox(tags, checked) {
   return tags;
 }
 
+function unlinkFiles(paths) {
+  (paths || []).forEach((p) => {
+    try { fs.unlinkSync(path.join(uploadsDir, path.basename(p))); } catch (_) {}
+  });
+}
+
+// Une page wiki avec plusieurs photos ne fait plus qu'une seule entrée
+// (album) dans la galerie, au lieu d'une carte par image.
 function buildItems(galleryImages, wikiPages) {
-  const wikiItems = wikiPages.flatMap((page) =>
-    page.imagePaths.map((src) => ({
+  const wikiItems = wikiPages
+    .filter((page) => page.imagePaths && page.imagePaths.length)
+    .map((page) => ({
       type: "wiki",
-      src,
-      title: page.title,
-      tags: page.tags,
-      wikiPageId: page.id,
-      cat: CAT_MAP[page.category] || { key: page.category, label: page.category, hue: 220 },
-      date: page.updatedAt,
       id: null,
+      wikiPageId: page.id,
+      imagePaths: page.imagePaths,
+      title: page.title,
+      category: page.category,
+      tags: page.tags,
       notes: "",
-    }))
-  );
+      rating: page.rating || 0,
+      flame: !!page.flame,
+      interested: !!page.interested,
+      date: page.updatedAt,
+    }));
 
   const galleryItems = galleryImages.map((img) => ({
     type: "gallery",
-    src: img.filename,
-    title: img.title,
-    tags: img.tags,
-    wikiPageId: null,
-    cat: null,
-    date: img.createdAt,
     id: img.id,
+    wikiPageId: img.wikiPageId,
+    imagePaths: img.imagePaths,
+    title: img.title,
+    category: img.category,
+    tags: img.tags,
     notes: img.notes,
+    rating: img.rating,
+    flame: img.flame,
+    interested: img.interested,
+    date: img.createdAt,
   }));
 
   return [...galleryItems, ...wikiItems].sort((a, b) => b.date.localeCompare(a.date));
@@ -102,17 +124,54 @@ function buildGalleryRouter(config) {
 
   router.get("/", (req, res) => {
     const { items, allTags } = getCtx();
-    res.render("gallery", { config, items, allTags });
+    res.render("gallery", { config, items, allTags, categories: CATEGORIES });
   });
 
   router.post("/", upload.array("images", 30), (req, res) => {
+    const files = req.files || [];
+    if (!files.length) return res.redirect("/galerie");
     const title = String(req.body.title || "").trim();
+    const category = normalizeCategory(req.body.category);
     const tags = parseTags(req.body.tags);
     const notes = String(req.body.notes || "").trim();
-    for (const file of req.files || []) {
-      insertGalleryImage({ filename: `/uploads/gallery/${file.filename}`, title, tags, notes });
-    }
+    const imagePaths = files.map((f) => `/uploads/gallery/${f.filename}`);
+    insertGalleryImage({ imagePaths, title, tags, notes, category });
     res.redirect("/galerie");
+  });
+
+  // ── Actions groupées : sélectionner plusieurs cartes de galerie
+  // (jamais les images issues du wiki) pour les taguer/supprimer d'un coup.
+  // Placé avant "/:id" pour ne pas être confondu avec un identifiant.
+  router.post("/bulk", (req, res) => {
+    const ids = [].concat(req.body.ids || []).map(Number).filter(Number.isInteger);
+    const action = String(req.body.action || "");
+    if (!ids.length) return res.json({ ok: false });
+
+    if (action === "delete") {
+      ids.forEach((id) => {
+        const image = getGalleryImage(id);
+        if (!image) return;
+        unlinkFiles(image.imagePaths);
+        deleteGalleryImage(id);
+      });
+    } else if (action === "ultra-on" || action === "ultra-off") {
+      ids.forEach((id) => {
+        const image = getGalleryImage(id);
+        if (!image) return;
+        const tags = applyUltraCheckbox(image.tags, action === "ultra-on");
+        updateGalleryImage(id, {
+          title: image.title,
+          category: image.category,
+          tags,
+          notes: image.notes,
+          imagePaths: image.imagePaths,
+          wikiPageId: image.wikiPageId,
+        });
+      });
+    } else {
+      return res.json({ ok: false });
+    }
+    res.json({ ok: true });
   });
 
   router.get("/:id/edit", (req, res) => {
@@ -120,19 +179,48 @@ function buildGalleryRouter(config) {
     const image = Number.isInteger(id) ? getGalleryImage(id) : null;
     if (!image) return res.redirect("/galerie");
     const { allTags } = getCtx();
-    res.render("gallery-form", { config, image, allTags });
+    const linkedPage = image.wikiPageId ? getWikiPage(image.wikiPageId) : null;
+    res.render("gallery-form", { config, image, allTags, categories: CATEGORIES, linkedPage });
   });
 
-  router.post("/:id", (req, res) => {
+  router.post("/:id", upload.array("images", 30), (req, res) => {
     const id = Number(req.params.id);
     const image = Number.isInteger(id) ? getGalleryImage(id) : null;
     if (!image) return res.redirect("/galerie");
+
+    // Images : on part des existantes, on retire celles cochées, on ajoute
+    // les nouvelles, puis on remet la couverture choisie en tête.
+    const toRemove = [].concat(req.body.remove_image || []);
+    const kept = image.imagePaths.filter((p) => !toRemove.includes(p));
+    const added = (req.files || []).map((f) => `/uploads/gallery/${f.filename}`);
+    let imagePaths = [...kept, ...added];
+    const cover = req.body.cover_image;
+    if (cover && imagePaths.includes(cover) && imagePaths[0] !== cover) {
+      imagePaths = [cover, ...imagePaths.filter((p) => p !== cover)];
+    }
+    unlinkFiles(toRemove);
+
     const tags = applyUltraCheckbox(parseTags(req.body.tags), req.body.ultra === "on");
+    const category = normalizeCategory(req.body.category);
+    const wikiPageIdRaw = Number(req.body.wiki_page_id);
+    const wikiPageId = Number.isInteger(wikiPageIdRaw) && wikiPageIdRaw > 0 ? wikiPageIdRaw : null;
+
     updateGalleryImage(id, {
       title: String(req.body.title || "").trim(),
+      category,
       tags,
       notes: String(req.body.notes || "").trim(),
+      imagePaths,
+      wikiPageId,
     });
+
+    const rating = Math.max(0, Math.min(5, Number(req.body.rating) || 0));
+    reactGalleryImage(id, {
+      rating,
+      flame: req.body.flame === "on",
+      interested: req.body.interested === "on",
+    });
+
     res.redirect("/galerie");
   });
 
@@ -141,11 +229,7 @@ function buildGalleryRouter(config) {
     if (Number.isInteger(id)) {
       const image = getGalleryImage(id);
       if (image) {
-        const filePath = path.join(
-          __dirname, "..", "..", "data", "uploads", "gallery",
-          path.basename(image.filename)
-        );
-        try { fs.unlinkSync(filePath); } catch (_) {}
+        unlinkFiles(image.imagePaths);
         deleteGalleryImage(id);
       }
     }

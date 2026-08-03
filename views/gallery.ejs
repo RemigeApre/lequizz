@@ -13,6 +13,16 @@
       <div class="gallery-form-row">
         <input type="text" name="title" class="gallery-title-input" placeholder="Titre commun aux images (optionnel)&hellip;" autocomplete="off" />
       </div>
+
+      <div class="wiki-form-top-row">
+        <select name="category" class="wiki-cat-inline-select">
+          <option value="">Sans cat&eacute;gorie</option>
+          <% categories.forEach(function (c) { %>
+            <option value="<%= c.key %>" data-hue="<%= c.hue %>"><%= c.label %></option>
+          <% }) %>
+        </select>
+      </div>
+
       <div class="wiki-tags-widget">
         <div class="wiki-tags-board">
           <input type="text" class="wiki-tags-typing" placeholder="Tags&hellip;" autocomplete="off" />
@@ -35,34 +45,56 @@
         <button type="submit" class="gallery-submit-btn">Ajouter</button>
         <button type="button" id="gallery-upload-cancel" class="link-button">Annuler</button>
       </div>
+      <p class="wiki-md-hint">Plusieurs images choisies ensemble forment un seul album, pas une carte par image.</p>
       <div class="gallery-upload-previews" id="gallery-upload-previews"></div>
     </form>
   </div>
 
-  <%# ─── FILTRES ─────────────────────────────────────────────────────── %>
-  <div class="gallery-controls">
-    <div class="gallery-search-bar">
-      <span class="wiki-search-icon">&#128269;</span>
-      <input type="search" id="gallery-search" class="wiki-search-input" placeholder="Rechercher&hellip;" autocomplete="off" />
-    </div>
+  <%# ─── FILTRES : repliés par défaut ───────────────────────────────── %>
+  <div class="gallery-search-bar">
+    <span class="wiki-search-icon">&#128269;</span>
+    <input type="search" id="gallery-search" class="wiki-search-input" placeholder="Rechercher&hellip;" autocomplete="off" />
+  </div>
 
-    <div class="links-filter" id="gallery-source-filter">
-      <button type="button" class="tag-chip active" data-source="">Toutes sources</button>
-      <button type="button" class="tag-chip" data-source="wiki">Wiki</button>
-      <button type="button" class="tag-chip" data-source="gallery">Galerie</button>
-    </div>
-    <button type="button" id="gallery-ultra-toggle" class="tag-chip gallery-ultra-toggle">&#128274; Masquer Ultra</button>
+  <details class="wiki-filters-panel" id="gallery-filters-panel">
+    <summary class="wiki-filters-summary">Filtres &amp; tri</summary>
+    <div class="wiki-filters-body">
+      <div class="links-filter" id="gallery-source-filter">
+        <button type="button" class="tag-chip active" data-source="">Toutes sources</button>
+        <button type="button" class="tag-chip" data-source="wiki">Wiki</button>
+        <button type="button" class="tag-chip" data-source="gallery">Galerie</button>
+      </div>
 
-    <% if (allTags.length) { %>
-      <div class="links-filter" id="gallery-tag-filter">
-        <button type="button" class="tag-chip active" data-tag="">Tous les tags</button>
-        <% allTags.forEach(function(t) { %>
-          <button type="button" class="tag-chip" data-tag="<%= t %>"><%= t %></button>
+      <div class="links-filter" id="gallery-category-filter">
+        <button type="button" class="tag-chip active" data-category="">Toutes cat&eacute;gories</button>
+        <% categories.forEach(function (c) { %>
+          <button type="button" class="tag-chip" data-category="<%= c.key %>" style="--ch-hue: <%= c.hue %>"><%= c.label %></button>
         <% }) %>
       </div>
-    <% } %>
-  </div>
+
+      <% if (allTags.length) { %>
+        <div class="links-filter" id="gallery-tag-filter">
+          <button type="button" class="tag-chip active" data-tag="">Tous les tags</button>
+          <% allTags.forEach(function(t) { %>
+            <button type="button" class="tag-chip" data-tag="<%= t %>"><%= t %></button>
+          <% }) %>
+        </div>
+      <% } %>
+
+      <button type="button" id="gallery-ultra-toggle" class="tag-chip gallery-ultra-toggle">&#128274; Masquer Ultra</button>
+    </div>
+  </details>
   <p id="gallery-count" class="gallery-count" hidden></p>
+
+  <%# ─── SÉLECTION GROUPÉE ────────────────────────────────────────────── %>
+  <div class="gallery-bulk-bar" id="gallery-bulk-bar" hidden>
+    <span class="gallery-bulk-count" id="gallery-bulk-count"></span>
+    <button type="button" class="tag-chip" id="gallery-bulk-ultra-on">&#128274; Marquer Ultra</button>
+    <button type="button" class="tag-chip" id="gallery-bulk-ultra-off">&#128275; Retirer Ultra</button>
+    <button type="button" class="tag-chip gallery-bulk-delete" id="gallery-bulk-delete">Supprimer</button>
+    <button type="button" class="link-button" id="gallery-bulk-cancel">Annuler la s&eacute;lection</button>
+  </div>
+  <button type="button" class="link-button gallery-select-toggle" id="gallery-select-toggle" hidden>S&eacute;lectionner</button>
 
   <%# ─── GRILLE ───────────────────────────────────────────────────────── %>
   <% if (!items.length) { %>
@@ -70,29 +102,49 @@
   <% } %>
   <div class="gallery-grid" id="gallery-grid">
     <% items.forEach(function(item, idx) { %>
+      <% var cat = item.category ? categories.find(function (c) { return c.key === item.category; }) : null; %>
       <div class="gallery-card"
         data-idx="<%= idx %>"
         data-tags="<%= item.tags.join('|').toLowerCase() %>"
         data-source="<%= item.type %>"
+        data-category="<%= item.category || '' %>"
         data-ultra="<%= item.tags.indexOf('ultra') !== -1 ? '1' : '0' %>"
         data-title="<%= (item.title || '').toLowerCase() %>"
-        data-src="<%= item.src %>"
+        data-images="<%= item.imagePaths.join('|') %>"
         data-wiki-id="<%= item.wikiPageId || '' %>"
         data-gallery-id="<%= item.id || '' %>">
 
-        <img src="<%= item.src %>" alt="<%= item.title %>" class="gallery-img" loading="lazy" />
+        <% if (cat) { %><span class="wiki-card-accent" style="background: hsl(<%= cat.hue %>, 55%, 45%)"></span><% } %>
+
+        <% if (item.type === 'gallery' && item.id) { %>
+          <label class="gallery-select-check">
+            <input type="checkbox" class="gallery-select-input" value="<%= item.id %>" />
+            <span class="gallery-select-mark">&#10003;</span>
+          </label>
+        <% } %>
+
+        <img src="<%= item.imagePaths[0] %>" alt="<%= item.title %>" class="gallery-img" loading="lazy" />
+
+        <% if (item.imagePaths.length > 1) { %>
+          <span class="gallery-album-badge" title="<%= item.imagePaths.length %> images">&#128247; <%= item.imagePaths.length %></span>
+        <% } %>
 
         <div class="gallery-card-overlay">
-          <% if (item.type === 'wiki' && item.cat) { %>
-            <span class="gallery-source-badge" style="background: hsl(<%= item.cat.hue %>, 55%, 45%)"><%= item.cat.label %></span>
-          <% } else { %>
-            <span class="gallery-source-badge gallery-source-own">Galerie</span>
-          <% } %>
+          <% if (cat) { %><span class="gallery-source-badge" style="background: hsl(<%= cat.hue %>, 55%, 45%)"><%= cat.label %></span><% } %>
+          <span class="wiki-card-badges">
+            <% if (item.rating) { %>
+              <span class="wiki-card-mini-stars">
+                <% for (var si = 1; si <= 5; si++) { %><span class="wiki-card-star<%= si <= item.rating ? ' filled' : '' %>">&#9733;</span><% } %>
+              </span>
+            <% } %>
+            <% if (item.flame) { %><span class="wiki-card-react-badge" title="J'adore">&#128293;</span><% } %>
+            <% if (item.interested) { %><span class="wiki-card-react-badge" title="Ça m'intéresse">&#10024;</span><% } %>
+          </span>
           <div class="gallery-card-btns">
             <% if (item.type === 'gallery' && item.id) { %>
               <a href="/galerie/<%= item.id %>/edit" class="gallery-card-btn" title="Modifier">&#9998;</a>
             <% } %>
-            <% if (item.type === 'wiki' && item.wikiPageId) { %>
+            <% if (item.wikiPageId) { %>
               <a href="/wiki/<%= item.wikiPageId %>" class="gallery-card-btn" title="Page wiki">&#128196;</a>
             <% } %>
           </div>
@@ -121,6 +173,7 @@
   <button type="button" class="gallery-lb-next" title="Suivante">&#8250;</button>
   <div class="gallery-lb-inner">
     <img class="gallery-lb-img" alt="" />
+    <div class="gallery-lb-dots" id="gallery-lb-dots" hidden></div>
     <div class="gallery-lb-panel">
       <p class="gallery-lb-title"></p>
       <div class="gallery-lb-tags"></div>
