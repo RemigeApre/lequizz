@@ -62,15 +62,19 @@
       </a>
     </nav>
 
-    <%# ─ Note : grosse, centrée, fonctionnelle — c'est ici qu'on note ─ %>
-    <div class="wiki-detail-rating" data-id="<%= page.id %>" data-rating="<%= page.rating %>">
-      <% for (var i = 1; i <= 5; i++) { %>
-        <button type="button" class="wiki-star wiki-star-lg" data-value="<%= i %>"><%- i <= page.rating ? '&#9733;' : '&#9734;' %></button>
-      <% } %>
-    </div>
+    <%# ─ Note : grosse, centrée, fonctionnelle — c'est ici qu'on note ─
+         Réservée aux profils connectés, comme les images et réactions. %>
+    <% if (currentUser) { %>
+      <div class="wiki-detail-rating" data-id="<%= page.id %>" data-rating="<%= page.rating %>">
+        <% for (var i = 1; i <= 5; i++) { %>
+          <button type="button" class="wiki-star wiki-star-lg" data-value="<%= i %>"><%- i <= page.rating ? '&#9733;' : '&#9734;' %></button>
+        <% } %>
+      </div>
+    <% } %>
 
-    <%# ─ Image principale ─ %>
-    <% if (hasImages) { %>
+    <%# ─ Image principale ─ Les images restent privées même si le texte
+         du wiki devient public : rien à afficher pour un visiteur anonyme. %>
+    <% if (hasImages && currentUser) { %>
       <div class="wiki-infobox-images wiki-detail-main-images">
         <img src="<%= page.imagePaths[0] %>" alt="" class="wiki-infobox-img" />
       </div>
@@ -147,17 +151,19 @@
 
       </dl>
 
-      <div class="wiki-react wiki-infotable-reactions"
-        data-id="<%= page.id %>"
-        data-flame="<%= page.flame ? '1' : '0' %>"
-        data-interested="<%= page.interested ? '1' : '0' %>">
-        <button type="button" class="wiki-react-btn wiki-react-flame<%= page.flame ? ' active' : '' %>" data-key="flame">
-          <span class="wiki-react-icon">&#128293;</span><span class="wiki-react-label">J&apos;adore</span>
-        </button>
-        <button type="button" class="wiki-react-btn wiki-react-interest<%= page.interested ? ' active' : '' %>" data-key="interested">
-          <span class="wiki-react-icon">&#10024;</span><span class="wiki-react-label">Int&eacute;ress&eacute;e</span>
-        </button>
-      </div>
+      <% if (currentUser) { %>
+        <div class="wiki-react wiki-infotable-reactions"
+          data-id="<%= page.id %>"
+          data-flame="<%= page.flame ? '1' : '0' %>"
+          data-interested="<%= page.interested ? '1' : '0' %>">
+          <button type="button" class="wiki-react-btn wiki-react-flame<%= page.flame ? ' active' : '' %>" data-key="flame">
+            <span class="wiki-react-icon">&#128293;</span><span class="wiki-react-label">J&apos;adore</span>
+          </button>
+          <button type="button" class="wiki-react-btn wiki-react-interest<%= page.interested ? ' active' : '' %>" data-key="interested">
+            <span class="wiki-react-icon">&#10024;</span><span class="wiki-react-label">Int&eacute;ress&eacute;e</span>
+          </button>
+        </div>
+      <% } %>
     </div>
 
     <%# ─ Description : section principale + sections repliables ─ %>
@@ -166,7 +172,7 @@
     <% } %>
 
     <%# ─ Images suivantes : carrousel, après la description ─ %>
-    <% if (hasImages && page.imagePaths.length > 1) { %>
+    <% if (hasImages && page.imagePaths.length > 1 && currentUser) { %>
       <div class="wiki-infobox-images wiki-infobox-images-rest">
         <% page.imagePaths.slice(1).forEach(function (src) { %>
           <img src="<%= src %>" alt="" class="wiki-infobox-img" />
@@ -180,11 +186,14 @@
       <div class="wiki-pl-cards" data-role="links"></div>
     </div>
 
-    <%# ─ Questions du quizz liées : idem, lecture seule ─ %>
-    <div class="wiki-question-links-view" data-page-id="<%= page.id %>" hidden>
-      <h3 class="wiki-ql-heading">Questions du quizz li&eacute;es</h3>
-      <ul class="wiki-ql-list"></ul>
-    </div>
+    <%# ─ Questions du quizz liées : idem, lecture seule. Le quizz est
+         privé, donc ce bloc (et l'API qui l'alimente) le reste aussi. ─ %>
+    <% if (currentUser) { %>
+      <div class="wiki-question-links-view" data-page-id="<%= page.id %>" hidden>
+        <h3 class="wiki-ql-heading">Questions du quizz li&eacute;es</h3>
+        <ul class="wiki-ql-list"></ul>
+      </div>
+    <% } %>
 
     <%# ─ Tag : tags + mots dérivés, dans un espace réduit et centré ─ %>
     <% if (hasAnyTags) { %>
@@ -208,7 +217,7 @@
           <% suggestions.forEach(function (s) { %>
             <% var scat = categories.find(function (c) { return c.key === s.category; }); %>
             <a href="/wiki/<%= s.id %>" class="wiki-sugg-card">
-              <% if (s.imagePaths && s.imagePaths.length) { %>
+              <% if (s.imagePaths && s.imagePaths.length && currentUser) { %>
                 <div class="wiki-sugg-img-wrap">
                   <img src="<%= s.imagePaths[0] %>" alt="" class="wiki-sugg-img" />
                 </div>
@@ -222,9 +231,12 @@
       </div>
     <% } %>
 
-    <div class="wiki-detail-actions">
-      <a href="/wiki/<%= page.id %>/edit" class="wiki-edit-icon-btn" title="Modifier" aria-label="Modifier">&#9998;</a>
-    </div>
+    <% if (currentUser) { %>
+      <div class="wiki-detail-actions">
+        <button type="button" class="wiki-edit-icon-btn wiki-fav-icon-btn<%= isFavorite ? ' active' : '' %>" id="wiki-fav-btn" data-item-id="<%= page.id %>" title="Favori" aria-label="Favori">&#128278;</button>
+        <a href="/wiki/<%= page.id %>/edit" class="wiki-edit-icon-btn" title="Modifier" aria-label="Modifier">&#9998;</a>
+      </div>
+    <% } %>
 
   </article>
 </main>

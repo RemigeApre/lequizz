@@ -4,6 +4,7 @@
     <a href="/bd" class="bd-reader-back link-button">&larr; BD</a>
     <span class="bd-reader-title"><%= book.title %></span>
     <span class="bd-reader-counter" id="bd-counter">1 / <%= book.imagePaths.length %></span>
+    <button type="button" class="bd-reader-fav link-button<%= isFavorite ? ' active' : '' %>" id="bd-fav-btn" data-item-id="<%= book.id %>" title="Favori">&#128278;</button>
     <a href="/bd/<%= book.id %>/edit" class="bd-reader-edit link-button">Modifier</a>
   </div>
 
@@ -78,4 +79,21 @@
 })();
 </script>
 <% } %>
+<script>
+(function () {
+  var btn = document.getElementById("bd-fav-btn");
+  if (!btn) return;
+  btn.addEventListener("click", function () {
+    fetch("/favoris/toggle", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ itemType: "bd", itemId: Number(btn.dataset.itemId) }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.ok) btn.classList.toggle("active", d.active);
+      });
+  });
+})();
+</script>
 <%- include('partials/foot') %>

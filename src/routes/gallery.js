@@ -11,7 +11,9 @@ const {
   deleteGalleryImage,
   listWikiPages,
   getWikiPage,
+  listFavoriteRows,
 } = require("../db");
+const { requireUser } = require("../auth");
 
 const CATEGORIES = [
   { key: "fantasmes",   label: "Fantasmes",   hue: 330 },
@@ -121,10 +123,14 @@ function getCtx() {
 
 function buildGalleryRouter(config) {
   const router = express.Router();
+  router.use(requireUser);
 
   router.get("/", (req, res) => {
     const { items, allTags } = getCtx();
-    res.render("gallery", { config, items, allTags, categories: CATEGORIES });
+    const favoriteGalleryIds = listFavoriteRows(req.user.id)
+      .filter((r) => r.item_type === "gallery")
+      .map((r) => r.item_id);
+    res.render("gallery", { config, items, allTags, categories: CATEGORIES, favoriteGalleryIds });
   });
 
   router.post("/", upload.array("images", 30), (req, res) => {

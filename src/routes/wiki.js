@@ -21,7 +21,9 @@ const {
   getImageLinks,
   addImageLink,
   removeImageLink,
+  isFavorite,
 } = require("../db");
+const { requireUser, requireUserJson } = require("../auth");
 
 const CATEGORIES = [
   { key: "fantasmes",  label: "Fantasmes",   desc: "Sc\u00e9narios, d\u00e9sirs...",          hue: 330 },
@@ -243,7 +245,7 @@ function buildWikiRouter(config) {
     res.render("wiki", { config, pages, allTags: getAllTags(pages), lockedCategory: cat, ...CTX });
   });
 
-  router.post("/", upload.array("images", 10), (req, res) => {
+  router.post("/", requireUser, upload.array("images", 10), (req, res) => {
     const title = String(req.body.title || "").trim();
     if (!title) return res.redirect("/wiki");
 
@@ -260,20 +262,20 @@ function buildWikiRouter(config) {
   });
 
   // ── Associations image ─────────────────────────────
-  router.get("/image-links", (req, res) => {
+  router.get("/image-links", requireUserJson, (req, res) => {
     const src = req.query.src;
     if (!src) return res.json([]);
     res.json(getImageLinks(src));
   });
 
-  router.post("/image-links", (req, res) => {
+  router.post("/image-links", requireUserJson, (req, res) => {
     const { src, page_id } = req.body;
     if (!src || !page_id) return res.status(400).json({ ok: false });
     addImageLink(src, Number(page_id));
     res.json({ ok: true });
   });
 
-  router.delete("/image-links", (req, res) => {
+  router.delete("/image-links", requireUserJson, (req, res) => {
     const { src, page_id } = req.body;
     if (!src || !page_id) return res.status(400).json({ ok: false });
     removeImageLink(src, Number(page_id));
@@ -312,10 +314,11 @@ function buildWikiRouter(config) {
     const nextPage = idx < allPages.length - 1 ? { id: allPages[idx + 1].id, title: allPages[idx + 1].title } : null;
     const suggestions = computeSuggestions(page, allPages);
     const back = wikiBackTarget(req);
-    res.render("wiki-detail", { config, page, pages: allPages, suggestions, prevPage, nextPage, backHref: back.href, backLabel: back.label, ...CTX });
+    const pageIsFavorite = req.user ? isFavorite(req.user.id, "wiki", id) : false;
+    res.render("wiki-detail", { config, page, pages: allPages, suggestions, prevPage, nextPage, backHref: back.href, backLabel: back.label, isFavorite: pageIsFavorite, ...CTX });
   });
 
-  router.get("/:id/edit", (req, res) => {
+  router.get("/:id/edit", requireUser, (req, res) => {
     const id = Number(req.params.id);
     const page = Number.isInteger(id) ? getWikiPage(id) : null;
     if (!page) return res.redirect("/wiki");
@@ -324,7 +327,7 @@ function buildWikiRouter(config) {
     res.render("wiki-form", { config, page, pages, allTags, ...CTX });
   });
 
-  router.post("/:id", upload.array("images", 10), (req, res) => {
+  router.post("/:id", requireUser, upload.array("images", 10), (req, res) => {
     const id = Number(req.params.id);
     const existing = Number.isInteger(id) ? getWikiPage(id) : null;
     if (!existing) return res.redirect("/wiki");
@@ -365,7 +368,7 @@ function buildWikiRouter(config) {
     res.json({ links: getWikiPageLinks(id), backlinks: getWikiBacklinks(id) });
   });
 
-  router.post("/:id/page-links", (req, res) => {
+  router.post("/:id/page-links", requireUserJson, (req, res) => {
     const id = Number(req.params.id);
     const linked = Number(req.body.linked_page_id);
     if (!Number.isInteger(id) || !Number.isInteger(linked)) return res.status(400).json({ ok: false });
@@ -373,7 +376,7 @@ function buildWikiRouter(config) {
     res.json({ ok: true });
   });
 
-  router.delete("/:id/page-links", (req, res) => {
+  router.delete("/:id/page-links", requireUserJson, (req, res) => {
     const id = Number(req.params.id);
     const linked = Number(req.body.linked_page_id);
     if (!Number.isInteger(id) || !Number.isInteger(linked)) return res.status(400).json({ ok: false });
@@ -384,7 +387,7 @@ function buildWikiRouter(config) {
   // ── Associations questions ──────────────────────────
   // Sens inverse : depuis une question du quizz, quelles pages wiki y sont
   // déjà liées (utilisé par le bouton "?" sur les questions).
-  router.get("/question-links/lookup", (req, res) => {
+  router.get("/question-links/lookup", requireUserJson, (req, res) => {
     const sectionKey = String(req.query.section_key || "");
     const questionId = String(req.query.question_id || "");
     if (!sectionKey || !questionId) return res.json([]);
@@ -392,7 +395,7 @@ function buildWikiRouter(config) {
     res.json(pages.map((p) => ({ id: p.id, title: p.title, category: p.category })));
   });
 
-  router.get("/:id/question-links", (req, res) => {
+  router.get("/:id/question-links", requireUserJson, (req, res) => {
     const id = Number(req.params.id);
     if (!Number.isInteger(id)) return res.json([]);
     const links = getWikiQuestionLinks(id);
@@ -409,7 +412,7 @@ function buildWikiRouter(config) {
     res.json(enriched);
   });
 
-  router.post("/:id/question-links", (req, res) => {
+  router.post("/:id/question-links", requireUserJson, (req, res) => {
     const id = Number(req.params.id);
     if (!Number.isInteger(id)) return res.status(400).json({ ok: false });
     const { section_key, question_id } = req.body;
@@ -418,7 +421,7 @@ function buildWikiRouter(config) {
     res.json({ ok: true });
   });
 
-  router.delete("/:id/question-links", (req, res) => {
+  router.delete("/:id/question-links", requireUserJson, (req, res) => {
     const id = Number(req.params.id);
     if (!Number.isInteger(id)) return res.status(400).json({ ok: false });
     const { section_key, question_id } = req.body;
@@ -427,7 +430,7 @@ function buildWikiRouter(config) {
     res.json({ ok: true });
   });
 
-  router.post("/:id/react", (req, res) => {
+  router.post("/:id/react", requireUserJson, (req, res) => {
     const id = Number(req.params.id);
     if (!Number.isInteger(id)) return res.status(400).json({ ok: false });
     const { rating, flame, interested } = req.body;
@@ -435,7 +438,7 @@ function buildWikiRouter(config) {
     res.json({ ok: true });
   });
 
-  router.post("/:id/delete", (req, res) => {
+  router.post("/:id/delete", requireUser, (req, res) => {
     const id = Number(req.params.id);
     if (Number.isInteger(id)) deleteWikiPage(id);
     res.redirect("/wiki");

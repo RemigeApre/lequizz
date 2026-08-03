@@ -1733,4 +1733,23 @@
     applyBtn(nextBtn, context[idx + 1] || null);
   })();
 
+  // ══════════════════════════════════════════════════
+  // 15. FAVORI (page wiki) — bouton dans la page de lecture
+  // ══════════════════════════════════════════════════
+  (function () {
+    var btn = document.getElementById("wiki-fav-btn");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      fetch("/favoris/toggle", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ itemType: "wiki", itemId: Number(btn.dataset.itemId) }),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.ok) btn.classList.toggle("active", d.active);
+        });
+    });
+  })();
+
 })();

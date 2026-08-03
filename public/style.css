@@ -586,6 +586,29 @@ body.nav-drawer-locked {
   text-align: center;
 }
 
+/* Formulaire de connexion multi-profil : le select passe sur sa propre
+   ligne, mot de passe + bouton restent sur la ligne suivante (comme avant). */
+.gate-form-profile {
+  flex-wrap: wrap;
+}
+
+.gate-form-profile select {
+  flex: 1 1 100%;
+  border: none;
+  border-bottom: 2px solid var(--border);
+  background: transparent;
+  color: var(--fg);
+  font-size: 1.1rem;
+  padding: 0.6rem 0.2rem;
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+
+.gate-form-profile select:focus {
+  outline: none;
+  border-bottom-color: var(--accent);
+}
+
 .section-title-h1 {
   text-align: center;
 }
@@ -1296,6 +1319,38 @@ input[type="text"], input[type="password"] {
   text-align: left;
   padding: 0.5rem;
   border-bottom: 1px solid var(--border);
+}
+
+.admin-inline-form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.admin-inline-form input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg);
+  padding: 0.35rem 0.5rem;
+}
+
+.admin-new-profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 26rem;
+}
+
+.admin-new-profile-form input[type="text"],
+.admin-new-profile-form input[type="password"] {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg);
+  padding: 0.55rem 0.7rem;
 }
 
 .answer-list { list-style: none; padding: 0; }
@@ -3162,6 +3217,16 @@ input[type="text"], input[type="password"] {
 }
 .wiki-pl-cards::-webkit-scrollbar { display: none; }
 
+/* Page "Mes favoris" : mêmes chips que .wiki-pl-cards mais qui passent à
+   la ligne au lieu de défiler horizontalement (liste complète, pas un
+   aperçu contextuel). */
+.favoris-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
 .wiki-pl-empty {
   font-size: 0.82rem;
   color: var(--fg);
@@ -3448,6 +3513,7 @@ a.wiki-ql-label:hover .wiki-ql-text {
 .wiki-detail-actions {
   display: flex;
   justify-content: center;
+  gap: 0.6rem;
   margin-top: 0.5rem;
 }
 
@@ -3468,6 +3534,16 @@ a.wiki-ql-label:hover .wiki-ql-text {
   transition: background 0.15s, color 0.15s;
 }
 .wiki-edit-icon-btn:hover {
+  background: var(--wiki-gold);
+  color: #fff;
+}
+
+.wiki-fav-icon-btn {
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+.wiki-fav-icon-btn.active {
   background: var(--wiki-gold);
   color: #fff;
 }
@@ -4113,6 +4189,8 @@ a.wiki-ql-label:hover .wiki-ql-text {
 }
 .gallery-card-btn:hover { background: rgba(0,0,0,0.75); }
 
+.gallery-fav-btn.active { background: var(--wiki-gold); color: #fff; }
+
 .gallery-card-body {
   padding: 0.4rem 0.6rem 0.55rem;
   display: flex;
@@ -4453,10 +4531,16 @@ a.wiki-ql-label:hover .wiki-ql-text {
 }
 
 .bd-reader-back,
-.bd-reader-edit {
+.bd-reader-edit,
+.bd-reader-fav {
   font-size: 0.8rem;
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+.bd-reader-fav.active {
+  color: var(--wiki-gold);
+  text-decoration: none;
 }
 
 .bd-reader-stage {

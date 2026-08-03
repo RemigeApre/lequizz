@@ -53,7 +53,7 @@ derniere section, le resultat final est calcule et enregistre dans
 ```bash
 npm install
 cp .env.example .env
-# renseigner SITE_PASSWORD et ADMIN_PASSWORD dans .env
+# renseigner ADMIN_PASSWORD et MANON_PASSWORD dans .env (profils initiaux)
 npm start
 ```
 

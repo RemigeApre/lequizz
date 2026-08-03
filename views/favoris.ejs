@@ -1,0 +1,65 @@
+<%- include('partials/head', { title: 'Mes favoris — ' + config.title }) %>
+<main class="container wide">
+  <%- include('partials/top-nav', { config: config }) %>
+
+  <div class="admin-header">
+    <h1 class="section-title-h1">Mes favoris</h1>
+    <form method="POST" action="/admin/logout">
+      <button type="submit" class="link-button">Se d&eacute;connecter</button>
+    </form>
+  </div>
+
+  <% if (!wikiPages.length && !galleryImages.length && !bdBooks.length) { %>
+    <p class="intro">Aucun favori pour l&apos;instant. Utilise le bouton favori sur une page wiki, une image de la galerie ou une BD pour l&apos;ajouter ici.</p>
+  <% } %>
+
+  <% if (wikiPages.length) { %>
+    <h2>Pages wiki (<%= wikiPages.length %>)</h2>
+    <div class="wiki-grid">
+      <% wikiPages.forEach(function (page) { %>
+        <%- include('partials/wiki-card', { page: page, categories: categories, showCategoryBadge: true }) %>
+      <% }) %>
+    </div>
+  <% } %>
+
+  <% if (galleryImages.length) { %>
+    <h2>Galerie (<%= galleryImages.length %>)</h2>
+    <div class="favoris-chip-list">
+      <% galleryImages.forEach(function (img) { %>
+        <span class="wiki-pl-card" data-fav-item data-item-type="gallery" data-item-id="<%= img.id %>">
+          <a href="/galerie/<%= img.id %>/edit" class="wiki-pl-title"><%= img.title || "Sans titre" %></a>
+          <button type="button" class="wiki-pl-remove" title="Retirer des favoris">&#215;</button>
+        </span>
+      <% }) %>
+    </div>
+  <% } %>
+
+  <% if (bdBooks.length) { %>
+    <h2>BD (<%= bdBooks.length %>)</h2>
+    <div class="favoris-chip-list">
+      <% bdBooks.forEach(function (book) { %>
+        <span class="wiki-pl-card" data-fav-item data-item-type="bd" data-item-id="<%= book.id %>">
+          <a href="/bd/<%= book.id %>" class="wiki-pl-title"><%= book.title %></a>
+          <button type="button" class="wiki-pl-remove" title="Retirer des favoris">&#215;</button>
+        </span>
+      <% }) %>
+    </div>
+  <% } %>
+</main>
+<script>
+document.querySelectorAll("[data-fav-item] .wiki-pl-remove").forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    var card = btn.closest("[data-fav-item]");
+    fetch("/favoris/toggle", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ itemType: card.dataset.itemType, itemId: Number(card.dataset.itemId) }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.ok && !d.active) card.remove();
+      });
+  });
+});
+</script>
+<%- include('partials/foot') %>

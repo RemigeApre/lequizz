@@ -15,23 +15,28 @@
 
   <nav class="nav-drawer-body">
     <a href="/wiki" class="nav-drawer-link">Wiki</a>
-    <a href="/galerie" class="nav-drawer-link">Galerie</a>
-    <a href="/bd" class="nav-drawer-link">BD</a>
-    <a href="/liens" class="nav-drawer-link">Liens</a>
+    <% if (currentUser) { %>
+      <a href="/galerie" class="nav-drawer-link">Galerie</a>
+      <a href="/bd" class="nav-drawer-link">BD</a>
+      <a href="/liens" class="nav-drawer-link">Liens</a>
+      <a href="/favoris" class="nav-drawer-link">Mes favoris</a>
 
-    <details class="nav-drawer-group" open>
-      <summary class="nav-drawer-group-summary">Quizz</summary>
-      <div class="nav-drawer-sublist">
-        <% config.sections.forEach(function (s, i) { %>
-          <a href="/section/<%= i %>" class="nav-drawer-link">
-            <span class="nav-drawer-dot" style="background: <%= s.color || 'var(--accent)' %>"></span> <%= s.title %>
-          </a>
-        <% }) %>
-      </div>
-    </details>
+      <details class="nav-drawer-group" open>
+        <summary class="nav-drawer-group-summary">Quizz</summary>
+        <div class="nav-drawer-sublist">
+          <% config.sections.forEach(function (s, i) { %>
+            <a href="/section/<%= i %>" class="nav-drawer-link">
+              <span class="nav-drawer-dot" style="background: <%= s.color || 'var(--accent)' %>"></span> <%= s.title %>
+            </a>
+          <% }) %>
+        </div>
+      </details>
+    <% } %>
   </nav>
 
   <div class="nav-drawer-footer">
-    <a href="/admin" class="nav-drawer-admin" title="Panneau admin">&#128273;</a>
+    <a href="<%= currentUser ? (currentUser.isAdmin ? '/admin' : '/favoris') : '/admin/login' %>"
+       class="nav-drawer-admin"
+       title="<%= currentUser ? currentUser.displayName : 'Connexion' %>">&#128273;</a>
   </div>
 </aside>

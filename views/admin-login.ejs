@@ -1,11 +1,18 @@
-<%- include('partials/head', { title: 'Connexion admin' }) %>
+<%- include('partials/head', { title: 'Connexion' }) %>
 <main class="container narrow gate-page">
   <% if (error) { %>
     <p class="error gate-error"><%= error %></p>
   <% } %>
 
-  <form method="POST" action="/admin/login" class="gate-form">
-    <input type="password" name="password" placeholder="mot de passe admin" required autofocus />
+  <form method="POST" action="/admin/login" class="gate-form gate-form-profile">
+    <select name="username" required autofocus>
+      <option value="" disabled selected>Choisis ton profil&hellip;</option>
+      <% users.forEach(function (u) { %>
+        <option value="<%= u.username %>"><%= u.displayName %></option>
+      <% }) %>
+    </select>
+    <input type="password" name="password" placeholder="mot de passe" required />
+    <input type="hidden" name="next" value="<%= next %>" />
     <button type="submit" aria-label="Entrer" title="Entrer">&#8594;</button>
   </form>
 </main>

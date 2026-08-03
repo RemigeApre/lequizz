@@ -1,6 +1,7 @@
 const express = require("express");
 const { insertLink, listLinks, deleteLink } = require("../db");
 const { fetchPageTitle } = require("../linkTitle");
+const { requireUser } = require("../auth");
 
 function parseTags(raw) {
   return String(raw || "")
@@ -20,6 +21,7 @@ function isValidUrl(value) {
 
 function buildLinksRouter(config) {
   const router = express.Router();
+  router.use(requireUser);
 
   router.get("/", (req, res) => {
     const links = listLinks();

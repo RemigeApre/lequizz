@@ -142,6 +142,7 @@
           </span>
           <div class="gallery-card-btns">
             <% if (item.type === 'gallery' && item.id) { %>
+              <button type="button" class="gallery-card-btn gallery-fav-btn<%= favoriteGalleryIds.indexOf(item.id) !== -1 ? ' active' : '' %>" data-item-id="<%= item.id %>" title="Favori">&#128278;</button>
               <a href="/galerie/<%= item.id %>/edit" class="gallery-card-btn" title="Modifier">&#9998;</a>
             <% } %>
             <% if (item.wikiPageId) { %>

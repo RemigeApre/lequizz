@@ -2,7 +2,8 @@ const path = require("path");
 const fs = require("fs");
 const express = require("express");
 const multer = require("multer");
-const { listBdBooks, getBdBook, insertBdBook, updateBdBook, deleteBdBook } = require("../db");
+const { listBdBooks, getBdBook, insertBdBook, updateBdBook, deleteBdBook, isFavorite } = require("../db");
+const { requireUser } = require("../auth");
 
 const uploadsDir = path.join(__dirname, "..", "..", "data", "uploads", "bd");
 fs.mkdirSync(uploadsDir, { recursive: true });
@@ -56,6 +57,7 @@ function applyImageOrder(existing, newFiles, orderRaw) {
 
 function buildBdRouter(config) {
   const router = express.Router();
+  router.use(requireUser);
 
   router.get("/", (req, res) => {
     const books = listBdBooks();
@@ -124,7 +126,7 @@ function buildBdRouter(config) {
     const idx = allBooks.findIndex((b) => b.id === book.id);
     const prevBook = idx < allBooks.length - 1 ? allBooks[idx + 1] : null;
     const nextBook = idx > 0 ? allBooks[idx - 1] : null;
-    res.render("bd-detail", { config, book, prevBook, nextBook });
+    res.render("bd-detail", { config, book, prevBook, nextBook, isFavorite: isFavorite(req.user.id, "bd", book.id) });
   });
 
   router.use((err, req, res, next) => {

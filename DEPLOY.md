@@ -256,14 +256,23 @@ Et remplis :
 PORT=3000
 NODE_ENV=production
 SESSION_SECRET=<la sortie de openssl rand -hex 32>
-SITE_PASSWORD=<le mot de passe d'acces au site, choisi par toi>
-ADMIN_PASSWORD=<le mot de passe du panneau admin, choisi par toi>
+ADMIN_USERNAME=admin
+ADMIN_DISPLAY_NAME=Admin
+ADMIN_PASSWORD=<le mot de passe du profil admin, choisi par toi>
+MANON_USERNAME=manon
+MANON_DISPLAY_NAME=Manon
+MANON_PASSWORD=<le mot de passe du profil de Manon, choisi par toi>
 ```
 
-Un seul mot de passe admin (pas de hash, pas d'identifiant) : meme
-principe que la page de connexion du site. Choisis un mot de passe
-different de `SITE_PASSWORD` et que tu n'as tape nulle part d'autre
-(ex. jamais dans une conversation en clair).
+Il n'y a plus de mot de passe unique pour tout le site : le wiki (texte)
+est desormais public, et chaque profil (Admin, Manon, puis d'autres
+crees depuis "Gerer les profils" dans le panneau admin) a son propre
+identifiant + mot de passe, entres via l'icone cle en haut du site. Ces
+deux mots de passe initiaux ne sont crees qu'au premier demarrage ou
+`MANON_PASSWORD`/`ADMIN_PASSWORD` sont renseignes — choisis-les differents
+l'un de l'autre et que tu n'as tapes nulle part d'autre (ex. jamais dans
+une conversation en clair). D'autres profils peuvent ensuite etre crees
+directement depuis l'interface (pas besoin de repasser par `.env`).
 
 ---
 
@@ -375,32 +384,33 @@ sudo bash -c "cd /home/quizz && git pull && docker compose up -d --build"
 
 Cette version serveur (pas la version GitHub Pages statique) gere ca :
 
-- **Mot de passe unique du site** (`SITE_PASSWORD` dans `.env`) : une
-  barriere devant tout le site (page `/gate`). Une fois entre, l'acces est
-  memorise ~90 jours via un cookie de session. Il n'y a pas de compte par
-  personne : tout le monde qui connait le mot de passe partage la meme
-  progression (une seule ligne dans la table `attempts`, cle fixe
-  `"shared"`) — adapte a un usage a deux, pas a plusieurs repondants
-  distincts.
-- **Continuite entre appareils** : comme la progression est unique et
-  stockee cote serveur (pas dans le navigateur), se connecter depuis
-  n'importe quel appareil (PC, telephone, le sien, le tien) donne acces
-  exactement aux memes reponses, sans code ni identifiant a saisir.
+- **Profils personnels** (icone cle en haut du site, `/admin/login`) : le
+  wiki (texte) est public, sans connexion. Tout le reste (galerie, BD,
+  quizz, images, favoris) demande d'etre connecte a un profil (identifiant
+  + mot de passe, voir Etape 7). Chaque profil a sa propre progression de
+  quizz (table `attempts`, cle `"user:<id>"`) — contrairement a l'ancienne
+  version a mot de passe unique, deux profils ne partagent plus les memes
+  reponses. Une fois connecte, l'acces est memorise ~90 jours via un
+  cookie de session.
+- **Continuite entre appareils** : la progression est stockee cote serveur
+  (pas dans le navigateur) et rattachee au profil, pas a l'appareil : se
+  connecter avec le meme profil depuis n'importe quel appareil (PC,
+  telephone) donne acces exactement aux memes reponses.
 - **CSV en temps reel** : en plus de la base SQLite (`data/quizz.db`), chaque
   section validee est immediatement ajoutee a `data/log.csv` (colonnes :
   `timestamp,event,code,section_key,section_index,payload_json` — `code`
-  vaut toujours `shared`). C'est un filet de securite en texte brut, lisible
-  avec n'importe quel tableur, independant de la base.
+  vaut `user:<id>`, un profil par ligne). C'est un filet de securite en
+  texte brut, lisible avec n'importe quel tableur, independant de la base.
 - Terminer le quiz jusqu'au bout n'efface plus rien : un instantane du
-  score est range dans `submissions` (consultable via `/admin`), mais la
-  progression reste modifiable a volonte ensuite (page d'accueil ->
-  n'importe quelle section).
+  score est range dans `submissions` (consultable via `/admin`, avec le
+  profil concerne), mais la progression reste modifiable a volonte ensuite
+  (page d'accueil -> n'importe quelle section).
 - `data/log.csv` n'est jamais commite dans Git (`.gitignore`), comme
   `data/quizz.db` — pense a inclure `data/` dans tes propres sauvegardes
   manuelles du VPS si tu en fais.
-- Les images ajoutees dans le wiki sont stockees dans
-  `data/uploads/wiki/` (servies sous `/uploads/...`, derriere la meme
-  barriere de mot de passe que tout le site) — meme regle que le reste
+- Les images (wiki, galerie, BD) sont stockees dans `data/uploads/`
+  (servies sous `/uploads/...`, jamais accessibles sans etre connecte a un
+  profil, meme si le texte du wiki est public) — meme regle que le reste
   de `data/` : jamais commitees dans Git, a inclure dans tes sauvegardes
   manuelles si tu en fais.
 
@@ -458,7 +468,7 @@ accepter une fois par navigateur/appareil.
 
 ---
 
-## Depannage : boucle de connexion sur `/gate`
+## Depannage : boucle de connexion sur `/admin/login`
 
 Symptome : le mot de passe correct ne debloque jamais l'acces, retour
 permanent sur la page de connexion.
@@ -468,17 +478,18 @@ seule fois** au demarrage (presence reelle des fichiers de certificat) et
 sert a la fois a choisir HTTP/HTTPS **et** a regler `cookie.secure` — les
 deux ne peuvent donc plus se desynchroniser au niveau du code. Le serveur
 affiche aussi desormais un avertissement au demarrage
-(`sudo docker compose logs lequizz`) si `SITE_PASSWORD` manque ou si des
-chemins de certificat sont configures sans fichiers presents. Si ca
-bloque quand meme, verifie dans cet ordre (sur le VPS, dans
-`/home/quizz`) :
+(`sudo docker compose logs lequizz`) si `ADMIN_PASSWORD`/`MANON_PASSWORD`
+manquent (le profil correspondant n'est alors pas cree) ou si des chemins
+de certificat sont configures sans fichiers presents. Si ca bloque quand
+meme, verifie dans cet ordre (sur le VPS, dans `/home/quizz`) :
 
 ```bash
 # 1. Le serveur tourne dans quel mode ?
 sudo docker compose logs --tail=30 lequizz | grep -iE "listening|attention"
 
-# 2. .env a-t-il bien SITE_PASSWORD ? (doit repondre 1, pas 0)
-grep -c SITE_PASSWORD .env
+# 2. .env a-t-il bien les mots de passe des profils ? (doivent repondre 1, pas 0)
+grep -c ADMIN_PASSWORD .env
+grep -c MANON_PASSWORD .env
 
 # 3. certs/ contient-il vraiment les fichiers attendus par .env ?
 ls -la certs/
@@ -492,25 +503,25 @@ grep -c TLS_CERT_PATH .env
   normal juste apres un clone frais, `certs/` n'est jamais commite dans
   Git. Regenere le certificat (memes commandes qu'a l'etape 1 ci-dessus)
   puis `sudo docker compose up -d --build`.
-- `grep -c SITE_PASSWORD .env` repond `0` : aucun mot de passe ne sera
+- `grep -c ADMIN_PASSWORD .env` (ou `MANON_PASSWORD`) repond `0` : aucun mot de passe ne sera
   jamais accepte tant que la ligne n'existe pas dans `.env`.
 
 Test direct sans navigateur, pour isoler si le probleme vient du serveur
-ou du navigateur (cookies bloques/perimes) — remplace
-`REMPLACE_PAR_LE_VRAI` par le vrai mot de passe juste avant de lancer :
+ou du navigateur (cookies bloques/perimes) — remplace `REMPLACE_PAR_LE_VRAI`
+par le vrai mot de passe du profil admin juste avant de lancer :
 
 ```bash
 cd /tmp && rm -f cookies.txt
-curl -s -o /dev/null -w "GET /gate -> %{http_code}\n" -c cookies.txt http://localhost:3000/gate
-curl -s -o /dev/null -w "POST mauvais mdp -> %{http_code}\n" -b cookies.txt -c cookies.txt --data-urlencode "password=test-faux" http://localhost:3000/gate
-curl -s -o /dev/null -w "POST bon mdp -> %{http_code}\n" -b cookies.txt -c cookies.txt --data-urlencode "password=REMPLACE_PAR_LE_VRAI" http://localhost:3000/gate
-curl -s -o /dev/null -w "GET / apres connexion -> %{http_code}\n" -b cookies.txt http://localhost:3000/
+curl -s -o /dev/null -w "GET /admin/login -> %{http_code}\n" -c cookies.txt http://localhost:3000/admin/login
+curl -s -o /dev/null -w "POST mauvais mdp -> %{http_code}\n" -b cookies.txt -c cookies.txt --data-urlencode "username=admin" --data-urlencode "password=test-faux" http://localhost:3000/admin/login
+curl -s -o /dev/null -w "POST bon mdp -> %{http_code}\n" -b cookies.txt -c cookies.txt --data-urlencode "username=admin" --data-urlencode "password=REMPLACE_PAR_LE_VRAI" http://localhost:3000/admin/login
+curl -s -o /dev/null -w "GET /admin apres connexion -> %{http_code}\n" -b cookies.txt http://localhost:3000/admin
 ```
 
 Attendu : `200`, `200`, `302`, `200` (dans cet ordre). Si le `302`
-apparait mais que le dernier `GET /` renvoie quand meme vers `/gate`, le
-souci est cote navigateur (vide les cookies du site et reessaie) — pas
-cote serveur.
+apparait mais que le dernier `GET /admin` renvoie quand meme vers
+`/admin/login`, le souci est cote navigateur (vide les cookies du site et
+reessaie) — pas cote serveur.
 
 ### Si une commande SSH "fige" le terminal, ou si le site se bloque en reseau mobile
 

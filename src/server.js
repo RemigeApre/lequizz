@@ -11,9 +11,8 @@ const buildLinksRouter = require("./routes/links");
 const buildWikiRouter = require("./routes/wiki");
 const buildGalleryRouter = require("./routes/gallery");
 const buildBdRouter = require("./routes/bd");
-const { createThrottle } = require("./loginThrottle");
-
-const gateThrottle = createThrottle();
+const buildFavoritesRouter = require("./routes/favorites");
+const { attachUser } = require("./auth");
 
 const config = JSON.parse(
   fs.readFileSync(path.join(__dirname, "..", "docs", "questions.json"), "utf8")
@@ -32,11 +31,6 @@ const usingHttps = Boolean(
   certPath && keyPath && fs.existsSync(certPath) && fs.existsSync(keyPath)
 );
 
-if (!process.env.SITE_PASSWORD) {
-  console.warn(
-    "ATTENTION: SITE_PASSWORD n'est pas defini dans .env -> /gate refusera TOUJOURS l'acces, quel que soit le mot de passe tape."
-  );
-}
 if (certPath && keyPath && !usingHttps) {
   console.warn(
     `ATTENTION: TLS_CERT_PATH/TLS_KEY_PATH sont definis dans .env mais les fichiers sont introuvables (${certPath}, ${keyPath}) -> demarrage en HTTP. Si tu comptais servir du HTTPS, regenere les certificats (voir DEPLOY.md).`
@@ -64,6 +58,14 @@ app.use((req, res, next) => {
   next();
 });
 
+// Le contenu est personnel : jamais d'indexation, meme sur les pages
+// publiques (wiki texte). Complete la balise <meta name="robots"> et
+// public/robots.txt (ceinture et bretelles).
+app.use((req, res, next) => {
+  res.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+  next();
+});
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "change_me",
@@ -78,38 +80,18 @@ app.use(
   })
 );
 
-app.get("/gate", (req, res) => {
-  res.render("gate", { error: null });
-});
+app.use(attachUser);
 
-app.post("/gate", (req, res) => {
-  const key = req.ip;
-  const wait = gateThrottle.secondsToWait(key);
-  if (wait > 0) {
-    return res.render("gate", { error: `Trop de tentatives. Reessaie dans ${wait}s.` });
-  }
-
-  if (process.env.SITE_PASSWORD && req.body.password === process.env.SITE_PASSWORD) {
-    gateThrottle.recordSuccess(key);
-    req.session.siteUnlocked = true;
-    return res.redirect("/");
-  }
-
-  gateThrottle.recordFailure(key);
-  res.render("gate", { error: "Mot de passe incorrect" });
-});
-
-app.use((req, res, next) => {
-  if (req.path === "/gate" || req.session.siteUnlocked) return next();
-  res.redirect("/gate");
-});
-
-// Apres la barriere de mot de passe : les images du wiki sont du contenu
-// prive au meme titre que le reste du site, elles ne doivent jamais etre
-// accessibles sans etre passe par /gate.
+// Le wiki (texte) est desormais public : plus de portail de mot de passe
+// unique devant tout le site. Les images, elles, restent un contenu prive
+// (wiki/galerie/BD) : jamais servies sans etre connecte a un profil.
 const uploadsDir = path.join(__dirname, "..", "data", "uploads");
 fs.mkdirSync(uploadsDir, { recursive: true });
-app.use("/uploads", express.static(uploadsDir));
+app.use(
+  "/uploads",
+  (req, res, next) => (req.user ? next() : res.status(403).end()),
+  express.static(uploadsDir)
+);
 
 app.use("/", buildQuizRouter(config));
 app.use("/admin", buildAdminRouter(config));
@@ -117,6 +99,7 @@ app.use("/liens", buildLinksRouter(config));
 app.use("/wiki", buildWikiRouter(config));
 app.use("/galerie", buildGalleryRouter(config));
 app.use("/bd", buildBdRouter(config));
+app.use("/favoris", buildFavoritesRouter(config));
 
 if (usingHttps) {
   https

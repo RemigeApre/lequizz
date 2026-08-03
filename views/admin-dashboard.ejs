@@ -2,31 +2,35 @@
 <main class="container wide">
   <div class="admin-header">
     <h1>Panneau admin</h1>
-    <form method="POST" action="/admin/logout">
-      <button type="submit" class="link-button">Se deconnecter</button>
-    </form>
+    <div style="display:flex; gap:.6rem; align-items:center">
+      <a href="/admin/profils" class="link-button">G&eacute;rer les profils</a>
+      <form method="POST" action="/admin/logout">
+        <button type="submit" class="link-button">Se deconnecter</button>
+      </form>
+    </div>
   </div>
 
   <% var matrixSections = config.sections.filter(function (s) { return s.type === "matrix"; }); %>
 
+  <% userStates.forEach(function (state) { %>
   <div class="result-section">
     <div class="admin-header">
-      <h2>Etat actuel</h2>
-      <% if (attempt) { %><a href="/admin/live" class="link-button">Voir le detail complet</a><% } %>
+      <h2><%= state.user.displayName %></h2>
+      <% if (state.attempt) { %><a href="/admin/live/<%= state.user.id %>" class="link-button">Voir le detail complet</a><% } %>
     </div>
-    <% if (attempt) { %>
-      <p class="intro">Derniere modification : <%= new Date(attempt.updatedAt).toLocaleString("fr-FR") %></p>
+    <% if (state.attempt) { %>
+      <p class="intro">Derniere modification : <%= new Date(state.attempt.updatedAt).toLocaleString("fr-FR") %></p>
 
       <div class="result-row">
         <div class="result-label">
           <span>Progression globale</span>
-          <span><%= livePercentage %>%</span>
+          <span><%= state.livePercentage %>%</span>
         </div>
-        <div class="bar"><div class="bar-fill" style="width: <%= livePercentage %>%"></div></div>
+        <div class="bar"><div class="bar-fill" style="width: <%= state.livePercentage %>%"></div></div>
       </div>
 
       <% matrixSections.forEach(function (s) { %>
-        <% var sc = liveScores.sections[s.key]; %>
+        <% var sc = state.liveScores.sections[s.key]; %>
         <div class="result-row">
           <div class="result-label">
             <span><%= s.title %></span>
@@ -35,24 +39,25 @@
           <div class="bar"><div class="bar-fill" style="width: <%= sc.percentage %>%"></div></div>
         </div>
       <% }) %>
-
-      <div class="admin-stats">
-        <div class="admin-stat">
-          <span class="admin-stat-value"><%= favoritesCount %></span>
-          <span class="admin-stat-label">Favoris</span>
-        </div>
-        <div class="admin-stat">
-          <span class="admin-stat-value"><%= linksCount %></span>
-          <span class="admin-stat-label">Liens enregistres</span>
-        </div>
-        <div class="admin-stat">
-          <span class="admin-stat-value"><%= wikiPages.length %></span>
-          <span class="admin-stat-label">Pages wiki</span>
-        </div>
-      </div>
     <% } else { %>
       <p class="intro">Aucune reponse enregistree pour l'instant.</p>
     <% } %>
+  </div>
+  <% }) %>
+
+  <div class="admin-stats">
+    <div class="admin-stat">
+      <span class="admin-stat-value"><%= favoritesCount %></span>
+      <span class="admin-stat-label">Favoris</span>
+    </div>
+    <div class="admin-stat">
+      <span class="admin-stat-value"><%= linksCount %></span>
+      <span class="admin-stat-label">Liens enregistres</span>
+    </div>
+    <div class="admin-stat">
+      <span class="admin-stat-value"><%= wikiPages.length %></span>
+      <span class="admin-stat-label">Pages wiki</span>
+    </div>
   </div>
 
   <% if (wikiPages.length) { %>
@@ -100,6 +105,7 @@
     <table class="admin-table">
       <thead>
         <tr>
+          <th>Profil</th>
           <th>Date</th>
           <% matrixSections.forEach(function (s) { %>
             <th><%= s.title %></th>
@@ -110,6 +116,7 @@
       <tbody>
         <% submissions.forEach(function (sub) { %>
           <tr>
+            <td><%= sub.userDisplayName || "—" %></td>
             <td><%= new Date(sub.createdAt).toLocaleString("fr-FR") %></td>
             <% matrixSections.forEach(function (s) { %>
               <td><%= sub.scores.sections[s.key] ? sub.scores.sections[s.key].percentage : "-" %>%</td>
@@ -118,7 +125,7 @@
           </tr>
         <% }) %>
         <% if (submissions.length === 0) { %>
-          <tr><td colspan="<%= matrixSections.length + 2 %>">Aucune reponse pour le moment.</td></tr>
+          <tr><td colspan="<%= matrixSections.length + 3 %>">Aucune reponse pour le moment.</td></tr>
         <% } %>
       </tbody>
     </table>

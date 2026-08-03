@@ -1,6 +1,7 @@
 const path = require("path");
 const fs = require("fs");
 const Database = require("better-sqlite3");
+const { hashPassword } = require("./passwords");
 
 const dataDir = path.join(__dirname, "..", "data");
 if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
@@ -16,6 +17,9 @@ db.exec(`
     scores TEXT NOT NULL
   )
 `);
+// Multi-profil : chaque soumission appartient a un profil (avant, un seul
+// jeu de reponses partage entre tout le monde).
+try { db.exec("ALTER TABLE submissions ADD COLUMN user_id INTEGER"); } catch (_) {}
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS attempts (
@@ -122,32 +126,181 @@ db.exec(`
   )
 `);
 
-function insertSubmission(answers, scores) {
+db.exec(`
+  CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    display_name TEXT NOT NULL,
+    password_hash TEXT NOT NULL,
+    is_admin INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL
+  )
+`);
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS favorites (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    item_type TEXT NOT NULL,
+    item_id INTEGER NOT NULL,
+    created_at TEXT NOT NULL,
+    UNIQUE(user_id, item_type, item_id)
+  )
+`);
+
+function rowToUser(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    username: row.username,
+    displayName: row.display_name,
+    isAdmin: !!row.is_admin,
+    createdAt: row.created_at,
+  };
+}
+
+function createUser({ username, displayName, passwordHash, isAdmin }) {
+  const info = db
+    .prepare(
+      "INSERT INTO users (username, display_name, password_hash, is_admin, created_at) VALUES (?, ?, ?, ?, ?)"
+    )
+    .run(username, displayName, passwordHash, isAdmin ? 1 : 0, new Date().toISOString());
+  return info.lastInsertRowid;
+}
+
+function getUserByUsername(username) {
+  const row = db.prepare("SELECT * FROM users WHERE username = ?").get(username);
+  return rowToUser(row);
+}
+
+// Renvoie le hash : reserve a la verification de mot de passe au login,
+// jamais expose au reste de l'app (rowToUser ne le contient pas).
+function getUserCredentials(username) {
+  return db.prepare("SELECT * FROM users WHERE username = ?").get(username) || null;
+}
+
+function getUserById(id) {
+  const row = db.prepare("SELECT * FROM users WHERE id = ?").get(id);
+  return rowToUser(row);
+}
+
+function listUsers() {
+  return db.prepare("SELECT * FROM users ORDER BY id ASC").all().map(rowToUser);
+}
+
+function updateUserPassword(id, passwordHash) {
+  db.prepare("UPDATE users SET password_hash = ? WHERE id = ?").run(passwordHash, id);
+}
+
+function addFavorite(userId, itemType, itemId) {
+  db.prepare(
+    "INSERT OR IGNORE INTO favorites (user_id, item_type, item_id, created_at) VALUES (?, ?, ?, ?)"
+  ).run(userId, itemType, itemId, new Date().toISOString());
+}
+
+function removeFavorite(userId, itemType, itemId) {
+  db.prepare("DELETE FROM favorites WHERE user_id = ? AND item_type = ? AND item_id = ?").run(userId, itemType, itemId);
+}
+
+function isFavorite(userId, itemType, itemId) {
+  return !!db.prepare("SELECT 1 FROM favorites WHERE user_id = ? AND item_type = ? AND item_id = ?").get(userId, itemType, itemId);
+}
+
+function listFavoriteRows(userId) {
+  return db.prepare("SELECT item_type, item_id FROM favorites WHERE user_id = ? ORDER BY id DESC").all(userId);
+}
+
+function countFavorites() {
+  return db.prepare("SELECT COUNT(*) AS c FROM favorites").get().c;
+}
+
+// Cree les profils initiaux au demarrage a partir des variables d'env
+// (idempotent : ne fait rien si le profil existe deja). Sans mot de passe
+// fourni, avertit et laisse le profil non cree plutot que planter.
+function seedInitialUsers() {
+  const profiles = [
+    {
+      username: process.env.ADMIN_USERNAME || "admin",
+      displayName: process.env.ADMIN_DISPLAY_NAME || "Admin",
+      password: process.env.ADMIN_PASSWORD,
+      isAdmin: true,
+    },
+    {
+      username: process.env.MANON_USERNAME || "manon",
+      displayName: process.env.MANON_DISPLAY_NAME || "Manon",
+      password: process.env.MANON_PASSWORD,
+      isAdmin: false,
+    },
+  ];
+  profiles.forEach((p) => {
+    if (getUserByUsername(p.username)) return;
+    if (!p.password) {
+      console.warn(
+        `ATTENTION: profil "${p.username}" non cree (mot de passe manquant dans .env) -> connexion impossible pour ce profil tant que ce n'est pas renseigne.`
+      );
+      return;
+    }
+    createUser({
+      username: p.username,
+      displayName: p.displayName,
+      passwordHash: hashPassword(p.password),
+      isAdmin: p.isAdmin,
+    });
+  });
+}
+
+// Migration ponctuelle : les reponses de quizz existantes (avant les
+// profils) etaient un seul jeu partage sous le token "shared". On les
+// rattache au profil de Manon des que celui-ci existe. Idempotent : une
+// fois migre, il n'y a plus de ligne "shared" / user_id NULL a traiter.
+function migrateSharedDataToManon() {
+  const manon = getUserByUsername(process.env.MANON_USERNAME || "manon");
+  if (!manon) return;
+  const newToken = "user:" + manon.id;
+  db.prepare("UPDATE attempts SET token = ? WHERE token = 'shared'").run(newToken);
+  db.prepare("UPDATE submissions SET user_id = ? WHERE user_id IS NULL").run(manon.id);
+}
+
+seedInitialUsers();
+migrateSharedDataToManon();
+
+function insertSubmission(userId, answers, scores) {
   const stmt = db.prepare(
-    "INSERT INTO submissions (created_at, answers, scores) VALUES (?, ?, ?)"
+    "INSERT INTO submissions (created_at, answers, scores, user_id) VALUES (?, ?, ?, ?)"
   );
   const info = stmt.run(
     new Date().toISOString(),
     JSON.stringify(answers),
-    JSON.stringify(scores)
+    JSON.stringify(scores),
+    userId || null
   );
   return info.lastInsertRowid;
 }
 
 function listSubmissions() {
   const rows = db
-    .prepare("SELECT id, created_at, scores FROM submissions ORDER BY id DESC")
+    .prepare(
+      `SELECT s.id, s.created_at, s.scores, s.user_id, u.display_name
+       FROM submissions s LEFT JOIN users u ON u.id = s.user_id
+       ORDER BY s.id DESC`
+    )
     .all();
   return rows.map((row) => ({
     id: row.id,
     createdAt: row.created_at,
     scores: JSON.parse(row.scores),
+    userId: row.user_id,
+    userDisplayName: row.display_name || null,
   }));
 }
 
 function getSubmission(id) {
   const row = db
-    .prepare("SELECT id, created_at, answers, scores FROM submissions WHERE id = ?")
+    .prepare(
+      `SELECT s.id, s.created_at, s.answers, s.scores, s.user_id, u.display_name
+       FROM submissions s LEFT JOIN users u ON u.id = s.user_id
+       WHERE s.id = ?`
+    )
     .get(id);
   if (!row) return null;
   return {
@@ -155,6 +308,8 @@ function getSubmission(id) {
     createdAt: row.created_at,
     answers: JSON.parse(row.answers),
     scores: JSON.parse(row.scores),
+    userId: row.user_id,
+    userDisplayName: row.display_name || null,
   };
 }
 
@@ -509,4 +664,15 @@ module.exports = {
   insertBdBook,
   updateBdBook,
   deleteBdBook,
+  getUserByUsername,
+  getUserCredentials,
+  getUserById,
+  listUsers,
+  createUser,
+  updateUserPassword,
+  addFavorite,
+  removeFavorite,
+  isFavorite,
+  listFavoriteRows,
+  countFavorites,
 };

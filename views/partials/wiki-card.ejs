@@ -50,8 +50,10 @@
        contexte de chapitre — sommaire, page de catégorie). %>
   <span class="wiki-card-accent" style="background: <%= wcAccent %>"></span>
 
-  <%# Si image : image pleine + overlay avec badge (optionnel) et réactions %>
-  <% if (page.imagePaths && page.imagePaths.length) { %>
+  <%# Si image : image pleine + overlay avec badge (optionnel) et réactions.
+       Les images restent privées même quand le texte du wiki est public :
+       un visiteur anonyme retombe sur le header sans image ci-dessous. %>
+  <% if (page.imagePaths && page.imagePaths.length && currentUser) { %>
     <div class="wiki-card-image">
       <img src="<%= page.imagePaths[0] %>" alt="" class="wiki-card-img" />
       <div class="wiki-card-overlay">

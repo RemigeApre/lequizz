@@ -5,11 +5,15 @@
   <p class="home-message"><%= config.intro %></p>
 
   <div class="home-shortcuts">
-    <a href="/liens" class="home-shortcut">Liens</a>
     <a href="/wiki" class="home-shortcut">Wiki</a>
+    <% if (currentUser) { %><a href="/liens" class="home-shortcut">Liens</a><% } %>
   </div>
 
-  <% if (featuredPages && featuredPages.length) { %>
+  <% if (!currentUser) { %>
+    <p class="intro">Connecte-toi (ic&ocirc;ne &#128273; en haut) pour acc&eacute;der &agrave; la galerie, la BD, le quizz et les images du wiki.</p>
+  <% } %>
+
+  <% if (currentUser && featuredPages && featuredPages.length) { %>
   <section class="home-featured">
     <h2 class="home-featured-heading">Ce qui pourrait t&apos;int&eacute;resser</h2>
     <div class="home-featured-strip">
@@ -29,6 +33,7 @@
   </section>
   <% } %>
 
+  <% if (currentUser) { %>
   <div class="section-cards">
     <% config.sections.forEach(function (s, i) { %>
       <a class="section-card" href="/section/<%= i %>" style="--card-color: <%= s.color || 'var(--accent)' %>">
@@ -37,5 +42,6 @@
       </a>
     <% }) %>
   </div>
+  <% } %>
 </main>
 <%- include('partials/foot') %>

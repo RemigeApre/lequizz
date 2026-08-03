@@ -1,0 +1,71 @@
+const express = require("express");
+const {
+  listFavoriteRows,
+  addFavorite,
+  removeFavorite,
+  getWikiPage,
+  getGalleryImage,
+  getBdBook,
+} = require("../db");
+const { requireUser, requireUserJson } = require("../auth");
+
+// Copie minimale des categories du wiki (memes cles/teintes que
+// src/routes/wiki.js) : necessaire pour reutiliser partials/wiki-card.ejs
+// dans "Mes favoris" sans dupliquer tout le fichier wiki.js.
+const WIKI_CATEGORIES = [
+  { key: "fantasmes",   label: "Fantasmes",   hue: 330 },
+  { key: "jeu_de_role",  label: "Jeu de rôle", hue:  60 },
+  { key: "partenaires", label: "Partenaires", hue: 210 },
+  { key: "pratique",    label: "Pratique",    hue:   5 },
+  { key: "position",    label: "Position",    hue: 270 },
+  { key: "lieux",       label: "Lieux",       hue: 140 },
+  { key: "objets",      label: "Objets",      hue:  28 },
+  { key: "tenues",      label: "Tenues",      hue: 175 },
+  { key: "autre",       label: "Autre",       hue: 220 },
+];
+
+const VALID_TYPES = ["wiki", "gallery", "bd"];
+
+function buildFavoritesRouter(config) {
+  const router = express.Router();
+
+  router.get("/", requireUser, (req, res) => {
+    const rows = listFavoriteRows(req.user.id);
+    const wikiPages = [];
+    const galleryImages = [];
+    const bdBooks = [];
+    rows.forEach((row) => {
+      if (row.item_type === "wiki") {
+        const page = getWikiPage(row.item_id);
+        if (page) wikiPages.push(page);
+      } else if (row.item_type === "gallery") {
+        const img = getGalleryImage(row.item_id);
+        if (img) galleryImages.push(img);
+      } else if (row.item_type === "bd") {
+        const book = getBdBook(row.item_id);
+        if (book) bdBooks.push(book);
+      }
+    });
+    res.render("favoris", { config, wikiPages, galleryImages, bdBooks, categories: WIKI_CATEGORIES });
+  });
+
+  router.post("/toggle", requireUserJson, (req, res) => {
+    const itemType = String(req.body.itemType || "");
+    const itemId = Number(req.body.itemId);
+    if (!VALID_TYPES.includes(itemType) || !Number.isInteger(itemId)) {
+      return res.status(400).json({ ok: false });
+    }
+    const rows = listFavoriteRows(req.user.id);
+    const already = rows.some((r) => r.item_type === itemType && r.item_id === itemId);
+    if (already) {
+      removeFavorite(req.user.id, itemType, itemId);
+    } else {
+      addFavorite(req.user.id, itemType, itemId);
+    }
+    res.json({ ok: true, active: !already });
+  });
+
+  return router;
+}
+
+module.exports = buildFavoritesRouter;

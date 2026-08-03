@@ -505,4 +505,23 @@
     });
   })();
 
+  // ══════════════════════════════════════════════════
+  // 7. FAVORI — bouton sur chaque carte galerie
+  // ══════════════════════════════════════════════════
+  (function () {
+    document.querySelectorAll(".gallery-fav-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        fetch("/favoris/toggle", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ itemType: "gallery", itemId: Number(btn.dataset.itemId) }),
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (d.ok) btn.classList.toggle("active", d.active);
+          });
+      });
+    });
+  })();
+
 })();
