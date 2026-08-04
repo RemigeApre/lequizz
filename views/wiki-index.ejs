@@ -23,36 +23,54 @@
   </section>
 
   <%# ─── RECHERCHE + FILTRES : barre de recherche dans le panel ───────── %>
-  <details class="wiki-filters-panel" id="wiki-hero-filters-panel" open>
+  <details class="wiki-filters-panel" id="wiki-hero-filters-panel">
     <summary class="wiki-filters-summary">Recherche &amp; Filtres</summary>
     <div class="wiki-filters-body">
 
       <form action="/wiki/tous" method="GET" class="wiki-index-search-form" id="wiki-hero-search-form">
         <div class="wiki-search-bar">
           <span class="wiki-search-icon">&#128269;</span>
-          <input type="search" name="q" class="wiki-search-input" placeholder="Rechercher une page, un tag, un terme&hellip;" autocomplete="off" />
+          <input type="search" name="q" id="wiki-hero-q" class="wiki-search-input" placeholder="Rechercher une page, un tag, un terme&hellip;" autocomplete="off" />
           <button type="submit" class="wiki-search-submit" aria-label="Rechercher">&#8594;</button>
         </div>
-      </form>
 
-      <% if (currentUser) { %>
-      <div class="wiki-adv-row">
-        <label class="wiki-adv-label" for="wiki-hero-rating">Note min.</label>
-        <select id="wiki-hero-rating" class="wiki-sort-select">
-          <option value="0" selected>Toutes</option>
-          <option value="1">1 &#9733;</option>
-          <option value="2">2 &#9733;</option>
-          <option value="3">3 &#9733;</option>
-          <option value="4">4 &#9733;</option>
-          <option value="5">5 &#9733;</option>
-        </select>
-      </div>
-      <div class="wiki-adv-checks">
-        <label class="chip-option"><input type="checkbox" id="wiki-hero-owned" /><span>&#9733; Poss&eacute;d&eacute;</span></label>
-        <label class="chip-option"><input type="checkbox" id="wiki-hero-flame" /><span>&#128293; J&apos;adore</span></label>
-        <label class="chip-option"><input type="checkbox" id="wiki-hero-interested" /><span>&#10024; Int&eacute;ress&eacute;e</span></label>
-      </div>
-      <% } %>
+        <div class="wiki-adv-row" style="margin-top:0.6rem">
+          <label class="wiki-adv-label" for="wiki-hero-sort">Tri</label>
+          <select id="wiki-hero-sort" class="wiki-sort-select">
+            <option value="alpha-asc">A &#8594; Z</option>
+            <option value="alpha-desc">Z &#8594; A</option>
+            <option value="date-desc">Plus r&eacute;cent</option>
+            <option value="date-asc">Plus ancien</option>
+            <% if (currentUser) { %>
+            <option value="rating-desc">Meilleures notes</option>
+            <% } %>
+          </select>
+        </div>
+
+        <div class="wiki-adv-checks" style="margin-top:0.5rem">
+          <button type="button" id="wiki-hero-ultra-toggle" class="tag-chip">&#128274; Masquer Ultra</button>
+        </div>
+
+        <% if (currentUser) { %>
+        <div class="wiki-adv-row" style="margin-top:0.6rem">
+          <label class="wiki-adv-label" for="wiki-hero-rating">Note min.</label>
+          <select id="wiki-hero-rating" class="wiki-sort-select">
+            <option value="0">Toutes</option>
+            <option value="1">1 &#9733;</option>
+            <option value="2">2 &#9733;</option>
+            <option value="3">3 &#9733;</option>
+            <option value="4">4 &#9733;</option>
+            <option value="5">5 &#9733;</option>
+          </select>
+        </div>
+        <div class="wiki-adv-checks">
+          <label class="chip-option"><input type="checkbox" id="wiki-hero-owned" /><span>&#9733; Poss&eacute;d&eacute;</span></label>
+          <label class="chip-option"><input type="checkbox" id="wiki-hero-flame" /><span>&#128293; J&apos;adore</span></label>
+          <label class="chip-option"><input type="checkbox" id="wiki-hero-interested" /><span>&#10024; Int&eacute;ress&eacute;e</span></label>
+        </div>
+        <% } %>
+
+      </form>
 
     </div>
   </details>

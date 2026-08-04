@@ -1626,14 +1626,27 @@
   (function () {
     var hero = document.getElementById("wiki-hero");
     if (!hero) return;
-    var KEY = "wiki-hero-collapsed";
+    var KEY      = "wiki-hero-collapsed";
+    var SEEN_KEY = "wiki-hero-seen";
 
     function apply(collapsed) {
       hero.classList.toggle("collapsed", collapsed);
       hero.setAttribute("aria-expanded", collapsed ? "false" : "true");
     }
 
-    apply(localStorage.getItem(KEY) === "1");
+    var seen     = localStorage.getItem(SEEN_KEY) === "1";
+    var explicit = localStorage.getItem(KEY);
+    var startCollapsed;
+    if (!seen) {
+      // Première visite : on montre le message, on mémorise que c'est vu
+      localStorage.setItem(SEEN_KEY, "1");
+      startCollapsed = false;
+    } else {
+      // Visites suivantes : réduit par défaut, sauf si l'utilisateur a
+      // explicitement rouvert le bloc (KEY === "0").
+      startCollapsed = explicit !== "0";
+    }
+    apply(startCollapsed);
 
     hero.addEventListener("click", function () {
       var collapsed = !hero.classList.contains("collapsed");
@@ -1656,12 +1669,56 @@
   (function () {
     var form = document.getElementById("wiki-hero-search-form");
     if (!form) return;
-    var rating      = document.getElementById("wiki-hero-rating");
-    var owned       = document.getElementById("wiki-hero-owned");
-    var flame       = document.getElementById("wiki-hero-flame");
-    var interested  = document.getElementById("wiki-hero-interested");
+    var heroQ         = document.getElementById("wiki-hero-q");
+    var heroSort      = document.getElementById("wiki-hero-sort");
+    var heroUltraBtn  = document.getElementById("wiki-hero-ultra-toggle");
+    var rating        = document.getElementById("wiki-hero-rating");
+    var owned         = document.getElementById("wiki-hero-owned");
+    var flame         = document.getElementById("wiki-hero-flame");
+    var interested    = document.getElementById("wiki-hero-interested");
 
+    // ── Restauration de l'état depuis localStorage ───────────────────
+    var savedSearch = localStorage.getItem("wiki-filter-search") || "";
+    if (heroQ && savedSearch) heroQ.value = savedSearch;
+
+    var savedSort = localStorage.getItem("wiki-filter-sort") || "alpha-asc";
+    if (heroSort) heroSort.value = savedSort;
+
+    // Tri : sauvegarde à chaque changement (pas besoin de soumettre)
+    if (heroSort) {
+      heroSort.addEventListener("change", function () {
+        localStorage.setItem("wiki-filter-sort", heroSort.value);
+      });
+    }
+
+    // Ultra toggle
+    var heroHideUltra = localStorage.getItem("wiki-hide-ultra") !== "0";
+    function syncHeroUltraBtn() {
+      if (!heroUltraBtn) return;
+      heroUltraBtn.textContent = heroHideUltra ? "\uD83D\uDD12 Masquer Ultra" : "\uD83D\uDD13 Afficher Ultra";
+      heroUltraBtn.classList.toggle("active", heroHideUltra);
+    }
+    if (heroUltraBtn) {
+      syncHeroUltraBtn();
+      heroUltraBtn.addEventListener("click", function () {
+        heroHideUltra = !heroHideUltra;
+        localStorage.setItem("wiki-hide-ultra", heroHideUltra ? "1" : "0");
+        syncHeroUltraBtn();
+      });
+    }
+
+    // Note min : restauration visuelle
+    var savedRating = localStorage.getItem("wiki-filter-rating") || "0";
+    if (rating) rating.value = savedRating;
+
+    // Checkboxes : restauration visuelle
+    if (owned      && localStorage.getItem("wiki-filter-owned")      === "1") owned.checked = true;
+    if (flame      && localStorage.getItem("wiki-filter-flame")      === "1") flame.checked = true;
+    if (interested && localStorage.getItem("wiki-filter-interested") === "1") interested.checked = true;
+
+    // ── Sauvegarde à la soumission ────────────────────────────────────
     form.addEventListener("submit", function () {
+      if (heroSort)   localStorage.setItem("wiki-filter-sort", heroSort.value);
       if (rating)     localStorage.setItem("wiki-filter-rating", rating.value);
       if (owned)      localStorage.setItem("wiki-filter-owned", owned.checked ? "1" : "0");
       if (flame)      localStorage.setItem("wiki-filter-flame", flame.checked ? "1" : "0");
