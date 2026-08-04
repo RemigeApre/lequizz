@@ -32,7 +32,7 @@ function buildAdminRouter(config) {
   const router = express.Router();
 
   router.get("/login", (req, res) => {
-    res.render("admin-login", { error: null, users: listUsers(), next: safeNext(req.query.next) || "" });
+    res.render("admin-login", { error: null, next: safeNext(req.query.next) || "" });
   });
 
   router.post("/login", (req, res) => {
@@ -40,7 +40,7 @@ function buildAdminRouter(config) {
     const wait = loginThrottle.secondsToWait(key);
     const next = safeNext(req.body.next);
     if (wait > 0) {
-      return res.render("admin-login", { error: `Trop de tentatives. Reessaie dans ${wait}s.`, users: listUsers(), next: next || "" });
+      return res.render("admin-login", { error: `Trop de tentatives. Reessaie dans ${wait}s.`, next: next || "" });
     }
 
     const user = verifyLogin(req.body.username, req.body.password);
@@ -51,7 +51,7 @@ function buildAdminRouter(config) {
     }
 
     loginThrottle.recordFailure(key);
-    res.render("admin-login", { error: "Identifiants incorrects", users: listUsers(), next: next || "" });
+    res.render("admin-login", { error: "Identifiants incorrects", next: next || "" });
   });
 
   router.post("/logout", (req, res) => {

@@ -58,7 +58,7 @@
       <img src="<%= page.imagePaths[0] %>" alt="" class="wiki-card-img" />
       <div class="wiki-card-overlay">
         <% if (wcShowBadge) { %><span class="wiki-category-badge" style="background: hsl(<%= cat ? cat.hue : 220 %>, 55%, 45%)"><%= cat ? cat.label : page.category %></span><% } %>
-        <span class="wiki-card-badges">
+        <% if (currentUser) { %><span class="wiki-card-badges">
           <% if (page.rating) { %>
             <span class="wiki-card-mini-stars">
               <% for (var si = 1; si <= 5; si++) { %><span class="wiki-card-star<%= si <= page.rating ? ' filled' : '' %>">&#9733;</span><% } %>
@@ -67,14 +67,14 @@
           <% if (page.owned) { %><span class="wiki-owned-badge" title="Possédé">&#9733;</span><% } %>
           <% if (page.flame) { %><span class="wiki-card-react-badge" title="J'adore">&#128293;</span><% } %>
           <% if (page.interested) { %><span class="wiki-card-react-badge" title="Ça m'intéresse">&#10024;</span><% } %>
-        </span>
+        </span><% } %>
       </div>
     </div>
   <% } else { %>
     <%# Sans image : header classique %>
     <div class="wiki-card-header">
       <% if (wcShowBadge) { %><span class="wiki-category-badge" style="background: hsl(<%= cat ? cat.hue : 220 %>, 55%, 45%)"><%= cat ? cat.label : page.category %></span><% } %>
-      <span class="wiki-card-badges">
+      <% if (currentUser) { %><span class="wiki-card-badges">
         <% if (page.rating) { %>
           <span class="wiki-card-mini-stars">
             <% for (var si2 = 1; si2 <= 5; si2++) { %><span class="wiki-card-star<%= si2 <= page.rating ? ' filled' : '' %>">&#9733;</span><% } %>
@@ -83,7 +83,7 @@
         <% if (page.owned) { %><span class="wiki-owned-badge" title="Possédé">&#9733;</span><% } %>
         <% if (page.flame) { %><span class="wiki-card-react-badge">&#128293;</span><% } %>
         <% if (page.interested) { %><span class="wiki-card-react-badge">&#10024;</span><% } %>
-      </span>
+      </span><% } %>
     </div>
   <% } %>
 

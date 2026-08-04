@@ -122,6 +122,7 @@ function buildQuizRouter(config) {
   const router = express.Router();
 
   router.get("/", (req, res) => {
+    if (!req.user) return res.redirect("/wiki");
     const featuredPages = listFeaturedWikiPages();
     res.render("home", { config, featuredPages });
   });
