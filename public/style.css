@@ -1666,14 +1666,18 @@ input[type="text"], input[type="password"] {
 }
 .wiki-filters-summary::-webkit-details-marker { display: none; }
 .wiki-filters-summary::before {
-  content: "\25B8";
+  content: "";
   display: inline-block;
-  font-size: 0.75em;
-  color: var(--wiki-gold);
-  transition: transform 0.15s ease;
+  width: 0.42em;
+  height: 0.42em;
+  border-right: 2px solid var(--wiki-gold);
+  border-bottom: 2px solid var(--wiki-gold);
+  transform: rotate(-45deg);
+  transition: transform 0.18s ease;
+  flex-shrink: 0;
 }
 .wiki-filters-panel[open] > .wiki-filters-summary::before {
-  transform: rotate(90deg);
+  transform: rotate(45deg);
 }
 .wiki-filters-body {
   padding: 0 1rem 1rem;
@@ -2379,14 +2383,15 @@ input[type="text"], input[type="password"] {
 }
 
 .wiki-card-excerpt {
-  margin: 0.3rem 0 0;
-  font-size: 0.75rem;
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
   color: var(--text-muted);
-  line-height: 1.4;
+  line-height: 1.45;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  opacity: .85;
 }
 
 .wiki-index-search-form {
@@ -4728,13 +4733,11 @@ a.wiki-ql-label:hover .wiki-ql-text {
 /* Message d'intro : présente l'esprit du wiki + la règle Ultra */
 .wiki-hero {
   position: relative;
-  background: color-mix(in srgb, var(--card) 92%, var(--wiki-gold) 8%);
+  background: var(--card);
   border: 1px solid var(--border);
-  border-left: 3px solid var(--wiki-gold);
-  border-radius: 4px 16px 16px 4px;
-  padding: 1.3rem 1.5rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 1px 3px rgba(40, 30, 10, 0.06);
+  border-radius: 12px;
+  padding: 1.1rem 1.4rem;
+  margin-bottom: 1.25rem;
 }
 
 /* Pas de bouton : tout le bloc se clique pour réduire/rouvrir */
@@ -4816,15 +4819,8 @@ a.wiki-ql-label:hover .wiki-ql-text {
      bordure/ombre en haut : le top-nav a déjà sa propre séparation juste
      au-dessus, superposer les deux créait un empilement de liserés. */
   .wiki-hero {
-    margin: 0 -1.25rem 1.75rem;
-    width: calc(100% + 2.5rem);
-    border-left: none;
-    border-right: none;
-    border-top: none;
-    border-bottom: 3px solid var(--wiki-gold);
-    border-radius: 0;
-    box-shadow: none;
-    padding: 1.25rem 1.25rem 1.1rem;
+    margin-bottom: 1rem;
+    padding: 1rem 1.1rem;
   }
   .wiki-hero-lead {
     font-size: 0.98rem;
@@ -4836,15 +4832,27 @@ a.wiki-ql-label:hover .wiki-ql-text {
 
 /* Titre centré au-dessus du sommaire des chapitres */
 .wiki-chapters-title {
-  margin: 1.25rem 0 0.75rem;
-  text-align: center;
+  margin: 1.5rem 0 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
   font-family: Georgia, "Times New Roman", serif;
   font-style: italic;
-  font-size: 2.6rem;
+  font-size: 2.4rem;
   font-weight: 400;
   letter-spacing: .01em;
   color: var(--fg);
   line-height: 1.1;
+}
+.wiki-chapters-title::before,
+.wiki-chapters-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, color-mix(in srgb, var(--wiki-gold) 55%, transparent));
+}
+.wiki-chapters-title::after {
+  background: linear-gradient(to left, transparent, color-mix(in srgb, var(--wiki-gold) 55%, transparent));
 }
 
 .wiki-toc {
@@ -4880,13 +4888,15 @@ a.wiki-ql-label:hover .wiki-ql-text {
 
 .wiki-chapter-header {
   display: grid;
-  grid-template-columns: 1.6rem 1fr 1.6rem;
+  grid-template-columns: 2.5rem 1fr 2.5rem;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.9rem 1.1rem;
+  padding: 1rem 1.25rem;
   background:
-    linear-gradient(100deg, hsl(var(--ch-hue, 220), 38%, 24%), hsl(var(--ch-hue, 220), 34%, 32%));
-  border-top: 2px solid color-mix(in srgb, var(--wiki-gold) 65%, transparent);
+    linear-gradient(110deg,
+      hsl(var(--ch-hue, 220), 42%, 20%),
+      hsl(var(--ch-hue, 220), 36%, 30%));
+  border-top: 2px solid color-mix(in srgb, var(--wiki-gold) 55%, transparent);
   color: #fff;
 }
 
@@ -4895,18 +4905,25 @@ a.wiki-ql-label:hover .wiki-ql-text {
   margin: 0;
   text-align: center;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.1rem;
-  font-weight: 700;
-  letter-spacing: 0.015em;
+  font-size: 1.15rem;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: 0.03em;
   color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,.35);
 }
 
 .wiki-chapter-count {
   grid-column: 3;
   text-align: right;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: #fff;
+  color: rgba(255,255,255,.9);
+  background: rgba(255,255,255,.13);
+  border-radius: 20px;
+  padding: 0.15rem 0.55rem;
+  justify-self: end;
+  letter-spacing: .01em;
 }
 
 .wiki-chapter-body {
@@ -4921,26 +4938,26 @@ a.wiki-ql-label:hover .wiki-ql-text {
   display: flex;
   gap: 0.85rem;
   overflow-x: auto;
-  padding-bottom: 0.5rem;
-  padding-right: 2.5rem; /* espace avant le fade */
+  padding-bottom: 0.55rem;
+  padding-right: 3rem;
   scroll-snap-type: x proximity;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--accent) 35%, transparent) transparent;
+  scrollbar-color: hsl(var(--ch-hue, 220), 50%, 45%) transparent;
 }
 
 .wiki-chapter-strip::-webkit-scrollbar {
-  height: 4px;
+  height: 3px;
 }
 .wiki-chapter-strip::-webkit-scrollbar-track {
   background: transparent;
 }
 .wiki-chapter-strip::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--accent) 40%, transparent);
+  background: hsl(var(--ch-hue, 220), 50%, 45%);
   border-radius: 2px;
 }
 .wiki-chapter-strip::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in srgb, var(--accent) 65%, transparent);
+  background: hsl(var(--ch-hue, 220), 60%, 58%);
 }
 
 /* Fondu sur le bord droit pour indiquer qu'il y a du contenu à faire défiler */
