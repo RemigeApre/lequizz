@@ -89,5 +89,17 @@
 
   <div class="wiki-card-body">
     <p class="wiki-card-title"><%= page.title %></p>
+    <% if (!currentUser && page.content) { %>
+      <%
+        var wcExcerpt = (page.content || '')
+          .replace(/^#+\s+/gm, '')
+          .replace(/\*\*?|__?/g, '')
+          .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+          .replace(/\n+/g, ' ')
+          .trim();
+        if (wcExcerpt.length > 100) wcExcerpt = wcExcerpt.slice(0, 100) + '…';
+      %>
+      <% if (wcExcerpt) { %><p class="wiki-card-excerpt"><%= wcExcerpt %></p><% } %>
+    <% } %>
   </div>
 </a>
