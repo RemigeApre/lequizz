@@ -7,8 +7,13 @@
     var pm = page.meta || {};
 
     var FSUBS = { jeux_role: 'Jeux de rôle et comportement', hardcore: 'Hardcore', bdsm: 'BDSM', classique: 'Classique', fantaisie: 'Fantaisie' };
-    var nbF = pm.nb_femmes, nbH = pm.nb_hommes;
-    var hasPartMeta = page.category === 'partenaires' && (nbF || nbH);
+    // Partenaires : nouveaux champs + compat anciennes pages (nb_femmes/nb_hommes)
+    var nbTotal   = pm.nb_total    || '';
+    var nbFem     = pm.nb_feminin  || pm.nb_femmes || '';
+    var nbMasc    = pm.nb_masculin || pm.nb_hommes || '';
+    var pmTypes   = Array.isArray(pm.types) ? pm.types : [];
+    var TYPES_PART = { humain: 'Humain', monstre: 'Monstre', animaux: 'Animaux', autre: 'Autre' };
+    var hasPartMeta = page.category === 'partenaires' && (nbTotal || nbFem || nbMasc || pmTypes.length);
     var LIEU = { prive: 'Privé', public: 'Public', cache: 'Caché' };
     var GODE = { animal: 'Animal', monstre: 'Monstre', fantaisiste: 'Fantaisiste', ethnique: 'Ethnique', autre: 'Autre' };
     var QUI    = { femme: 'Femme', homme: 'Homme', variable: 'Variable', aucun: 'Debout / aucun' };
@@ -105,16 +110,28 @@
         <% } %>
 
         <% if (hasPartMeta) { %>
-          <% if (nbF) { %>
+          <% if (nbTotal) { %>
             <div class="wiki-infobox-row">
-              <dt>Femmes</dt>
-              <dd><%= nbF === 'nombreux' ? 'Nombreuses' : nbF %></dd>
+              <dt>Nombre total</dt>
+              <dd><%= nbTotal === 'nombreux' ? 'Nombreux' : nbTotal === 'variable' ? 'Variable' : nbTotal %></dd>
             </div>
           <% } %>
-          <% if (nbH) { %>
+          <% if (nbFem) { %>
             <div class="wiki-infobox-row">
-              <dt>Hommes</dt>
-              <dd><%= nbH === 'nombreux' ? 'Nombreux' : nbH %></dd>
+              <dt>F&eacute;minin</dt>
+              <dd><%= nbFem === 'nombreux' ? 'Nombreuses' : nbFem === 'variable' ? 'Variable' : nbFem %></dd>
+            </div>
+          <% } %>
+          <% if (nbMasc) { %>
+            <div class="wiki-infobox-row">
+              <dt>Masculin</dt>
+              <dd><%= nbMasc === 'nombreux' ? 'Nombreux' : nbMasc === 'variable' ? 'Variable' : nbMasc %></dd>
+            </div>
+          <% } %>
+          <% if (pmTypes.length) { %>
+            <div class="wiki-infobox-row">
+              <dt>Type</dt>
+              <dd><%= pmTypes.map(function(t){ return TYPES_PART[t] || t; }).join(' &middot; ') %></dd>
             </div>
           <% } %>
         <% } %>
@@ -224,6 +241,14 @@
             </div>
           </details>
         <% }) %>
+      </div>
+    <% } %>
+
+    <%# ─ Scénario (partenaires seulement) ─ %>
+    <% if (page.category === 'partenaires' && pm.scenario) { %>
+      <div class="wiki-pos-section wiki-pos-nouvelles">
+        <h3 class="wiki-pos-section-heading">Sc&eacute;nario</h3>
+        <div class="wiki-pos-nouvelles-text"><%= pm.scenario %></div>
       </div>
     <% } %>
 

@@ -144,8 +144,15 @@ function parseMeta(category, body) {
     const validSubs = FANTASMES_SUBCATS.map((s) => s.key);
     specific = { sous_cat: validSubs.includes(sub) ? sub : "" };
   } else if (category === "partenaires") {
-    const nb = (v) => ["0","1","2","3","nombreux"].includes(String(v)) ? String(v) : "";
-    specific = { nb_femmes: nb(body.meta_nb_femmes), nb_hommes: nb(body.meta_nb_hommes) };
+    const nb = (v) => ["0","1","2","3","4","nombreux","variable"].includes(String(v)) ? String(v) : "";
+    const validTypes = ["humain", "monstre", "animaux", "autre"];
+    specific = {
+      nb_total:    nb(body.meta_nb_total),
+      nb_feminin:  nb(body.meta_nb_feminin),
+      nb_masculin: nb(body.meta_nb_masculin),
+      types:       arr(body.meta_types).filter(x => validTypes.includes(x)),
+      scenario:    String(body.meta_scenario || "").slice(0, 5000),
+    };
   } else if (category === "lieux") {
     const t = body.meta_type_lieu;
     specific = { type_lieu: ["prive","public","cache"].includes(t) ? t : "" };

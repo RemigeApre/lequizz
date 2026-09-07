@@ -64,22 +64,48 @@
     </div>
 
     <%# ─ Champs partenaires ─ %>
+    <%
+      var pmPartTypes = Array.isArray(pm.types) ? pm.types : [];
+      function ckPart(v) { return pmPartTypes.indexOf(v) !== -1 ? 'checked' : ''; }
+      function raPart(field, v) { return pm[field] === v ? 'checked' : ''; }
+    %>
     <div class="wiki-partenaires-meta" <%= page.category === 'partenaires' ? '' : 'hidden' %>>
       <div class="wiki-meta-group">
-        <p class="wiki-meta-label">Nombre de femmes</p>
+        <p class="wiki-meta-label">Nombre total</p>
         <div class="wiki-meta-options">
-          <% ['0','1','2','3','nombreux'].forEach(function(v) { %>
-            <label class="chip-option"><input type="radio" name="meta_nb_femmes" value="<%= v %>" <%= pm.nb_femmes === v ? 'checked' : '' %>><span><%= v === 'nombreux' ? 'Nombreuses' : v %></span></label>
+          <% ['1','2','3','4','nombreux','variable'].forEach(function(v) { %>
+            <label class="chip-option"><input type="radio" name="meta_nb_total" value="<%= v %>" <%= raPart('nb_total', v) %>><span><%= v === 'nombreux' ? 'Nombreux' : v === 'variable' ? 'Variable' : v %></span></label>
           <% }) %>
         </div>
       </div>
       <div class="wiki-meta-group">
-        <p class="wiki-meta-label">Nombre d&apos;hommes</p>
+        <p class="wiki-meta-label">F&eacute;minin</p>
         <div class="wiki-meta-options">
-          <% ['0','1','2','3','nombreux'].forEach(function(v) { %>
-            <label class="chip-option"><input type="radio" name="meta_nb_hommes" value="<%= v %>" <%= pm.nb_hommes === v ? 'checked' : '' %>><span><%= v === 'nombreux' ? 'Nombreux' : v %></span></label>
+          <% ['0','1','2','3','4','nombreux','variable'].forEach(function(v) { %>
+            <label class="chip-option"><input type="radio" name="meta_nb_feminin" value="<%= v %>" <%= raPart('nb_feminin', v) %>><span><%= v === 'nombreux' ? 'Nombreuses' : v === 'variable' ? 'Variable' : v %></span></label>
           <% }) %>
         </div>
+      </div>
+      <div class="wiki-meta-group">
+        <p class="wiki-meta-label">Masculin</p>
+        <div class="wiki-meta-options">
+          <% ['0','1','2','3','4','nombreux','variable'].forEach(function(v) { %>
+            <label class="chip-option"><input type="radio" name="meta_nb_masculin" value="<%= v %>" <%= raPart('nb_masculin', v) %>><span><%= v === 'nombreux' ? 'Nombreux' : v === 'variable' ? 'Variable' : v %></span></label>
+          <% }) %>
+        </div>
+      </div>
+      <div class="wiki-meta-group">
+        <p class="wiki-meta-label">Type</p>
+        <div class="wiki-meta-options">
+          <label class="chip-option"><input type="checkbox" name="meta_types" value="humain"  <%= ckPart('humain') %>><span>Humain</span></label>
+          <label class="chip-option"><input type="checkbox" name="meta_types" value="monstre" <%= ckPart('monstre') %>><span>Monstre</span></label>
+          <label class="chip-option"><input type="checkbox" name="meta_types" value="animaux" <%= ckPart('animaux') %>><span>Animaux</span></label>
+          <label class="chip-option"><input type="checkbox" name="meta_types" value="autre"   <%= ckPart('autre') %>><span>Autre</span></label>
+        </div>
+      </div>
+      <div class="wiki-meta-group">
+        <p class="wiki-meta-label">Sc&eacute;nario <span class="wiki-md-hint">(courte mise en sc&egrave;ne)</span></p>
+        <textarea name="meta_scenario" class="wiki-textarea wiki-pos-textarea" rows="5" placeholder="Une courte histoire, un contexte&hellip;"><%= pm.scenario || '' %></textarea>
       </div>
     </div>
 

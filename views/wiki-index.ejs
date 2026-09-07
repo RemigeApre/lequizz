@@ -150,24 +150,52 @@
       <%# ─ Champs partenaires ─ %>
       <div class="wiki-partenaires-meta" hidden>
         <div class="wiki-meta-group">
-          <p class="wiki-meta-label">Nombre de femmes</p>
+          <p class="wiki-meta-label">Nombre total</p>
           <div class="wiki-meta-options">
-            <label class="chip-option"><input type="radio" name="meta_nb_femmes" value="0"><span>0</span></label>
-            <label class="chip-option"><input type="radio" name="meta_nb_femmes" value="1"><span>1</span></label>
-            <label class="chip-option"><input type="radio" name="meta_nb_femmes" value="2"><span>2</span></label>
-            <label class="chip-option"><input type="radio" name="meta_nb_femmes" value="3"><span>3</span></label>
-            <label class="chip-option"><input type="radio" name="meta_nb_femmes" value="nombreux"><span>Nombreuses</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_total" value="1"><span>1</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_total" value="2"><span>2</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_total" value="3"><span>3</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_total" value="4"><span>4</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_total" value="nombreux"><span>Nombreux</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_total" value="variable"><span>Variable</span></label>
           </div>
         </div>
         <div class="wiki-meta-group">
-          <p class="wiki-meta-label">Nombre d&apos;hommes</p>
+          <p class="wiki-meta-label">F&eacute;minin</p>
           <div class="wiki-meta-options">
-            <label class="chip-option"><input type="radio" name="meta_nb_hommes" value="0"><span>0</span></label>
-            <label class="chip-option"><input type="radio" name="meta_nb_hommes" value="1"><span>1</span></label>
-            <label class="chip-option"><input type="radio" name="meta_nb_hommes" value="2"><span>2</span></label>
-            <label class="chip-option"><input type="radio" name="meta_nb_hommes" value="3"><span>3</span></label>
-            <label class="chip-option"><input type="radio" name="meta_nb_hommes" value="nombreux"><span>Nombreux</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_feminin" value="0"><span>0</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_feminin" value="1"><span>1</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_feminin" value="2"><span>2</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_feminin" value="3"><span>3</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_feminin" value="4"><span>4</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_feminin" value="nombreux"><span>Nombreuses</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_feminin" value="variable"><span>Variable</span></label>
           </div>
+        </div>
+        <div class="wiki-meta-group">
+          <p class="wiki-meta-label">Masculin</p>
+          <div class="wiki-meta-options">
+            <label class="chip-option"><input type="radio" name="meta_nb_masculin" value="0"><span>0</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_masculin" value="1"><span>1</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_masculin" value="2"><span>2</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_masculin" value="3"><span>3</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_masculin" value="4"><span>4</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_masculin" value="nombreux"><span>Nombreux</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nb_masculin" value="variable"><span>Variable</span></label>
+          </div>
+        </div>
+        <div class="wiki-meta-group">
+          <p class="wiki-meta-label">Type</p>
+          <div class="wiki-meta-options">
+            <label class="chip-option"><input type="checkbox" name="meta_types" value="humain"><span>Humain</span></label>
+            <label class="chip-option"><input type="checkbox" name="meta_types" value="monstre"><span>Monstre</span></label>
+            <label class="chip-option"><input type="checkbox" name="meta_types" value="animaux"><span>Animaux</span></label>
+            <label class="chip-option"><input type="checkbox" name="meta_types" value="autre"><span>Autre</span></label>
+          </div>
+        </div>
+        <div class="wiki-meta-group">
+          <p class="wiki-meta-label">Sc&eacute;nario <span class="wiki-md-hint">(courte mise en sc&egrave;ne)</span></p>
+          <textarea name="meta_scenario" class="wiki-textarea wiki-pos-textarea" rows="5" placeholder="Une courte histoire, un contexte&hellip;"></textarea>
         </div>
       </div>
 
