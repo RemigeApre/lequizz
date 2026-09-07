@@ -2811,6 +2811,37 @@ input[type="text"], input[type="password"] {
 }
 
 /* ── Galerie des images suivantes : rangée défilante + dots ───────── */
+.wiki-carousel-wrap {
+  position: relative;
+}
+.wiki-carousel-arrow {
+  display: none; /* masqué sur mobile */
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.45);
+  color: #fff;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s, background 0.15s;
+  padding: 0;
+}
+.wiki-carousel-wrap:hover .wiki-carousel-arrow:not(:disabled) { opacity: 1; }
+.wiki-carousel-arrow:hover { background: rgba(0,0,0,0.7); }
+.wiki-carousel-arrow:disabled { opacity: 0 !important; cursor: default; }
+.wiki-carousel-arrow--prev { left: 0.4rem; }
+.wiki-carousel-arrow--next { right: 0.4rem; }
+@media (min-width: 640px) {
+  .wiki-carousel-arrow { display: flex; align-items: center; justify-content: center; }
+}
+
 .wiki-infobox-images-rest {
   display: flex;
   flex-direction: row;

@@ -1254,7 +1254,7 @@
   });
 
   // ══════════════════════════════════════════════════
-  // 11. CARROUSEL MOBILE (images suivantes)
+  // 11. CARROUSEL (images suivantes)
   // ══════════════════════════════════════════════════
   (function () {
     var rail = document.querySelector(".wiki-infobox-images-rest");
@@ -1262,10 +1262,31 @@
     var imgs = rail.querySelectorAll(".wiki-infobox-img");
     if (imgs.length < 2) return;
 
+    // Wrapper relatif pour positionner les flèches
+    var wrap = document.createElement("div");
+    wrap.className = "wiki-carousel-wrap";
+    rail.parentNode.insertBefore(wrap, rail);
+    wrap.appendChild(rail);
+
+    // Flèches prev / next
+    var btnPrev = document.createElement("button");
+    btnPrev.type = "button";
+    btnPrev.className = "wiki-carousel-arrow wiki-carousel-arrow--prev";
+    btnPrev.setAttribute("aria-label", "Image précédente");
+    btnPrev.textContent = "‹";
+    wrap.appendChild(btnPrev);
+
+    var btnNext = document.createElement("button");
+    btnNext.type = "button";
+    btnNext.className = "wiki-carousel-arrow wiki-carousel-arrow--next";
+    btnNext.setAttribute("aria-label", "Image suivante");
+    btnNext.textContent = "›";
+    wrap.appendChild(btnNext);
+
     // Dots indicateurs
     var dotsWrap = document.createElement("div");
     dotsWrap.className = "wiki-carousel-dots";
-    rail.parentNode.insertBefore(dotsWrap, rail.nextSibling);
+    wrap.parentNode.insertBefore(dotsWrap, wrap.nextSibling);
     var dots = [];
     imgs.forEach(function (_, i) {
       var d = document.createElement("button");
@@ -1283,20 +1304,28 @@
       dots.forEach(function (d, j) { d.classList.toggle("active", j === i); });
     }
 
+    function updateArrows() {
+      btnPrev.disabled = current === 0;
+      btnNext.disabled = current === imgs.length - 1;
+    }
+
     function goTo(i) {
       current = i;
-      // Scroll uniquement dans le rail (horizontal), sans toucher au scroll vertical de la page
       var target = imgs[i].offsetLeft - (rail.clientWidth - imgs[i].offsetWidth) / 2;
       rail.scrollTo({ left: target, behavior: "smooth" });
       setDot(i);
+      updateArrows();
     }
 
-    setDot(0);
+    btnPrev.addEventListener("click", function () { if (current > 0) goTo(current - 1); });
+    btnNext.addEventListener("click", function () { if (current < imgs.length - 1) goTo(current + 1); });
 
-    // Auto-scroll toutes les 3,5 s si le carrousel est visible (mobile)
-    var timer = setInterval(function () {
+    setDot(0);
+    updateArrows();
+
+    // Auto-scroll toutes les 3,5 s si le carrousel est scrollable
+    setInterval(function () {
       if (paused) return;
-      // Ne fait rien si le rail n'est pas scrollable (desktop)
       if (rail.scrollWidth <= rail.clientWidth + 4) return;
       goTo((current + 1) % imgs.length);
     }, 3500);
@@ -1312,6 +1341,7 @@
         if (img.offsetLeft <= mid && img.offsetLeft + img.offsetWidth > mid) {
           current = i;
           setDot(i);
+          updateArrows();
         }
       });
     }, { passive: true });
