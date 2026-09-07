@@ -1285,7 +1285,9 @@
 
     function goTo(i) {
       current = i;
-      imgs[i].scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      // Scroll uniquement dans le rail (horizontal), sans toucher au scroll vertical de la page
+      var target = imgs[i].offsetLeft - (rail.clientWidth - imgs[i].offsetWidth) / 2;
+      rail.scrollTo({ left: target, behavior: "smooth" });
       setDot(i);
     }
 
