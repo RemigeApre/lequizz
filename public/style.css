@@ -2633,6 +2633,11 @@ input[type="text"], input[type="password"] {
 .wiki-card[data-fantaisie="1"] {
   border-color: #c89fe0;
   background: linear-gradient(150deg, #fdf0ff 0%, #f0e4ff 50%, #fff0f8 100%);
+  box-shadow:
+    0 0 0 3px #e8d0ff,
+    0 0 0 4px #c080f0,
+    0 0 14px rgba(200, 120, 255, 0.25),
+    inset 0 0 10px rgba(230, 200, 255, 0.2);
 }
 .wiki-card[data-fantaisie="1"] .wiki-card-title {
   color: #6a2f9a;
@@ -2669,6 +2674,11 @@ input[type="text"], input[type="password"] {
   .wiki-card[data-fantaisie="1"] {
     border-color: #7a4aaa;
     background: linear-gradient(150deg, #1e0f2a 0%, #260e38 50%, #200e28 100%);
+    box-shadow:
+      0 0 0 3px #3a1a5a,
+      0 0 0 4px #8040c0,
+      0 0 18px rgba(160, 80, 255, 0.3),
+      inset 0 0 10px rgba(180, 100, 255, 0.08);
   }
   .wiki-card[data-fantaisie="1"] .wiki-card-title { color: #d8a8f8; }
 }

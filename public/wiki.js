@@ -1785,6 +1785,12 @@
         return { id: Number(m[1]), title: titleEl ? titleEl.textContent : "" };
       }).filter(Boolean);
       try { sessionStorage.setItem(NAV_KEY, JSON.stringify(entries)); } catch (_) {}
+      // Mémorise l'origine (catégorie, recherche…) pour le bouton ← des pages de lecture
+      try {
+        var headingEl = document.querySelector(".wiki-chapter-hero-title, .section-title-h1");
+        var backLabel = headingEl ? headingEl.textContent.trim() : document.title;
+        sessionStorage.setItem("wikiNavBack", JSON.stringify({ href: location.href, label: backLabel }));
+      } catch (_) {}
     }, true);
 
     var prevBtn = document.getElementById("wiki-nav-prev");
@@ -1820,6 +1826,25 @@
 
     applyBtn(prevBtn, context[idx - 1] || null);
     applyBtn(nextBtn, context[idx + 1] || null);
+
+    // Applique le contexte de retour mémorisé (catégorie, liste…) au bouton ←
+    var backLink = document.querySelector(".wiki-detail-banner-back");
+    if (backLink) {
+      var storedBack = null;
+      try { storedBack = JSON.parse(sessionStorage.getItem("wikiNavBack") || "null"); } catch (_) {}
+      if (storedBack && storedBack.href) {
+        // Ne l'applique pas si l'origine stockée est elle-même une fiche wiki
+        var backPath = "";
+        try { backPath = new URL(storedBack.href, location.origin).pathname; } catch (_) {}
+        if (!/^\/wiki\/\d+$/.test(backPath)) {
+          backLink.href = storedBack.href;
+          if (storedBack.label) {
+            backLink.setAttribute("aria-label", storedBack.label);
+            backLink.title = storedBack.label;
+          }
+        }
+      }
+    }
   })();
 
   // ══════════════════════════════════════════════════
