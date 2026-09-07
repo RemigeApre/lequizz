@@ -104,10 +104,23 @@ function parseMeta(category, body) {
 
   let specific = {};
   if (category === "position") {
+    const validCats    = ["penetration","fellation_cunnilingus","anilingus","stimulation_manuelle","double_penetration","position_69","autre"];
+    const validDessus  = ["femme","homme","variable","aucun"];
+    const validCanal   = ["vagin","anus","bouche","mains","autre"];
+    const validOri     = ["face_a_face","face_contre_dos","cote_a_cote","acrobatique","autre"];
+    const validNbPart  = ["2","3","4plus","variable"];
+    const validActif   = ["femme","homme","les_deux","variable"];
+    const validSupport = ["lit","sol","chaise","canape","mur","table","bain","autre"];
+    const oneof = (v, list) => list.includes(String(v || "")) ? String(v) : "";
+    const manyof = (v, list) => arr(v).filter(x => list.includes(x));
     specific = {
-      qui_dessus:  String(body.meta_qui_dessus || ""),
-      canal:       arr(body.meta_canal),
-      orientation: arr(body.meta_orientation),
+      categorie:        oneof(body.meta_categorie,        validCats),
+      qui_dessus:       oneof(body.meta_qui_dessus,       validDessus),
+      canal:            manyof(body.meta_canal,           validCanal),
+      orientation:      manyof(body.meta_orientation,     validOri),
+      nb_partenaires:   oneof(body.meta_nb_partenaires,   validNbPart),
+      partenaire_actif: oneof(body.meta_partenaire_actif, validActif),
+      supports:         manyof(body.meta_supports,        validSupport),
     };
   } else if (category === "fantasmes") {
     const sub = body.meta_sous_cat;

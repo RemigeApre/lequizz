@@ -2283,32 +2283,54 @@ input[type="text"], input[type="password"] {
   margin-top: 1rem;
 }
 
+/* ═══════════════════════════════════════════════
+   WIKI CARD — design responsive
+   Mobile  : carte portrait, titre dans le header coloré
+   Desktop : carte paysage 16/9, titre sous le header (Z-pattern)
+   ═══════════════════════════════════════════════ */
 .wiki-card {
   display: flex;
   flex-direction: column;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 14px;
   background: var(--card);
   overflow: hidden;
   text-decoration: none;
   color: inherit;
-  transition: box-shadow 0.2s ease, transform 0.15s ease, border-color 0.15s ease;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  position: relative;
+  /* Transition sur trois propriétés pour un hover très fluide */
+  transition:
+    border-color 0.25s ease,
+    box-shadow   0.25s ease,
+    transform    0.2s  ease;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.07);
 }
-.wiki-card-accent {
-  display: block;
-  height: 4px;
+
+/* Largeur fixe dans le strip horizontal (le grid gère lui-même la largeur) */
+.wiki-chapter-strip .wiki-card {
+  width: 160px;
   flex-shrink: 0;
 }
 
+/* Hover : léger lift + halo coloré propre à la catégorie */
 .wiki-card:hover {
-  border-color: var(--accent);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.13);
+  border-color: color-mix(in srgb, hsl(var(--card-hue, 220), 60%, 50%) 70%, var(--border));
+  transform: translateY(-4px);
+  box-shadow:
+    0 12px 32px color-mix(in srgb, hsl(var(--card-hue, 220), 55%, 45%) 22%, rgba(0,0,0,0.1)),
+    0 2px  8px  rgba(0,0,0,0.06);
 }
 
+/* ── Filet d'accent (identité couleur en haut) ─── */
+.wiki-card-accent {
+  display: block;
+  height: 3px;
+  flex-shrink: 0;
+}
+
+/* ── Carte AVEC image ──────────────────────────── */
 .wiki-card-image {
-  height: 175px;
+  height: 160px;
   background: var(--bg);
   overflow: hidden;
   position: relative;
@@ -2317,86 +2339,193 @@ input[type="text"], input[type="password"] {
 .wiki-card-img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
 }
 .wiki-card-overlay {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 0.5rem 0.6rem 0.5rem;
-  background: linear-gradient(transparent, rgba(0,0,0,0.6));
+  bottom: 0; left: 0; right: 0;
+  padding: 0.55rem 0.65rem;
+  background: linear-gradient(transparent, rgba(0,0,0,0.68));
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 0.4rem;
 }
-.wiki-card-overlay .wiki-category-badge {
-  font-size: 0.68rem;
-}
+.wiki-card-overlay .wiki-category-badge { font-size: 0.66rem; }
 .wiki-card-overlay .wiki-card-react-badge,
 .wiki-card-overlay .wiki-owned-badge {
   color: #fff;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.55);
 }
 
+/* ── Carte SANS image : header coloré ─────────── */
+/* Sur mobile : portrait, titre affiché dans le header.
+   Sur desktop : 16/9, badge en overlay, titre en dessous. */
 .wiki-card-header {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0.85rem 0.8rem 0.7rem;
+  position: relative;
+  /* Lumière d'ambiance : glow de catégorie depuis le bas-gauche
+     (là où reposera le badge), fondue vers le fond sombre. Cinématique. */
+  background:
+    radial-gradient(
+      ellipse 110% 80% at 15% 115%,
+      color-mix(in srgb, hsl(var(--card-hue, 220), 68%, 44%) 72%, transparent),
+      transparent 68%
+    ),
+    radial-gradient(
+      ellipse 60% 50% at 88% -5%,
+      color-mix(in srgb, hsl(var(--card-hue, 220), 35%, 38%) 28%, transparent),
+      transparent 55%
+    ),
+    var(--card);
+  /* Mobile : portrait */
+  min-height: 7.5rem;
+  flex: 1;
+}
+
+/* Pied du header : badge + éventuelles réactions */
+.wiki-card-header-foot {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.75rem 0.85rem 0.6rem;
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, hsl(var(--card-hue, 220), 55%, 45%) 28%, var(--card)) 0%,
-    color-mix(in srgb, hsl(var(--card-hue, 220), 55%, 45%) 10%, var(--card)) 100%
-  );
-  border-radius: 10px 10px 0 0;
-  min-height: 3.2rem;
+  gap: 0.4rem;
+  margin-top: auto;
 }
 
-.wiki-card-body {
-  padding: 0.65rem 0.85rem 0.85rem;
+/* Titre mobile : visible dans le header */
+.wiki-card-title--mobile  { /* visible par défaut */ }
+/* Titre desktop : caché sur mobile */
+.wiki-card-title--desktop { display: none; }
+
+/* Body no-image : sur mobile, on le cache s'il n'a pas d'extrait */
+.wiki-card-body--noimg {
+  display: none; /* masqué par défaut sur mobile */
+}
+/* S'il y a un extrait (visiteur public), on le montre */
+.wiki-card-body--noimg:has(.wiki-card-excerpt) {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  flex: 1;
-}
-/* Quand le header (sans image) précède le body, moins d'espace en haut */
-.wiki-card-header + .wiki-card-body {
-  padding-top: 0.5rem;
+  padding: 0.5rem 0.8rem 0.7rem;
+  gap: 0;
 }
 
+/* ── Body partagé (image + desktop no-image) ─── */
+.wiki-card-body {
+  padding: 0.6rem 0.8rem 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1;
+}
+
+/* ── Badge catégorie ───────────────────────────── */
 .wiki-category-badge {
   display: inline-flex;
   border-radius: 999px;
-  padding: 0.2rem 0.65rem;
-  font-size: 0.72rem;
+  padding: 0.18rem 0.6rem;
+  font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
   color: #fff;
-  background: var(--accent); /* fallback, écrasé par inline style */
+  background: var(--accent);
+  white-space: nowrap;
 }
 
+/* ── Réactions ─────────────────────────────────── */
 .wiki-owned-badge {
   color: #d9a441;
   font-weight: 700;
   font-size: 0.85rem;
 }
 
+/* ── Titre ─────────────────────────────────────── */
 .wiki-card-title {
   margin: 0;
-  font-size: 0.97rem;
+  font-size: 0.93rem;
   font-weight: 700;
   color: var(--fg);
   line-height: 1.3;
 }
+/* Titre dans le header (mobile) : occupe l'espace, légèrement plus grand */
+.wiki-card-header .wiki-card-title {
+  font-size: 1rem;
+  flex: 1;
+  /* Clamp à 4 lignes sur mobile pour les titres longs */
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════
+   DESKTOP ≥ 600px
+   Les cartes dans le strip passent en format 16/9 (YouTube).
+   Théorie du Z : regard entre en haut-à-gauche (badge dans
+   l'image), balaie vers la droite, descend sur le titre, repart
+   à gauche vers l'extrait — deux points d'ancrage nets.
+   ═══════════════════════════════════════════════ */
+@media (min-width: 600px) {
+
+  /* ─ Strip : largeur fixe ─ */
+  .wiki-chapter-strip .wiki-card { width: 265px; }
+
+  /* ─ Format 16/9 pour tous les headers sans image (strip + grille) ─ */
+  .wiki-card-header {
+    aspect-ratio: 16 / 9;
+    min-height: unset;
+    flex: 0 0 auto;
+    padding: 0;
+    justify-content: flex-end;
+  }
+
+  /* Badge + réactions : overlay absolu en bas du header,
+     gradient montant pour lisibilité sur le fond coloré */
+  .wiki-card-header-foot {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 1.4rem 0.7rem 0.5rem; /* espace au-dessus pour le dégradé */
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+    margin-top: 0;
+  }
+
+  /* Titre migre dans le body — caché dans le header */
+  .wiki-card-title--mobile  { display: none; }
+  .wiki-card-title--desktop { display: block; }
+
+  /* Body no-image toujours visible */
+  .wiki-card-body--noimg {
+    display: flex;
+    flex-direction: column;
+    padding: 0.65rem 0.8rem 0.8rem;
+    gap: 0.3rem;
+  }
+
+  /* Titre sous l'header : sobre, compact, 2 lignes max */
+  .wiki-card-body--noimg .wiki-card-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Extrait : 2 lignes max sur desktop */
+  .wiki-card-body--noimg .wiki-card-excerpt {
+    -webkit-line-clamp: 2;
+  }
+}
 
 .wiki-card-excerpt {
-  margin: 0.35rem 0 0;
+  margin: 0;
   font-size: 0.78rem;
-  color: var(--text-muted);
+  color: var(--muted);
   line-height: 1.45;
   text-align: justify;
   display: -webkit-box;

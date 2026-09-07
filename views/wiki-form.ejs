@@ -109,38 +109,83 @@
 
     <%# ─ Champs position ─ %>
     <%
-      var pmCanal = pm.canal || [];
+      var pmCanal = Array.isArray(pm.canal) ? pm.canal : (pm.canal ? [pm.canal] : []);
+      var pmOri   = Array.isArray(pm.orientation) ? pm.orientation : (pm.orientation ? [pm.orientation] : []);
+      var pmSup   = Array.isArray(pm.supports) ? pm.supports : (pm.supports ? [pm.supports] : []);
+      function ck(arr, v) { return arr.indexOf(v) !== -1 ? 'checked' : ''; }
+      function ra(val, v)  { return val === v ? 'checked' : ''; }
     %>
     <div class="wiki-position-meta" <%= page.category === 'position' ? '' : 'hidden' %>>
       <div class="wiki-meta-group">
-        <p class="wiki-meta-label">Qui est au-dessus&nbsp;?</p>
+        <p class="wiki-meta-label">Cat&eacute;gorie</p>
         <div class="wiki-meta-options">
-          <label class="chip-option"><input type="radio" name="meta_qui_dessus" value="femme"    <%= pm.qui_dessus === 'femme'    ? 'checked' : '' %>><span>Femme</span></label>
-          <label class="chip-option"><input type="radio" name="meta_qui_dessus" value="homme"    <%= pm.qui_dessus === 'homme'    ? 'checked' : '' %>><span>Homme</span></label>
-          <label class="chip-option"><input type="radio" name="meta_qui_dessus" value="variable" <%= pm.qui_dessus === 'variable' ? 'checked' : '' %>><span>Variable</span></label>
-          <label class="chip-option"><input type="radio" name="meta_qui_dessus" value="aucun"    <%= pm.qui_dessus === 'aucun'    ? 'checked' : '' %>><span>Aucun&nbsp;/ debout</span></label>
+          <label class="chip-option"><input type="radio" name="meta_categorie" value="penetration"         <%= ra(pm.categorie,'penetration') %>><span>P&eacute;n&eacute;tration</span></label>
+          <label class="chip-option"><input type="radio" name="meta_categorie" value="fellation_cunnilingus" <%= ra(pm.categorie,'fellation_cunnilingus') %>><span>Fellation&nbsp;/ Cunnilingus</span></label>
+          <label class="chip-option"><input type="radio" name="meta_categorie" value="anilingus"           <%= ra(pm.categorie,'anilingus') %>><span>Anilingus</span></label>
+          <label class="chip-option"><input type="radio" name="meta_categorie" value="stimulation_manuelle" <%= ra(pm.categorie,'stimulation_manuelle') %>><span>Stimulation manuelle</span></label>
+          <label class="chip-option"><input type="radio" name="meta_categorie" value="double_penetration"  <%= ra(pm.categorie,'double_penetration') %>><span>Double p&eacute;n&eacute;tration</span></label>
+          <label class="chip-option"><input type="radio" name="meta_categorie" value="position_69"         <%= ra(pm.categorie,'position_69') %>><span>Position 69</span></label>
+          <label class="chip-option"><input type="radio" name="meta_categorie" value="autre"               <%= ra(pm.categorie,'autre') %>><span>Autre</span></label>
+        </div>
+      </div>
+      <div class="wiki-meta-group">
+        <p class="wiki-meta-label">Au-dessus</p>
+        <div class="wiki-meta-options">
+          <label class="chip-option"><input type="radio" name="meta_qui_dessus" value="femme"    <%= ra(pm.qui_dessus,'femme') %>><span>Femme</span></label>
+          <label class="chip-option"><input type="radio" name="meta_qui_dessus" value="homme"    <%= ra(pm.qui_dessus,'homme') %>><span>Homme</span></label>
+          <label class="chip-option"><input type="radio" name="meta_qui_dessus" value="variable" <%= ra(pm.qui_dessus,'variable') %>><span>Variable</span></label>
+          <label class="chip-option"><input type="radio" name="meta_qui_dessus" value="aucun"    <%= ra(pm.qui_dessus,'aucun') %>><span>Debout&nbsp;/ aucun</span></label>
         </div>
       </div>
       <div class="wiki-meta-group">
         <p class="wiki-meta-label">Canal(aux)</p>
         <div class="wiki-meta-options">
-          <label class="chip-option"><input type="checkbox" name="meta_canal" value="vagin"  <%= pmCanal.indexOf('vagin')  !== -1 ? 'checked' : '' %>><span>Vagin</span></label>
-          <label class="chip-option"><input type="checkbox" name="meta_canal" value="anus"   <%= pmCanal.indexOf('anus')   !== -1 ? 'checked' : '' %>><span>Anus</span></label>
-          <label class="chip-option"><input type="checkbox" name="meta_canal" value="bouche" <%= pmCanal.indexOf('bouche') !== -1 ? 'checked' : '' %>><span>Bouche</span></label>
-          <label class="chip-option"><input type="checkbox" name="meta_canal" value="mains"  <%= pmCanal.indexOf('mains')  !== -1 ? 'checked' : '' %>><span>Mains</span></label>
-          <label class="chip-option"><input type="checkbox" name="meta_canal" value="autre"  <%= pmCanal.indexOf('autre')  !== -1 ? 'checked' : '' %>><span>Autre</span></label>
+          <label class="chip-option"><input type="checkbox" name="meta_canal" value="vagin"  <%= ck(pmCanal,'vagin') %>><span>Vagin</span></label>
+          <label class="chip-option"><input type="checkbox" name="meta_canal" value="anus"   <%= ck(pmCanal,'anus') %>><span>Anus</span></label>
+          <label class="chip-option"><input type="checkbox" name="meta_canal" value="bouche" <%= ck(pmCanal,'bouche') %>><span>Bouche</span></label>
+          <label class="chip-option"><input type="checkbox" name="meta_canal" value="mains"  <%= ck(pmCanal,'mains') %>><span>Mains</span></label>
+          <label class="chip-option"><input type="checkbox" name="meta_canal" value="autre"  <%= ck(pmCanal,'autre') %>><span>Autre</span></label>
         </div>
       </div>
       <div class="wiki-meta-group">
         <p class="wiki-meta-label">Orientation</p>
         <div class="wiki-meta-options">
-          <%
-            var pmOri = Array.isArray(pm.orientation) ? pm.orientation : (pm.orientation ? [pm.orientation] : []);
-          %>
-          <label class="chip-option"><input type="checkbox" name="meta_orientation" value="face_a_face"     <%= pmOri.indexOf('face_a_face')     !== -1 ? 'checked' : '' %>><span>Face &agrave; face</span></label>
-          <label class="chip-option"><input type="checkbox" name="meta_orientation" value="face_contre_dos" <%= pmOri.indexOf('face_contre_dos') !== -1 ? 'checked' : '' %>><span>Face contre dos</span></label>
-          <label class="chip-option"><input type="checkbox" name="meta_orientation" value="acrobatique"     <%= pmOri.indexOf('acrobatique')     !== -1 ? 'checked' : '' %>><span>Acrobatique</span></label>
-          <label class="chip-option"><input type="checkbox" name="meta_orientation" value="autre"           <%= pmOri.indexOf('autre')           !== -1 ? 'checked' : '' %>><span>Autre</span></label>
+          <label class="chip-option"><input type="checkbox" name="meta_orientation" value="face_a_face"     <%= ck(pmOri,'face_a_face') %>><span>Face &agrave; face</span></label>
+          <label class="chip-option"><input type="checkbox" name="meta_orientation" value="face_contre_dos" <%= ck(pmOri,'face_contre_dos') %>><span>Face contre dos</span></label>
+          <label class="chip-option"><input type="checkbox" name="meta_orientation" value="cote_a_cote"     <%= ck(pmOri,'cote_a_cote') %>><span>C&ocirc;te &agrave; c&ocirc;te</span></label>
+          <label class="chip-option"><input type="checkbox" name="meta_orientation" value="acrobatique"     <%= ck(pmOri,'acrobatique') %>><span>Acrobatique</span></label>
+          <label class="chip-option"><input type="checkbox" name="meta_orientation" value="autre"           <%= ck(pmOri,'autre') %>><span>Autre</span></label>
+        </div>
+      </div>
+      <div class="wiki-meta-group">
+        <p class="wiki-meta-label">Nombre de partenaires</p>
+        <div class="wiki-meta-options">
+          <label class="chip-option"><input type="radio" name="meta_nb_partenaires" value="2"        <%= ra(pm.nb_partenaires,'2') %>><span>2</span></label>
+          <label class="chip-option"><input type="radio" name="meta_nb_partenaires" value="3"        <%= ra(pm.nb_partenaires,'3') %>><span>3</span></label>
+          <label class="chip-option"><input type="radio" name="meta_nb_partenaires" value="4plus"    <%= ra(pm.nb_partenaires,'4plus') %>><span>4+</span></label>
+          <label class="chip-option"><input type="radio" name="meta_nb_partenaires" value="variable" <%= ra(pm.nb_partenaires,'variable') %>><span>Variable</span></label>
+        </div>
+      </div>
+      <div class="wiki-meta-group">
+        <p class="wiki-meta-label">Partenaire actif</p>
+        <div class="wiki-meta-options">
+          <label class="chip-option"><input type="radio" name="meta_partenaire_actif" value="femme"    <%= ra(pm.partenaire_actif,'femme') %>><span>Femme</span></label>
+          <label class="chip-option"><input type="radio" name="meta_partenaire_actif" value="homme"    <%= ra(pm.partenaire_actif,'homme') %>><span>Homme</span></label>
+          <label class="chip-option"><input type="radio" name="meta_partenaire_actif" value="les_deux" <%= ra(pm.partenaire_actif,'les_deux') %>><span>Les deux</span></label>
+          <label class="chip-option"><input type="radio" name="meta_partenaire_actif" value="variable" <%= ra(pm.partenaire_actif,'variable') %>><span>Variable</span></label>
+        </div>
+      </div>
+      <div class="wiki-meta-group">
+        <p class="wiki-meta-label">Supports possibles</p>
+        <div class="wiki-meta-options">
+          <label class="chip-option"><input type="checkbox" name="meta_supports" value="lit"    <%= ck(pmSup,'lit') %>><span>Lit</span></label>
+          <label class="chip-option"><input type="checkbox" name="meta_supports" value="sol"    <%= ck(pmSup,'sol') %>><span>Sol</span></label>
+          <label class="chip-option"><input type="checkbox" name="meta_supports" value="chaise" <%= ck(pmSup,'chaise') %>><span>Chaise</span></label>
+          <label class="chip-option"><input type="checkbox" name="meta_supports" value="canape" <%= ck(pmSup,'canape') %>><span>Canap&eacute;&nbsp;/ Bord de lit</span></label>
+          <label class="chip-option"><input type="checkbox" name="meta_supports" value="mur"    <%= ck(pmSup,'mur') %>><span>Contre un mur</span></label>
+          <label class="chip-option"><input type="checkbox" name="meta_supports" value="table"  <%= ck(pmSup,'table') %>><span>Table&nbsp;/ Plan</span></label>
+          <label class="chip-option"><input type="checkbox" name="meta_supports" value="bain"   <%= ck(pmSup,'bain') %>><span>Bain&nbsp;/ Douche</span></label>
+          <label class="chip-option"><input type="checkbox" name="meta_supports" value="autre"  <%= ck(pmSup,'autre') %>><span>Autre</span></label>
         </div>
       </div>
     </div>

@@ -11,11 +11,16 @@
     var hasPartMeta = page.category === 'partenaires' && (nbF || nbH);
     var LIEU = { prive: 'Privé', public: 'Public', cache: 'Caché' };
     var GODE = { animal: 'Animal', monstre: 'Monstre', fantaisiste: 'Fantaisiste', ethnique: 'Ethnique', autre: 'Autre' };
-    var QUI  = { femme: 'Femme', homme: 'Homme', variable: 'Variable', aucun: 'Aucun / debout' };
-    var CAN  = { vagin: 'Vagin', anus: 'Anus', bouche: 'Bouche', mains: 'Mains', autre: 'Autre' };
-    var ORI  = { face_a_face: 'Face à face', face_contre_dos: 'Face contre dos', acrobatique: 'Acrobatique', autre: 'Autre' };
-    var pmOri = Array.isArray(pm.orientation) ? pm.orientation : (pm.orientation ? [pm.orientation] : []);
-    var hasPosMeta = page.category === 'position' && (pm.qui_dessus || (pm.canal && pm.canal.length) || pmOri.length);
+    var QUI    = { femme: 'Femme', homme: 'Homme', variable: 'Variable', aucun: 'Debout / aucun' };
+    var CAN    = { vagin: 'Vagin', anus: 'Anus', bouche: 'Bouche', mains: 'Mains', autre: 'Autre' };
+    var ORI    = { face_a_face: 'Face à face', face_contre_dos: 'Face contre dos', cote_a_cote: 'Côte à côte', acrobatique: 'Acrobatique', autre: 'Autre' };
+    var POSCAT = { penetration: 'Pénétration', fellation_cunnilingus: 'Fellation / Cunnilingus', anilingus: 'Anilingus', stimulation_manuelle: 'Stimulation manuelle', double_penetration: 'Double pénétration', position_69: 'Position 69', autre: 'Autre' };
+    var NBPART = { '2': '2', '3': '3', '4plus': '4+', variable: 'Variable' };
+    var ACTIF  = { femme: 'Femme', homme: 'Homme', les_deux: 'Les deux', variable: 'Variable' };
+    var SUP    = { lit: 'Lit', sol: 'Sol', chaise: 'Chaise', canape: 'Canapé / Bord de lit', mur: 'Contre un mur', table: 'Table / Plan', bain: 'Bain / Douche', autre: 'Autre' };
+    var pmOri  = Array.isArray(pm.orientation) ? pm.orientation : (pm.orientation ? [pm.orientation] : []);
+    var pmSup  = Array.isArray(pm.supports) ? pm.supports : (pm.supports ? [pm.supports] : []);
+    var hasPosMeta = page.category === 'position' && (pm.categorie || pm.qui_dessus || (pm.canal && pm.canal.length) || pmOri.length || pm.nb_partenaires || pm.partenaire_actif || pmSup.length);
 
     var hasImages = page.imagePaths && page.imagePaths.length;
     // Compat : anciennes pages où termes_derives est un tableau de
@@ -129,6 +134,12 @@
         <% } %>
 
         <% if (hasPosMeta) { %>
+          <% if (pm.categorie && POSCAT[pm.categorie]) { %>
+            <div class="wiki-infobox-row">
+              <dt>Cat&eacute;gorie</dt>
+              <dd><%= POSCAT[pm.categorie] %></dd>
+            </div>
+          <% } %>
           <% if (pm.qui_dessus && QUI[pm.qui_dessus]) { %>
             <div class="wiki-infobox-row">
               <dt>Au-dessus</dt>
@@ -138,13 +149,31 @@
           <% if (pm.canal && pm.canal.length) { %>
             <div class="wiki-infobox-row">
               <dt>Canal</dt>
-              <dd><%= pm.canal.map(function(c){ return CAN[c] || c; }).join(' · ') %></dd>
+              <dd><%= pm.canal.map(function(c){ return CAN[c] || c; }).join(' &middot; ') %></dd>
             </div>
           <% } %>
           <% if (pmOri.length) { %>
             <div class="wiki-infobox-row">
               <dt>Orientation</dt>
-              <dd><%= pmOri.map(function(o){ return ORI[o] || o; }).join(' · ') %></dd>
+              <dd><%= pmOri.map(function(o){ return ORI[o] || o; }).join(' &middot; ') %></dd>
+            </div>
+          <% } %>
+          <% if (pm.nb_partenaires && NBPART[pm.nb_partenaires]) { %>
+            <div class="wiki-infobox-row">
+              <dt>Partenaires</dt>
+              <dd><%= NBPART[pm.nb_partenaires] %></dd>
+            </div>
+          <% } %>
+          <% if (pm.partenaire_actif && ACTIF[pm.partenaire_actif]) { %>
+            <div class="wiki-infobox-row">
+              <dt>Partenaire actif</dt>
+              <dd><%= ACTIF[pm.partenaire_actif] %></dd>
+            </div>
+          <% } %>
+          <% if (pmSup.length) { %>
+            <div class="wiki-infobox-row">
+              <dt>Supports</dt>
+              <dd><%= pmSup.map(function(s){ return SUP[s] || s; }).join(' &middot; ') %></dd>
             </div>
           <% } %>
         <% } %>

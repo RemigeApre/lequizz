@@ -2,9 +2,6 @@
   var cat = categories.find(function (c) { return c.key === page.category; });
   var wcShowBadge = typeof showCategoryBadge !== 'undefined' ? showCategoryBadge : true;
 
-  // Une ou plusieurs teintes (catégorie principale + catégories
-  // supplémentaires) pour le filet d'accent en haut de la carte :
-  // uni, bicolore ou tricolore selon le nombre de chapitres concernés.
   var wcHues = [cat ? cat.hue : 220].concat(
     (page.extraCategories || []).map(function (eck) {
       var ecat = categories.find(function (c) { return c.key === eck; });
@@ -18,17 +15,24 @@
     var wcStep = 100 / wcHues.length;
     var wcStops = wcHues.map(function (h, i) {
       var from = Math.round(i * wcStep);
-      var to = Math.round((i + 1) * wcStep);
+      var to   = Math.round((i + 1) * wcStep);
       return 'hsl(' + h + ', 55%, 45%) ' + from + '%, hsl(' + h + ', 55%, 45%) ' + to + '%';
     });
     wcAccent = 'linear-gradient(90deg, ' + wcStops.join(', ') + ')';
   }
 
-  // Compat : anciennes pages où termes_derives est un tableau de
-  // chaînes brutes, avant le marquage anglais par terme.
   var wcDerived = ((page.meta && page.meta.termes_derives) || []).map(function (t) {
     return typeof t === 'string' ? { term: t, en: false } : t;
   });
+
+  var wcExcerpt = '';
+  if (!currentUser && page.content) {
+    wcExcerpt = (page.content || '')
+      .replace(/^#+\s+/gm, '').replace(/\*\*?|__?/g, '')
+      .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+      .replace(/\n+/g, ' ').trim();
+    if (wcExcerpt.length > 110) wcExcerpt = wcExcerpt.slice(0, 110) + '\u2026';
+  }
 %>
 <a href="/wiki/<%= page.id %>" class="wiki-card"
   style="--card-hue: <%= cat ? cat.hue : 220 %>"
@@ -46,61 +50,44 @@
   data-fantaisie="<%= page.tags.indexOf('fantaisie') !== -1 ? '1' : '0' %>"
   data-extra-cats="<%= (page.extraCategories || []).join('|') %>">
 
-  <%# Filet d'accent : identité de couleur du/des chapitre(s), à la
-       place du badge texte (retiré quand la page est déjà dans un
-       contexte de chapitre — sommaire, page de catégorie). %>
   <span class="wiki-card-accent" style="background: <%= wcAccent %>"></span>
 
-  <%# Si image : image pleine + overlay avec badge (optionnel) et réactions.
-       Les images restent privées même quand le texte du wiki est public :
-       un visiteur anonyme retombe sur le header sans image ci-dessous. %>
   <% if (page.imagePaths && page.imagePaths.length && currentUser) { %>
+    <%# ── Carte AVEC image ───────────────────────────────────────────── %>
     <div class="wiki-card-image">
       <img src="<%= page.imagePaths[0] %>" alt="" class="wiki-card-img" />
       <div class="wiki-card-overlay">
         <% if (wcShowBadge) { %><span class="wiki-category-badge" style="background: hsl(<%= cat ? cat.hue : 220 %>, 55%, 45%)"><%= cat ? cat.label : page.category %></span><% } %>
         <% if (currentUser) { %><span class="wiki-card-badges">
-          <% if (page.rating) { %>
-            <span class="wiki-card-mini-stars">
-              <% for (var si = 1; si <= 5; si++) { %><span class="wiki-card-star<%= si <= page.rating ? ' filled' : '' %>">&#9733;</span><% } %>
-            </span>
-          <% } %>
+          <% if (page.rating) { %><span class="wiki-card-mini-stars"><% for (var si = 1; si <= 5; si++) { %><span class="wiki-card-star<%= si <= page.rating ? ' filled' : '' %>">&#9733;</span><% } %></span><% } %>
           <% if (page.owned) { %><span class="wiki-owned-badge" title="Possédé">&#9733;</span><% } %>
           <% if (page.flame) { %><span class="wiki-card-react-badge" title="J'adore">&#128293;</span><% } %>
           <% if (page.interested) { %><span class="wiki-card-react-badge" title="Ça m'intéresse">&#10024;</span><% } %>
         </span><% } %>
       </div>
     </div>
+    <div class="wiki-card-body">
+      <p class="wiki-card-title"><%= page.title %></p>
+    </div>
+
   <% } else { %>
-    <%# Sans image : header classique %>
+    <%# ── Carte SANS image ───────────────────────────────────────────── %>
+    <%# Le titre apparaît dans le header sur mobile, dans le body sur desktop. %>
     <div class="wiki-card-header">
-      <% if (wcShowBadge) { %><span class="wiki-category-badge" style="background: hsl(<%= cat ? cat.hue : 220 %>, 55%, 45%)"><%= cat ? cat.label : page.category %></span><% } %>
-      <% if (currentUser) { %><span class="wiki-card-badges">
-        <% if (page.rating) { %>
-          <span class="wiki-card-mini-stars">
-            <% for (var si2 = 1; si2 <= 5; si2++) { %><span class="wiki-card-star<%= si2 <= page.rating ? ' filled' : '' %>">&#9733;</span><% } %>
-          </span>
-        <% } %>
-        <% if (page.owned) { %><span class="wiki-owned-badge" title="Possédé">&#9733;</span><% } %>
-        <% if (page.flame) { %><span class="wiki-card-react-badge">&#128293;</span><% } %>
-        <% if (page.interested) { %><span class="wiki-card-react-badge">&#10024;</span><% } %>
-      </span><% } %>
+      <p class="wiki-card-title wiki-card-title--mobile"><%= page.title %></p>
+      <div class="wiki-card-header-foot">
+        <% if (wcShowBadge) { %><span class="wiki-category-badge" style="background: hsl(<%= cat ? cat.hue : 220 %>, 55%, 45%)"><%= cat ? cat.label : page.category %></span><% } %>
+        <% if (currentUser) { %><span class="wiki-card-badges">
+          <% if (page.rating) { %><span class="wiki-card-mini-stars"><% for (var si2 = 1; si2 <= 5; si2++) { %><span class="wiki-card-star<%= si2 <= page.rating ? ' filled' : '' %>">&#9733;</span><% } %></span><% } %>
+          <% if (page.owned) { %><span class="wiki-owned-badge" title="Possédé">&#9733;</span><% } %>
+          <% if (page.flame) { %><span class="wiki-card-react-badge">&#128293;</span><% } %>
+          <% if (page.interested) { %><span class="wiki-card-react-badge">&#10024;</span><% } %>
+        </span><% } %>
+      </div>
+    </div>
+    <div class="wiki-card-body wiki-card-body--noimg">
+      <p class="wiki-card-title wiki-card-title--desktop"><%= page.title %></p>
+      <% if (wcExcerpt) { %><p class="wiki-card-excerpt"><%= wcExcerpt %></p><% } %>
     </div>
   <% } %>
-
-  <div class="wiki-card-body">
-    <p class="wiki-card-title"><%= page.title %></p>
-    <% if (!currentUser && page.content) { %>
-      <%
-        var wcExcerpt = (page.content || '')
-          .replace(/^#+\s+/gm, '')
-          .replace(/\*\*?|__?/g, '')
-          .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
-          .replace(/\n+/g, ' ')
-          .trim();
-        if (wcExcerpt.length > 100) wcExcerpt = wcExcerpt.slice(0, 100) + '…';
-      %>
-      <% if (wcExcerpt) { %><p class="wiki-card-excerpt"><%= wcExcerpt %></p><% } %>
-    <% } %>
-  </div>
 </a>
