@@ -487,6 +487,7 @@ function buildWikiRouter(config) {
 
   router.use((err, req, res, next) => {
     if (!err) return next();
+    console.error("[wiki] erreur route", req.method, req.originalUrl, err.message || err);
     res.redirect("/wiki");
   });
 
