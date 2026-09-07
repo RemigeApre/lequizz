@@ -183,7 +183,7 @@ function buildQuestionIndex(config) {
 
 function computeSuggestions(page, allPages) {
   const pageTagSet = new Set(page.tags.map((t) => t.toLowerCase()));
-  const pageDerived = new Set((page.meta.termes_derives || []).map((t) => t.toLowerCase()));
+  const pageDerived = new Set((page.meta.termes_derives || []).map((t) => (typeof t === "string" ? t : t.term || "").toLowerCase()));
   const pageTitleWords = new Set(
     page.title.toLowerCase().split(/\s+/).filter((w) => w.length > 3)
   );
@@ -197,7 +197,7 @@ function computeSuggestions(page, allPages) {
       // Même catégorie
       if (p.category === page.category) score += 2;
       // Termes dérivés communs
-      (p.meta.termes_derives || []).forEach((t) => { if (pageDerived.has(t.toLowerCase())) score += 2; });
+      (p.meta.termes_derives || []).forEach((t) => { if (pageDerived.has((typeof t === "string" ? t : t.term || "").toLowerCase())) score += 2; });
       // Mots du titre communs (> 3 lettres)
       p.title.toLowerCase().split(/\s+/).forEach((w) => { if (w.length > 3 && pageTitleWords.has(w)) score += 1; });
       return { p, score };
