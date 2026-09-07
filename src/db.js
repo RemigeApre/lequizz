@@ -148,6 +148,16 @@ db.exec(`
   )
 `);
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS wiki_page_user_notes (
+    page_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    content TEXT NOT NULL DEFAULT '',
+    updated_at TEXT NOT NULL,
+    PRIMARY KEY (page_id, user_id)
+  )
+`);
+
 function rowToUser(row) {
   if (!row) return null;
   return {
@@ -212,6 +222,18 @@ function listFavoriteRows(userId) {
 
 function countFavorites() {
   return db.prepare("SELECT COUNT(*) AS c FROM favorites").get().c;
+}
+
+function getUserNote(pageId, userId) {
+  const row = db.prepare("SELECT content FROM wiki_page_user_notes WHERE page_id = ? AND user_id = ?").get(pageId, userId);
+  return row ? row.content : "";
+}
+
+function setUserNote(pageId, userId, content) {
+  db.prepare(
+    `INSERT INTO wiki_page_user_notes (page_id, user_id, content, updated_at) VALUES (?, ?, ?, ?)
+     ON CONFLICT(page_id, user_id) DO UPDATE SET content = excluded.content, updated_at = excluded.updated_at`
+  ).run(pageId, userId, String(content || "").slice(0, 10000), new Date().toISOString());
 }
 
 // Cree les profils initiaux au demarrage a partir des variables d'env
@@ -675,4 +697,6 @@ module.exports = {
   isFavorite,
   listFavoriteRows,
   countFavorites,
+  getUserNote,
+  setUserNote,
 };

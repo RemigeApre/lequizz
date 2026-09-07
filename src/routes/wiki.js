@@ -22,6 +22,8 @@ const {
   addImageLink,
   removeImageLink,
   isFavorite,
+  getUserNote,
+  setUserNote,
 } = require("../db");
 const { requireUser, requireUserJson } = require("../auth");
 
@@ -122,6 +124,23 @@ function parseMeta(category, body) {
       partenaire_actif: oneof(body.meta_partenaire_actif, validActif),
       supports:         manyof(body.meta_supports,        validSupport),
     };
+
+    // Sections textuelles spécifiques aux positions
+    let variantes = [];
+    try { variantes = JSON.parse(body.meta_variantes || "[]"); } catch (_) {}
+    function sanitizeVar(v) {
+      return {
+        id: String(v.id || ""),
+        nom: String(v.nom || "").slice(0, 200).trim(),
+        description: String(v.description || "").slice(0, 5000),
+        variantes: Array.isArray(v.variantes) ? v.variantes.map(function (sv) {
+          return { id: String(sv.id || ""), nom: String(sv.nom || "").slice(0, 200).trim(), description: String(sv.description || "").slice(0, 5000) };
+        }) : [],
+      };
+    }
+    specific.variantes     = Array.isArray(variantes) ? variantes.map(sanitizeVar) : [];
+    specific.infos_utiles  = String(body.meta_infos_utiles || "").slice(0, 10000);
+    specific.nouvelles     = String(body.meta_nouvelles || "").slice(0, 5000);
   } else if (category === "fantasmes") {
     const sub = body.meta_sous_cat;
     const validSubs = FANTASMES_SUBCATS.map((s) => s.key);
@@ -328,7 +347,9 @@ function buildWikiRouter(config) {
     const suggestions = computeSuggestions(page, allPages);
     const back = wikiBackTarget(req);
     const pageIsFavorite = req.user ? isFavorite(req.user.id, "wiki", id) : false;
-    res.render("wiki-detail", { config, page, pages: allPages, suggestions, prevPage, nextPage, backHref: back.href, backLabel: back.label, isFavorite: pageIsFavorite, ...CTX });
+    let userNote = "";
+    try { userNote = req.user ? getUserNote(id, req.user.id) : ""; } catch (_) {}
+    res.render("wiki-detail", { config, page, pages: allPages, suggestions, prevPage, nextPage, backHref: back.href, backLabel: back.label, isFavorite: pageIsFavorite, userNote, ...CTX });
   });
 
   router.get("/:id/edit", requireUser, (req, res) => {
@@ -448,6 +469,13 @@ function buildWikiRouter(config) {
     if (!Number.isInteger(id)) return res.status(400).json({ ok: false });
     const { rating, flame, interested } = req.body;
     reactWikiPage(id, { rating, flame, interested });
+    res.json({ ok: true });
+  });
+
+  router.post("/:id/note", requireUserJson, (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.status(400).json({ ok: false });
+    setUserNote(id, req.user.id, req.body.content || "");
     res.json({ ok: true });
   });
 

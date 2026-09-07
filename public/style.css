@@ -5220,4 +5220,215 @@ a.wiki-ql-label:hover .wiki-ql-text {
   border-color: hsl(var(--ch-hue, 220), 55%, 45%);
 }
 
+/* ── Sections de contenu enrichi (positions) ────────────────── */
+.wiki-pos-section {
+  margin: 2rem 0;
+}
+.wiki-pos-section-heading {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: hsl(var(--ch-hue, 220), 45%, 52%);
+  border-bottom: 1px solid color-mix(in srgb, hsl(var(--ch-hue, 220), 45%, 52%) 30%, var(--border));
+  padding-bottom: 0.35rem;
+  margin: 0 0 1rem;
+}
+
+/* Variantes : accordéon */
+.wiki-var-detail {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 0.6rem;
+  overflow: hidden;
+}
+.wiki-var-summary {
+  cursor: pointer;
+  padding: 0.7rem 1rem;
+  font-weight: 600;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--surface);
+  transition: background 0.15s;
+}
+.wiki-var-summary::-webkit-details-marker { display: none; }
+.wiki-var-summary::before {
+  content: "▶";
+  font-size: 0.65em;
+  color: var(--muted);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.wiki-var-detail[open] > .wiki-var-summary::before { transform: rotate(90deg); }
+.wiki-var-summary:hover { background: var(--card); }
+.wiki-var-body {
+  padding: 0.8rem 1.1rem 1rem;
+  border-top: 1px solid var(--border);
+}
+.wiki-var-sub-detail {
+  margin: 0.6rem 0 0;
+  border-color: color-mix(in srgb, var(--border) 70%, transparent);
+}
+.wiki-var-sub-detail .wiki-var-summary {
+  font-weight: 500;
+  font-size: 0.95em;
+  background: var(--bg);
+}
+.wiki-var-sub-detail .wiki-var-body {
+  background: var(--bg);
+}
+
+/* Nouvelles : style légèrement différent (prose) */
+.wiki-pos-nouvelles-text {
+  white-space: pre-wrap;
+  font-style: italic;
+  line-height: 1.75;
+  color: var(--text);
+  opacity: 0.88;
+}
+
+/* Textarea position */
+.wiki-pos-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 0.25rem;
+}
+
+/* ── Éditeur de variantes (formulaire) ──────────────────────── */
+.wiki-var-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+.wiki-var-list,
+.wiki-var-sub-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.wiki-var-item {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 0.9rem;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.wiki-var-item-head {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.wiki-var-nom {
+  flex: 1;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.wiki-var-nom:focus { outline: none; border-color: hsl(var(--ch-hue, 220), 50%, 55%); }
+.wiki-var-desc {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 0.88rem;
+  resize: vertical;
+  font-family: inherit;
+}
+.wiki-var-desc:focus { outline: none; border-color: hsl(var(--ch-hue, 220), 50%, 55%); }
+.wiki-var-del-btn {
+  flex-shrink: 0;
+  width: 1.7rem;
+  height: 1.7rem;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s, color 0.15s;
+}
+.wiki-var-del-btn:hover { border-color: #d44; color: #d44; }
+.wiki-var-sub-item {
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  border-radius: 6px;
+  padding: 0.55rem 0.7rem;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-left: 0.8rem;
+}
+.wiki-var-sub-item .wiki-var-nom { font-weight: 500; }
+.wiki-var-add-btn,
+.wiki-var-sub-add-btn {
+  align-self: flex-start;
+  padding: 0.3rem 0.75rem;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: border-color 0.15s, color 0.15s;
+}
+.wiki-var-add-btn:hover,
+.wiki-var-sub-add-btn:hover {
+  border-color: hsl(var(--ch-hue, 220), 50%, 55%);
+  color: hsl(var(--ch-hue, 220), 50%, 55%);
+}
+.wiki-var-sub-add-btn {
+  font-size: 0.8rem;
+  margin-top: 0.2rem;
+}
+
+/* ── Notes personnelles (page de lecture) ───────────────────── */
+.wiki-user-note {
+  margin: 2rem 0 1rem;
+}
+.wiki-user-note-heading {
+  margin-bottom: 0.65rem;
+}
+.wiki-user-note-area {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  resize: vertical;
+  transition: border-color 0.15s;
+}
+.wiki-user-note-area:focus {
+  outline: none;
+  border-color: hsl(var(--ch-hue, 220), 50%, 55%);
+  box-shadow: 0 0 0 2px color-mix(in srgb, hsl(var(--ch-hue, 220), 50%, 55%) 18%, transparent);
+}
+.wiki-user-note-status {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin: 0.25rem 0 0;
+  min-height: 1em;
+  text-align: right;
+}
+
 .bd-sort-remove input { display: none; }

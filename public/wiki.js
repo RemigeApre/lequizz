@@ -1809,4 +1809,185 @@
     });
   })();
 
+  // ══════════════════════════════════════════════════
+  // 16. ÉDITEUR DE VARIANTES (formulaire position)
+  // ══════════════════════════════════════════════════
+  (function () {
+    var editor    = document.getElementById("wiki-variante-editor");
+    var hiddenIn  = document.getElementById("wiki-variantes-hidden");
+    if (!editor || !hiddenIn) return;
+
+    var varList = editor.querySelector(".wiki-var-list");
+    var addBtn  = editor.querySelector(".wiki-var-add-btn");
+
+    // Données en mémoire
+    var data = [];
+    try { data = JSON.parse(hiddenIn.value || "[]"); } catch (_) { data = []; }
+    if (!Array.isArray(data)) data = [];
+
+    function uid() { return "v_" + Date.now() + "_" + Math.floor(Math.random() * 1e6); }
+
+    function sync() {
+      hiddenIn.value = JSON.stringify(data);
+    }
+
+    function makeSubItem(sv, parentData) {
+      var wrap = document.createElement("div");
+      wrap.className = "wiki-var-sub-item";
+      wrap.dataset.id = sv.id;
+
+      var head = document.createElement("div");
+      head.className = "wiki-var-item-head";
+
+      var nom = document.createElement("input");
+      nom.type = "text";
+      nom.className = "wiki-var-nom";
+      nom.placeholder = "Nom de la sous-variante\u2026";
+      nom.value = sv.nom || "";
+      nom.addEventListener("input", function () { sv.nom = nom.value; sync(); });
+
+      var del = document.createElement("button");
+      del.type = "button";
+      del.className = "wiki-var-del-btn";
+      del.title = "Supprimer";
+      del.textContent = "\u00D7";
+      del.addEventListener("click", function () {
+        var idx = parentData.variantes.indexOf(sv);
+        if (idx !== -1) parentData.variantes.splice(idx, 1);
+        wrap.remove();
+        sync();
+      });
+
+      head.appendChild(nom);
+      head.appendChild(del);
+
+      var desc = document.createElement("textarea");
+      desc.className = "wiki-var-desc";
+      desc.placeholder = "Description\u2026";
+      desc.rows = 2;
+      desc.value = sv.description || "";
+      desc.addEventListener("input", function () { sv.description = desc.value; sync(); });
+
+      wrap.appendChild(head);
+      wrap.appendChild(desc);
+      return wrap;
+    }
+
+    function makeItem(v) {
+      var wrap = document.createElement("div");
+      wrap.className = "wiki-var-item";
+      wrap.dataset.id = v.id;
+
+      var head = document.createElement("div");
+      head.className = "wiki-var-item-head";
+
+      var nom = document.createElement("input");
+      nom.type = "text";
+      nom.className = "wiki-var-nom";
+      nom.placeholder = "Nom de la variante\u2026";
+      nom.value = v.nom || "";
+      nom.addEventListener("input", function () { v.nom = nom.value; sync(); });
+
+      var del = document.createElement("button");
+      del.type = "button";
+      del.className = "wiki-var-del-btn";
+      del.title = "Supprimer";
+      del.textContent = "\u00D7";
+      del.addEventListener("click", function () {
+        var idx = data.indexOf(v);
+        if (idx !== -1) data.splice(idx, 1);
+        wrap.remove();
+        sync();
+      });
+
+      head.appendChild(nom);
+      head.appendChild(del);
+
+      var desc = document.createElement("textarea");
+      desc.className = "wiki-var-desc";
+      desc.placeholder = "Description\u2026";
+      desc.rows = 3;
+      desc.value = v.description || "";
+      desc.addEventListener("input", function () { v.description = desc.value; sync(); });
+
+      var subList = document.createElement("div");
+      subList.className = "wiki-var-sub-list";
+      if (!Array.isArray(v.variantes)) v.variantes = [];
+      v.variantes.forEach(function (sv) { subList.appendChild(makeSubItem(sv, v)); });
+
+      var subAddBtn = document.createElement("button");
+      subAddBtn.type = "button";
+      subAddBtn.className = "wiki-var-sub-add-btn";
+      subAddBtn.textContent = "+ Ajouter une sous-variante";
+      subAddBtn.addEventListener("click", function () {
+        var sv = { id: uid(), nom: "", description: "", };
+        v.variantes.push(sv);
+        subList.appendChild(makeSubItem(sv, v));
+        sync();
+      });
+
+      wrap.appendChild(head);
+      wrap.appendChild(desc);
+      wrap.appendChild(subList);
+      wrap.appendChild(subAddBtn);
+      return wrap;
+    }
+
+    // Initialiser depuis données existantes
+    data.forEach(function (v) {
+      if (!v.id) v.id = uid();
+      if (!Array.isArray(v.variantes)) v.variantes = [];
+      varList.appendChild(makeItem(v));
+    });
+
+    addBtn.addEventListener("click", function () {
+      var v = { id: uid(), nom: "", description: "", variantes: [] };
+      data.push(v);
+      varList.appendChild(makeItem(v));
+      sync();
+    });
+  })();
+
+  // ══════════════════════════════════════════════════
+  // 17. NOTES PERSONNELLES (page de lecture)
+  // ══════════════════════════════════════════════════
+  (function () {
+    var noteWrap = document.querySelector(".wiki-user-note");
+    if (!noteWrap) return;
+    var area   = noteWrap.querySelector(".wiki-user-note-area");
+    var status = noteWrap.querySelector(".wiki-user-note-status");
+    var pageId = Number(noteWrap.dataset.pageId);
+    if (!area || !pageId) return;
+
+    var timer = null;
+    var saving = false;
+
+    function save() {
+      if (saving) return;
+      saving = true;
+      status.textContent = "Enregistrement\u2026";
+      fetch("/wiki/" + pageId + "/note", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: area.value }),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          saving = false;
+          status.textContent = d.ok ? "Sauvegard\u00e9" : "Erreur";
+          setTimeout(function () { status.textContent = ""; }, 2000);
+        })
+        .catch(function () {
+          saving = false;
+          status.textContent = "Erreur";
+        });
+    }
+
+    area.addEventListener("input", function () {
+      clearTimeout(timer);
+      status.textContent = "";
+      timer = setTimeout(save, 1200);
+    });
+  })();
+
 })();

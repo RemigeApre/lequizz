@@ -271,6 +271,28 @@
             <label class="chip-option"><input type="checkbox" name="meta_supports" value="autre"><span>Autre</span></label>
           </div>
         </div>
+
+        <%# ─ Variantes ─ %>
+        <div class="wiki-meta-group">
+          <p class="wiki-meta-label">Variantes</p>
+          <div class="wiki-var-editor" id="wiki-variante-editor">
+            <div class="wiki-var-list"></div>
+            <button type="button" class="wiki-var-add-btn">+ Ajouter une variante</button>
+          </div>
+          <input type="hidden" name="meta_variantes" id="wiki-variantes-hidden" value="[]" />
+        </div>
+
+        <%# ─ Informations utiles ─ %>
+        <div class="wiki-meta-group">
+          <p class="wiki-meta-label">Informations utiles <span class="wiki-md-hint">(Markdown support&eacute;)</span></p>
+          <textarea name="meta_infos_utiles" class="wiki-textarea wiki-pos-textarea" rows="5" placeholder="Conditions, pr&eacute;requis, variantes contextuelles&hellip;"></textarea>
+        </div>
+
+        <%# ─ Nouvelles ─ %>
+        <div class="wiki-meta-group">
+          <p class="wiki-meta-label">Nouvelles <span class="wiki-md-hint">(courte histoire li&eacute;e &agrave; cette position)</span></p>
+          <textarea name="meta_nouvelles" class="wiki-textarea wiki-pos-textarea" rows="5" placeholder="Une courte histoire&hellip;"></textarea>
+        </div>
       </div>
 
       <%# ─ Catégories supplémentaires ─ %>
