@@ -28,20 +28,18 @@ const {
 const { requireUser, requireUserJson } = require("../auth");
 
 const CATEGORIES = [
-  { key: "fantasmes",  label: "Fantasmes",   desc: "Sc\u00e9narios, d\u00e9sirs...",          hue: 330 },
-  { key: "jeu_de_role",label: "Jeu de r\u00f4le", desc: "Sc\u00e9narios jou\u00e9s, personnages...", hue:  60 },
-  { key: "partenaires",label: "Partenaires", desc: "Configurations, r\u00f4les...",       hue: 210 },
-  { key: "pratique",   label: "Pratique",    desc: "Actes et gestes sexuels...",      hue:   5 },
-  { key: "position",   label: "Position",    desc: "Kama-sutra, variantes...",        hue: 270 },
-  { key: "lieux",      label: "Lieux",       desc: "Endroits, contextes...",          hue: 140 },
-  { key: "objets",     label: "Objets",      desc: "Sex-toys, accessoires...",        hue:  28 },
-  { key: "tenues",     label: "Tenues",      desc: "Lingerie, costumes...",           hue: 175 },
-  { key: "autre",      label: "Autre",       desc: "Tout le reste",                  hue: 220 },
+  { key: "fantasmes",  label: "Fantasmes",   desc: "Fantasmes, désirs, tout le reste...", hue: 330 },
+  { key: "jeu_de_role",label: "Scénarios",   desc: "Scénarios joués, personnages...",     hue:  60 },
+  { key: "partenaires",label: "Partenaire",  desc: "Configurations, rôles...",            hue: 210 },
+  { key: "pratique",   label: "Pratique",    desc: "Actes et gestes sexuels...",          hue:   5 },
+  { key: "position",   label: "Position",    desc: "Kama-sutra, variantes...",            hue: 270 },
+  { key: "lieux",      label: "Lieux",       desc: "Endroits, contextes...",              hue: 140 },
+  { key: "objets",     label: "Objets",      desc: "Sex-toys, accessoires...",            hue:  28 },
+  { key: "tenues",     label: "Tenues",      desc: "Lingerie, costumes...",               hue: 175 },
 ];
 
-// "Fantaisie" et "Jeux de r\u00f4le" ne sont plus des sous-cat\u00e9gories : la
-// premi\u00e8re existe d\u00e9j\u00e0 comme tag, le second est devenu un chapitre
-// complet \u00e0 part enti\u00e8re (cat\u00e9gorie "jeu_de_role").
+// "Fantaisie" est un tag libre. "autre" a été fusionné dans "fantasmes" (migration DB).
+// La clé "jeu_de_role" est conservée pour ne pas invalider les données existantes.
 const FANTASMES_SUBCATS = [
   { key: "hardcore",   label: "Hardcore" },
   { key: "bdsm",       label: "BDSM" },
@@ -93,7 +91,7 @@ function parseDerivedTerms(raw) {
 }
 
 function normalizeCategory(value) {
-  return CATEGORY_KEYS.includes(value) ? value : "autre";
+  return CATEGORY_KEYS.includes(value) ? value : "fantasmes";
 }
 
 function arr(v) { return Array.isArray(v) ? v : v ? [v] : []; }

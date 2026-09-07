@@ -286,6 +286,17 @@ function migrateSharedDataToManon() {
 seedInitialUsers();
 migrateSharedDataToManon();
 
+// Migration : catégorie "autre" fusionnée dans "fantasmes" (suppression du chapitre).
+// Idempotent : après le premier passage il n'y a plus de lignes "autre".
+db.prepare("UPDATE wiki_pages SET category = 'fantasmes' WHERE category = 'autre'").run();
+// Nettoie aussi extra_categories qui pourraient contenir "autre".
+db.prepare("SELECT id, extra_categories FROM wiki_pages WHERE extra_categories LIKE '%autre%'").all().forEach(function (row) {
+  try {
+    const cats = JSON.parse(row.extra_categories || "[]").filter(function (c) { return c !== "autre"; });
+    db.prepare("UPDATE wiki_pages SET extra_categories = ? WHERE id = ?").run(JSON.stringify(cats), row.id);
+  } catch (_) {}
+});
+
 function insertSubmission(userId, answers, scores) {
   const stmt = db.prepare(
     "INSERT INTO submissions (created_at, answers, scores, user_id) VALUES (?, ?, ?, ?)"
