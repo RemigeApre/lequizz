@@ -164,7 +164,8 @@ function parseMeta(category, body) {
   return { ...base, ...specific };
 }
 
-const PRESET_TAGS = ["fantaisie", "ultra"];
+const PRESET_TAGS = ["fantaisie", "irréaliste", "ultra"];
+const SPECIAL_TAGS = new Set(["ultra", "irréaliste"]);
 
 function getAllTags(pages) {
   return Array.from(new Set([...PRESET_TAGS, ...pages.flatMap((p) => p.tags)])).sort((a, b) =>
@@ -232,7 +233,7 @@ function buildWikiRouter(config) {
 
   // Une page "ULTRA" porte un simple tag libre "ultra" (insensible a la casse).
   function isUltra(page) {
-    return (page.tags || []).some((t) => String(t).toLowerCase() === "ultra");
+    return (page.tags || []).some((t) => SPECIAL_TAGS.has(String(t).toLowerCase()));
   }
 
   // Le bouton "retour" d'une page doit ramener a l'endroit precis d'ou l'on

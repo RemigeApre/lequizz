@@ -46,7 +46,8 @@
   data-interested="<%= page.interested ? '1' : '0' %>"
   data-derived="<%= wcDerived.map(function (t) { return t.term; }).join('|').toLowerCase() %>"
   data-content="<%= (page.content || '').toLowerCase().replace(/"/g,'').replace(/\s+/g,' ').slice(0, 400) %>"
-  data-ultra="<%= page.tags.indexOf('ultra') !== -1 ? '1' : '0' %>"
+  data-ultra="<%= (page.tags.indexOf('ultra') !== -1 || page.tags.indexOf('irréaliste') !== -1) ? '1' : '0' %>"
+  data-irrealiste="<%= page.tags.indexOf('irréaliste') !== -1 ? '1' : '0' %>"
   data-fantaisie="<%= page.tags.indexOf('fantaisie') !== -1 ? '1' : '0' %>"
   data-extra-cats="<%= (page.extraCategories || []).join('|') %>">
 
