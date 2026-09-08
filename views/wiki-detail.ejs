@@ -344,13 +344,38 @@
 
     <%# ─ Carrousel images secondaires mobile (après texte + notes) ─ %>
     <% if (hasImages && page.imagePaths.length > 1 && currentUser) { %>
-      <div class="wiki-mobile-sec-carousel">
-        <% page.imagePaths.slice(1).forEach(function (src) { %>
-          <div class="wiki-mobile-sec-carousel-item">
-            <img src="<%= src %>" alt="" class="wiki-mobile-sec-carousel-img" loading="lazy" />
-          </div>
-        <% }) %>
+      <% var secCount = page.imagePaths.length - 1; %>
+      <div class="wiki-mobile-sec-wrap">
+        <div class="wiki-mobile-sec-heading">
+          <span>Autres images</span>
+          <span class="wiki-mobile-sec-counter" id="wiki-sec-counter"><%= secCount > 1 ? '1\u00a0/\u00a0' + secCount : '' %></span>
+        </div>
+        <div class="wiki-mobile-sec-carousel" id="wiki-sec-carousel">
+          <% page.imagePaths.slice(1).forEach(function (src) { %>
+            <div class="wiki-mobile-sec-item">
+              <img src="<%= src %>" alt="" class="wiki-mobile-sec-img" loading="lazy" />
+            </div>
+          <% }) %>
+        </div>
       </div>
+      <% if (secCount > 1) { %>
+      <script>
+      (function () {
+        var carousel = document.getElementById("wiki-sec-carousel");
+        var counter  = document.getElementById("wiki-sec-counter");
+        var total    = <%= secCount %>;
+        if (!carousel || !counter) return;
+        var items = carousel.querySelectorAll(".wiki-mobile-sec-item");
+        function update() {
+          if (!items.length) return;
+          var itemW = items[0].offsetWidth + 12; /* gap 0.75rem ≈ 12px */
+          var idx   = Math.min(Math.round(carousel.scrollLeft / itemW), total - 1);
+          counter.textContent = (idx + 1) + "\u00a0/\u00a0" + total;
+        }
+        carousel.addEventListener("scroll", update, { passive: true });
+      })();
+      </script>
+      <% } %>
     <% } %>
 
     <%# Actions mobile (fav + edit) — masquées sur PC où elles sont dans la sidebar droite ─ %>

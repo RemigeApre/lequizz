@@ -7962,12 +7962,13 @@ a.wiki-ql-label:hover .wiki-ql-text {
 .wiki-detail-right  { display: none; }
 .wiki-detail-left   { display: none; }
 .wiki-detail-actions-mobile { display: flex; gap: 0.6rem; margin-top: 1.25rem; }
-.wiki-mobile-sec-carousel { display: none; }
+.wiki-mobile-sec-wrap { display: none; }
 
 /* ─────────────────────────────────────────────────────────
    Wiki detail mobile : image principale + rating + carrousel secondaire
 ───────────────────────────────────────────────────────── */
 @media (max-width: 640px) {
+  /* Volet droit visible sur mobile */
   .wiki-detail-right {
     display: block;
     margin-bottom: 0.75rem;
@@ -7990,7 +7991,7 @@ a.wiki-ql-label:hover .wiki-ql-text {
     display: block;
   }
 
-  /* Rating + réactions dans wiki-right-body sur mobile */
+  /* Rating + réactions */
   .wiki-detail-right .wiki-right-body {
     padding: 0.5rem 0 0;
     display: flex;
@@ -8002,33 +8003,52 @@ a.wiki-ql-label:hover .wiki-ql-text {
   .wiki-detail-right .wiki-right-actions { display: none; }
   .wiki-detail-right .wiki-right-variants { display: none; }
 
-  /* Images secondaires dans le corps : masquées (remplacées par le carrousel en bas) */
+  /* Images secondaires desktop masquées */
   .wiki-secondary-imgs { display: none; }
 
-  /* Carrousel des images secondaires (après texte + notes) */
+  /* ── Carrousel images secondaires ─────────────────────── */
+  .wiki-mobile-sec-wrap {
+    display: block;
+    margin-top: 2rem;
+    padding-bottom: 1.25rem;
+  }
+  .wiki-mobile-sec-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0 1.25rem 0.55rem;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--muted);
+  }
   .wiki-mobile-sec-carousel {
     display: flex;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
+    scroll-padding-inline: 1.25rem;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    gap: 0.5rem;
-    padding: 0.5rem 0 0.75rem;
-    margin-top: 1rem;
+    gap: 0.75rem;
+    padding: 0 1.25rem;
   }
   .wiki-mobile-sec-carousel::-webkit-scrollbar { display: none; }
-  .wiki-mobile-sec-carousel-item {
+  .wiki-mobile-sec-item {
     flex-shrink: 0;
-    width: 88vw;
-    scroll-snap-align: center;
-    border-radius: 10px;
+    /* Largeur : laisse ~1rem de l'image suivante visible à droite */
+    width: calc(100vw - 3.25rem);
+    scroll-snap-align: start;
+    border-radius: 12px;
     overflow: hidden;
+    background: hsl(220, 8%, 9%);
+    line-height: 0;
   }
-  .wiki-mobile-sec-carousel-img {
+  .wiki-mobile-sec-img {
     width: 100%;
     height: auto;
     display: block;
     object-fit: contain;
+    border-radius: 12px;
   }
 }
 
