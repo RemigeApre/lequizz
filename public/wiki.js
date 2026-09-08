@@ -84,17 +84,19 @@
     el.innerHTML = renderMarkdown(raw.textContent || raw.innerText);
   });
 
-  // Mobile : place l'image principale avant le premier h2 du corps de texte
+  // Mobile : place l'image principale avant la première section ## du contenu
+  // (les ## sont rendus en <details class="wiki-section">, pas en <h2>)
   (function () {
     var hero = document.getElementById("wiki-mobile-hero");
     if (!hero) return;
     var mainMd = document.querySelector(".wiki-detail-body .wiki-md");
     if (!mainMd) return;
-    var firstH2 = mainMd.querySelector("h2");
-    if (firstH2) {
-      mainMd.insertBefore(hero, firstH2);
+    var firstSection = mainMd.querySelector("details.wiki-section");
+    if (firstSection) {
+      mainMd.insertBefore(hero, firstSection);
     } else {
-      mainMd.parentNode.insertBefore(hero, mainMd.nextSibling);
+      // Pas de section ## : on place l'image après tout le texte intro
+      mainMd.appendChild(hero);
     }
   })();
 
