@@ -527,7 +527,8 @@
   var categoryFilter  = document.getElementById("wiki-category-filter");
   var tagFilter       = document.getElementById("wiki-tag-filter");
   var sortSelect      = document.getElementById("wiki-sort-select");
-  var ultraToggle     = document.getElementById("wiki-ultra-toggle");
+  var ultraToggle      = document.getElementById("wiki-ultra-toggle");
+  var fantaisieToggle  = document.getElementById("wiki-fantaisie-toggle");
   var wikiList        = document.getElementById("wiki-list");
   var searchInput     = document.getElementById("wiki-search-input");
   var searchClear     = document.getElementById("wiki-search-clear");
@@ -545,6 +546,7 @@
   var activeSort      = localStorage.getItem("wiki-filter-sort") || "alpha-asc";
   // Par défaut : ultra masqué. Seulement "0" explicite = affiché.
   var hideUltra       = localStorage.getItem("wiki-hide-ultra") !== "0";
+  var hideFantaisie   = localStorage.getItem("wiki-hide-fantaisie") !== "0";
   var searchQuery     = localStorage.getItem("wiki-filter-search") || "";
   var advMinRating    = Number(localStorage.getItem("wiki-filter-rating")) || 0;
 
@@ -668,7 +670,8 @@
           : card.dataset.category === activeCategory || extraCats.indexOf(activeCategory) !== -1);
       var cardTags  = (card.dataset.tags || "").split("|");
       var okTag     = !activeTag || cardTags.indexOf(activeTag) !== -1;
-      var okUltra   = !hideUltra || card.dataset.ultra !== "1";
+      var okUltra      = !hideUltra    || card.dataset.ultra     !== "1";
+      var okFantaisie  = !hideFantaisie || card.dataset.fantaisie !== "1";
 
       // Recherche textuelle
       var sc = scoreCard(card, q);
@@ -682,7 +685,7 @@
       var okFlame      = !(advFlame && advFlame.checked) || card.dataset.flame === "1";
       var okInterested = !(advInterested && advInterested.checked) || card.dataset.interested === "1";
 
-      card.hidden = !(okCat && okTag && okUltra && okSearch && okRating && okOwned && okFlame && okInterested);
+      card.hidden = !(okCat && okTag && okUltra && okFantaisie && okSearch && okRating && okOwned && okFlame && okInterested);
     });
 
     // Tri
@@ -857,6 +860,32 @@
   }
   syncUltraBtn();
 
+  // Filtre les cartes dans les strips du sommaire (wiki-index)
+  function applyChapterStripFilters() {
+    document.querySelectorAll(".wiki-chapter-strip .wiki-card").forEach(function (card) {
+      var isF = card.dataset.fantaisie === "1";
+      var isU = card.dataset.ultra === "1";
+      card.hidden = (hideFantaisie && isF) || (hideUltra && isU);
+    });
+  }
+
+  function syncFantaisieBtn() {
+    if (!fantaisieToggle) return;
+    fantaisieToggle.textContent = hideFantaisie ? "\u2728 Afficher Fantaisie" : "\u2728 Masquer Fantaisie";
+    fantaisieToggle.classList.toggle("active", hideFantaisie);
+  }
+  if (fantaisieToggle) {
+    fantaisieToggle.addEventListener("click", function () {
+      hideFantaisie = !hideFantaisie;
+      localStorage.setItem("wiki-hide-fantaisie", hideFantaisie ? "1" : "0");
+      syncFantaisieBtn();
+      applyFilters();
+      applyChapterStripFilters();
+    });
+  }
+  syncFantaisieBtn();
+  applyChapterStripFilters();
+
   // Restaure la barre de recherche
   if (searchInput && searchQuery) {
     searchInput.value = searchQuery;
@@ -873,7 +902,7 @@
   }
 
   var filtersPanel = document.getElementById("wiki-filters-panel");
-  if (filtersPanel && (anyAdv || activeCategory || activeTag || activeSort !== "alpha-asc" || !hideUltra)) {
+  if (filtersPanel && (anyAdv || activeCategory || activeTag || activeSort !== "alpha-asc" || !hideUltra || !hideFantaisie)) {
     filtersPanel.open = true;
   }
 
@@ -1775,7 +1804,8 @@
     if (!form) return;
     var heroQ         = document.getElementById("wiki-hero-q");
     var heroSort      = document.getElementById("wiki-hero-sort");
-    var heroUltraBtn  = document.getElementById("wiki-hero-ultra-toggle");
+    var heroUltraBtn      = document.getElementById("wiki-hero-ultra-toggle");
+    var heroFantaisieBtn  = document.getElementById("wiki-hero-fantaisie-toggle");
     var rating        = document.getElementById("wiki-hero-rating");
     var owned         = document.getElementById("wiki-hero-owned");
     var flame         = document.getElementById("wiki-hero-flame");
@@ -1808,6 +1838,22 @@
         heroHideUltra = !heroHideUltra;
         localStorage.setItem("wiki-hide-ultra", heroHideUltra ? "1" : "0");
         syncHeroUltraBtn();
+      });
+    }
+
+    // Fantaisie toggle
+    var heroHideFantaisie = localStorage.getItem("wiki-hide-fantaisie") !== "0";
+    function syncHeroFantaisieBtn() {
+      if (!heroFantaisieBtn) return;
+      heroFantaisieBtn.textContent = heroHideFantaisie ? "\u2728 Afficher Fantaisie" : "\u2728 Masquer Fantaisie";
+      heroFantaisieBtn.classList.toggle("active", heroHideFantaisie);
+    }
+    if (heroFantaisieBtn) {
+      syncHeroFantaisieBtn();
+      heroFantaisieBtn.addEventListener("click", function () {
+        heroHideFantaisie = !heroHideFantaisie;
+        localStorage.setItem("wiki-hide-fantaisie", heroHideFantaisie ? "1" : "0");
+        syncHeroFantaisieBtn();
       });
     }
 
