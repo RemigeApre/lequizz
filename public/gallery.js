@@ -151,7 +151,8 @@
   var activeRating   = 0;
   var sortMode       = "date-desc";
   var currentPage    = 0;
-  var ITEMS_PER_PAGE = 50;
+  var MOBILE_BREAK   = 641;
+  var ITEMS_PER_PAGE = window.innerWidth < MOBILE_BREAK ? 10 : 50;
   var filteredCards  = [];
 
   function norm(s) {

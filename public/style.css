@@ -6685,10 +6685,6 @@ a.wiki-ql-label:hover .wiki-ql-text {
     gap: 0.6rem;
   }
 
-  /* ── Gallery grid : 2 colonnes plus petites ─────────────────────────── */
-  .gallery-grid {
-    --gallery-card-min: 140px;
-  }
 
   /* ── Wiki detail : reorder (droite d'abord = image + note + réactions) */
   .wiki-detail-layout {
