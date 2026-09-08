@@ -3,8 +3,12 @@
   <%- include('partials/top-nav', { config: config, navTitle: 'BD', navBack: '/' }) %>
   <div class="bd-list-header">
     <h1 class="section-title-h1">BD</h1>
-    <% if (currentUser && currentUser.isAdmin) { %><a href="/bd/new" class="link-button">+ Nouvelle BD</a><% } %>
   </div>
+  <% if (currentUser && currentUser.isAdmin) { %>
+  <div class="gallery-fab-wrap">
+    <a href="/bd/new" class="wiki-fab-add" title="Nouvelle BD">+</a>
+  </div>
+  <% } %>
 
   <% if (books.length) { %>
   <div class="bd-controls">

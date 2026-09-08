@@ -96,22 +96,13 @@
     if (fabMain) fabMain.textContent = "\u00d7";
   }
 
-  if (fabMain && fabMenu) {
+  if (fabMain) {
     fabMain.addEventListener("click", function () {
       if (uploadPanel && !uploadPanel.hidden) { closeUpload(); return; }
-      fabMenu.hidden = !fabMenu.hidden;
+      openUploadAs("image");
     });
   }
-  if (fabImage) fabImage.addEventListener("click", function () { openUploadAs("image"); });
-  if (fabBd)    fabBd.addEventListener("click",    function () { openUploadAs("bd"); });
   if (cancelBtn) cancelBtn.addEventListener("click", closeUpload);
-
-  // Ferme le menu si on clique en dehors
-  document.addEventListener("click", function (e) {
-    if (!fabMenu || fabMenu.hidden) return;
-    var wrap = document.getElementById("gallery-fab-wrap");
-    if (wrap && !wrap.contains(e.target)) fabMenu.hidden = true;
-  });
 
   if (fileInput && previewZone) {
     fileInput.addEventListener("change", function () {

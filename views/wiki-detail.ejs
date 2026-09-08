@@ -265,21 +265,6 @@
           </div>
         <% } %>
 
-        <%# e) Réactions côte à côte ─ %>
-        <% if (currentUser) { %>
-          <div class="wiki-react wiki-right-reactions"
-               data-id="<%= page.id %>"
-               data-flame="<%= (page.flame || isFavorite) ? '1' : '0' %>"
-               data-interested="<%= page.interested ? '1' : '0' %>">
-            <button type="button" class="wiki-react-btn wiki-react-flame<%= (page.flame || isFavorite) ? ' active' : '' %>" data-key="flame">
-              <span class="wiki-react-icon">&#128293;</span><span class="wiki-react-label">J&apos;adore</span>
-            </button>
-            <button type="button" class="wiki-react-btn wiki-react-interest<%= page.interested ? ' active' : '' %>" data-key="interested">
-              <span class="wiki-react-icon">&#10024;</span><span class="wiki-react-label">Int&eacute;ress&eacute;e</span>
-            </button>
-          </div>
-        <% } %>
-
         <%# f) Tags cliquables → accueil wiki avec tag filtré ─ %>
         <% if (hasAnyTags) { %>
           <div class="wiki-right-tags">
@@ -297,6 +282,58 @@
                 <span class="wiki-derived-pill"><%= t.term %><% if (t.en) { %> <span class="wiki-derived-en" title="Terme anglais">&#127468;&#127463;</span><% } %></span>
               <% }) %>
             <% } %>
+          </div>
+        <% } %>
+
+        <%# Carrousel images secondaires (mobile uniquement, entre tags et réactions) ─ %>
+        <% if (hasImages && page.imagePaths.length > 1 && currentUser) { %>
+          <% var secCount = page.imagePaths.length - 1; %>
+          <div class="wiki-mobile-sec-wrap">
+            <div class="wiki-mobile-sec-heading">
+              <span>Autres images</span>
+              <span class="wiki-mobile-sec-counter" id="wiki-sec-counter"><%= secCount > 1 ? '1\u00a0/\u00a0' + secCount : '' %></span>
+            </div>
+            <div class="wiki-mobile-sec-carousel" id="wiki-sec-carousel">
+              <% page.imagePaths.slice(1).forEach(function (src) { %>
+                <div class="wiki-mobile-sec-item">
+                  <img src="<%= src %>" alt="" class="wiki-mobile-sec-img" loading="lazy" />
+                </div>
+              <% }) %>
+            </div>
+          </div>
+          <% if (secCount > 1) { %>
+          <script>
+          (function () {
+            var carousel = document.getElementById("wiki-sec-carousel");
+            var counter  = document.getElementById("wiki-sec-counter");
+            var total    = <%= secCount %>;
+            if (!carousel || !counter) return;
+            var items = carousel.querySelectorAll(".wiki-mobile-sec-item");
+            function update() {
+              if (!items.length) return;
+              var gap  = parseFloat(getComputedStyle(carousel).gap) || 10;
+              var itemW = items[0].offsetWidth + gap;
+              var idx  = Math.min(Math.round(carousel.scrollLeft / itemW), total - 1);
+              counter.textContent = (idx + 1) + "\u00a0/\u00a0" + total;
+            }
+            carousel.addEventListener("scroll", update, { passive: true });
+          })();
+          </script>
+          <% } %>
+        <% } %>
+
+        <%# e) Réactions côte à côte ─ %>
+        <% if (currentUser) { %>
+          <div class="wiki-react wiki-right-reactions"
+               data-id="<%= page.id %>"
+               data-flame="<%= (page.flame || isFavorite) ? '1' : '0' %>"
+               data-interested="<%= page.interested ? '1' : '0' %>">
+            <button type="button" class="wiki-react-btn wiki-react-flame<%= (page.flame || isFavorite) ? ' active' : '' %>" data-key="flame">
+              <span class="wiki-react-icon">&#128293;</span><span class="wiki-react-label">J&apos;adore</span>
+            </button>
+            <button type="button" class="wiki-react-btn wiki-react-interest<%= page.interested ? ' active' : '' %>" data-key="interested">
+              <span class="wiki-react-icon">&#10024;</span><span class="wiki-react-label">Int&eacute;ress&eacute;e</span>
+            </button>
           </div>
         <% } %>
 
@@ -340,42 +377,6 @@
         <textarea class="wiki-user-note-area" placeholder="Tes notes personnelles sur cette page…" rows="4"><%= locals.userNote || '' %></textarea>
         <p class="wiki-user-note-status" aria-live="polite"></p>
       </div>
-    <% } %>
-
-    <%# ─ Carrousel images secondaires mobile (après texte + notes) ─ %>
-    <% if (hasImages && page.imagePaths.length > 1 && currentUser) { %>
-      <% var secCount = page.imagePaths.length - 1; %>
-      <div class="wiki-mobile-sec-wrap">
-        <div class="wiki-mobile-sec-heading">
-          <span>Autres images</span>
-          <span class="wiki-mobile-sec-counter" id="wiki-sec-counter"><%= secCount > 1 ? '1\u00a0/\u00a0' + secCount : '' %></span>
-        </div>
-        <div class="wiki-mobile-sec-carousel" id="wiki-sec-carousel">
-          <% page.imagePaths.slice(1).forEach(function (src) { %>
-            <div class="wiki-mobile-sec-item">
-              <img src="<%= src %>" alt="" class="wiki-mobile-sec-img" loading="lazy" />
-            </div>
-          <% }) %>
-        </div>
-      </div>
-      <% if (secCount > 1) { %>
-      <script>
-      (function () {
-        var carousel = document.getElementById("wiki-sec-carousel");
-        var counter  = document.getElementById("wiki-sec-counter");
-        var total    = <%= secCount %>;
-        if (!carousel || !counter) return;
-        var items = carousel.querySelectorAll(".wiki-mobile-sec-item");
-        function update() {
-          if (!items.length) return;
-          var itemW = items[0].offsetWidth + 12; /* gap 0.75rem ≈ 12px */
-          var idx   = Math.min(Math.round(carousel.scrollLeft / itemW), total - 1);
-          counter.textContent = (idx + 1) + "\u00a0/\u00a0" + total;
-        }
-        carousel.addEventListener("scroll", update, { passive: true });
-      })();
-      </script>
-      <% } %>
     <% } %>
 
     <%# Actions mobile (fav + edit) — masquées sur PC où elles sont dans la sidebar droite ─ %>
