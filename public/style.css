@@ -4119,6 +4119,7 @@ a.wiki-ql-label:hover .wiki-ql-text {
   color: var(--muted); font-weight: 600; margin-right: 0.35rem;
 }
 .wiki-lb-meta-value { font-size: 0.82rem; color: var(--fg); }
+.wiki-lb-meta-value.wiki-lb-meta-placeholder { color: var(--muted); font-style: italic; }
 
 .wiki-lb-meta-input {
   width: 100%; font-size: 0.82rem; padding: 0.3rem 0.5rem;
@@ -6922,7 +6923,7 @@ a.wiki-ql-label:hover .wiki-ql-text {
 /* ── Tags cliquables ────────────────────────────────── */
 .wiki-right-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; }
 .wiki-right-tag-link {
-  font-size: 0.7rem; padding: 0.12rem 0.45rem;
+  font-size: 0.82rem; padding: 0.15rem 0.55rem;
   border-radius: 20px;
   background: rgba(255,255,255,0.1);
   color: rgba(255,255,255,0.75);
@@ -6932,8 +6933,9 @@ a.wiki-ql-label:hover .wiki-ql-text {
 }
 .wiki-right-tag-link:hover { background: rgba(255,255,255,0.2); color: #fff; }
 .wiki-tag-xy {
-  font-size: 0.6rem; margin-left: 0.2rem;
+  font-size: 0.72rem; margin-left: 0.3rem;
   font-variant-numeric: tabular-nums; letter-spacing: 0;
+  font-weight: 600;
 }
 .wiki-tag-xy-pages { color: hsl(38,90%,72%); }
 .wiki-tag-xy-imgs  { color: hsl(195,70%,72%); }

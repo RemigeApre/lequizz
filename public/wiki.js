@@ -1647,6 +1647,8 @@
     });
   }
 
+  var LB_FIELD_PLACEHOLDER = { author: "Inconnu", parody: "Non" };
+
   function exitEditMode() {
     lbEditMode = false;
     lbMetaEditBtn.hidden = !lbCanEdit || !lbCurrentMeta;
@@ -1655,11 +1657,14 @@
     if (!lbCurrentMeta) return;
     renderMetaTags(lbCurrentMeta.tags, false);
     lbMetaFields.querySelectorAll(".wiki-lb-meta-field").forEach(function(field) {
-      field.querySelector(".wiki-lb-meta-value").hidden = false;
+      var key = field.dataset.field;
+      var val = lbCurrentMeta[key] || "";
+      var valueEl = field.querySelector(".wiki-lb-meta-value");
+      valueEl.hidden = false;
+      valueEl.textContent = val || LB_FIELD_PLACEHOLDER[key] || "\u2014";
+      valueEl.classList.toggle("wiki-lb-meta-placeholder", !val);
       field.querySelector(".wiki-lb-meta-edit").hidden = true;
-      var val = lbCurrentMeta[field.dataset.field] || "";
-      field.querySelector(".wiki-lb-meta-value").textContent = val;
-      field.closest(".wiki-lb-meta-field").hidden = !val;
+      field.hidden = false;
     });
   }
 
@@ -1672,11 +1677,25 @@
     fetch("/galerie/image-meta?src=" + encodeURIComponent(lbCurrentSrc))
       .then(function(r) { return r.json(); })
       .then(function(meta) {
-        if (!meta) { lbMetaSection.hidden = true; lbCurrentMeta = null; return; }
         lbMetaSection.hidden = false;
-        lbCurrentMeta = meta;
+        lbCurrentMeta = meta || null;
         lbEditMode = false;
-        exitEditMode();
+        // Toujours afficher auteur/parodie, même sans enregistrement DB
+        lbMetaTags.innerHTML = "";
+        if (meta && meta.tags && meta.tags.length) renderMetaTags(meta.tags, false);
+        lbMetaEditBtn.hidden = !lbCanEdit || !meta;
+        lbMetaSaveRow.hidden = true;
+        lbTagEditWrap.hidden = true;
+        lbMetaFields.querySelectorAll(".wiki-lb-meta-field").forEach(function(field) {
+          var key = field.dataset.field;
+          var val = (meta && meta[key]) || "";
+          var valueEl = field.querySelector(".wiki-lb-meta-value");
+          valueEl.hidden = false;
+          valueEl.textContent = val || LB_FIELD_PLACEHOLDER[key] || "\u2014";
+          valueEl.classList.toggle("wiki-lb-meta-placeholder", !val);
+          field.querySelector(".wiki-lb-meta-edit").hidden = true;
+          field.hidden = false;
+        });
       });
   }
 
