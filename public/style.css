@@ -2353,11 +2353,12 @@ input[type="text"], input[type="password"] {
     0 2px  8px  rgba(0,0,0,0.06);
 }
 
-/* ── Filet d'accent (identité couleur en haut) ─── */
+/* ── Filet d'accent (identité couleur en bas) ──── */
 .wiki-card-accent {
   display: block;
   height: 3px;
   flex-shrink: 0;
+  margin-top: auto;
 }
 
 /* ── Carte AVEC image ──────────────────────────── */
@@ -2614,14 +2615,15 @@ input[type="text"], input[type="password"] {
 /* ── Bandeaux Ultra / Fantaisie / Irréaliste ─────── */
 .wiki-card { position: relative; }
 .wiki-card-banner {
-  display: block;
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  z-index: 3;
   text-align: center;
   font-size: 0.58rem;
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   padding: 0.18rem 0.5rem;
-  border-radius: 0;
   line-height: 1.4;
 }
 .wiki-card-banner--ultra     { background: #2a0a5a; color: #c8a8f8; }
@@ -6129,16 +6131,14 @@ a.wiki-ql-label:hover .wiki-ql-text {
 .wiki-grid--cols-4 { grid-template-columns: repeat(4, 1fr) !important; }
 .wiki-grid--cols-5 { grid-template-columns: repeat(5, 1fr) !important; }
 
-.wiki-cols-selector { display: flex; gap: 0.3rem; }
-.wiki-cols-btn {
-  flex: 1; padding: 0.3rem; border-radius: 5px;
-  font-size: 0.82rem; font-weight: 700; cursor: pointer;
-  border: 1px solid var(--border);
-  background: var(--card); color: var(--fg);
-}
-.wiki-cols-btn--active, .wiki-cols-btn.active {
-  background: var(--accent); color: #fff; border-color: var(--accent);
-}
+/* ── Hauteur image selon cols ─────────────────────── */
+.wiki-grid--cols-1 .wiki-card-image { height: 280px; }
+.wiki-grid--cols-2 .wiki-card-image { height: 210px; }
+.wiki-grid--cols-4 .wiki-card-image { height: 120px; }
+.wiki-grid--cols-5 .wiki-card-image { height: 100px; }
+
+.wiki-sort-cols-row { display: flex; gap: 0.4rem; }
+.wiki-sort-cols-row .wiki-sort-select { flex: 1; }
 
 /* ── Carousel (1-2 cols) ──────────────────────────── */
 .wiki-card-carousel-wrap { position: relative; height: 100%; }
@@ -6152,15 +6152,6 @@ a.wiki-ql-label:hover .wiki-ql-text {
 .wiki-card-image:hover .wiki-card-carousel-btn { opacity: 1; }
 .wiki-card-carousel-btn--prev { left: 0.4rem; }
 .wiki-card-carousel-btn--next { right: 0.4rem; }
-.wiki-card-carousel-dots {
-  position: absolute; bottom: 2.5rem; left: 0; right: 0;
-  display: flex; justify-content: center; gap: 0.3rem; z-index: 4;
-}
-.wiki-card-carousel-dot {
-  width: 0.4rem; height: 0.4rem; border-radius: 50%;
-  background: rgba(255,255,255,0.5); cursor: pointer;
-}
-.wiki-card-carousel-dot.active { background: #fff; }
 
 /* ── Pagination ───────────────────────────────────── */
 .wiki-page-hidden { display: none !important; }

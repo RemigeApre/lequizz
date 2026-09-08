@@ -539,8 +539,9 @@
   var advStarReset    = document.getElementById("wiki-adv-star-reset");
   var propGrid        = document.getElementById("wiki-prop-grid");
   var tagSearchInput  = document.getElementById("wiki-tag-search");
-  var colsSelector    = document.getElementById("wiki-cols-selector");
+  var colsSelect      = document.getElementById("wiki-cols-select");
   var paginationEl    = document.getElementById("wiki-pagination");
+  var paginationTopEl = document.getElementById("wiki-pagination-top");
   var specialFilter   = document.getElementById("wiki-special-filter");
   var extraCatFilter  = document.getElementById("wiki-extra-cat-filter");
 
@@ -820,6 +821,7 @@
     if (totalPages <= 1) {
       visibleCards.forEach(function (c) { c.classList.remove("wiki-page-hidden"); });
       if (paginationEl) paginationEl.hidden = true;
+      if (paginationTopEl) paginationTopEl.hidden = true;
       return;
     }
     if (currentPage > totalPages) currentPage = totalPages;
@@ -828,14 +830,12 @@
     visibleCards.forEach(function (c, i) {
       c.classList.toggle("wiki-page-hidden", i < start || i >= end);
     });
-    if (paginationEl) {
-      paginationEl.hidden = false;
-      renderPagination(totalPages);
-    }
+    if (paginationEl) { paginationEl.hidden = false; renderPaginationInto(paginationEl, totalPages); }
+    if (paginationTopEl) { paginationTopEl.hidden = false; renderPaginationInto(paginationTopEl, totalPages); }
   }
 
-  function renderPagination(totalPages) {
-    while (paginationEl.firstChild) paginationEl.removeChild(paginationEl.firstChild);
+  function renderPaginationInto(container, totalPages) {
+    while (container.firstChild) container.removeChild(container.firstChild);
     function makePage(label, page, disabled) {
       var btn = document.createElement("button");
       btn.type = "button"; btn.textContent = label;
@@ -851,17 +851,17 @@
       }
       return btn;
     }
-    paginationEl.appendChild(makePage("\u2190", currentPage - 1, currentPage <= 1));
+    container.appendChild(makePage("\u2190", currentPage - 1, currentPage <= 1));
     for (var p = 1; p <= totalPages; p++) {
       if (p === 1 || p === totalPages || (p >= currentPage - 1 && p <= currentPage + 1)) {
-        paginationEl.appendChild(makePage(String(p), p, false));
+        container.appendChild(makePage(String(p), p, false));
       } else if (p === currentPage - 2 || p === currentPage + 2) {
         var ellipsis = document.createElement("span");
         ellipsis.className = "wiki-page-ellipsis"; ellipsis.textContent = "\u2026";
-        paginationEl.appendChild(ellipsis);
+        container.appendChild(ellipsis);
       }
     }
-    paginationEl.appendChild(makePage("\u2192", currentPage + 1, currentPage >= totalPages));
+    container.appendChild(makePage("\u2192", currentPage + 1, currentPage >= totalPages));
   }
 
   // ── Cols selector ───────────────────────────────────────────────────────────
@@ -869,10 +869,10 @@
     if (!wikiList) return;
     wikiList.className = wikiList.className.replace(/\bwiki-grid--cols-\d\b/g, "");
     wikiList.classList.add("wiki-grid--cols-" + activeCols);
-    // Carousel: only in 1-2 cols mode
+    // Carousel: only in 1-2 cols mode, max 3 images
     var doCarousel = activeCols <= 2;
     wikiList.querySelectorAll(".wiki-card-image[data-images]").forEach(function (imgDiv) {
-      var paths = imgDiv.dataset.images.split("|").filter(Boolean);
+      var paths = imgDiv.dataset.images.split("|").filter(Boolean).slice(0, 3);
       if (paths.length <= 1) return;
       if (doCarousel) {
         enableCarousel(imgDiv, paths);
@@ -880,12 +880,8 @@
         disableCarousel(imgDiv, paths[0]);
       }
     });
-    // Update col buttons
-    if (colsSelector) {
-      colsSelector.querySelectorAll(".wiki-cols-btn").forEach(function (btn) {
-        btn.classList.toggle("active", Number(btn.dataset.cols) === activeCols);
-      });
-    }
+    // Sync select value
+    if (colsSelect) colsSelect.value = String(activeCols);
   }
 
   function enableCarousel(imgDiv, paths) {
@@ -902,22 +898,10 @@
     nextBtn.type = "button"; nextBtn.className = "wiki-card-carousel-btn wiki-card-carousel-btn--next";
     nextBtn.setAttribute("aria-label", "Image suivante"); nextBtn.textContent = "\u203a";
 
-    var dots = document.createElement("div");
-    dots.className = "wiki-card-carousel-dots";
-    paths.forEach(function (_, i) {
-      var dot = document.createElement("span");
-      dot.className = "wiki-card-carousel-dot" + (i === idx ? " active" : "");
-      dot.addEventListener("click", function (e) { e.preventDefault(); goTo(i); });
-      dots.appendChild(dot);
-    });
-
     function goTo(newIdx) {
       idx = ((newIdx % paths.length) + paths.length) % paths.length;
       img.src = paths[idx];
       imgDiv.dataset.imgIdx = idx;
-      dots.querySelectorAll(".wiki-card-carousel-dot").forEach(function (d, i) {
-        d.classList.toggle("active", i === idx);
-      });
     }
 
     prevBtn.addEventListener("click", function (e) { e.preventDefault(); goTo(idx - 1); });
@@ -925,7 +909,6 @@
 
     imgDiv.appendChild(prevBtn);
     imgDiv.appendChild(nextBtn);
-    imgDiv.appendChild(dots);
   }
 
   function disableCarousel(imgDiv, firstPath) {
@@ -934,19 +917,15 @@
     imgDiv.dataset.imgIdx = "0";
     var img = imgDiv.querySelector(".wiki-card-img");
     if (img) img.src = firstPath;
-    imgDiv.querySelectorAll(".wiki-card-carousel-btn, .wiki-card-carousel-dots").forEach(function (el) {
-      el.remove();
-    });
+    imgDiv.querySelectorAll(".wiki-card-carousel-btn").forEach(function (el) { el.remove(); });
   }
 
-  if (colsSelector) {
-    colsSelector.querySelectorAll(".wiki-cols-btn").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        activeCols = Number(btn.dataset.cols);
-        localStorage.setItem("wiki-cols", activeCols);
-        applyCols();
-        applyFilters();
-      });
+  if (colsSelect) {
+    colsSelect.addEventListener("change", function () {
+      activeCols = Number(colsSelect.value);
+      localStorage.setItem("wiki-cols", activeCols);
+      applyCols();
+      applyFilters();
     });
   }
 

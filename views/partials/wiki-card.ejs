@@ -81,12 +81,10 @@
   %>
   data-extra-cats="<%= (page.extraCategories || []).join('|') %>">
 
-  <span class="wiki-card-accent" style="background: <%= wcAccent %>"></span>
-  <% if (wcBannerText) { %><span class="wiki-card-banner wiki-card-banner--<%= wcBannerMod %>"><%= wcBannerText %></span><% } %>
-
   <% if (page.imagePaths && page.imagePaths.length && currentUser) { %>
     <%# ── Carte AVEC image ───────────────────────────────────────────── %>
     <div class="wiki-card-image" data-images="<%= page.imagePaths.join('|') %>">
+      <% if (wcBannerText) { %><span class="wiki-card-banner wiki-card-banner--<%= wcBannerMod %>"><%= wcBannerText %></span><% } %>
       <img src="<%= page.imagePaths[0] %>" alt="" class="wiki-card-img" />
       <div class="wiki-card-overlay">
         <% if (wcShowBadge) { %><span class="wiki-category-badge" style="background: hsl(<%= cat ? cat.hue : 220 %>, 55%, 45%)"><%= cat ? cat.label : page.category %></span><% } %>
@@ -101,11 +99,13 @@
     <div class="wiki-card-body">
       <p class="wiki-card-title"><%= page.title %></p>
     </div>
+    <span class="wiki-card-accent" style="background: <%= wcAccent %>"></span>
 
   <% } else { %>
     <%# ── Carte SANS image : placeholder géométrique ────────────────── %>
     <% var ph = cat ? cat.hue : 220; %>
     <div class="wiki-card-image">
+      <% if (wcBannerText) { %><span class="wiki-card-banner wiki-card-banner--<%= wcBannerMod %>"><%= wcBannerText %></span><% } %>
       <svg class="wiki-card-placeholder-svg" viewBox="0 0 160 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
         <defs>
           <radialGradient id="rg-<%= page.id %>" cx="50%" cy="50%" r="65%">
@@ -134,5 +134,6 @@
     <div class="wiki-card-body">
       <p class="wiki-card-title"><%= page.title %></p>
     </div>
+    <span class="wiki-card-accent" style="background: <%= wcAccent %>"></span>
   <% } %>
 </a>
