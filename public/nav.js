@@ -1,3 +1,50 @@
+// ── Historique de navigation (bouton retour mobile) ─────────────────────────
+(function () {
+  var MAX = 5;
+  var KEY = "lq_nav_stack";
+  var BACK_FLAG = "lq_nav_back";
+
+  function getStack() {
+    try { return JSON.parse(sessionStorage.getItem(KEY) || "[]"); } catch (_) { return []; }
+  }
+  function saveStack(s) {
+    try { sessionStorage.setItem(KEY, JSON.stringify(s)); } catch (_) {}
+  }
+
+  var cur = location.pathname + location.search;
+  var stack = getStack();
+
+  var isBackNav = sessionStorage.getItem(BACK_FLAG) === "1";
+  if (isBackNav) {
+    // On vient du bouton retour : le stack est déjà correct, ne pas repousser
+    try { sessionStorage.removeItem(BACK_FLAG); } catch (_) {}
+  } else if (!stack.length || stack[stack.length - 1] !== cur) {
+    stack.push(cur);
+    if (stack.length > MAX) stack = stack.slice(stack.length - MAX);
+    saveStack(stack);
+  }
+
+  var btn = document.querySelector(".nav-back-btn");
+  if (!btn) return;
+
+  if (stack.length >= 2) {
+    btn.href = stack[stack.length - 2];
+  }
+
+  btn.addEventListener("click", function (e) {
+    var s = getStack();
+    if (s.length >= 2) {
+      e.preventDefault();
+      var dest = s[s.length - 2];
+      s.pop();
+      saveStack(s);
+      try { sessionStorage.setItem(BACK_FLAG, "1"); } catch (_) {}
+      window.location.href = dest;
+    }
+    // sinon : laisser le href statique (fallback)
+  });
+})();
+
 // ── Drawer mobile ────────────────────────────────────────────────────────────
 (function () {
   var burger = document.getElementById("nav-burger");
