@@ -537,10 +537,7 @@
   var advPanel        = document.getElementById("wiki-adv-panel");
   var advStarsWrap    = document.getElementById("wiki-adv-stars");
   var advStarReset    = document.getElementById("wiki-adv-star-reset");
-  var advOwned        = document.getElementById("adv-owned");
-  var advFlame        = document.getElementById("adv-flame");
-  var advInterested   = document.getElementById("adv-interested");
-  var advNotRated     = document.getElementById("adv-not-rated");
+  var propGrid        = document.getElementById("wiki-prop-grid");
   var tagSearchInput  = document.getElementById("wiki-tag-search");
   var colsSelector    = document.getElementById("wiki-cols-selector");
   var paginationEl    = document.getElementById("wiki-pagination");
@@ -548,7 +545,14 @@
   var extraCatFilter  = document.getElementById("wiki-extra-cat-filter");
 
   var activeCategory  = localStorage.getItem("wiki-filter-cat") || "";
-  var activeTag       = localStorage.getItem("wiki-filter-tag") || "";
+  var propStates = {
+    "not-rated": Number(localStorage.getItem("wiki-prop-not-rated") || "0"),
+    "owned":     Number(localStorage.getItem("wiki-prop-owned")     || "0"),
+    "flame":     Number(localStorage.getItem("wiki-prop-flame")     || "0"),
+    "interested":Number(localStorage.getItem("wiki-prop-interested")|| "0")
+  };
+  var includedTagsSet = new Set(JSON.parse(localStorage.getItem("wiki-filter-tags-inc") || "[]"));
+  var excludedTagsSet = new Set(JSON.parse(localStorage.getItem("wiki-filter-tags-exc") || "[]"));
   var activeSort      = localStorage.getItem("wiki-filter-sort") || "alpha-asc";
   // Par défaut : ultra masqué. Seulement "0" explicite = affiché.
   var hideUltra       = localStorage.getItem("wiki-hide-ultra") !== "0";
@@ -663,16 +667,51 @@
     return score;
   }
 
+  function updateTagChipVisibility(baseCards) {
+    if (!tagFilter) return;
+    var chips = tagFilter.querySelectorAll(".wiki-tag-chip[data-tag]");
+    if (includedTagsSet.size === 0 && excludedTagsSet.size === 0) {
+      chips.forEach(function(chip) {
+        var t = (chip.dataset.tag || "").toLowerCase();
+        chip.hidden = !baseCards.some(function(c) {
+          return (c.dataset.tags || "").split("|").indexOf(t) !== -1;
+        });
+      });
+      return;
+    }
+    chips.forEach(function(chip) {
+      var chipTag = (chip.dataset.tag || "").toLowerCase();
+      var chipState = chip.dataset.state || "0";
+      if (chipState !== "0") {
+        chip.hidden = false; // always show active chips
+        return;
+      }
+      // Would adding this chip as "include" still yield cards?
+      var wouldYield = baseCards.some(function(card) {
+        var cardTags = (card.dataset.tags || "").split("|");
+        if (cardTags.indexOf(chipTag) === -1) return false;
+        // Must have all currently included tags
+        for (var incT of includedTagsSet) {
+          if (cardTags.indexOf(incT) === -1) return false;
+        }
+        // Must not have any excluded tags
+        for (var excT of excludedTagsSet) {
+          if (cardTags.indexOf(excT) !== -1) return false;
+        }
+        return true;
+      });
+      chip.hidden = !wouldYield;
+    });
+  }
+
   function applyFilters() {
     if (!wikiList) return;
     if (!_paginationNavigation) currentPage = 1;
     var cards   = Array.from(wikiList.querySelectorAll(".wiki-card"));
     var q       = norm(searchQuery);
-    var hasAdv  = advMinRating > 0 ||
-                  (advNotRated && advNotRated.checked) ||
-                  (advOwned && advOwned.checked) ||
-                  (advFlame && advFlame.checked) ||
-                  (advInterested && advInterested.checked);
+    var _anyPropAdv = false;
+    for (var _pk in propStates) { if (propStates[_pk] !== 0) { _anyPropAdv = true; break; } }
+    var hasAdv  = advMinRating > 0 || _anyPropAdv;
 
     var scores = new Map();
 
@@ -683,7 +722,13 @@
         (activeCategory === "__owned__" ? card.dataset.owned === "1"
           : card.dataset.category === activeCategory || extraCats.indexOf(activeCategory) !== -1);
       var cardTags  = (card.dataset.tags || "").split("|");
-      var okTag     = !activeTag || cardTags.indexOf(activeTag) !== -1;
+      var okTag = true;
+      if (includedTagsSet.size > 0) {
+        okTag = Array.from(includedTagsSet).every(function(t) { return cardTags.indexOf(t) !== -1; });
+      }
+      if (okTag && excludedTagsSet.size > 0) {
+        okTag = !Array.from(excludedTagsSet).some(function(t) { return cardTags.indexOf(t) !== -1; });
+      }
       // Ultra toggle only applies to cards that are ultra but NOT irréaliste
       var okUltra = !hideUltra || card.dataset.ultra !== "1" || card.dataset.irrealiste === "1";
       // Irréaliste toggle controls all irréaliste cards
@@ -717,18 +762,22 @@
       scores.set(card, sc);
 
       // Filtres avancés
-      var okRating;
-      if (advNotRated && advNotRated.checked) {
-        okRating = Number(card.dataset.rating) === 0;
-      } else {
-        okRating = !advMinRating || Number(card.dataset.rating) >= advMinRating;
-      }
-      var okOwned      = !(advOwned && advOwned.checked) || card.dataset.owned === "1";
-      var okFlame      = !(advFlame && advFlame.checked) || card.dataset.flame === "1";
-      var okInterested = !(advInterested && advInterested.checked) || card.dataset.interested === "1";
+      var okRating = !advMinRating || Number(card.dataset.rating) >= advMinRating;
+      // Prop filters (3-state)
+      var isUnrated = !Number(card.dataset.rating);
+      var okNotRated   = propStates["not-rated"]  === 0 ? true : (propStates["not-rated"]  === 1 ? isUnrated              : !isUnrated);
+      var okOwned      = propStates["owned"]      === 0 ? true : (propStates["owned"]      === 1 ? card.dataset.owned === "1"      : card.dataset.owned !== "1");
+      var okFlame      = propStates["flame"]      === 0 ? true : (propStates["flame"]      === 1 ? card.dataset.flame === "1"      : card.dataset.flame !== "1");
+      var okInterested = propStates["interested"] === 0 ? true : (propStates["interested"] === 1 ? card.dataset.interested === "1" : card.dataset.interested !== "1");
 
-      card.hidden = !(okCat && okTag && okUltra && okIrrealiste && okSpecial && okExtraCat && okSearch && okRating && okOwned && okFlame && okInterested);
+      // Track which cards pass all non-tag filters (for smart tag chip visibility)
+      var okNonTag = okCat && okUltra && okIrrealiste && okSpecial && okExtraCat && okSearch && okRating && okNotRated && okOwned && okFlame && okInterested;
+      card._passesNonTag = okNonTag;
+      card.hidden = !(okNonTag && okTag);
     });
+
+    var baseCards = cards.filter(function(c) { return c._passesNonTag; });
+    updateTagChipVisibility(baseCards);
 
     // Tri
     var visible = cards.filter(function (c) { return !c.hidden; });
@@ -958,22 +1007,22 @@
     }
   }
 
-  // Checkboxes avancées
-  var advCbMap = [
-    [advOwned,      "wiki-filter-owned"],
-    [advFlame,      "wiki-filter-flame"],
-    [advInterested, "wiki-filter-interested"],
-    [advNotRated,   "wiki-filter-not-rated"],
-  ];
-  advCbMap.forEach(function (pair) {
-    var cb = pair[0], key = pair[1];
-    if (!cb) return;
-    if (localStorage.getItem(key) === "1") cb.checked = true;
-    cb.addEventListener("change", function () {
-      localStorage.setItem(key, cb.checked ? "1" : "0");
-      applyFilters();
+  // Prop buttons (3-state)
+  if (propGrid) {
+    propGrid.querySelectorAll(".wiki-prop-btn").forEach(function(btn) {
+      var prop = btn.dataset.prop;
+      var saved = propStates[prop] || 0;
+      btn.dataset.state = String(saved);
+      btn.addEventListener("click", function() {
+        var s = Number(btn.dataset.state);
+        s = (s + 1) % 3;
+        btn.dataset.state = String(s);
+        propStates[prop] = s;
+        localStorage.setItem("wiki-prop-" + prop, String(s));
+        applyFilters();
+      });
     });
-  });
+  }
 
   if (categoryFilter) {
     categoryFilter.querySelectorAll(".tag-chip").forEach(function (chip) {
@@ -998,34 +1047,37 @@
     }
   }
   if (tagFilter) {
-    tagFilter.querySelectorAll(".tag-chip").forEach(function (chip) {
-      chip.addEventListener("click", function () {
-        tagFilter.querySelectorAll(".tag-chip").forEach(function (c) { c.classList.remove("active"); });
-        chip.classList.add("active");
-        activeTag = (chip.dataset.tag || "").toLowerCase();
-        localStorage.setItem("wiki-filter-tag", activeTag);
+    // Restore state from localStorage
+    tagFilter.querySelectorAll(".wiki-tag-chip[data-tag]").forEach(function(chip) {
+      var t = (chip.dataset.tag || "").toLowerCase();
+      if (includedTagsSet.has(t)) chip.dataset.state = "1";
+      else if (excludedTagsSet.has(t)) chip.dataset.state = "2";
+      else chip.dataset.state = "0";
+      chip.addEventListener("click", function() {
+        var s = Number(chip.dataset.state);
+        var t2 = (chip.dataset.tag || "").toLowerCase();
+        // Remove from both sets first
+        includedTagsSet.delete(t2);
+        excludedTagsSet.delete(t2);
+        s = (s + 1) % 3;
+        chip.dataset.state = String(s);
+        if (s === 1) includedTagsSet.add(t2);
+        else if (s === 2) excludedTagsSet.add(t2);
+        // Persist
+        localStorage.setItem("wiki-filter-tags-inc", JSON.stringify(Array.from(includedTagsSet)));
+        localStorage.setItem("wiki-filter-tags-exc", JSON.stringify(Array.from(excludedTagsSet)));
+        currentPage = 1;
         applyFilters();
       });
     });
-    // Restaure le tag actif visuellement
-    if (activeTag) {
-      var restoredTagChip = tagFilter.querySelector('[data-tag="' + activeTag + '"]');
-      if (restoredTagChip) {
-        tagFilter.querySelectorAll(".tag-chip").forEach(function (c) { c.classList.remove("active"); });
-        restoredTagChip.classList.add("active");
-      } else {
-        activeTag = "";
-        localStorage.removeItem("wiki-filter-tag");
-      }
-    }
   }
   if (tagSearchInput) {
     tagSearchInput.addEventListener("input", function () {
       var q = tagSearchInput.value.trim().toLowerCase();
       if (tagFilter) {
-        tagFilter.querySelectorAll(".tag-chip").forEach(function (chip) {
+        tagFilter.querySelectorAll(".wiki-tag-chip").forEach(function (chip) {
           var tag = (chip.dataset.tag || "").toLowerCase();
-          chip.hidden = q.length > 0 && tag.length > 0 && tag.indexOf(q) === -1;
+          chip.hidden = q.length > 0 && (chip.dataset.state || "0") === "0" && tag.indexOf(q) === -1;
         });
       }
     });
@@ -1087,18 +1139,16 @@
     if (searchClear) searchClear.hidden = false;
   }
   // Ouvre le panneau avancé si un filtre avancé est actif
-  var anyAdv = advMinRating > 0 ||
-      (advNotRated && advNotRated.checked) ||
-      (advOwned && advOwned.checked) ||
-      (advFlame && advFlame.checked) ||
-      (advInterested && advInterested.checked);
+  var _anyPropInit = false;
+  for (var _pki in propStates) { if (propStates[_pki] !== 0) { _anyPropInit = true; break; } }
+  var anyAdv = advMinRating > 0 || _anyPropInit || includedTagsSet.size > 0 || excludedTagsSet.size > 0;
   if (advPanel && anyAdv) {
     advPanel.hidden = false;
     if (advToggle) advToggle.innerHTML = "Filtres avanc\u00e9s &#9652;";
   }
 
   var filtersPanel = document.getElementById("wiki-filters-panel");
-  if (filtersPanel && (anyAdv || activeCategory || activeTag || activeSort !== "alpha-asc" || !hideUltra || !hideIrrealiste)) {
+  if (filtersPanel && (anyAdv || activeCategory || activeSort !== "alpha-asc" || !hideUltra || !hideIrrealiste)) {
     filtersPanel.open = true;
   }
 

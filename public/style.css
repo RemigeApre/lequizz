@@ -5844,6 +5844,7 @@ a.wiki-ql-label:hover .wiki-ql-text {
     bottom: 0;
     width: calc((100vw - 900px) / 2);
     min-width: 240px;
+    max-width: 300px;
     display: flex;
     flex-direction: column;
     background: linear-gradient(
@@ -5943,6 +5944,8 @@ a.wiki-ql-label:hover .wiki-ql-text {
     border-color: rgba(255, 255, 255, 0.2);
     background: rgba(255, 255, 255, 0.07);
   }
+  .wiki-cat-sidebar .wiki-adv-stars { justify-content: center; }
+  .wiki-cat-sidebar .wiki-adv-star { font-size: 1.1rem; padding: 0.3rem 0.4rem; }
   .wiki-cat-sidebar .wiki-adv-star.active,
   .wiki-cat-sidebar .wiki-adv-star:hover { color: var(--wiki-gold); }
   .wiki-cat-sidebar .wiki-adv-star-reset {
@@ -6003,6 +6006,7 @@ a.wiki-ql-label:hover .wiki-ql-text {
     color: #fff;
     font-size: 0.82rem;
     width: 100%;
+    text-align: center;
   }
   .wiki-cat-sidebar .wiki-sort-select option {
     background-color: #1c1030;
@@ -6051,6 +6055,63 @@ a.wiki-ql-label:hover .wiki-ql-text {
   .wiki-notrated-opt { margin-top: 0.25rem; }
   .wiki-cat-sidebar .wiki-adv-checks { gap: 0.3rem; }
 }
+
+.wiki-prop-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+}
+.wiki-prop-btn {
+  padding: 0.35rem 0.4rem;
+  border-radius: 5px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: #111;
+  color: rgba(255,255,255,0.55);
+  text-align: center;
+  transition: background 0.12s;
+  line-height: 1.3;
+}
+.wiki-prop-btn[data-state="1"] { background: #1a5c1a; color: #e0ffe0; border-color: #2a7a2a; }
+.wiki-prop-btn[data-state="2"] { background: #6a1515; color: #ffe0e0; border-color: #8a2020; }
+
+/* ── Tag chips 3-state ────────────────────────────── */
+.wiki-tag-cloud {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.3rem;
+}
+@media (max-width: 900px) {
+  .wiki-tag-cloud { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 500px) {
+  .wiki-tag-cloud { grid-template-columns: 1fr; }
+}
+.wiki-tag-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.25rem 0.45rem;
+  border-radius: 5px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: #111;
+  color: rgba(255,255,255,0.6);
+  transition: background 0.12s;
+  gap: 0.2rem;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.wiki-tag-chip .wtc-label { overflow: hidden; text-overflow: ellipsis; flex: 1; }
+.wiki-tag-chip .wtc-count { font-size: 0.65rem; opacity: 0.6; flex-shrink: 0; }
+.wiki-tag-chip[data-state="1"] { background: #1a5c1a; color: #e0ffe0; border-color: #2a7a2a; }
+.wiki-tag-chip[data-state="2"] { background: #6a1515; color: #ffe0e0; border-color: #8a2020; }
+.wiki-tag-chip[hidden] { display: none; }
+.wiki-cat-sidebar .wiki-tag-chip { border-color: rgba(255,255,255,0.18); }
 
 /* ── Bouton Ajouter page (sidebar catégorie) ──────── */
 .wiki-add-page-btn {

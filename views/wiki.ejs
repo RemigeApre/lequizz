@@ -50,7 +50,6 @@
           </div>
 
           <div class="wiki-filter-section">
-            <span class="wiki-filter-label">Trier</span>
             <select id="wiki-sort-select" class="wiki-sort-select">
               <option value="alpha-asc">A &rarr; Z</option>
               <option value="alpha-desc">Z &rarr; A</option>
@@ -101,30 +100,32 @@
           <% } %>
 
           <div class="wiki-filter-section">
-            <span class="wiki-filter-label">Note min.</span>
+            <span class="wiki-filter-label" style="text-align:center;display:block">Note minimale</span>
             <div class="wiki-adv-stars" id="wiki-adv-stars">
               <% for (var si = 1; si <= 5; si++) { %>
                 <button type="button" class="wiki-adv-star" data-value="<%= si %>">&#9734;</button>
               <% } %>
               <button type="button" class="wiki-adv-star-reset" id="wiki-adv-star-reset">&#10006;</button>
             </div>
-            <label class="chip-option wiki-notrated-opt"><input type="checkbox" id="adv-not-rated" /><span>Pas encore not&eacute;</span></label>
           </div>
 
-          <div class="wiki-filter-section wiki-adv-checks">
-            <label class="chip-option"><input type="checkbox" id="adv-owned" /><span>&#9733; Poss&eacute;d&eacute;</span></label>
-            <label class="chip-option"><input type="checkbox" id="adv-flame" /><span>&#128293; J&apos;adore</span></label>
-            <label class="chip-option"><input type="checkbox" id="adv-interested" /><span>&#10024; Int&eacute;ress&eacute;e</span></label>
+          <div class="wiki-filter-section">
+            <div class="wiki-prop-grid" id="wiki-prop-grid">
+              <button type="button" class="wiki-prop-btn" data-prop="not-rated" data-state="0">Pas encore not&eacute;</button>
+              <button type="button" class="wiki-prop-btn" data-prop="owned" data-state="0">Poss&eacute;d&eacute;</button>
+              <button type="button" class="wiki-prop-btn" data-prop="flame" data-state="0">J&apos;adore</button>
+              <button type="button" class="wiki-prop-btn" data-prop="interested" data-state="0">Int&eacute;ress&eacute;e</button>
+            </div>
           </div>
 
           <% if (allTags.length) { %>
             <div class="wiki-filter-section">
-              <span class="wiki-filter-label">Tags</span>
               <input type="search" id="wiki-tag-search" class="wiki-tag-search-input" placeholder="Chercher un tag&hellip;" autocomplete="off" />
-              <div class="links-filter wiki-tag-cloud" id="wiki-tag-filter">
-                <button type="button" class="tag-chip active" data-tag="">Tous</button>
+              <div class="wiki-tag-cloud" id="wiki-tag-filter">
                 <% allTags.forEach(function (tag) { %>
-                  <button type="button" class="tag-chip" data-tag="<%= tag %>"><%= tag %></button>
+                  <button type="button" class="wiki-tag-chip" data-tag="<%= tag %>" data-state="0">
+                    <span class="wtc-label"><%= tag %></span><% if (typeof tagCounts !== 'undefined' && tagCounts[tag]) { %><span class="wtc-count"><%= tagCounts[tag] %></span><% } %>
+                  </button>
                 <% }) %>
               </div>
             </div>
@@ -169,11 +170,11 @@
               <button type="button" class="wiki-adv-star-reset" id="wiki-adv-star-reset">&#10006;</button>
             </div>
           </div>
-          <label class="chip-option" style="margin-top:0.25rem"><input type="checkbox" id="adv-not-rated" /><span>Pas encore not&eacute;</span></label>
-          <div class="wiki-adv-checks">
-            <label class="chip-option"><input type="checkbox" id="adv-owned" /><span>&#9733; Poss&eacute;d&eacute;</span></label>
-            <label class="chip-option"><input type="checkbox" id="adv-flame" /><span>&#128293; J&apos;adore</span></label>
-            <label class="chip-option"><input type="checkbox" id="adv-interested" /><span>&#10024; Int&eacute;ress&eacute;e</span></label>
+          <div class="wiki-prop-grid" id="wiki-prop-grid">
+            <button type="button" class="wiki-prop-btn" data-prop="not-rated" data-state="0">Pas encore not&eacute;</button>
+            <button type="button" class="wiki-prop-btn" data-prop="owned" data-state="0">Poss&eacute;d&eacute;</button>
+            <button type="button" class="wiki-prop-btn" data-prop="flame" data-state="0">J&apos;adore</button>
+            <button type="button" class="wiki-prop-btn" data-prop="interested" data-state="0">Int&eacute;ress&eacute;e</button>
           </div>
         </div>
 
@@ -202,10 +203,11 @@
           </div>
 
           <% if (allTags.length) { %>
-            <div class="links-filter" id="wiki-tag-filter">
-              <button type="button" class="tag-chip active" data-tag="">Tous les tags</button>
+            <div class="wiki-tag-cloud" id="wiki-tag-filter">
               <% allTags.forEach(function (tag) { %>
-                <button type="button" class="tag-chip" data-tag="<%= tag %>"><%= tag %></button>
+                <button type="button" class="wiki-tag-chip" data-tag="<%= tag %>" data-state="0">
+                  <span class="wtc-label"><%= tag %></span><% if (typeof tagCounts !== 'undefined' && tagCounts[tag]) { %><span class="wtc-count"><%= tagCounts[tag] %></span><% } %>
+                </button>
               <% }) %>
             </div>
           <% } %>

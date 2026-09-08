@@ -216,6 +216,12 @@ function getAllTags(pages) {
   });
 }
 
+function getTagCounts(pages) {
+  const counts = {};
+  pages.forEach(p => p.tags.forEach(t => { counts[t] = (counts[t] || 0) + 1; }));
+  return counts;
+}
+
 // Liste plate de toutes les questions du quiz (construite une seule fois)
 function buildQuestionIndex(config) {
   const list = [];
@@ -315,7 +321,7 @@ function buildWikiRouter(config) {
   // ── Vue "tout" : toutes les pages, toutes categories melangees ──
   router.get("/tous", (req, res) => {
     const pages = sortedPages();
-    res.render("wiki", { config, pages, allTags: getAllTags(pages), lockedCategory: null, ...CTX });
+    res.render("wiki", { config, pages, allTags: getAllTags(pages), tagCounts: getTagCounts(pages), lockedCategory: null, ...CTX });
   });
 
   // ── Vue par categorie : un "chapitre" du livre ──
@@ -323,7 +329,7 @@ function buildWikiRouter(config) {
     const cat = CATEGORIES.find((c) => c.key === req.params.key);
     if (!cat) return res.redirect("/wiki");
     const pages = pagesForCategory(sortedPages(), cat.key);
-    res.render("wiki", { config, pages, allTags: getAllTags(pages), lockedCategory: cat, ...CTX });
+    res.render("wiki", { config, pages, allTags: getAllTags(pages), tagCounts: getTagCounts(pages), lockedCategory: cat, ...CTX });
   });
 
   router.post("/", requireUser, upload.any(), (req, res) => {
