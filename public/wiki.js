@@ -190,6 +190,12 @@
       suggestBox.querySelectorAll(".wiki-tag-suggest-chip").forEach(function (chip) {
         chip.classList.toggle("active", !!findTag(chip.dataset.tag));
       });
+      // Sync special shortcut buttons outside the widget
+      if (!isDerived) {
+        document.querySelectorAll(".wf-tag-special").forEach(function (btn) {
+          btn.classList.toggle("active", !!findTag(btn.dataset.tag));
+        });
+      }
     }
 
     function addTag(raw) {
@@ -214,10 +220,10 @@
 
     // Clavier dans le champ de saisie
     typer.addEventListener("keydown", function (e) {
-      if (e.key === "Enter" || e.key === "," || e.key === ";") {
+      if (e.key === "Enter" || e.key === "," || e.key === ";" || e.key === ".") {
         e.preventDefault();
-        var val = typer.value.trim();
-        if (val) { addTag(val); typer.value = ""; }
+        var val = typer.value.trim().replace(/\.$/, ""); // strip trailing dot
+        if (val) { addTag(val); typer.value = ""; closeAc(); }
       } else if (e.key === "Backspace" && typer.value === "" && tags.length) {
         removeTag(tags[tags.length - 1].term);
       }
@@ -287,7 +293,16 @@
       acDrop.hidden = false;
     }
 
-    typer.addEventListener("input", function () { showAc(typer.value); });
+    typer.addEventListener("input", function () {
+      showAc(typer.value);
+      // Filter visible suggestion chips as the user types
+      if (suggestBox) {
+        var q = typer.value.trim().toLowerCase();
+        suggestBox.querySelectorAll(".wiki-tag-suggest-chip").forEach(function (chip) {
+          chip.hidden = q.length > 0 && chip.dataset.tag.toLowerCase().indexOf(q) === -1;
+        });
+      }
+    });
     typer.addEventListener("blur",  function () { setTimeout(closeAc, 160); });
 
     // Navigation clavier dans le dropdown (capture → avant le handler Enter existant)
@@ -3087,6 +3102,31 @@
       mainWidget.addEventListener("click", function () { setTimeout(syncPanelChips, 50); });
     }
     syncPanelChips();
+  })();
+
+  // ══════════════════════════════════════════════════
+  // 19. BOUTONS SPÉCIAUX (ultra / irréaliste)
+  // ══════════════════════════════════════════════════
+  (function () {
+    document.querySelectorAll(".wf-tag-special").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var mainWidget = null;
+        document.querySelectorAll(".wiki-tags-widget").forEach(function (w) {
+          if (!w.classList.contains("wiki-derived-widget")) mainWidget = w;
+        });
+        if (!mainWidget) return;
+        // Déléguer au chip dans les suggestions (toggle add/remove)
+        var chip = mainWidget.querySelector('.wiki-tag-suggest-chip[data-tag="' + btn.dataset.tag + '"]');
+        if (chip) { chip.click(); return; }
+        // Fallback : ajouter via l'input
+        var typer = mainWidget.querySelector(".wiki-tags-typing");
+        if (typer) {
+          typer.value = btn.dataset.tag;
+          typer.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+          typer.value = "";
+        }
+      });
+    });
   })();
 
   // Sur desktop, le volet filtre est ouvert par défaut
