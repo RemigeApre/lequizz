@@ -1,24 +1,13 @@
 :root {
-  color-scheme: light dark;
-  --bg: #fafafa;
-  --fg: #1a1a1a;
-  --muted: #666;
+  color-scheme: dark;
+  --bg: #121212;
+  --fg: #eee;
+  --muted: #999;
   --accent: #5b4fcf;
-  --border: #ddd;
-  --card: #fff;
+  --border: #333;
+  --card: #1c1c1c;
   --topnav-height: 3rem;
-  --wiki-gold: #96772c;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #121212;
-    --fg: #eee;
-    --muted: #999;
-    --border: #333;
-    --card: #1c1c1c;
-    --wiki-gold: #c9a227;
-  }
+  --wiki-gold: #c9a227;
 }
 
 * { box-sizing: border-box; }
@@ -1584,20 +1573,12 @@ input[type="text"], input[type="password"] {
 
 .link-tag-pill {
   --h: 210;
-  background: hsl(var(--h), 55%, 92%);
-  color: hsl(var(--h), 55%, 30%);
-  border: 1px solid hsl(var(--h), 55%, 82%);
+  background: hsl(var(--h), 35%, 20%);
+  color: hsl(var(--h), 55%, 78%);
+  border: 1px solid hsl(var(--h), 35%, 32%);
   border-radius: 999px;
   padding: 0.18rem 0.6rem;
   font-size: 0.75rem;
-}
-
-@media (prefers-color-scheme: dark) {
-  .link-tag-pill {
-    background: hsl(var(--h), 35%, 20%);
-    color: hsl(var(--h), 55%, 78%);
-    border-color: hsl(var(--h), 35%, 32%);
-  }
 }
 
 /* Termes dérivés */
@@ -1772,16 +1753,9 @@ input[type="text"], input[type="password"] {
 }
 .wiki-ultra-btn:hover { border-color: var(--accent); color: var(--fg); }
 .wiki-ultra-btn.active {
-  background: #1a1a2e;
-  border-color: #4a4a8a;
-  color: #a0a0e0;
-}
-@media (prefers-color-scheme: dark) {
-  .wiki-ultra-btn.active {
-    background: #0d0d1a;
-    border-color: #5050a0;
-    color: #9090d0;
-  }
+  background: #0d0d1a;
+  border-color: #5050a0;
+  color: #9090d0;
 }
 
 /* ── Bouton réinitialiser filtres ───────────────────────────── */
@@ -2127,20 +2101,13 @@ input[type="text"], input[type="password"] {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.4rem;
-  background: #fff8e1;
-  border: 1px solid #f0c040;
+  background: #2a1f00;
+  border: 1px solid #a08020;
   border-radius: 7px;
   padding: 0.55rem 0.75rem;
   font-size: 0.83rem;
-  color: #7a5800;
+  color: #e0c060;
   margin-top: 0.4rem;
-}
-@media (prefers-color-scheme: dark) {
-  .wiki-title-warn {
-    background: #2a1f00;
-    border-color: #a08020;
-    color: #e0c060;
-  }
 }
 .wiki-warn-icon { font-size: 1rem; flex: 0 0 auto; }
 .wiki-warn-link {
@@ -2235,18 +2202,11 @@ input[type="text"], input[type="password"] {
   padding: 0.18rem 0.3rem 0.18rem 0.6rem;
   border-radius: 999px;
   font-size: 0.8rem;
-  background: hsl(var(--h), 55%, 92%);
-  color: hsl(var(--h), 55%, 30%);
-  border: 1px solid hsl(var(--h), 55%, 80%);
+  background: hsl(var(--h), 35%, 20%);
+  color: hsl(var(--h), 55%, 78%);
+  border: 1px solid hsl(var(--h), 35%, 32%);
   cursor: default;
   user-select: none;
-}
-@media (prefers-color-scheme: dark) {
-  .wiki-chip {
-    background: hsl(var(--h), 35%, 20%);
-    color: hsl(var(--h), 55%, 78%);
-    border-color: hsl(var(--h), 35%, 32%);
-  }
 }
 
 .wiki-chip-remove {
@@ -2264,12 +2224,7 @@ input[type="text"], input[type="password"] {
   padding: 0;
   line-height: 1;
 }
-.wiki-chip-remove:hover {
-  background: hsl(var(--h), 55%, 82%);
-}
-@media (prefers-color-scheme: dark) {
-  .wiki-chip-remove:hover { background: hsl(var(--h), 35%, 30%); }
-}
+.wiki-chip-remove:hover { background: hsl(var(--h), 35%, 30%); }
 
 /* Suggestions de tags */
 .wiki-tag-suggestions {
@@ -2296,16 +2251,9 @@ input[type="text"], input[type="password"] {
   color: var(--accent);
 }
 .wiki-tag-suggest-chip.active {
-  background: hsl(var(--h), 55%, 92%);
-  color: hsl(var(--h), 55%, 30%);
-  border-color: hsl(var(--h), 55%, 80%);
-}
-@media (prefers-color-scheme: dark) {
-  .wiki-tag-suggest-chip.active {
-    background: hsl(var(--h), 35%, 20%);
-    color: hsl(var(--h), 55%, 78%);
-    border-color: hsl(var(--h), 35%, 32%);
-  }
+  background: hsl(var(--h), 35%, 20%);
+  color: hsl(var(--h), 55%, 78%);
+  border-color: hsl(var(--h), 35%, 32%);
 }
 
 /* ── Séparateur + chips spéciaux dans les suggestions de tags ── */
@@ -2317,9 +2265,9 @@ input[type="text"], input[type="password"] {
   margin: 0.25rem 0;
 }
 .wiki-tag-suggest-chip--special {
-  border-color: #4a2a8a;
-  color: #a080d8;
-  background: rgba(80,30,160,0.06);
+  border-color: #5a3a9a;
+  color: #b090e8;
+  background: rgba(80,30,160,0.12);
   font-weight: 600;
 }
 .wiki-tag-suggest-chip--special:hover {
@@ -2331,13 +2279,6 @@ input[type="text"], input[type="password"] {
   background: rgba(80,30,160,0.22);
   border-color: #7a50c8;
   color: #d0b8ff;
-}
-@media (prefers-color-scheme: dark) {
-  .wiki-tag-suggest-chip--special {
-    border-color: #5a3a9a;
-    color: #b090e8;
-    background: rgba(80,30,160,0.12);
-  }
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -3380,29 +3321,15 @@ input[type="text"], input[type="password"] {
 .wiki-react-icon { font-size: 1.05rem; line-height: 1; }
 
 .wiki-react-flame.active {
-  background: #fff0e6;
-  border-color: #f07030;
-  color: #d05010;
-}
-@media (prefers-color-scheme: dark) {
-  .wiki-react-flame.active {
-    background: #3a1800;
-    border-color: #c05020;
-    color: #ff8040;
-  }
+  background: #3a1800;
+  border-color: #c05020;
+  color: #ff8040;
 }
 
 .wiki-react-interest.active {
-  background: #f0ecff;
-  border-color: #7c60e0;
-  color: #5040b0;
-}
-@media (prefers-color-scheme: dark) {
-  .wiki-react-interest.active {
-    background: #1e1440;
-    border-color: #8060d0;
-    color: #b090ff;
-  }
+  background: #1e1440;
+  border-color: #8060d0;
+  color: #b090ff;
 }
 
 /* ── Indicateurs sur les cartes ─────────────── */
