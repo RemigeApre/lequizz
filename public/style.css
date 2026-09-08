@@ -6356,3 +6356,75 @@ a.wiki-ql-label:hover .wiki-ql-text {
   color: var(--muted); font-size: 0.88rem; text-align: center; margin-top: 1.5rem;
 }
 
+/* ══ WIKI INDEX — page d'accueil redesignée ════════════════════════════════ */
+
+/* Texte d'introduction */
+#wiki-index-native {
+  padding: 0;
+}
+.wiki-index-intro {
+  margin-bottom: 1.75rem;
+  max-width: 74ch;
+}
+.wiki-index-intro p {
+  color: var(--fg-muted, var(--muted));
+  line-height: 1.65;
+  margin-bottom: 0.65rem;
+}
+.wiki-index-intro p:last-child { margin-bottom: 0; }
+
+/* Grille des catégories */
+.wiki-index-cats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 2.25rem;
+}
+.wiki-index-cat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  padding: 0.8rem 0.9rem;
+  background: hsl(var(--ch-hue, 250), 38%, 17%);
+  border: 1px solid hsl(var(--ch-hue, 250), 32%, 26%);
+  border-bottom: 3px solid hsl(var(--ch-hue, 250), 55%, 44%);
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--fg);
+  transition: background 0.15s, transform 0.13s;
+}
+.wiki-index-cat-card:hover {
+  background: hsl(var(--ch-hue, 250), 40%, 22%);
+  transform: translateY(-2px);
+}
+.wiki-index-cat-label {
+  font-weight: 700;
+  font-size: 0.88rem;
+  line-height: 1.2;
+}
+.wiki-index-cat-count {
+  font-size: 0.75rem;
+  color: hsl(var(--ch-hue, 250), 65%, 65%);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Strips (lignes défilantes) */
+.wiki-index-strip-section {
+  margin-bottom: 2rem;
+}
+.wiki-index-strip-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 0.6rem;
+}
+
+/* La sidebar n'a pas de back-link sur la page d'accueil */
+.wiki-index-back-placeholder {
+  display: inline-block;
+  width: 2rem;
+}
+

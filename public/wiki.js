@@ -544,6 +544,7 @@
   var paginationTopEl = document.getElementById("wiki-pagination-top");
   var specialFilter   = document.getElementById("wiki-special-filter");
   var extraCatFilter  = document.getElementById("wiki-extra-cat-filter");
+  var indexNative     = document.getElementById("wiki-index-native");
 
   var activeCategory  = localStorage.getItem("wiki-filter-cat") || "";
   var propStates = {
@@ -706,6 +707,15 @@
     applyTagOverflow();
   }
 
+  function hasActiveFilters() {
+    if (searchQuery) return true;
+    if (activeCategory) return true;
+    if (advMinRating > 0) return true;
+    if (includedTagsSet.size > 0 || excludedTagsSet.size > 0) return true;
+    for (var _p in propStates) { if (propStates[_p] !== 0) return true; }
+    return false;
+  }
+
   function applyFilters() {
     if (!wikiList) return;
     if (!_paginationNavigation) currentPage = 1;
@@ -811,6 +821,18 @@
       if (showCount) {
         var n = visible.length;
         resultCount.textContent = n + "\u00a0r\u00e9sultat" + (n > 1 ? "s" : "");
+      }
+    }
+
+    // Page d'accueil wiki : bascule entre la vue native (intro + strips)
+    // et la grille filtrée selon qu'un filtre est actif ou non.
+    if (indexNative) {
+      var _filtersActive = hasActiveFilters();
+      indexNative.hidden = _filtersActive;
+      if (wikiList) wikiList.hidden = !_filtersActive;
+      if (!_filtersActive) {
+        if (paginationEl) paginationEl.hidden = true;
+        if (paginationTopEl) paginationTopEl.hidden = true;
       }
     }
   }

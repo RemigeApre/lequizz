@@ -315,7 +315,25 @@ function buildWikiRouter(config) {
       const catPages = pagesForCategory(visiblePages, cat.key);
       return { ...cat, pages: catPages, count: catPages.length, preview: catPages.slice(0, 6) };
     });
-    res.render("wiki-index", { config, chapters, pages, allTags: getAllTags(pages), totalCount: pages.length, ...CTX });
+    const allPages = listWikiPages();
+    const recentAdded = [...allPages]
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, 15);
+    const recentUpdated = [...allPages]
+      .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+      .slice(0, 15);
+    const popular = allPages
+      .filter((p) => p.rating > 0)
+      .sort((a, b) => b.rating - a.rating)
+      .slice(0, 15);
+    res.render("wiki-index", {
+      config, chapters, pages,
+      allTags: getAllTags(pages),
+      tagCounts: getTagCounts(pages),
+      totalCount: pages.length,
+      recentAdded, recentUpdated, popular,
+      ...CTX
+    });
   });
 
   // ── Vue "tout" : toutes les pages, toutes categories melangees ──
