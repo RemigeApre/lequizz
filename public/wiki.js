@@ -565,11 +565,12 @@
   function scoreCard(card, q) {
     if (!q) return 1; // tout passe si pas de query
     var words = q.split(/\s+/).filter(Boolean);
-    var title   = norm(card.dataset.title || "");
-    var derived = norm(card.dataset.derived || "");
-    var tags    = norm(card.dataset.tags || "").replace(/\|/g, " ");
-    var content = norm(card.dataset.content || "");
-    var cat     = norm(card.dataset.category || "");
+    var title     = norm(card.dataset.title || "");
+    var derived   = norm(card.dataset.derived || "");
+    var tags      = norm(card.dataset.tags || "").replace(/\|/g, " ");
+    var content   = norm(card.dataset.content || "");
+    var variantes = norm(card.dataset.variantes || "");
+    var cat       = norm(card.dataset.category || "");
 
     var score = 0;
     words.forEach(function (w) {
@@ -579,6 +580,7 @@
 
       if (derived.includes(w))      score += 4;
       if (tags.includes(w))         score += 3;
+      if (variantes.includes(w))    score += 3;
       if (content.includes(w))      score += 2;
       if (cat.includes(w))          score += 1;
     });
@@ -1888,6 +1890,46 @@
       hiddenIn.value = JSON.stringify(data);
     }
 
+    // Miniatures des images existantes d'une variante avec bouton de suppression
+    function makeImgPreview(obj, fieldPrefix) {
+      var zone = document.createElement("div");
+      zone.className = "wiki-var-imgs";
+      function render() {
+        zone.innerHTML = "";
+        var imgs = Array.isArray(obj.images) ? obj.images : [];
+        imgs.forEach(function (src, i) {
+          var thumb = document.createElement("div");
+          thumb.className = "wiki-var-img-thumb";
+          var img = document.createElement("img");
+          img.src = src;
+          img.alt = "";
+          var rm = document.createElement("button");
+          rm.type = "button";
+          rm.className = "wiki-var-img-rm";
+          rm.title = "Supprimer cette image";
+          rm.textContent = "\u00D7";
+          rm.addEventListener("click", function () {
+            obj.images.splice(i, 1);
+            sync();
+            render();
+          });
+          thumb.appendChild(img);
+          thumb.appendChild(rm);
+          zone.appendChild(thumb);
+        });
+        // Champ d'upload pour ajouter des images
+        var fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.name = fieldPrefix + obj.id;
+        fileInput.accept = "image/*";
+        fileInput.multiple = true;
+        fileInput.className = "wiki-var-img-input";
+        zone.appendChild(fileInput);
+      }
+      render();
+      return zone;
+    }
+
     function makeSubItem(sv, parentData) {
       var wrap = document.createElement("div");
       wrap.className = "wiki-var-sub-item";
@@ -1925,8 +1967,10 @@
       desc.value = sv.description || "";
       desc.addEventListener("input", function () { sv.description = desc.value; sync(); });
 
+      if (!Array.isArray(sv.images)) sv.images = [];
       wrap.appendChild(head);
       wrap.appendChild(desc);
+      wrap.appendChild(makeImgPreview(sv, "variante_sub_img_"));
       return wrap;
     }
 
@@ -1967,6 +2011,8 @@
       desc.value = v.description || "";
       desc.addEventListener("input", function () { v.description = desc.value; sync(); });
 
+      if (!Array.isArray(v.images)) v.images = [];
+
       var subList = document.createElement("div");
       subList.className = "wiki-var-sub-list";
       if (!Array.isArray(v.variantes)) v.variantes = [];
@@ -1977,7 +2023,7 @@
       subAddBtn.className = "wiki-var-sub-add-btn";
       subAddBtn.textContent = "+ Ajouter une sous-variante";
       subAddBtn.addEventListener("click", function () {
-        var sv = { id: uid(), nom: "", description: "", };
+        var sv = { id: uid(), nom: "", description: "", images: [] };
         v.variantes.push(sv);
         subList.appendChild(makeSubItem(sv, v));
         sync();
@@ -1985,6 +2031,7 @@
 
       wrap.appendChild(head);
       wrap.appendChild(desc);
+      wrap.appendChild(makeImgPreview(v, "variante_img_"));
       wrap.appendChild(subList);
       wrap.appendChild(subAddBtn);
       return wrap;

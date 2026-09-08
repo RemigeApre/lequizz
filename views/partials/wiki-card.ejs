@@ -25,6 +25,20 @@
     return typeof t === 'string' ? { term: t, en: false } : t;
   });
 
+  // Texte des variantes (noms + descriptions) pour la recherche côté client
+  var wcVariantes = '';
+  if (page.meta && Array.isArray(page.meta.variantes) && page.meta.variantes.length) {
+    var vcParts = [];
+    page.meta.variantes.forEach(function (v) {
+      if (v.nom) vcParts.push(v.nom);
+      if (v.description) vcParts.push(v.description.slice(0, 200));
+      if (Array.isArray(v.variantes)) v.variantes.forEach(function (sv) {
+        if (sv.nom) vcParts.push(sv.nom);
+      });
+    });
+    wcVariantes = vcParts.join(' ').toLowerCase().replace(/"/g, '').replace(/\s+/g, ' ').slice(0, 600);
+  }
+
   var wcExcerpt = '';
   if (!currentUser && page.content) {
     wcExcerpt = (page.content || '')
@@ -46,6 +60,7 @@
   data-interested="<%= page.interested ? '1' : '0' %>"
   data-derived="<%= wcDerived.map(function (t) { return t.term; }).join('|').toLowerCase() %>"
   data-content="<%= (page.content || '').toLowerCase().replace(/"/g,'').replace(/\s+/g,' ').slice(0, 400) %>"
+  data-variantes="<%= wcVariantes %>"
   data-ultra="<%= (page.tags.indexOf('ultra') !== -1 || page.tags.indexOf('irréaliste') !== -1) ? '1' : '0' %>"
   data-irrealiste="<%= page.tags.indexOf('irréaliste') !== -1 ? '1' : '0' %>"
   data-fantaisie="<%= page.tags.indexOf('fantaisie') !== -1 ? '1' : '0' %>"

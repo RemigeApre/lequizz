@@ -131,8 +131,14 @@ function parseMeta(category, body) {
         id: String(v.id || ""),
         nom: String(v.nom || "").slice(0, 200).trim(),
         description: String(v.description || "").slice(0, 5000),
+        images: Array.isArray(v.images) ? v.images.filter((s) => typeof s === "string" && s.startsWith("/uploads/")) : [],
         variantes: Array.isArray(v.variantes) ? v.variantes.map(function (sv) {
-          return { id: String(sv.id || ""), nom: String(sv.nom || "").slice(0, 200).trim(), description: String(sv.description || "").slice(0, 5000) };
+          return {
+            id: String(sv.id || ""),
+            nom: String(sv.nom || "").slice(0, 200).trim(),
+            description: String(sv.description || "").slice(0, 5000),
+            images: Array.isArray(sv.images) ? sv.images.filter((s) => typeof s === "string" && s.startsWith("/uploads/")) : [],
+          };
         }) : [],
       };
     }
@@ -162,6 +168,39 @@ function parseMeta(category, body) {
   }
 
   return { ...base, ...specific };
+}
+
+// Injecte les chemins d'images des variantes dans le JSON meta_variantes
+// avant de le passer à parseMeta. Les fichiers uploadés portent le fieldname
+// "variante_img_VARID" ou "variante_sub_img_VARID" (sous-variante).
+function injectVarianteImages(body, files) {
+  if (!body.meta_variantes) return body;
+  let variantes;
+  try { variantes = JSON.parse(body.meta_variantes); } catch { return body; }
+  if (!Array.isArray(variantes)) return body;
+
+  // Index des fichiers par variante ID
+  const byVar = {};
+  const bySub = {};
+  files.forEach((f) => {
+    const mv = f.fieldname.match(/^variante_img_(.+)$/);
+    if (mv) { (byVar[mv[1]] = byVar[mv[1]] || []).push(`/uploads/wiki/${f.filename}`); }
+    const ms = f.fieldname.match(/^variante_sub_img_(.+)$/);
+    if (ms) { (bySub[ms[1]] = bySub[ms[1]] || []).push(`/uploads/wiki/${f.filename}`); }
+  });
+
+  variantes = variantes.map((v) => {
+    const existing = Array.isArray(v.images) ? v.images : [];
+    const newImgs  = byVar[v.id] || [];
+    const subs = Array.isArray(v.variantes) ? v.variantes.map((sv) => {
+      const exSub  = Array.isArray(sv.images) ? sv.images : [];
+      const newSub = bySub[sv.id] || [];
+      return { ...sv, images: [...exSub, ...newSub] };
+    }) : [];
+    return { ...v, images: [...existing, ...newImgs], variantes: subs };
+  });
+
+  return { ...body, meta_variantes: JSON.stringify(variantes) };
 }
 
 const PRESET_TAGS = ["fantaisie", "irréaliste", "ultra"];
@@ -283,7 +322,7 @@ function buildWikiRouter(config) {
     res.render("wiki", { config, pages, allTags: getAllTags(pages), lockedCategory: cat, ...CTX });
   });
 
-  router.post("/", requireUser, upload.array("images", 10), (req, res) => {
+  router.post("/", requireUser, upload.any(), (req, res) => {
     const title = String(req.body.title || "").trim();
     if (!title) return res.redirect("/wiki");
 
@@ -291,9 +330,12 @@ function buildWikiRouter(config) {
     const content         = String(req.body.content || "").trim();
     const tags            = parseTags(req.body.tags);
     const owned           = OWNED_CATEGORIES.includes(category) && req.body.owned === "on";
-    const meta            = parseMeta(category, req.body);
-    const imagePaths      = (req.files || []).map((f) => `/uploads/wiki/${f.filename}`);
     const extraCategories = arr(req.body.extra_categories).filter((k) => CATEGORY_KEYS.includes(k) && k !== category);
+
+    const files = req.files || [];
+    const imagePaths = files.filter((f) => f.fieldname === "images").map((f) => `/uploads/wiki/${f.filename}`);
+    const bodyWithVarianteImgs = injectVarianteImages(req.body, files);
+    const meta = parseMeta(category, bodyWithVarianteImgs);
 
     insertWikiPage({ title, category, content, tags, imagePaths, owned, meta, extraCategories });
     res.redirect("/wiki");
@@ -367,7 +409,7 @@ function buildWikiRouter(config) {
     res.render("wiki-form", { config, page, pages, allTags, ...CTX });
   });
 
-  router.post("/:id", requireUser, upload.array("images", 10), (req, res) => {
+  router.post("/:id", requireUser, upload.any(), (req, res) => {
     const id = Number(req.params.id);
     const existing = Number.isInteger(id) ? getWikiPage(id) : null;
     if (!existing) return res.redirect("/wiki");
@@ -377,12 +419,15 @@ function buildWikiRouter(config) {
     const content  = String(req.body.content || "").trim();
     const tags     = parseTags(req.body.tags);
     const owned    = OWNED_CATEGORIES.includes(category) && req.body.owned === "on";
-    const meta     = parseMeta(category, req.body);
 
-    // Images : on part des existantes, on retire celles cochées, on ajoute les nouvelles
+    const files = req.files || [];
+    const bodyWithVarianteImgs = injectVarianteImages(req.body, files);
+    const meta = parseMeta(category, bodyWithVarianteImgs);
+
+    // Images de page : on part des existantes, on retire celles cochées, on ajoute les nouvelles
     const toRemove  = [].concat(req.body.remove_image || []);
     const kept      = existing.imagePaths.filter((p) => !toRemove.includes(p));
-    const added     = (req.files || []).map((f) => `/uploads/wiki/${f.filename}`);
+    const added     = files.filter((f) => f.fieldname === "images").map((f) => `/uploads/wiki/${f.filename}`);
     let imagePaths  = [...kept, ...added];
 
     // Réordonne selon l'image de couverture choisie

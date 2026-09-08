@@ -227,6 +227,13 @@
             <summary class="wiki-var-summary"><%= v.nom %></summary>
             <div class="wiki-var-body">
               <% if (v.description) { %><div class="wiki-md"><span class="wiki-md-raw" hidden><%= v.description %></span></div><% } %>
+              <% if (currentUser && v.images && v.images.length) { %>
+                <div class="wiki-var-images">
+                  <% v.images.forEach(function(src) { %>
+                    <img src="<%= src %>" alt="" class="wiki-var-img" />
+                  <% }) %>
+                </div>
+              <% } %>
               <% if (v.variantes && v.variantes.length) { %>
                 <% v.variantes.forEach(function(sv) { %>
                   <% if (!sv.nom) return; %>
@@ -234,6 +241,13 @@
                     <summary class="wiki-var-summary"><%= sv.nom %></summary>
                     <div class="wiki-var-body">
                       <% if (sv.description) { %><div class="wiki-md"><span class="wiki-md-raw" hidden><%= sv.description %></span></div><% } %>
+                      <% if (currentUser && sv.images && sv.images.length) { %>
+                        <div class="wiki-var-images">
+                          <% sv.images.forEach(function(src) { %>
+                            <img src="<%= src %>" alt="" class="wiki-var-img" />
+                          <% }) %>
+                        </div>
+                      <% } %>
                     </div>
                   </details>
                 <% }) %>

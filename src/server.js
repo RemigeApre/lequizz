@@ -13,6 +13,45 @@ const buildGalleryRouter = require("./routes/gallery");
 const buildBdRouter = require("./routes/bd");
 const buildFavoritesRouter = require("./routes/favorites");
 const { attachUser } = require("./auth");
+const { db } = require("./db");
+
+// Store de sessions SQLite : survit aux redemarrages contrairement au
+// memory store par defaut. Implémenté directement avec better-sqlite3
+// sans dépendance supplémentaire.
+class SqliteSessionStore extends session.Store {
+  constructor(database) {
+    super();
+    this._db = database;
+    this._db.exec(`CREATE TABLE IF NOT EXISTS sessions (
+      sid  TEXT PRIMARY KEY,
+      sess TEXT NOT NULL,
+      exp  INTEGER NOT NULL
+    )`);
+    // Nettoyage des sessions expirées toutes les heures
+    setInterval(() => {
+      this._db.prepare("DELETE FROM sessions WHERE exp < ?").run(Date.now());
+    }, 60 * 60 * 1000).unref();
+  }
+  get(sid, cb) {
+    const row = this._db.prepare("SELECT sess, exp FROM sessions WHERE sid = ?").get(sid);
+    if (!row || row.exp < Date.now()) return cb(null, null);
+    try { cb(null, JSON.parse(row.sess)); } catch { cb(null, null); }
+  }
+  set(sid, sess, cb) {
+    const exp = sess.cookie && sess.cookie.expires
+      ? new Date(sess.cookie.expires).getTime()
+      : Date.now() + 1000 * 60 * 60 * 24 * 90;
+    this._db.prepare(
+      "INSERT OR REPLACE INTO sessions (sid, sess, exp) VALUES (?, ?, ?)"
+    ).run(sid, JSON.stringify(sess), exp);
+    if (cb) cb(null);
+  }
+  destroy(sid, cb) {
+    this._db.prepare("DELETE FROM sessions WHERE sid = ?").run(sid);
+    if (cb) cb(null);
+  }
+  touch(sid, sess, cb) { this.set(sid, sess, cb); }
+}
 
 const config = JSON.parse(
   fs.readFileSync(path.join(__dirname, "..", "docs", "questions.json"), "utf8")
@@ -68,6 +107,7 @@ app.use((req, res, next) => {
 
 app.use(
   session({
+    store: new SqliteSessionStore(db),
     secret: process.env.SESSION_SECRET || "change_me",
     resave: false,
     saveUninitialized: false,
@@ -81,6 +121,13 @@ app.use(
 );
 
 app.use(attachUser);
+
+// Expose le chemin courant pour que le lien "Se connecter" dans la nav
+// puisse y revenir après connexion (paramètre ?next=).
+app.use((req, res, next) => {
+  res.locals.currentPath = req.originalUrl;
+  next();
+});
 
 // Le wiki (texte) est desormais public : plus de portail de mot de passe
 // unique devant tout le site. Les images, elles, restent un contenu prive

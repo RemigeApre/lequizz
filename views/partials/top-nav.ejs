@@ -35,7 +35,7 @@
   </nav>
 
   <div class="nav-drawer-footer">
-    <a href="<%= currentUser ? (currentUser.isAdmin ? '/admin' : '/favoris') : '/admin/login' %>"
+    <a href="<%= currentUser ? (currentUser.isAdmin ? '/admin' : '/favoris') : '/admin/login?next=' + encodeURIComponent(locals.currentPath || '/') %>"
        class="nav-drawer-admin"
        title="<%= currentUser ? currentUser.displayName : 'Connexion' %>">&#128273;</a>
   </div>

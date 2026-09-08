@@ -22,19 +22,21 @@
     </div>
   </section>
 
-  <%# ─── RECHERCHE + FILTRES : barre de recherche dans le panel ───────── %>
+  <%# ─── RECHERCHE : barre toujours visible ───────────────────────────── %>
+  <form action="/wiki/tous" method="GET" class="wiki-index-search-form" id="wiki-hero-search-form">
+    <div class="wiki-search-bar">
+      <span class="wiki-search-icon">&#128269;</span>
+      <input type="search" name="q" id="wiki-hero-q" class="wiki-search-input" placeholder="Rechercher une page, un tag, un terme&hellip;" autocomplete="off" />
+      <button type="submit" class="wiki-search-submit" aria-label="Rechercher">&#8594;</button>
+    </div>
+  </form>
+
+  <%# ─── FILTRES : volet déroulant ────────────────────────────────────── %>
   <details class="wiki-filters-panel" id="wiki-hero-filters-panel">
-    <summary class="wiki-filters-summary">Recherche &amp; Filtres</summary>
+    <summary class="wiki-filters-summary">Filtres</summary>
     <div class="wiki-filters-body">
 
-      <form action="/wiki/tous" method="GET" class="wiki-index-search-form" id="wiki-hero-search-form">
-        <div class="wiki-search-bar">
-          <span class="wiki-search-icon">&#128269;</span>
-          <input type="search" name="q" id="wiki-hero-q" class="wiki-search-input" placeholder="Rechercher une page, un tag, un terme&hellip;" autocomplete="off" />
-          <button type="submit" class="wiki-search-submit" aria-label="Rechercher">&#8594;</button>
-        </div>
-
-        <div class="wiki-adv-row" style="margin-top:0.6rem">
+        <div class="wiki-adv-row">
           <label class="wiki-adv-label" for="wiki-hero-sort">Tri</label>
           <select id="wiki-hero-sort" class="wiki-sort-select">
             <option value="alpha-asc">A &#8594; Z</option>
@@ -69,8 +71,6 @@
           <label class="chip-option"><input type="checkbox" id="wiki-hero-interested" /><span>&#10024; Int&eacute;ress&eacute;e</span></label>
         </div>
         <% } %>
-
-      </form>
 
     </div>
   </details>

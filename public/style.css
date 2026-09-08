@@ -5367,6 +5367,66 @@ a.wiki-ql-label:hover .wiki-ql-text {
   background: var(--bg);
 }
 
+/* Images dans les variantes (vue de lecture) */
+.wiki-var-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.6rem 0 0.4rem;
+}
+.wiki-var-img {
+  width: 120px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 6px;
+  cursor: zoom-in;
+  transition: opacity 0.15s;
+}
+.wiki-var-img:hover { opacity: 0.85; }
+
+/* Éditeur : zone images par variante */
+.wiki-var-imgs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.4rem 0;
+}
+.wiki-var-img-thumb {
+  position: relative;
+  width: 70px;
+  height: 55px;
+}
+.wiki-var-img-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 5px;
+  display: block;
+}
+.wiki-var-img-rm {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: none;
+  background: #c00;
+  color: #fff;
+  font-size: 0.7rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+.wiki-var-img-input {
+  font-size: 0.75rem;
+  max-width: 160px;
+}
+
 /* Nouvelles : style légèrement différent (prose) */
 .wiki-pos-nouvelles-text {
   white-space: pre-wrap;

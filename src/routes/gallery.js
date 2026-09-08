@@ -76,22 +76,50 @@ function unlinkFiles(paths) {
 // Une page wiki avec plusieurs photos ne fait plus qu'une seule entrée
 // (album) dans la galerie, au lieu d'une carte par image.
 function buildItems(galleryImages, wikiPages) {
-  const wikiItems = wikiPages
-    .filter((page) => page.imagePaths && page.imagePaths.length)
-    .map((page) => ({
-      type: "wiki",
-      id: null,
-      wikiPageId: page.id,
-      imagePaths: page.imagePaths,
-      title: page.title,
-      category: page.category,
-      tags: page.tags,
-      notes: "",
-      rating: page.rating || 0,
-      flame: !!page.flame,
-      interested: !!page.interested,
-      date: page.updatedAt,
-    }));
+  const wikiItems = [];
+  wikiPages.forEach((page) => {
+    // Images principales de la page
+    if (page.imagePaths && page.imagePaths.length) {
+      wikiItems.push({
+        type: "wiki",
+        id: null,
+        wikiPageId: page.id,
+        imagePaths: page.imagePaths,
+        title: page.title,
+        category: page.category,
+        tags: page.tags,
+        notes: "",
+        rating: page.rating || 0,
+        flame: !!page.flame,
+        interested: !!page.interested,
+        date: page.updatedAt,
+      });
+    }
+    // Images des variantes (héritent des tags de la page + tag du nom de la variante)
+    const variantes = (page.meta && Array.isArray(page.meta.variantes)) ? page.meta.variantes : [];
+    variantes.forEach((v) => {
+      const allSubs = Array.isArray(v.variantes) ? v.variantes : [];
+      const varianteSources = [v, ...allSubs];
+      varianteSources.forEach((vv) => {
+        if (!Array.isArray(vv.images) || !vv.images.length) return;
+        const extraTag = vv.nom ? [vv.nom.toLowerCase()] : [];
+        wikiItems.push({
+          type: "wiki",
+          id: null,
+          wikiPageId: page.id,
+          imagePaths: vv.images,
+          title: `${page.title} — ${vv.nom || "variante"}`,
+          category: page.category,
+          tags: [...page.tags, ...extraTag],
+          notes: "",
+          rating: page.rating || 0,
+          flame: !!page.flame,
+          interested: !!page.interested,
+          date: page.updatedAt,
+        });
+      });
+    });
+  });
 
   const galleryItems = galleryImages.map((img) => ({
     type: "gallery",
