@@ -297,24 +297,6 @@
         <input type="text" class="wiki-tags-typing" placeholder="Ajouter un tag&hellip;" autocomplete="off" />
       </div>
       <input type="hidden" name="tags" class="wiki-tags-hidden" value="<%= page.tags.join(', ') %>" />
-      <% if (allTags.length) { %>
-        <%
-          var SPECIAL_TAG_KEYS = ["ultra", "irréaliste"];
-          var normalSuggestions = allTags.filter(function(t){ return SPECIAL_TAG_KEYS.indexOf(t) === -1; });
-          var specialSuggestions = allTags.filter(function(t){ return SPECIAL_TAG_KEYS.indexOf(t) !== -1; });
-        %>
-        <div class="wiki-tag-suggestions">
-          <% normalSuggestions.forEach(function(t) { %>
-            <button type="button" class="wiki-tag-suggest-chip" data-tag="<%= t %>"><%= t %></button>
-          <% }) %>
-          <% if (specialSuggestions.length) { %>
-            <span class="wiki-tag-suggest-sep" aria-hidden="true"></span>
-            <% specialSuggestions.forEach(function(t) { %>
-              <button type="button" class="wiki-tag-suggest-chip wiki-tag-suggest-chip--special" data-tag="<%= t %>"><%= t %></button>
-            <% }) %>
-          <% } %>
-        </div>
-      <% } %>
     </div>
 
     <%# ─ Images ─ %>
