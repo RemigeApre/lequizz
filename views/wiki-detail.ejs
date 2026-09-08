@@ -206,17 +206,6 @@
       <%# ─ COLONNE DROITE : panneau info (PC) ─ %>
       <aside class="wiki-detail-right">
 
-        <%# ─ Carrousel mobile (toutes les images) — masqué sur PC ─ %>
-        <% if (hasImages && currentUser) { %>
-          <div class="wiki-mobile-carousel">
-            <% page.imagePaths.forEach(function (src, i) { %>
-              <div class="wiki-mobile-carousel-item">
-                <img src="<%= src %>" alt="" class="wiki-mobile-carousel-img" loading="<%= i === 0 ? 'eager' : 'lazy' %>" />
-              </div>
-            <% }) %>
-          </div>
-        <% } %>
-
         <%# ─ Header : retour + catégories ─ %>
         <div class="wiki-right-header">
           <a href="<%= backHref %>" class="wiki-right-back" title="<%= backLabel %>">&#8592;</a>
@@ -350,6 +339,17 @@
         <h3 class="wiki-pos-section-heading wiki-user-note-heading">Mes notes</h3>
         <textarea class="wiki-user-note-area" placeholder="Tes notes personnelles sur cette page…" rows="4"><%= locals.userNote || '' %></textarea>
         <p class="wiki-user-note-status" aria-live="polite"></p>
+      </div>
+    <% } %>
+
+    <%# ─ Carrousel images secondaires mobile (après texte + notes) ─ %>
+    <% if (hasImages && page.imagePaths.length > 1 && currentUser) { %>
+      <div class="wiki-mobile-sec-carousel">
+        <% page.imagePaths.slice(1).forEach(function (src) { %>
+          <div class="wiki-mobile-sec-carousel-item">
+            <img src="<%= src %>" alt="" class="wiki-mobile-sec-carousel-img" loading="lazy" />
+          </div>
+        <% }) %>
       </div>
     <% } %>
 
