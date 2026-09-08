@@ -6580,6 +6580,170 @@ a.wiki-ql-label:hover .wiki-ql-text {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE REDESIGN — max-width 640px
+═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Mobile top-nav : 3 slots (retour | titre | burger) ───────────────── */
+.nav-back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  font-size: 1.1rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--fg);
+  text-decoration: none;
+  transition: border-color 0.15s, color 0.15s;
+}
+.nav-back-btn:hover { border-color: var(--accent); color: var(--accent); }
+.nav-back-placeholder {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+}
+.top-nav-page-title {
+  flex: 1;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 0.25rem;
+  color: var(--fg);
+}
+
+@media (max-width: 640px) {
+  /* Top-nav : grid 3 colonnes symétriques */
+  .top-nav {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr 2.5rem;
+    gap: 0.25rem;
+    justify-items: center;
+  }
+
+  /* ── Wiki sidebar sur mobile : masquer le hero (titre dans le header) ── */
+  .wiki-cat-sidebar .wiki-chapter-hero { display: none; }
+
+  /* ── Filtre panel : details collapsible sur mobile ─────────────────── */
+  .wiki-sidebar-filter-details {
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .wiki-sidebar-filter-summary {
+    padding: 0.6rem 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.85);
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+  }
+  .wiki-sidebar-filter-summary::-webkit-details-marker { display: none; }
+  .wiki-sidebar-filter-details[open] .wiki-sidebar-filter-summary { border-bottom: 1px solid rgba(255,255,255,0.1); }
+
+  /* ── Intro collapsible ──────────────────────────────────────────────── */
+  .wiki-intro-details {
+    margin-bottom: 1rem;
+  }
+  .wiki-intro-summary {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0.3rem 0;
+    list-style: none;
+    user-select: none;
+  }
+  .wiki-intro-summary::-webkit-details-marker { display: none; }
+  .wiki-intro-details .wiki-index-intro { margin-top: 0.5rem; }
+
+  /* ── Cols select : caché sur mobile ─────────────────────────────────── */
+  .wiki-cols-select { display: none !important; }
+
+  /* ── Tags : grille 2 colonnes sur mobile ───────────────────────────── */
+  .wiki-cat-sidebar .wiki-tag-cloud,
+  .gallery-sidebar .wiki-tag-cloud {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.25rem;
+  }
+  .wiki-cat-sidebar .wiki-tag-chip,
+  .gallery-sidebar .wiki-tag-chip {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* ── Wiki grid : 2 colonnes plus petites ───────────────────────────── */
+  .wiki-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+  }
+
+  /* ── Gallery grid : 2 colonnes plus petites ─────────────────────────── */
+  .gallery-grid {
+    --gallery-card-min: 140px;
+  }
+
+  /* ── Wiki detail : reorder (droite d'abord = image + note + réactions) */
+  .wiki-detail-layout {
+    display: flex;
+    flex-direction: column;
+  }
+  .wiki-detail-right { order: 1; }
+  .wiki-detail-body  { order: 2; }
+  .wiki-detail-left  { order: 3; }
+
+  /* Image principale bien visible sur mobile */
+  .wiki-right-img-wrap {
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+  }
+  .wiki-right-img { width: 100%; max-height: 280px; object-fit: cover; }
+
+  /* Images secondaires : carousel horizontal snap */
+  .wiki-secondary-imgs {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .wiki-secondary-imgs::-webkit-scrollbar { display: none; }
+  .wiki-secondary-img-wrap {
+    flex-shrink: 0;
+    width: 85vw;
+    max-width: 340px;
+    scroll-snap-align: start;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .wiki-secondary-img { width: 100%; height: auto; display: block; }
+}
+
+/* ── Desktop : details always open, summary hidden ───────────────────── */
+@media (min-width: 641px) {
+  .wiki-sidebar-filter-details {
+    display: contents;
+  }
+  .wiki-sidebar-filter-details > .wiki-sidebar-filter-summary { display: none; }
+  .wiki-intro-details { display: contents; }
+  .wiki-intro-details > .wiki-intro-summary { display: none; }
+  /* nav-back/placeholder hidden on desktop (pc-nav handles navigation) */
+  .nav-back-btn,
+  .nav-back-placeholder,
+  .top-nav-page-title { display: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    PC NAV — barre de navigation desktop
    Visible uniquement à partir de 641px. Le drawer mobile est inchangé.
 ═══════════════════════════════════════════════════════════════════════════ */

@@ -1,7 +1,12 @@
 <div class="top-nav">
 
-  <%# ─── Mobile : brand + burger (masqués sur desktop) ────────────────── %>
-  <a href="/" class="top-nav-brand"><%= config.title %></a>
+  <%# ─── Mobile : retour + titre + burger (masqués sur desktop) ────────── %>
+  <% if (locals.navBack) { %>
+    <a href="<%= locals.navBack %>" class="nav-back-btn" aria-label="Retour">&#8592;</a>
+  <% } else { %>
+    <span class="nav-back-placeholder"></span>
+  <% } %>
+  <span class="top-nav-page-title"><%= locals.navTitle || config.title %></span>
   <button type="button" class="nav-burger" id="nav-burger" aria-label="Menu" aria-expanded="false" aria-controls="nav-drawer">
     &#9776;
   </button>

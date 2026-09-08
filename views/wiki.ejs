@@ -1,6 +1,6 @@
 <%- include('partials/head', { title: lockedCategory ? lockedCategory.label : 'Toutes les pages' }) %>
 <main class="container wide<%= lockedCategory ? ' wiki-locked' : '' %>"<% if (lockedCategory) { %> style="--ch-hue: <%= lockedCategory.hue %>"<% } %>>
-  <%- include('partials/top-nav', { config: config }) %>
+  <%- include('partials/top-nav', { config: config, navTitle: lockedCategory ? lockedCategory.label : 'Wiki', navBack: lockedCategory ? '/wiki' : '/' }) %>
 
   <% if (lockedCategory) { %>
 
@@ -31,6 +31,8 @@
           <span id="wiki-result-count" class="wiki-result-count" hidden></span>
         </div>
 
+        <details class="wiki-sidebar-filter-details">
+        <summary class="wiki-sidebar-filter-summary">Filtres &#9662;</summary>
         <div class="wiki-sidebar-filters">
 
           <div class="wiki-filter-section wiki-sort-cols-row">
@@ -118,6 +120,7 @@
           <% } %>
 
         </div><%# /wiki-sidebar-filters %>
+        </details>
 
       </div><%# /wiki-sidebar-body %>
     </aside>

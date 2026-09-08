@@ -1,6 +1,6 @@
 <%- include('partials/head', { title: 'Images — ' + config.title }) %>
 <main class="container wide gallery-has-sidebar">
-  <%- include('partials/top-nav', { config: config }) %>
+  <%- include('partials/top-nav', { config: config, navTitle: 'Galerie', navBack: '/' }) %>
 
   <%# ─── SIDEBAR GAUCHE ──────────────────────────────────────────────── %>
   <aside class="wiki-cat-sidebar gallery-sidebar">
@@ -22,6 +22,9 @@
         </div>
         <span id="gallery-result-count" class="wiki-result-count" hidden></span>
       </div>
+
+      <details class="wiki-sidebar-filter-details">
+      <summary class="wiki-sidebar-filter-summary">Filtres &#9662;</summary>
 
       <%# Type Image / BD — toggle, pas de "Tout" %>
       <div class="wiki-filter-section">
@@ -102,6 +105,8 @@
         <button type="button" class="link-button gallery-select-toggle" id="gallery-select-toggle" hidden>S&eacute;lectionner</button>
       </div>
       <% } %>
+
+      </details>
 
     </div>
   </aside>

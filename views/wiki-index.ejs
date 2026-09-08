@@ -1,6 +1,6 @@
 <%- include('partials/head', { title: 'Wiki' }) %>
 <main class="container wide wiki-locked" style="--ch-hue: 250">
-  <%- include('partials/top-nav', { config: config }) %>
+  <%- include('partials/top-nav', { config: config, navTitle: 'Wiki', navBack: '/' }) %>
 
   <%# ─── SIDEBAR ──────────────────────────────────────────────────────── %>
   <aside class="wiki-cat-sidebar">
@@ -26,6 +26,8 @@
         <span id="wiki-result-count" class="wiki-result-count" hidden></span>
       </div>
 
+      <details class="wiki-sidebar-filter-details">
+      <summary class="wiki-sidebar-filter-summary">Filtres &#9662;</summary>
       <div class="wiki-sidebar-filters">
 
         <div class="wiki-filter-section wiki-sort-cols-row">
@@ -105,6 +107,7 @@
         <% } %>
 
       </div><%# /wiki-sidebar-filters %>
+      </details>
 
     </div><%# /wiki-sidebar-body %>
   </aside>
@@ -114,10 +117,13 @@
   <%# Native : intro + catégories + strips (masqué si filtre actif) %>
   <div id="wiki-index-native">
 
-    <div class="wiki-index-intro">
-      <p>Le wiki de Confidence est un espace d&rsquo;encyclop&eacute;die agr&eacute;ment&eacute; par les administrateurs du site. Il vise &agrave; &ecirc;tre exhaustif sur tout ce qui touche &agrave; la sexualit&eacute;, des pratiques aux fantasmes en passant par les objets et les sc&eacute;narios. Tu peux noter, mettre en favoris et explorer &agrave; ton rythme.</p>
-      <p>Il existe deux tags sp&eacute;ciaux&nbsp;: <strong>Ultra</strong>, pour les contenus les plus extr&ecirc;mes, et <strong>Irr&eacute;aliste</strong>, pour les sc&eacute;narios qui rel&egrave;vent davantage du fantasme pur. Ces deux tags peuvent &ecirc;tre masqu&eacute;s depuis les filtres.</p>
-    </div>
+    <details class="wiki-intro-details">
+      <summary class="wiki-intro-summary">À propos du wiki</summary>
+      <div class="wiki-index-intro">
+        <p>Le wiki de Confidence est un espace d&rsquo;encyclop&eacute;die agr&eacute;ment&eacute; par les administrateurs du site. Il vise &agrave; &ecirc;tre exhaustif sur tout ce qui touche &agrave; la sexualit&eacute;, des pratiques aux fantasmes en passant par les objets et les sc&eacute;narios. Tu peux noter, mettre en favoris et explorer &agrave; ton rythme.</p>
+        <p>Il existe deux tags sp&eacute;ciaux&nbsp;: <strong>Ultra</strong>, pour les contenus les plus extr&ecirc;mes, et <strong>Irr&eacute;aliste</strong>, pour les sc&eacute;narios qui rel&egrave;vent davantage du fantasme pur. Ces deux tags peuvent &ecirc;tre masqu&eacute;s depuis les filtres.</p>
+      </div>
+    </details>
 
     <%# ─ Grille des catégories ─ %>
     <div class="wiki-index-cats">
