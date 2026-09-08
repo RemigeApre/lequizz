@@ -248,13 +248,15 @@ function buildGalleryRouter(config) {
   });
 
   // Mise à jour des métadonnées (admin only = requireUser déjà sur le router)
-  router.post("/image-meta", function(req, res) {
+  router.post("/image-meta", express.json(), function(req, res) {
     var id = Number(req.body.id);
     if (!id) return res.json({ ok: false });
     var tags   = [].concat(req.body.tags || []).filter(Boolean);
     var author = String(req.body.author || "").trim();
     var parody = String(req.body.parody || "").trim();
-    updateGalleryImageMeta(id, { tags, author, parody });
+    var title  = req.body.title !== undefined ? String(req.body.title).trim() : undefined;
+    var notes  = req.body.notes !== undefined ? String(req.body.notes).trim() : undefined;
+    updateGalleryImageMeta(id, { tags, author, parody, title, notes });
     res.json({ ok: true });
   });
 
@@ -324,6 +326,20 @@ function buildGalleryRouter(config) {
     });
 
     res.redirect("/galerie");
+  });
+
+  router.post("/:id/react", express.json(), (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.json({ ok: false });
+    const image = getGalleryImage(id);
+    if (!image) return res.json({ ok: false });
+    const rating = Math.max(0, Math.min(5, Number(req.body.rating) || 0));
+    reactGalleryImage(id, {
+      rating,
+      flame: image.flame,
+      interested: image.interested,
+    });
+    res.json({ ok: true });
   });
 
   router.post("/:id/delete", (req, res) => {

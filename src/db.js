@@ -677,9 +677,13 @@ function listGalleryParodies() {
   return db.prepare("SELECT DISTINCT parody FROM gallery_images WHERE parody != '' ORDER BY parody COLLATE NOCASE").all().map(r => r.parody);
 }
 
-function updateGalleryImageMeta(id, { tags, author, parody }) {
-  db.prepare("UPDATE gallery_images SET tags = ?, author = ?, parody = ?, updated_at = ? WHERE id = ?")
-    .run(JSON.stringify(tags || []), author || "", parody || "", new Date().toISOString(), id);
+function updateGalleryImageMeta(id, { tags, author, parody, title, notes }) {
+  const sets = ["tags = ?", "author = ?", "parody = ?", "updated_at = ?"];
+  const params = [JSON.stringify(tags || []), author || "", parody || "", new Date().toISOString()];
+  if (title !== undefined) { sets.splice(sets.length - 1, 0, "title = ?"); params.splice(params.length - 1, 0, title); }
+  if (notes !== undefined) { sets.splice(sets.length - 1, 0, "notes = ?"); params.splice(params.length - 1, 0, notes); }
+  params.push(id);
+  db.prepare(`UPDATE gallery_images SET ${sets.join(", ")} WHERE id = ?`).run(...params);
   return true;
 }
 

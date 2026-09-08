@@ -141,75 +141,130 @@
   var resultCount    = document.getElementById("gallery-result-count");
   var countHero      = document.getElementById("gallery-count-hero");
 
-  var activeTag      = "";
-  var activeType     = "";
+  var typeState      = 0;   // 0=neutre, 1=inclure, 2=exclure
+  var typeValue      = "";  // "image" ou "bd"
+  var tagStates      = {}; // { "tag": 0|1|2 }
   var activeCategory = "";
   var searchQ        = "";
   var hideUltra      = localStorage.getItem("gallery-hide-ultra") !== "0";
   var hideIrrealiste = localStorage.getItem("gallery-hide-irrealiste") === "1";
   var activeRating   = 0;
   var sortMode       = "date-desc";
+  var currentPage    = 0;
+  var ITEMS_PER_PAGE = 50;
+  var filteredCards  = [];
 
   function norm(s) {
     return (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   }
 
   function applyFilters() {
+    currentPage = 0;
+    renderPage();
+  }
+
+  function renderPage() {
     if (!grid) return;
     var cards = Array.from(grid.querySelectorAll(".gallery-card"));
     var q = norm(searchQ);
-    var shown = 0;
 
-    cards.forEach(function (card) {
-      var cardTags   = (card.dataset.tags || "").split("|").filter(Boolean);
-      var okTag      = !activeTag || cardTags.indexOf(norm(activeTag)) !== -1;
-      var okType     = !activeType || card.dataset.type === activeType;
+    var typeIncludes = typeState === 1 ? [typeValue] : [];
+    var typeExcludes = typeState === 2 ? [typeValue] : [];
+    var tagIncludes  = Object.keys(tagStates).filter(function(t){ return tagStates[t] === 1; });
+    var tagExcludes  = Object.keys(tagStates).filter(function(t){ return tagStates[t] === 2; });
+
+    filteredCards = [];
+    cards.forEach(function(card) {
+      var cardTags = (card.dataset.tags || "").split("|").filter(Boolean);
+
+      var okType = true;
+      if (typeIncludes.length) okType = typeIncludes.indexOf(card.dataset.type) !== -1;
+      if (typeExcludes.length) okType = okType && typeExcludes.indexOf(card.dataset.type) === -1;
+
       var okCategory = !activeCategory || card.dataset.category === activeCategory;
-      var okSearch   = !q || norm(card.dataset.title).includes(q) || cardTags.some(function(t){ return norm(t).includes(q); });
+      var okSearch   = !q || norm(card.dataset.title).indexOf(q) !== -1 || cardTags.some(function(t){ return norm(t).indexOf(q) !== -1; });
       var okUltra    = !hideUltra || card.dataset.ultra !== "1";
       var okBd       = !hideIrrealiste || card.dataset.bd !== "1";
       var okRating   = !activeRating || Number(card.dataset.rating) >= activeRating;
-      card.hidden = !(okTag && okType && okCategory && okSearch && okUltra && okBd && okRating);
-      if (!card.hidden) shown++;
+
+      var okTag = true;
+      if (tagIncludes.length) okTag = tagIncludes.every(function(t){ return cardTags.indexOf(t) !== -1; });
+      if (tagExcludes.length) okTag = okTag && tagExcludes.every(function(t){ return cardTags.indexOf(t) === -1; });
+
+      var passes = okType && okCategory && okSearch && okUltra && okBd && okRating && okTag;
+      card.dataset.filtered = passes ? "1" : "0";
+      if (passes) filteredCards.push(card);
     });
 
-    var total = cards.length;
-    var hasFilter = activeTag || activeType || activeCategory || q || hideUltra || hideIrrealiste || activeRating;
-    if (countHero) countHero.textContent = hasFilter ? (shown + "/" + total) : total;
-    if (resultCount) {
-      resultCount.hidden = !hasFilter;
-      if (hasFilter) resultCount.textContent = shown + " / " + total;
-    }
+    var start = currentPage * ITEMS_PER_PAGE;
+    var end   = start + ITEMS_PER_PAGE;
+    cards.forEach(function(card) {
+      if (card.dataset.filtered !== "1") { card.hidden = true; return; }
+      var idx = filteredCards.indexOf(card);
+      card.hidden = idx < start || idx >= end;
+    });
 
+    var total = filteredCards.length;
+    var totalPages = Math.ceil(total / ITEMS_PER_PAGE) || 1;
+    var hasFilter = typeState || Object.keys(tagStates).some(function(t){ return tagStates[t]; }) || activeCategory || q || hideUltra || hideIrrealiste || activeRating;
+    if (countHero) countHero.textContent = hasFilter ? (total + "/" + cards.length) : cards.length;
+    if (resultCount) { resultCount.hidden = !hasFilter; if (hasFilter) resultCount.textContent = total + " / " + cards.length; }
+
+    updatePagination(totalPages);
     sortCards();
+  }
+
+  function updatePagination(totalPages) {
+    ["gallery-pagination-top", "gallery-pagination-bot"].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.hidden = totalPages <= 1;
+      el.innerHTML = "";
+      if (totalPages <= 1) return;
+      var prev = document.createElement("button");
+      prev.type = "button"; prev.className = "gallery-page-btn";
+      prev.textContent = "\u2039 Pr\u00e9c.";
+      prev.disabled = currentPage === 0;
+      prev.addEventListener("click", function() { if (currentPage > 0) { currentPage--; renderPage(); window.scrollTo(0,0); } });
+      var info = document.createElement("span");
+      info.className = "gallery-page-info";
+      info.textContent = (currentPage + 1) + " / " + totalPages;
+      var next = document.createElement("button");
+      next.type = "button"; next.className = "gallery-page-btn";
+      next.textContent = "Suiv. \u203a";
+      next.disabled = currentPage >= totalPages - 1;
+      next.addEventListener("click", function() { if (currentPage < totalPages - 1) { currentPage++; renderPage(); window.scrollTo(0,0); } });
+      el.appendChild(prev); el.appendChild(info); el.appendChild(next);
+    });
   }
 
   function sortCards() {
     if (!grid) return;
-    var cards = Array.from(grid.querySelectorAll(".gallery-card"));
+    var cards = Array.from(grid.querySelectorAll(".gallery-card:not([hidden])"));
     cards.sort(function(a, b) {
       if (sortMode === "alpha-asc") return (a.dataset.title || "").localeCompare(b.dataset.title || "", "fr");
       if (sortMode === "rating-desc") return (Number(b.dataset.rating) || 0) - (Number(a.dataset.rating) || 0);
       if (sortMode === "date-asc") return (a.dataset.date || "").localeCompare(b.dataset.date || "");
-      // date-desc (default)
       return (b.dataset.date || "").localeCompare(a.dataset.date || "");
     });
     cards.forEach(function(c) { grid.appendChild(c); });
   }
 
-  // Type filter — toggle (cliquer sur actif = désactiver)
+  // Type filter — 3 états (neutre → inclure → exclure → neutre)
   if (typeFilter) {
-    typeFilter.querySelectorAll(".tag-chip[data-type]").forEach(function (chip) {
-      chip.addEventListener("click", function () {
+    typeFilter.querySelectorAll(".tag-chip[data-type]").forEach(function(chip) {
+      chip.addEventListener("click", function() {
         var t = chip.dataset.type || "";
-        if (activeType === t) {
-          chip.classList.remove("active");
-          activeType = "";
+        if (typeValue !== t) {
+          typeFilter.querySelectorAll(".tag-chip").forEach(function(c){ c.dataset.state = "0"; c.classList.remove("chip-include","chip-exclude"); });
+          typeValue = t; typeState = 1;
         } else {
-          typeFilter.querySelectorAll(".tag-chip").forEach(function(c){ c.classList.remove("active"); });
-          chip.classList.add("active");
-          activeType = t;
+          typeState = (typeState + 1) % 3;
+          if (typeState === 0) typeValue = "";
         }
+        chip.dataset.state = typeState;
+        chip.classList.toggle("chip-include", typeState === 1);
+        chip.classList.toggle("chip-exclude", typeState === 2);
         applyFilters();
       });
     });
@@ -233,21 +288,16 @@
     });
   }
 
-  // Tag filter (wiki-tag-chip style)
+  // Tag filter — 3 états (neutre → inclure → exclure → neutre)
   if (tagFilter) {
-    tagFilter.querySelectorAll(".wiki-tag-chip").forEach(function (chip) {
-      chip.addEventListener("click", function () {
+    tagFilter.querySelectorAll(".wiki-tag-chip").forEach(function(chip) {
+      chip.addEventListener("click", function() {
         var t = (chip.dataset.tag || "").toLowerCase();
-        if (activeTag === t) {
-          activeTag = "";
-          chip.dataset.state = "0";
-          chip.classList.remove("active");
-        } else {
-          tagFilter.querySelectorAll(".wiki-tag-chip").forEach(function(c){ c.dataset.state = "0"; c.classList.remove("active"); });
-          activeTag = t;
-          chip.dataset.state = "1";
-          chip.classList.add("active");
-        }
+        var state = ((tagStates[t] || 0) + 1) % 3;
+        tagStates[t] = state;
+        chip.dataset.state = state;
+        chip.classList.toggle("chip-include", state === 1);
+        chip.classList.toggle("chip-exclude", state === 2);
         applyFilters();
       });
     });
@@ -310,6 +360,20 @@
       sortMode = sortSelect.value;
       sortCards();
     });
+  }
+
+  // Taille des cartes
+  var sizeSelect = document.getElementById("gallery-size-select");
+  var SIZES = { small: "120px", medium: "180px", large: "240px", xlarge: "320px" };
+  function applySize(val) {
+    if (grid) grid.style.setProperty("--gallery-card-min", SIZES[val] || "180px");
+    localStorage.setItem("gallery-size", val);
+  }
+  if (sizeSelect) {
+    var savedSize = localStorage.getItem("gallery-size") || "medium";
+    sizeSelect.value = savedSize;
+    applySize(savedSize);
+    sizeSelect.addEventListener("change", function() { applySize(sizeSelect.value); });
   }
 
   applyFilters();
@@ -531,6 +595,166 @@
       }).then(function(r){ return r.json(); }).then(function(data){
         if (data.ok) btn.classList.toggle("active", !isActive);
       });
+    });
+  }
+
+  // ══════════════════════════════════════════════════
+  // 7. NOTE PAR ÉTOILE SUR LES CARTES
+  // ══════════════════════════════════════════════════
+  if (grid) {
+    grid.addEventListener("click", function(e) {
+      var star = e.target.closest(".gallery-star");
+      if (!star) return;
+      e.stopPropagation();
+      var ratingEl = star.closest(".gallery-card-rating");
+      if (!ratingEl) return;
+      var galleryId = Number(ratingEl.dataset.galleryId);
+      var val = Number(star.dataset.val);
+      var currentRating = Array.from(ratingEl.querySelectorAll(".gallery-star.filled")).length;
+      var newRating = currentRating === val ? 0 : val;
+      fetch("/galerie/" + galleryId + "/react", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rating: newRating }),
+      }).then(function(r){ return r.json(); }).then(function(data){
+        if (data.ok) {
+          ratingEl.querySelectorAll(".gallery-star").forEach(function(s, i){
+            s.classList.toggle("filled", i < newRating);
+          });
+          var card = ratingEl.closest(".gallery-card");
+          if (card) card.dataset.rating = newRating;
+        }
+      });
+    });
+  }
+
+  // ══════════════════════════════════════════════════
+  // 8. ÉDITION RAPIDE (admin)
+  // ══════════════════════════════════════════════════
+  var quickEditPanel = null;
+  var quickEditCurrentId = null;
+
+  function buildQuickEditPanel() {
+    if (quickEditPanel) return;
+    quickEditPanel = document.createElement("div");
+    quickEditPanel.className = "gallery-qedit-panel";
+    quickEditPanel.innerHTML = [
+      '<div class="gallery-qedit-inner">',
+        '<button type="button" class="gallery-qedit-close">&times;</button>',
+        '<div class="gallery-qedit-bd-fields" hidden>',
+          '<input type="text" class="gallery-qedit-title wiki-title-input" placeholder="Titre\u2026" />',
+          '<textarea class="gallery-qedit-notes wiki-textarea" rows="2" placeholder="Notes\u2026"></textarea>',
+        '</div>',
+        '<div class="gallery-lb-meta-tags gallery-qedit-tags"></div>',
+        '<div class="gallery-lb-meta-tag-edit">',
+          '<input type="text" class="gallery-qedit-tag-input wiki-lb-meta-tag-input" placeholder="Ajouter un tag\u2026" autocomplete="off" />',
+        '</div>',
+        '<input type="text" class="gallery-qedit-author wiki-title-input" placeholder="Auteur\u2026" autocomplete="off" />',
+        '<input type="text" class="gallery-qedit-parody wiki-title-input" placeholder="Parodie\u2026" autocomplete="off" />',
+        '<div class="gallery-qedit-actions">',
+          '<button type="button" class="gallery-qedit-save gallery-submit-btn">Enregistrer</button>',
+          '<button type="button" class="gallery-qedit-cancel link-button">Annuler</button>',
+        '</div>',
+      '</div>',
+    ].join("");
+    document.body.appendChild(quickEditPanel);
+    quickEditPanel.hidden = true;
+
+    var qClose    = quickEditPanel.querySelector(".gallery-qedit-close");
+    var qCancel   = quickEditPanel.querySelector(".gallery-qedit-cancel");
+    var qSave     = quickEditPanel.querySelector(".gallery-qedit-save");
+    var qTagInput = quickEditPanel.querySelector(".gallery-qedit-tag-input");
+    var qTagsEl   = quickEditPanel.querySelector(".gallery-qedit-tags");
+
+    function closeQEdit() { quickEditPanel.hidden = true; quickEditCurrentId = null; }
+    if (qClose)  qClose.addEventListener("click", closeQEdit);
+    if (qCancel) qCancel.addEventListener("click", closeQEdit);
+    quickEditPanel.addEventListener("click", function(e) { if (e.target === quickEditPanel) closeQEdit(); });
+
+    if (qTagInput) {
+      qTagInput.addEventListener("keydown", function(e) {
+        if ((e.key === "Enter" || e.key === ",") && qTagInput.value.trim()) {
+          e.preventDefault();
+          addQEditTag(qTagInput.value.trim());
+          qTagInput.value = "";
+        }
+      });
+    }
+
+    if (qSave) {
+      qSave.addEventListener("click", function() {
+        if (!quickEditCurrentId) return;
+        var tags = Array.from(qTagsEl.querySelectorAll(".wiki-lb-tag-chip")).map(function(c){ return c.dataset.tag; }).filter(Boolean);
+        var author = quickEditPanel.querySelector(".gallery-qedit-author").value.trim();
+        var parody = quickEditPanel.querySelector(".gallery-qedit-parody").value.trim();
+        var isBd = quickEditPanel.dataset.isBd === "1";
+        var body = { id: quickEditCurrentId, tags: tags, author: author, parody: parody };
+        if (isBd) {
+          body.title = quickEditPanel.querySelector(".gallery-qedit-title").value.trim();
+          body.notes = quickEditPanel.querySelector(".gallery-qedit-notes").value.trim();
+        }
+        fetch("/galerie/image-meta", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }).then(function(r){ return r.json(); }).then(function(data){
+          if (data.ok) closeQEdit();
+        });
+      });
+    }
+  }
+
+  function addQEditTag(tag) {
+    if (!quickEditPanel) return;
+    var qTagsEl = quickEditPanel.querySelector(".gallery-qedit-tags");
+    var existing = Array.from(qTagsEl.querySelectorAll(".wiki-lb-tag-chip")).map(function(c){ return c.dataset.tag; });
+    if (existing.indexOf(tag) !== -1) return;
+    var chip = document.createElement("span");
+    chip.className = "wiki-lb-tag-chip";
+    chip.dataset.tag = tag;
+    chip.textContent = tag;
+    var rm = document.createElement("button");
+    rm.type = "button"; rm.className = "wiki-lb-tag-rm"; rm.innerHTML = "&times;";
+    rm.addEventListener("click", function() { chip.remove(); });
+    chip.appendChild(rm);
+    qTagsEl.appendChild(chip);
+  }
+
+  function openQuickEdit(galleryId, isBd, card) {
+    buildQuickEditPanel();
+    quickEditCurrentId = galleryId;
+    quickEditPanel.dataset.isBd = isBd ? "1" : "0";
+    var qTagsEl = quickEditPanel.querySelector(".gallery-qedit-tags");
+    qTagsEl.innerHTML = "";
+    quickEditPanel.querySelector(".gallery-qedit-author").value = "";
+    quickEditPanel.querySelector(".gallery-qedit-parody").value = "";
+    var bdFields = quickEditPanel.querySelector(".gallery-qedit-bd-fields");
+    bdFields.hidden = !isBd;
+    if (isBd) {
+      quickEditPanel.querySelector(".gallery-qedit-title").value = card ? (card.dataset.title || "") : "";
+      quickEditPanel.querySelector(".gallery-qedit-notes").value = "";
+    }
+    var src = card ? (card.dataset.images || "").split("|")[0] : "";
+    if (src) {
+      fetch("/galerie/image-meta?src=" + encodeURIComponent(src))
+        .then(function(r){ return r.json(); })
+        .then(function(meta){
+          if (!meta) return;
+          (meta.tags || []).forEach(function(t){ addQEditTag(t); });
+          quickEditPanel.querySelector(".gallery-qedit-author").value = meta.author || "";
+          quickEditPanel.querySelector(".gallery-qedit-parody").value = meta.parody || "";
+        });
+    }
+    quickEditPanel.hidden = false;
+  }
+
+  if (grid) {
+    grid.addEventListener("click", function(e) {
+      var btn = e.target.closest(".gallery-quick-edit-btn");
+      if (!btn) return;
+      e.stopPropagation();
+      var card = btn.closest(".gallery-card");
+      openQuickEdit(Number(btn.dataset.galleryId), btn.dataset.isBd === "1", card);
     });
   }
 

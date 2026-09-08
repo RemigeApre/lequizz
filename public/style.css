@@ -4473,15 +4473,16 @@ a.wiki-ql-label:hover .wiki-ql-text {
   margin: 0 0 0.5rem;
 }
 
-/* ── Grille masonry ─────────────────────────────── */
+/* ── Grille galerie avec taille variable ─────────── */
 .gallery-grid {
-  columns: 180px;
-  column-gap: 0.6rem;
+  --gallery-card-min: 180px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--gallery-card-min), 1fr));
+  gap: 0.75rem;
 }
 
 .gallery-card {
-  break-inside: avoid;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0;
   position: relative;
   border-radius: 8px;
   overflow: hidden;
@@ -4761,7 +4762,7 @@ a.wiki-ql-label:hover .wiki-ql-text {
 .gallery-wiki-link-search-wrap { position: relative; }
 
 @media (max-width: 640px) {
-  .gallery-grid { columns: 140px; }
+  .gallery-grid { --gallery-card-min: 140px; }
   .gallery-lb-inner { flex-direction: column; align-items: center; }
   .gallery-lb-panel { min-width: unset; max-width: 90vw; }
   .gallery-lb-img { max-width: 95vw; }
@@ -7107,4 +7108,67 @@ a.wiki-ql-label:hover .wiki-ql-text {
 .wiki-tag-ac-item.selected {
   background: color-mix(in srgb, var(--accent) 12%, transparent);
 }
+
+/* ── Chips trois états ────────────────────────────── */
+.chip-include { background: hsl(140,55%,35%) !important; border-color: hsl(140,55%,35%) !important; color: #fff !important; }
+.chip-exclude { background: hsl(0,58%,45%) !important;   border-color: hsl(0,58%,45%) !important;   color: #fff !important; }
+
+.wiki-tag-chip.chip-include { background: hsl(140,55%,30%); color: #fff; }
+.wiki-tag-chip.chip-exclude { background: hsl(0,58%,40%);   color: #fff; }
+
+/* ── Pagination galerie ──────────────────────────── */
+.gallery-pagination {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0.75rem; padding: 0.6rem 0; margin: 0.5rem 0;
+}
+.gallery-page-btn {
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--fg); border-radius: 6px;
+  padding: 0.3rem 0.8rem; font-size: 0.85rem;
+  cursor: pointer; transition: background 0.12s;
+}
+.gallery-page-btn:hover:not(:disabled) { background: var(--accent); color: #fff; border-color: var(--accent); }
+.gallery-page-btn:disabled { opacity: 0.35; cursor: default; }
+.gallery-page-info { font-size: 0.85rem; color: var(--muted); }
+
+/* ── Étoiles de note sur la carte ───────────────── */
+.gallery-card-rating {
+  display: flex; gap: 0.1rem;
+  padding: 0.2rem 0.35rem;
+}
+.gallery-star { font-size: 0.85rem; color: rgba(255,255,255,0.3); cursor: pointer; transition: color 0.1s; }
+.gallery-star.filled { color: hsl(45,90%,60%); }
+.gallery-star:hover { color: hsl(45,90%,70%); }
+
+/* ── Panneau édition rapide ─────────────────────── */
+.gallery-qedit-panel {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.55);
+  display: flex; align-items: center; justify-content: center;
+}
+.gallery-qedit-inner {
+  background: hsl(220,10%,16%); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 12px; padding: 1.2rem 1.4rem; width: min(420px, 90vw);
+  display: flex; flex-direction: column; gap: 0.65rem;
+  position: relative;
+}
+.gallery-qedit-close {
+  position: absolute; top: 0.6rem; right: 0.8rem;
+  background: none; border: none; color: rgba(255,255,255,0.6);
+  font-size: 1.3rem; cursor: pointer; line-height: 1;
+}
+.gallery-qedit-close:hover { color: #fff; }
+.gallery-qedit-actions { display: flex; gap: 0.5rem; }
+
+/* ── Badge wiki sur carte ───────────────────────── */
+.gallery-wiki-badge-btn {
+  background: hsl(220,55%,40%);
+  border: none; color: #fff;
+  font-size: 0.65rem; font-weight: 800;
+  width: 1.4rem; height: 1.4rem;
+  border-radius: 4px;
+  display: inline-flex; align-items: center; justify-content: center;
+  text-decoration: none;
+}
+.gallery-wiki-badge-btn:hover { background: hsl(220,55%,50%); color: #fff; }
 

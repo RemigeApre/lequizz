@@ -78,6 +78,16 @@
         </select>
       </div>
 
+      <%# Taille des cartes %>
+      <div class="wiki-filter-section">
+        <select id="gallery-size-select" class="wiki-sort-select">
+          <option value="small">Petit</option>
+          <option value="medium" selected>Moyen</option>
+          <option value="large">Grand</option>
+          <option value="xlarge">Tr&egrave;s grand</option>
+        </select>
+      </div>
+
       <%# Sélection groupée %>
       <% if (currentUser) { %>
       <div class="wiki-filter-section">
@@ -98,6 +108,7 @@
   </div>
 
   <%# ─── GRILLE ───────────────────────────────────────────────────────── %>
+  <div class="gallery-pagination" id="gallery-pagination-top" hidden></div>
   <div class="gallery-grid" id="gallery-grid">
     <% if (!items.length) { %>
       <p class="intro">Aucune image pour l&apos;instant.</p>
@@ -135,21 +146,25 @@
 
         <div class="gallery-card-overlay">
           <span class="wiki-card-badges">
-            <% if (item.rating) { %>
-              <span class="wiki-card-mini-stars">
-                <% for (var si = 1; si <= 5; si++) { %><span class="wiki-card-star<%= si <= item.rating ? ' filled' : '' %>">&#9733;</span><% } %>
-              </span>
-            <% } %>
             <% if (item.flame) { %><span class="wiki-card-react-badge" title="J'adore">&#128293;</span><% } %>
             <% if (item.interested) { %><span class="wiki-card-react-badge" title="Ça m'intéresse">&#10024;</span><% } %>
           </span>
+          <% if (item.id) { %>
+            <div class="gallery-card-rating" data-gallery-id="<%= item.id %>">
+              <% for (var ri = 1; ri <= 5; ri++) { %>
+                <span class="gallery-star<%= (item.rating || 0) >= ri ? ' filled' : '' %>" data-val="<%= ri %>">&#9733;</span>
+              <% } %>
+            </div>
+          <% } %>
           <div class="gallery-card-btns">
+            <% if (item.wikiPageId) { %>
+              <a href="/wiki/<%= item.wikiPageId %>" class="gallery-card-btn gallery-wiki-badge-btn" title="Page wiki associ&#233;e">W</a>
+            <% } %>
             <% if (item.type === 'gallery' && item.id) { %>
               <button type="button" class="gallery-card-btn gallery-fav-btn<%= favoriteGalleryIds.indexOf(item.id) !== -1 ? ' active' : '' %>" data-item-id="<%= item.id %>" title="Favori">&#128278;</button>
-              <a href="/galerie/<%= item.id %>/edit" class="gallery-card-btn" title="Modifier">&#9998;</a>
-            <% } %>
-            <% if (item.wikiPageId) { %>
-              <a href="/wiki/<%= item.wikiPageId %>" class="gallery-card-btn" title="Page wiki">&#128196;</a>
+              <% if (currentUser) { %>
+                <button type="button" class="gallery-card-btn gallery-quick-edit-btn" data-gallery-id="<%= item.id %>" data-is-bd="<%= item.contentType === 'bd' ? '1' : '0' %>" title="Modifier">&#9998;</button>
+              <% } %>
             <% } %>
           </div>
         </div>
@@ -157,6 +172,7 @@
       </div>
     <% }) %>
   </div>
+  <div class="gallery-pagination" id="gallery-pagination-bot" hidden></div>
 
   <%# ─── FAB + DROPDOWN ───────────────────────────────────────────────── %>
   <% if (currentUser) { %>
