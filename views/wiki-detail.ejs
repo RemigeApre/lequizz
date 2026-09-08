@@ -234,8 +234,26 @@
             <img src="<%= page.imagePaths[0] %>" alt="" class="wiki-right-img" />
           </div>
         <% } %>
-        <%# a) Nom de la page (sous l'image) ─ %>
-        <h2 class="wiki-right-title"><%= page.title %></h2>
+
+        <%# Noms de variantes (tags cliquables sous l'image) ─ %>
+        <%
+          var variantNames = [];
+          if (pm.variantes && Array.isArray(pm.variantes)) {
+            pm.variantes.forEach(function(v) {
+              if (v.nom) variantNames.push(v.nom);
+              if (Array.isArray(v.variantes)) {
+                v.variantes.forEach(function(sv) { if (sv.nom) variantNames.push(sv.nom); });
+              }
+            });
+          }
+        %>
+        <% if (variantNames.length) { %>
+          <div class="wiki-right-variants">
+            <% variantNames.forEach(function(nom) { %>
+              <a href="/wiki?tag=<%= encodeURIComponent(nom.toLowerCase()) %>" class="wiki-right-variant-chip"><%= nom %></a>
+            <% }) %>
+          </div>
+        <% } %>
 
         <div class="wiki-right-body">
         <%# d) Notation ─ %>
@@ -271,7 +289,7 @@
                 var _ti = tagImageCounts && tagImageCounts[t] ? tagImageCounts[t] : 0;
               %>
               <a href="/wiki?tag=<%= encodeURIComponent(t.toLowerCase()) %>"
-                 class="link-tag-pill wiki-right-tag-link"><%= t %><% if (_tp || _ti) { %><span class="wiki-tag-xy"> <%= _tp %>|<%= _ti %></span><% } %></a>
+                 class="link-tag-pill wiki-right-tag-link"><%= t %><% if (_tp || _ti) { %><span class="wiki-tag-xy"><span class="wiki-tag-xy-pages"><%= _tp %></span>|<span class="wiki-tag-xy-imgs"><%= _ti %></span></span><% } %></a>
             <% }) %>
             <% if (derivedTerms.length) { %>
               <span class="wiki-derived-sep">&mdash;</span>
