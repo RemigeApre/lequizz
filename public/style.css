@@ -6131,9 +6131,10 @@ a.wiki-ql-label:hover .wiki-ql-text {
 .wiki-tag-all-link {
   font-size: 0.72rem; color: rgba(255,255,255,0.55);
   text-decoration: none; white-space: nowrap;
-  margin-left: auto;
+  display: block; text-align: center; width: 100%;
 }
 .wiki-tag-all-link:hover { color: #fff; }
+.wiki-tag-footer { justify-content: center; }
 
 /* ── Note min : titre + croix sur même ligne ─────── */
 .wiki-filter-label-row {
@@ -6182,14 +6183,16 @@ a.wiki-ql-label:hover .wiki-ql-text {
 .wiki-card-carousel-wrap { position: relative; height: 100%; }
 .wiki-card-carousel-btn {
   position: absolute; top: 50%; transform: translateY(-50%);
-  background: rgba(0,0,0,0.5); color: #fff; border: none;
-  width: 2rem; height: 2rem; border-radius: 50%; cursor: pointer;
-  z-index: 4; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;
-  opacity: 0; transition: opacity 0.15s;
+  background: none; border: none; color: #fff; cursor: pointer;
+  z-index: 4; font-size: 1.6rem; line-height: 1; padding: 0.5rem 0.6rem;
+  opacity: 0; transition: opacity 0.18s;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+  -webkit-text-stroke: 0;
 }
-.wiki-card-image:hover .wiki-card-carousel-btn { opacity: 1; }
-.wiki-card-carousel-btn--prev { left: 0.4rem; }
-.wiki-card-carousel-btn--next { right: 0.4rem; }
+.wiki-card-image:hover .wiki-card-carousel-btn { opacity: 0.88; }
+.wiki-card-carousel-btn:hover { opacity: 1 !important; }
+.wiki-card-carousel-btn--prev { left: 0; }
+.wiki-card-carousel-btn--next { right: 0; }
 
 /* ── Pagination ───────────────────────────────────── */
 .wiki-page-hidden { display: none !important; }
@@ -6220,13 +6223,38 @@ a.wiki-ql-label:hover .wiki-ql-text {
 .wiki-special-filter { display: flex; flex-wrap: wrap; gap: 0.3rem; }
 
 /* ── Page /tags ───────────────────────────────────── */
-.tags-page-header {
-  display: flex; align-items: center; gap: 1rem;
-  margin-bottom: 1.25rem;
+
+/* Hero bandeau (style wiki-detail-banner) */
+.tags-hero {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr 2.5rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.1rem 1rem;
+  margin: 0 -1.25rem 1.5rem;
+  background: linear-gradient(100deg, hsl(250, 38%, 22%), hsl(250, 34%, 30%));
+  border-top: 2px solid color-mix(in srgb, var(--wiki-gold) 65%, transparent);
+  color: #fff;
 }
-.tags-search-wrap {
-  margin-bottom: 1.25rem;
+.tags-hero-back {
+  grid-column: 1;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 2.2rem; height: 2.2rem; border-radius: 50%;
+  color: #fff; text-decoration: none; font-size: 1.2rem;
+  background: rgba(255,255,255,0.12); transition: background 0.15s;
 }
+.tags-hero-back:hover { background: rgba(255,255,255,0.24); }
+.tags-hero-title {
+  grid-column: 2; margin: 0;
+  font-size: 1.15rem; font-weight: 700; text-align: center; letter-spacing: -0.01em;
+}
+.tags-hero-count {
+  grid-column: 3;
+  font-size: 0.75rem; color: rgba(255,255,255,0.55);
+  text-align: right; font-weight: 600;
+}
+
+.tags-search-wrap { margin-bottom: 1.25rem; }
 .tags-search-input {
   width: 100%; padding: 0.5rem 0.8rem;
   border: 1px solid var(--border); border-radius: 8px;
@@ -6234,23 +6262,97 @@ a.wiki-ql-label:hover .wiki-ql-text {
   font-size: 0.92rem; outline: none;
 }
 .tags-search-input:focus { border-color: var(--accent); }
+
+/* Grille de tags */
 .tags-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
-  gap: 0.5rem;
+  gap: 0.45rem;
 }
 .tags-item {
   display: flex; align-items: center; justify-content: space-between;
   padding: 0.45rem 0.75rem;
-  border: 1px solid var(--border); border-radius: 7px;
-  background: var(--card);
+  border: 1px solid transparent;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: transform 0.1s, filter 0.1s;
   font-size: 0.85rem;
+  /* Dégradé de couleur fréquence : vibrant (pct=0) → neutre (pct=1) */
+  background: color-mix(in oklab,
+    hsl(255, 58%, 48%) calc((1 - var(--tag-pct, 0)) * 75%),
+    var(--card));
+  color: color-mix(in oklab,
+    #fff calc((1 - var(--tag-pct, 0)) * 80%),
+    var(--fg));
+  border-color: color-mix(in oklab,
+    hsl(255, 55%, 60%) calc((1 - var(--tag-pct, 0)) * 70%),
+    var(--border));
 }
-.tags-item-name { font-weight: 600; color: var(--fg); }
+.tags-item:hover { transform: translateY(-2px); filter: brightness(1.1); }
+.tags-item-name { font-weight: 600; }
 .tags-item-count {
-  font-size: 0.72rem; color: var(--muted);
-  background: var(--bg); border-radius: 4px;
+  font-size: 0.7rem; opacity: 0.65;
+  background: rgba(0,0,0,0.12); border-radius: 4px;
   padding: 0.1rem 0.3rem; min-width: 1.2rem; text-align: center;
 }
 .tags-empty { color: var(--muted); text-align: center; margin-top: 2rem; }
+
+/* Tooltip répartition */
+.tags-tooltip {
+  position: fixed; z-index: 100;
+  background: rgba(20,14,40,0.95); color: #e8e0ff;
+  border: 1px solid rgba(180,140,255,0.25);
+  border-radius: 7px; padding: 0.45rem 0.7rem;
+  font-size: 0.78rem; line-height: 1.6;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+/* Popup résultats */
+.tags-popup-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.55);
+  display: flex; align-items: center; justify-content: center;
+}
+.tags-popup {
+  background: var(--card); color: var(--fg);
+  border-radius: 12px; width: min(500px, 92vw);
+  max-height: 72vh; display: flex; flex-direction: column;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.4);
+  overflow: hidden;
+}
+.tags-popup-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.85rem 1rem 0.7rem;
+  border-bottom: 1px solid var(--border);
+}
+.tags-popup-tag { font-weight: 700; font-size: 1rem; }
+.tags-popup-close {
+  background: none; border: none; color: var(--muted);
+  font-size: 1.3rem; cursor: pointer; padding: 0; line-height: 1;
+}
+.tags-popup-close:hover { color: var(--fg); }
+.tags-popup-tabs {
+  display: flex; gap: 0; border-bottom: 1px solid var(--border);
+  padding: 0 1rem;
+}
+.tags-popup-tab {
+  background: none; border: none; border-bottom: 2px solid transparent;
+  color: var(--muted); font-size: 0.85rem; font-weight: 600;
+  padding: 0.5rem 0.75rem; cursor: pointer; margin-bottom: -1px;
+}
+.tags-popup-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tags-popup-tab:hover { color: var(--fg); }
+.tags-popup-body { flex: 1; overflow-y: auto; padding: 0.5rem 1rem 1rem; }
+.tags-popup-list {
+  list-style: none; margin: 0.5rem 0 0; padding: 0;
+  display: flex; flex-direction: column; gap: 0.3rem;
+}
+.tags-popup-list li { font-size: 0.9rem; padding: 0.25rem 0; border-bottom: 1px solid var(--border); }
+.tags-popup-list li:last-child { border-bottom: none; }
+.tags-popup-link { color: var(--accent); text-decoration: none; }
+.tags-popup-link:hover { text-decoration: underline; }
+.tags-popup-loading, .tags-popup-err, .tags-popup-empty {
+  color: var(--muted); font-size: 0.88rem; text-align: center; margin-top: 1.5rem;
+}
 

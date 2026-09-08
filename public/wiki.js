@@ -898,6 +898,8 @@
     var nextBtn = document.createElement("button");
     nextBtn.type = "button"; nextBtn.className = "wiki-card-carousel-btn wiki-card-carousel-btn--next";
     nextBtn.setAttribute("aria-label", "Image suivante"); nextBtn.textContent = "\u203a";
+    // Prevent card link navigation when clicking carousel buttons
+    [prevBtn, nextBtn].forEach(function(b) { b.addEventListener("click", function(e) { e.preventDefault(); e.stopPropagation(); }); });
 
     function goTo(newIdx) {
       idx = ((newIdx % paths.length) + paths.length) % paths.length;

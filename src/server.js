@@ -218,29 +218,61 @@ app.get("/api/search", function (req, res) {
 });
 
 // ── Page /tags : tous les tags de tous les contenus ────────────────────────
+function parseTags(raw) {
+  try { return JSON.parse(raw || "[]"); } catch (_) { return []; }
+}
 app.get("/tags", function (req, res) {
-  var counts = {};
-  function addTags(rows) {
-    rows.forEach(function (row) {
-      var tags = [];
-      try { tags = JSON.parse(row.tags || "[]"); } catch (_) {}
-      tags.forEach(function (t) {
-        var key = String(t).toLowerCase().trim();
-        if (!key) return;
-        counts[key] = (counts[key] || 0) + 1;
+  var wiki = {}, galerie = {}, bd = {};
+  function fill(rows, target) {
+    rows.forEach(function (r) {
+      parseTags(r.tags).forEach(function (t) {
+        var k = String(t).toLowerCase().trim();
+        if (k) target[k] = (target[k] || 0) + 1;
       });
     });
   }
-  try { addTags(db.prepare("SELECT tags FROM wiki_pages").all()); } catch (_) {}
+  try { fill(db.prepare("SELECT tags FROM wiki_pages").all(), wiki); } catch (_) {}
   if (req.user) {
-    try { addTags(db.prepare("SELECT tags FROM gallery_images").all()); } catch (_) {}
-    try { addTags(db.prepare("SELECT tags FROM bd_books").all()); } catch (_) {}
+    try { fill(db.prepare("SELECT tags FROM gallery_images").all(), galerie); } catch (_) {}
+    try { fill(db.prepare("SELECT tags FROM bd_books").all(), bd); } catch (_) {}
   }
-  var tags = Object.keys(counts).sort(function (a, b) {
-    var d = counts[b] - counts[a];
-    return d !== 0 ? d : a.localeCompare(b, "fr");
-  }).map(function (t) { return { tag: t, count: counts[t] }; });
+  var allKeys = new Set(Object.keys(wiki).concat(Object.keys(galerie)).concat(Object.keys(bd)));
+  var tags = Array.from(allKeys).map(function (t) {
+    return { tag: t, count: (wiki[t] || 0) + (galerie[t] || 0) + (bd[t] || 0),
+             breakdown: { wiki: wiki[t] || 0, galerie: galerie[t] || 0, bd: bd[t] || 0 } };
+  }).sort(function (a, b) {
+    var d = b.count - a.count;
+    return d !== 0 ? d : a.tag.localeCompare(b.tag, "fr");
+  });
   res.render("tags", { config, tags, currentUser: req.user || null });
+});
+
+// ── API : résultats pour un tag donné ──────────────────────────────────────
+app.get("/api/tags/results", function (req, res) {
+  var tag = String(req.query.tag || "").toLowerCase().trim();
+  if (!tag) return res.json({ wiki: [], galerie: [], bd: [] });
+  var result = { wiki: [], galerie: [], bd: [] };
+  function hasTag(raw) {
+    return parseTags(raw).some(function (t) { return String(t).toLowerCase().trim() === tag; });
+  }
+  try {
+    db.prepare("SELECT id, title, tags FROM wiki_pages").all().forEach(function (r) {
+      if (hasTag(r.tags)) result.wiki.push({ id: r.id, title: r.title });
+    });
+  } catch (_) {}
+  if (req.user) {
+    try {
+      db.prepare("SELECT id, title, tags FROM gallery_images").all().forEach(function (r) {
+        if (hasTag(r.tags)) result.galerie.push({ id: r.id, title: r.title || "Image #" + r.id });
+      });
+    } catch (_) {}
+    try {
+      db.prepare("SELECT id, title, tags FROM bd_books").all().forEach(function (r) {
+        if (hasTag(r.tags)) result.bd.push({ id: r.id, title: r.title });
+      });
+    } catch (_) {}
+  }
+  res.json(result);
 });
 
 app.use("/", buildQuizRouter(config));

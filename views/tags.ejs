@@ -2,9 +2,11 @@
 <main class="container">
   <%- include('partials/top-nav', { config: config }) %>
 
-  <div class="tags-page-header">
-    <a href="/wiki" class="link-button">&larr; Wiki</a>
-    <h1 class="section-title-h1">Tous les tags</h1>
+  <%# ── Hero bandeau (style wiki-detail-banner) ── %>
+  <div class="tags-hero">
+    <a href="#" class="tags-hero-back" id="tags-back-btn" title="Page précédente">&larr;</a>
+    <h1 class="tags-hero-title">Tous les tags</h1>
+    <span class="tags-hero-count"><%= tags.length %></span>
   </div>
 
   <div class="tags-search-wrap">
@@ -13,33 +15,208 @@
   </div>
 
   <div class="tags-grid" id="tags-grid">
-    <% tags.forEach(function (item) { %>
-      <div class="tags-item" data-tag="<%= item.tag.toLowerCase() %>">
+    <% var total = tags.length; %>
+    <% tags.forEach(function (item, idx) { %>
+      <%
+        var pct = total > 1 ? idx / (total - 1) : 0;
+        var bk = item.breakdown || { wiki: 0, galerie: 0, bd: 0 };
+        var bdStr = JSON.stringify(bk).replace(/'/g, '&#39;');
+      %>
+      <div class="tags-item" data-tag="<%= item.tag %>"
+           data-breakdown='<%= bdStr %>'
+           style="--tag-pct: <%= pct.toFixed(3) %>">
         <span class="tags-item-name"><%= item.tag %></span>
         <span class="tags-item-count"><%= item.count %></span>
       </div>
     <% }) %>
-    <p class="tags-empty" id="tags-empty" hidden>Aucun tag trouvé.</p>
+    <p class="tags-empty" id="tags-empty" hidden>Aucun tag trouv&eacute;.</p>
   </div>
+
+  <%# ── Popup résultats tag ── %>
+  <div class="tags-popup-overlay" id="tags-popup-overlay" hidden>
+    <div class="tags-popup" id="tags-popup">
+      <div class="tags-popup-header">
+        <span class="tags-popup-tag" id="tags-popup-tag"></span>
+        <button type="button" class="tags-popup-close" id="tags-popup-close">&#215;</button>
+      </div>
+      <div class="tags-popup-tabs" id="tags-popup-tabs"></div>
+      <div class="tags-popup-body" id="tags-popup-body"></div>
+    </div>
+  </div>
+
+  <%# ── Tooltip hover ── %>
+  <div class="tags-tooltip" id="tags-tooltip" hidden></div>
 </main>
 
 <script>
 (function () {
-  var input = document.getElementById("tags-search-input");
-  var grid  = document.getElementById("tags-grid");
-  var empty = document.getElementById("tags-empty");
-  if (!input || !grid) return;
-  input.addEventListener("input", function () {
-    var q = input.value.trim().toLowerCase();
-    var items = grid.querySelectorAll(".tags-item");
-    var any = false;
-    items.forEach(function (item) {
-      var match = !q || item.dataset.tag.indexOf(q) !== -1;
-      item.hidden = !match;
-      if (match) any = true;
+  /* ── Retour page précédente ── */
+  var backBtn = document.getElementById("tags-back-btn");
+  if (backBtn) {
+    backBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      if (history.length > 1 && document.referrer) history.back();
+      else window.location.href = "/wiki";
     });
-    if (empty) empty.hidden = any;
-  });
+  }
+
+  /* ── Recherche ── */
+  var searchInput = document.getElementById("tags-search-input");
+  var grid        = document.getElementById("tags-grid");
+  var emptyMsg    = document.getElementById("tags-empty");
+  if (searchInput && grid) {
+    searchInput.addEventListener("input", function () {
+      var q = searchInput.value.trim().toLowerCase();
+      var any = false;
+      grid.querySelectorAll(".tags-item").forEach(function (item) {
+        var match = !q || item.dataset.tag.toLowerCase().indexOf(q) !== -1;
+        item.hidden = !match;
+        if (match) any = true;
+      });
+      if (emptyMsg) emptyMsg.hidden = any || !q;
+    });
+  }
+
+  /* ── Tooltip répartition ── */
+  var tooltip = document.getElementById("tags-tooltip");
+  function showTooltip(item, evt) {
+    if (!tooltip) return;
+    var bk = {};
+    try { bk = JSON.parse(item.dataset.breakdown || "{}"); } catch (_) {}
+    var entries = [];
+    if (bk.wiki)    entries.push(["Wiki",    bk.wiki]);
+    if (bk.galerie) entries.push(["Galerie", bk.galerie]);
+    if (bk.bd)      entries.push(["BD",      bk.bd]);
+    if (!entries.length) return;
+    while (tooltip.firstChild) tooltip.removeChild(tooltip.firstChild);
+    entries.forEach(function (pair, i) {
+      if (i > 0) tooltip.appendChild(document.createElement("br"));
+      var span = document.createElement("span");
+      span.textContent = pair[0] + "\u00a0: ";
+      var strong = document.createElement("strong");
+      strong.textContent = pair[1];
+      tooltip.appendChild(span);
+      tooltip.appendChild(strong);
+    });
+    tooltip.hidden = false;
+    positionTooltip(evt);
+  }
+  function positionTooltip(evt) {
+    if (!tooltip || tooltip.hidden) return;
+    var x = evt.clientX + 12, y = evt.clientY + 12;
+    var tw = tooltip.offsetWidth, th = tooltip.offsetHeight;
+    if (x + tw > window.innerWidth  - 8) x = evt.clientX - tw - 12;
+    if (y + th > window.innerHeight - 8) y = evt.clientY - th - 12;
+    tooltip.style.left = x + "px";
+    tooltip.style.top  = y + "px";
+  }
+  function hideTooltip() { if (tooltip) tooltip.hidden = true; }
+
+  if (grid) {
+    grid.addEventListener("mouseover", function (e) {
+      var item = e.target.closest(".tags-item");
+      if (item) showTooltip(item, e);
+    });
+    grid.addEventListener("mousemove", positionTooltip);
+    grid.addEventListener("mouseout", function (e) {
+      if (!e.relatedTarget || !e.relatedTarget.closest(".tags-item")) hideTooltip();
+    });
+  }
+
+  /* ── Popup résultats ── */
+  var overlay   = document.getElementById("tags-popup-overlay");
+  var popup     = document.getElementById("tags-popup");
+  var popupTag  = document.getElementById("tags-popup-tag");
+  var popupTabs = document.getElementById("tags-popup-tabs");
+  var popupBody = document.getElementById("tags-popup-body");
+  var closeBtn  = document.getElementById("tags-popup-close");
+
+  var SECTION_LABELS = { wiki: "Wiki", galerie: "Galerie", bd: "BD" };
+  var SECTION_URLS   = { wiki: "/wiki/", galerie: null, bd: null };
+
+  function openPopup(tag) {
+    if (!overlay || !popupTag) return;
+    hideTooltip();
+    popupTag.textContent = tag;
+    while (popupTabs.firstChild) popupTabs.removeChild(popupTabs.firstChild);
+    while (popupBody.firstChild) popupBody.removeChild(popupBody.firstChild);
+    var loading = document.createElement("p");
+    loading.className = "tags-popup-loading";
+    loading.textContent = "Chargement\u2026";
+    popupBody.appendChild(loading);
+    overlay.hidden = false;
+
+    fetch("/api/tags/results?tag=" + encodeURIComponent(tag))
+      .then(function (r) { return r.json(); })
+      .then(function (data) { renderPopup(data); })
+      .catch(function () {
+        while (popupBody.firstChild) popupBody.removeChild(popupBody.firstChild);
+        var err = document.createElement("p"); err.className = "tags-popup-err";
+        err.textContent = "Erreur de chargement.";
+        popupBody.appendChild(err);
+      });
+  }
+
+  function renderPopup(data) {
+    while (popupTabs.firstChild) popupTabs.removeChild(popupTabs.firstChild);
+    while (popupBody.firstChild) popupBody.removeChild(popupBody.firstChild);
+    var sections = Object.keys(data).filter(function (k) { return data[k] && data[k].length > 0; });
+    if (!sections.length) {
+      var empty = document.createElement("p"); empty.className = "tags-popup-empty";
+      empty.textContent = "Aucun r\u00e9sultat.";
+      popupBody.appendChild(empty);
+      return;
+    }
+    var activeSection = sections[0];
+
+    function showSection(key) {
+      activeSection = key;
+      popupTabs.querySelectorAll(".tags-popup-tab").forEach(function (t) {
+        t.classList.toggle("active", t.dataset.section === key);
+      });
+      while (popupBody.firstChild) popupBody.removeChild(popupBody.firstChild);
+      var ul = document.createElement("ul");
+      ul.className = "tags-popup-list";
+      data[key].forEach(function (item) {
+        var li = document.createElement("li");
+        var url = SECTION_URLS[key];
+        if (url && item.id) {
+          var a = document.createElement("a");
+          a.href = url + item.id;
+          a.textContent = item.title;
+          a.className = "tags-popup-link";
+          li.appendChild(a);
+        } else {
+          li.textContent = item.title;
+        }
+        ul.appendChild(li);
+      });
+      popupBody.appendChild(ul);
+    }
+
+    sections.forEach(function (key) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "tags-popup-tab";
+      btn.dataset.section = key;
+      btn.textContent = (SECTION_LABELS[key] || key) + " (" + data[key].length + ")";
+      btn.addEventListener("click", function () { showSection(key); });
+      popupTabs.appendChild(btn);
+    });
+    showSection(activeSection);
+  }
+
+  function closePopup() { if (overlay) overlay.hidden = true; }
+  if (closeBtn) closeBtn.addEventListener("click", closePopup);
+  if (overlay)  overlay.addEventListener("click", function (e) { if (e.target === overlay) closePopup(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closePopup(); });
+
+  if (grid) {
+    grid.addEventListener("click", function (e) {
+      var item = e.target.closest(".tags-item");
+      if (item) openPopup(item.dataset.tag);
+    });
+  }
 })();
 </script>
 
