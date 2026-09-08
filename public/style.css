@@ -8047,12 +8047,29 @@ a.wiki-ql-label:hover .wiki-ql-text {
 .wiki-detail-right  { display: none; }
 .wiki-detail-left   { display: none; }
 .wiki-detail-actions-mobile { display: flex; gap: 0.6rem; margin-top: 1.25rem; }
+/* Image principale mobile : masquée par défaut, affichée dans le corps de texte */
+.wiki-mobile-hero { display: none; }
+
 .wiki-mobile-sec-wrap { display: none; }
 
 /* ─────────────────────────────────────────────────────────
    Wiki detail mobile : image principale + rating + carrousel secondaire
 ───────────────────────────────────────────────────────── */
 @media (max-width: 640px) {
+  /* Image mobile insérée dans le corps avant le 1er h2 */
+  .wiki-mobile-hero {
+    display: block;
+    margin: 1rem 0;
+    border-radius: 8px;
+    overflow: hidden;
+    line-height: 0;
+  }
+  .wiki-mobile-hero-img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
   /* Volet droit visible sur mobile */
   .wiki-detail-right {
     display: block;
@@ -8062,19 +8079,8 @@ a.wiki-ql-label:hover .wiki-ql-text {
   .wiki-detail-right .wiki-right-header,
   .wiki-detail-right .wiki-right-nav { display: none; }
 
-  /* Image principale : format complet, sans rogner */
-  .wiki-detail-right .wiki-right-img-wrap {
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 0;
-  }
-  .wiki-detail-right .wiki-right-img {
-    width: 100%;
-    height: auto;
-    max-height: none;
-    object-fit: contain;
-    display: block;
-  }
+  /* Image principale du volet droit masquée sur mobile (remplacée par .wiki-mobile-hero) */
+  .wiki-detail-right .wiki-right-img-wrap { display: none; }
 
   /* Rating + réactions */
   .wiki-detail-right .wiki-right-body {

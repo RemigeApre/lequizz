@@ -119,6 +119,13 @@
           <div class="wiki-md"><span class="wiki-md-raw" hidden><%= page.content %></span></div>
         <% } %>
 
+        <%# Image principale — mobile uniquement, glissée par JS avant le 1er h2 ─ %>
+        <% if (hasImages && currentUser) { %>
+          <div class="wiki-mobile-hero" id="wiki-mobile-hero" aria-hidden="true">
+            <img src="<%= page.imagePaths[0] %>" alt="" class="wiki-mobile-hero-img" loading="lazy" />
+          </div>
+        <% } %>
+
         <%# Variantes (positions) ─ %>
         <% if (page.category === 'position' && pm.variantes && pm.variantes.length) { %>
           <div class="wiki-pos-section wiki-pos-variantes">
