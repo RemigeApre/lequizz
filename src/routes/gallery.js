@@ -126,7 +126,7 @@ function buildItems(galleryImages, wikiPages) {
             id: null,
             wikiPageId: page.id,
             imagePaths: [imgPath],
-            title: `${page.title} — ${vv.nom || "variante"}`,
+            title: page.title,
             category: page.category,
             tags: [...page.tags, ...extraTag],
             notes: "",
