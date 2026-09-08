@@ -217,6 +217,32 @@ app.get("/api/search", function (req, res) {
   res.json({ results: results });
 });
 
+// ── Page /tags : tous les tags de tous les contenus ────────────────────────
+app.get("/tags", function (req, res) {
+  var counts = {};
+  function addTags(rows) {
+    rows.forEach(function (row) {
+      var tags = [];
+      try { tags = JSON.parse(row.tags || "[]"); } catch (_) {}
+      tags.forEach(function (t) {
+        var key = String(t).toLowerCase().trim();
+        if (!key) return;
+        counts[key] = (counts[key] || 0) + 1;
+      });
+    });
+  }
+  try { addTags(db.prepare("SELECT tags FROM wiki_pages").all()); } catch (_) {}
+  if (req.user) {
+    try { addTags(db.prepare("SELECT tags FROM gallery_images").all()); } catch (_) {}
+    try { addTags(db.prepare("SELECT tags FROM bd_books").all()); } catch (_) {}
+  }
+  var tags = Object.keys(counts).sort(function (a, b) {
+    var d = counts[b] - counts[a];
+    return d !== 0 ? d : a.localeCompare(b, "fr");
+  }).map(function (t) { return { tag: t, count: counts[t] }; });
+  res.render("tags", { config, tags, currentUser: req.user || null });
+});
+
 app.use("/", buildQuizRouter(config));
 app.use("/admin", buildAdminRouter(config));
 app.use("/liens", buildLinksRouter(config));

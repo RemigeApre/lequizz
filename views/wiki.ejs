@@ -16,10 +16,6 @@
           <h1 class="wiki-chapter-hero-title"><%= lockedCategory.label %></h1>
           <span class="wiki-chapter-hero-count"><%= pages.length %></span>
         </div>
-        <% if (lockedCategory.desc) { %><p class="wiki-chapter-hero-desc"><%= lockedCategory.desc %></p><% } %>
-        <% if (currentUser) { %>
-          <a href="/wiki/ajouter?category=<%= lockedCategory.key %>" class="wiki-add-page-btn">+ Ajouter</a>
-        <% } %>
       </div>
 
       <%# ─ Corps scrollable : recherche + filtres ─ %>
@@ -27,9 +23,8 @@
 
         <div class="wiki-search-wrap">
           <div class="wiki-search-bar">
-            <span class="wiki-search-icon">&#128269;</span>
             <input type="search" id="wiki-search-input" class="wiki-search-input"
-                   placeholder="Rechercher dans <%= lockedCategory.label %>&hellip;"
+                   placeholder="Recherche"
                    autocomplete="off" />
             <button type="button" id="wiki-search-clear" class="wiki-search-clear" hidden>&#215;</button>
           </div>
@@ -60,16 +55,6 @@
             <button type="button" id="wiki-irrealiste-toggle" class="wiki-ultra-btn">Irr&eacute;aliste</button>
           </div>
 
-          <div class="wiki-filter-section">
-            <span class="wiki-filter-label">Afficher seulement</span>
-            <div class="wiki-special-filter" id="wiki-special-filter">
-              <button type="button" class="tag-chip active" data-special="">Tous</button>
-              <button type="button" class="tag-chip" data-special="ultra">Ultra</button>
-              <button type="button" class="tag-chip" data-special="irrealiste">Irr&eacute;aliste</button>
-              <button type="button" class="tag-chip" data-special="both">Les deux</button>
-            </div>
-          </div>
-
           <%
             var availExtraCats = [];
             pages.forEach(function(p) {
@@ -95,12 +80,14 @@
           <% } %>
 
           <div class="wiki-filter-section">
-            <span class="wiki-filter-label" style="text-align:center;display:block">Note minimale</span>
+            <div class="wiki-filter-label-row">
+              <span class="wiki-filter-label">Note minimale</span>
+              <button type="button" class="wiki-adv-star-reset" id="wiki-adv-star-reset">&#10006;</button>
+            </div>
             <div class="wiki-adv-stars" id="wiki-adv-stars">
               <% for (var si = 1; si <= 5; si++) { %>
                 <button type="button" class="wiki-adv-star" data-value="<%= si %>">&#9734;</button>
               <% } %>
-              <button type="button" class="wiki-adv-star-reset" id="wiki-adv-star-reset">&#10006;</button>
             </div>
           </div>
 
@@ -123,6 +110,10 @@
                   </button>
                 <% }) %>
               </div>
+              <div class="wiki-tag-footer">
+                <button type="button" id="wiki-tag-expand-btn" class="wiki-tag-expand-btn" hidden>&#9660; Plus</button>
+                <a href="/tags" class="wiki-tag-all-link">Tous les tags &rarr;</a>
+              </div>
             </div>
           <% } %>
 
@@ -142,9 +133,8 @@
     <%# ─── RECHERCHE : toujours visible ──────────────────────────────────── %>
     <div class="wiki-search-wrap">
       <div class="wiki-search-bar">
-        <span class="wiki-search-icon">&#128269;</span>
         <input type="search" id="wiki-search-input" class="wiki-search-input"
-               placeholder="Rechercher une page&hellip;" autocomplete="off" />
+               placeholder="Recherche" autocomplete="off" />
         <button type="button" id="wiki-search-clear" class="wiki-search-clear" hidden>&#215;</button>
       </div>
       <span id="wiki-result-count" class="wiki-result-count" hidden></span>
@@ -174,13 +164,6 @@
         </div>
 
         <div class="wiki-controls">
-          <div class="wiki-special-filter" id="wiki-special-filter">
-            <button type="button" class="tag-chip active" data-special="">Tous</button>
-            <button type="button" class="tag-chip" data-special="ultra">Ultra</button>
-            <button type="button" class="tag-chip" data-special="irrealiste">Irr&eacute;aliste</button>
-            <button type="button" class="tag-chip" data-special="both">Les deux</button>
-          </div>
-
           <div class="links-filter" id="wiki-category-filter">
             <button type="button" class="tag-chip active" data-category="">Tous</button>
             <% categories.forEach(function (c) { %>
@@ -236,6 +219,9 @@
     <% }) %>
   </div>
   <div class="wiki-pagination" id="wiki-pagination" hidden></div>
+  <% if (currentUser && lockedCategory) { %>
+    <a href="/wiki/ajouter?category=<%= lockedCategory.key %>" class="wiki-fab-add" title="Ajouter une page">+</a>
+  <% } %>
 </main>
 <script src="/wiki.js?v=<%= assetVersion %>"></script>
 <%- include('partials/foot') %>

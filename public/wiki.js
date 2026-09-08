@@ -703,6 +703,7 @@
       });
       chip.hidden = !wouldYield;
     });
+    applyTagOverflow();
   }
 
   function applyFilters() {
@@ -1050,14 +1051,54 @@
       });
     });
   }
+  // ── Tag overflow (max 4 lignes = 12 chips, expand = 12 de plus) ──────────
+  var TAG_PAGE = 12; // chips par palier (4 lignes × 3 cols)
+  var TAG_MAX  = 24; // maximum affiché dans la sidebar
+  var tagExpandedCount = TAG_PAGE;
+  var tagExpandBtn = document.getElementById("wiki-tag-expand-btn");
+
+  function applyTagOverflow() {
+    if (!tagFilter) return;
+    var chips = tagFilter.querySelectorAll(".wiki-tag-chip[data-tag]");
+    // Chips "smart-visibles" (non masquées par le filtre intelligent)
+    var smartVisible = [];
+    chips.forEach(function(chip) { if (!chip.hidden) smartVisible.push(chip); });
+    var shown = 0;
+    chips.forEach(function(chip) {
+      if (chip.hidden) { chip.classList.remove("wiki-tag-overflow-hidden"); return; }
+      if (shown < tagExpandedCount) {
+        chip.classList.remove("wiki-tag-overflow-hidden");
+        shown++;
+      } else {
+        chip.classList.add("wiki-tag-overflow-hidden");
+      }
+    });
+    // Bouton : visible si des chips débordent ET qu'on n'a pas atteint le max
+    if (tagExpandBtn) {
+      var overflow = smartVisible.length > tagExpandedCount;
+      var canExpand = tagExpandedCount < TAG_MAX;
+      tagExpandBtn.hidden = !(overflow && canExpand);
+    }
+  }
+
+  if (tagExpandBtn) {
+    tagExpandBtn.addEventListener("click", function () {
+      tagExpandedCount = Math.min(tagExpandedCount + TAG_PAGE, TAG_MAX);
+      applyTagOverflow();
+    });
+  }
+
+  // Réinitialise le niveau d'expansion quand la recherche de tag change
   if (tagSearchInput) {
     tagSearchInput.addEventListener("input", function () {
+      tagExpandedCount = TAG_MAX; // on montre tout lors d'une recherche
       var q = tagSearchInput.value.trim().toLowerCase();
       if (tagFilter) {
         tagFilter.querySelectorAll(".wiki-tag-chip").forEach(function (chip) {
           var tag = (chip.dataset.tag || "").toLowerCase();
           chip.hidden = q.length > 0 && (chip.dataset.state || "0") === "0" && tag.indexOf(q) === -1;
         });
+        applyTagOverflow();
       }
     });
   }
@@ -1181,6 +1222,7 @@
 
   applyCols(); // applique le nombre de colonnes et les carousels
   applyFilters(); // toujours appelé au chargement
+  applyTagOverflow(); // collapse les tags au-delà de 4 lignes
 
   // ══════════════════════════════════════════════════
   // 7. AUTO-RESIZE TEXTAREA

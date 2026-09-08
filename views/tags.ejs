@@ -1,0 +1,46 @@
+<%- include('partials/head', { title: 'Tous les tags' }) %>
+<main class="container">
+  <%- include('partials/top-nav', { config: config }) %>
+
+  <div class="tags-page-header">
+    <a href="/wiki" class="link-button">&larr; Wiki</a>
+    <h1 class="section-title-h1">Tous les tags</h1>
+  </div>
+
+  <div class="tags-search-wrap">
+    <input type="search" id="tags-search-input" class="tags-search-input"
+           placeholder="Recherche&hellip;" autocomplete="off" />
+  </div>
+
+  <div class="tags-grid" id="tags-grid">
+    <% tags.forEach(function (item) { %>
+      <div class="tags-item" data-tag="<%= item.tag.toLowerCase() %>">
+        <span class="tags-item-name"><%= item.tag %></span>
+        <span class="tags-item-count"><%= item.count %></span>
+      </div>
+    <% }) %>
+    <p class="tags-empty" id="tags-empty" hidden>Aucun tag trouvé.</p>
+  </div>
+</main>
+
+<script>
+(function () {
+  var input = document.getElementById("tags-search-input");
+  var grid  = document.getElementById("tags-grid");
+  var empty = document.getElementById("tags-empty");
+  if (!input || !grid) return;
+  input.addEventListener("input", function () {
+    var q = input.value.trim().toLowerCase();
+    var items = grid.querySelectorAll(".tags-item");
+    var any = false;
+    items.forEach(function (item) {
+      var match = !q || item.dataset.tag.indexOf(q) !== -1;
+      item.hidden = !match;
+      if (match) any = true;
+    });
+    if (empty) empty.hidden = any;
+  });
+})();
+</script>
+
+<%- include('partials/foot') %>
