@@ -293,6 +293,8 @@ function buildGalleryRouter(config) {
       notes: String(req.body.notes || "").trim(),
       imagePaths,
       wikiPageId,
+      author: String(req.body.author || "").trim(),
+      parody: String(req.body.parody || "").trim(),
     });
 
     const rating = Math.max(0, Math.min(5, Number(req.body.rating) || 0));

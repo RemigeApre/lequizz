@@ -4365,6 +4365,12 @@ a.wiki-ql-label:hover .wiki-ql-text {
   font-size: 0.9rem;
 }
 
+.gallery-author-row {
+  display: flex; gap: 0.6rem;
+}
+.gallery-author-row .wiki-title-input {
+  flex: 1; font-size: 0.9rem; min-width: 0;
+}
 .gallery-notes-input {
   width: 100%;
   padding: 0.45rem 0.75rem;
@@ -5308,7 +5314,7 @@ a.wiki-ql-label:hover .wiki-ql-text {
 
 .wiki-chapter-hero-top {
   display: grid;
-  grid-template-columns: 1.8rem 1fr 1.8rem;
+  grid-template-columns: 1.8rem 1fr auto;
   align-items: center;
   gap: 0.5rem;
 }
