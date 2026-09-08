@@ -180,7 +180,7 @@ function parseMeta(category, body) {
     specific = { sous_cat: validSubs.includes(sub) ? sub : "" };
   } else if (category === "partenaires") {
     const nb = (v) => ["0","1","2","3","4","nombreux","variable"].includes(String(v)) ? String(v) : "";
-    const validTypes = ["humain", "monstre", "animaux", "autre"];
+    const validTypes = ["nombre", "fetichisme", "monstre", "animaux", "autre"];
     specific = {
       nb_total:    nb(body.meta_nb_total),
       nb_feminin:  nb(body.meta_nb_feminin),
@@ -451,6 +451,18 @@ function buildWikiRouter(config) {
     res.json(results.map((p) => ({ id: p.id, title: p.title, category: p.category })));
   });
 
+  router.get("/ajouter", requireUser, (req, res) => {
+    const preCategory = String(req.query.category || "");
+    const pages = sortedPages();
+    const blankPage = {
+      id: null, title: "", category: preCategory || (CATEGORIES[0] && CATEGORIES[0].key) || "",
+      content: "", tags: [], imagePaths: [], owned: false, meta: {},
+      extraCategories: [], rating: 0, flame: false, interested: false,
+      updatedAt: new Date().toISOString()
+    };
+    res.render("wiki-form", { config, page: blankPage, pages, allTags: getAllTags(pages), ...CTX });
+  });
+
   router.get("/:id", (req, res) => {
     const id = Number(req.params.id);
     const page = Number.isInteger(id) ? getWikiPage(id) : null;
@@ -473,18 +485,6 @@ function buildWikiRouter(config) {
     const tagImageCounts = {};
     listGalleryImages().forEach((img) => img.tags.forEach((t) => { tagImageCounts[t] = (tagImageCounts[t] || 0) + 1; }));
     res.render("wiki-detail", { config, page, pages: allPages, suggestions, prevPage, nextPage, backHref: back.href, backLabel: back.label, isFavorite: pageIsFavorite, userNote, tagPageCounts, tagImageCounts, ...CTX });
-  });
-
-  router.get("/ajouter", requireUser, (req, res) => {
-    const preCategory = String(req.query.category || "");
-    const pages = sortedPages();
-    const blankPage = {
-      id: null, title: "", category: preCategory || (CATEGORIES[0] && CATEGORIES[0].key) || "",
-      content: "", tags: [], imagePaths: [], owned: false, meta: {},
-      extraCategories: [], rating: 0, flame: false, interested: false,
-      updatedAt: new Date().toISOString()
-    };
-    res.render("wiki-form", { config, page: blankPage, pages, allTags: getAllTags(pages), ...CTX });
   });
 
   router.get("/:id/edit", requireUser, (req, res) => {

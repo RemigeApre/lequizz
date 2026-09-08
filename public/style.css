@@ -6217,6 +6217,13 @@ a.wiki-ql-label:hover .wiki-ql-text {
   .wiki-tag-cloud { flex-wrap: wrap; gap: 0.3rem; }
   .wiki-notrated-opt { margin-top: 0.25rem; }
   .wiki-cat-sidebar .wiki-adv-checks { gap: 0.3rem; }
+
+  /* Galerie sidebar : le container.wide est déjà centré, la sidebar prend l'espace à gauche */
+  .gallery-has-sidebar .gallery-grid,
+  .gallery-has-sidebar .gallery-bulk-bar,
+  .gallery-has-sidebar .gallery-fab-wrap {
+    /* Layout correct via container.wide centré + sidebar fixed hors flux */
+  }
 }
 
 .wiki-prop-grid {
@@ -6325,6 +6332,73 @@ a.wiki-ql-label:hover .wiki-ql-text {
   transition: background 0.15s, transform 0.15s;
 }
 .wiki-fab-add:hover { background: color-mix(in srgb, var(--accent) 80%, #fff); transform: scale(1.08); }
+
+/* ── Galerie avec sidebar gauche ─────────────────── */
+.top-nav ~ .gallery-sidebar { margin-top: 0; }
+
+.gallery-sidebar {
+  --ch-hue: 220;
+}
+
+/* FAB dropdown galerie */
+.gallery-fab-wrap {
+  position: fixed;
+  bottom: 1.75rem; right: 1.75rem;
+  z-index: 30;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.gallery-fab-menu {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.gallery-fab-option {
+  background: hsl(220, 15%, 22%);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 999px;
+  padding: 0.4rem 1.1rem;
+  font-size: 0.88rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.gallery-fab-option:hover { background: hsl(220, 15%, 30%); }
+
+/* Badge BD sur les cartes */
+.gallery-type-badge {
+  position: absolute;
+  top: 0.4rem; left: 0.4rem;
+  font-size: 0.62rem; font-weight: 700;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+.gallery-type-bd {
+  background: hsl(220, 55%, 45%);
+  color: #fff;
+}
+
+/* Chip de type dans le formulaire upload */
+.gallery-upload-type-chip {
+  display: inline-block;
+  font-size: 0.75rem; font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.gallery-upload-type-image { background: hsl(140, 45%, 35%); color: #fff; }
+.gallery-upload-type-bd    { background: hsl(220, 55%, 45%); color: #fff; }
 
 /* ── Grille : nombres de colonnes ─────────────────── */
 .wiki-grid--cols-1 { grid-template-columns: 1fr !important; }

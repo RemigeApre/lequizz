@@ -105,6 +105,7 @@ function buildItems(galleryImages, wikiPages) {
         rating: page.rating || 0,
         flame: !!page.flame,
         interested: !!page.interested,
+        contentType: "image",
         date: page.updatedAt,
       });
     }
@@ -128,6 +129,7 @@ function buildItems(galleryImages, wikiPages) {
           rating: page.rating || 0,
           flame: !!page.flame,
           interested: !!page.interested,
+          contentType: "image",
           date: page.updatedAt,
         });
       });
@@ -146,6 +148,7 @@ function buildItems(galleryImages, wikiPages) {
     rating: img.rating,
     flame: img.flame,
     interested: img.interested,
+    contentType: img.contentType || "image",
     date: img.createdAt,
   }));
 
@@ -181,8 +184,9 @@ function buildGalleryRouter(config) {
     const category = normalizeCategory(req.body.category);
     const tags = parseTags(req.body.tags);
     const notes = String(req.body.notes || "").trim();
+    const contentType = req.body.content_type === "bd" ? "bd" : "image";
     const imagePaths = files.map((f) => `/uploads/gallery/${f.filename}`);
-    insertGalleryImage({ imagePaths, title, tags, notes, category });
+    insertGalleryImage({ imagePaths, title, tags, notes, category, contentType });
     res.redirect("/galerie");
   });
 
@@ -285,6 +289,7 @@ function buildGalleryRouter(config) {
     const category = normalizeCategory(req.body.category);
     const wikiPageIdRaw = Number(req.body.wiki_page_id);
     const wikiPageId = Number.isInteger(wikiPageIdRaw) && wikiPageIdRaw > 0 ? wikiPageIdRaw : null;
+    const contentType = req.body.content_type === "bd" ? "bd" : "image";
 
     updateGalleryImage(id, {
       title: String(req.body.title || "").trim(),
@@ -295,6 +300,7 @@ function buildGalleryRouter(config) {
       wikiPageId,
       author: String(req.body.author || "").trim(),
       parody: String(req.body.parody || "").trim(),
+      contentType,
     });
 
     const rating = Math.max(0, Math.min(5, Number(req.body.rating) || 0));

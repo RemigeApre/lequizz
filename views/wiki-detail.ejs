@@ -11,7 +11,7 @@
     var nbFem     = pm.nb_feminin  || pm.nb_femmes || '';
     var nbMasc    = pm.nb_masculin || pm.nb_hommes || '';
     var pmTypes   = Array.isArray(pm.types) ? pm.types : [];
-    var TYPES_PART = { humain: 'Humain', monstre: 'Monstre', animaux: 'Animaux', autre: 'Autre' };
+    var TYPES_PART = { nombre: 'Nombre', fetichisme: 'Fétichisme', monstre: 'Monstre', animaux: 'Animaux', autre: 'Autre' };
     var hasPartMeta = page.category === 'partenaires' && (nbTotal || nbFem || nbMasc || pmTypes.length);
     var LIEU = { prive: 'Privé', public: 'Public', cache: 'Caché' };
     var GODE = { animal: 'Animal', monstre: 'Monstre', fantaisiste: 'Fantaisiste', ethnique: 'Ethnique', autre: 'Autre' };
