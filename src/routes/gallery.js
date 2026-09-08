@@ -91,25 +91,27 @@ function buildItems(galleryImages, wikiPages) {
 
   const wikiItems = [];
   wikiPages.forEach((page) => {
-    // Images principales : ignorées si un enregistrement gallery est déjà lié
+    // Images principales : une carte par image (destackées)
     if (page.imagePaths && page.imagePaths.length && !linkedPageIds.has(page.id)) {
-      wikiItems.push({
-        type: "wiki",
-        id: null,
-        wikiPageId: page.id,
-        imagePaths: page.imagePaths,
-        title: page.title,
-        category: page.category,
-        tags: page.tags,
-        notes: "",
-        rating: page.rating || 0,
-        flame: !!page.flame,
-        interested: !!page.interested,
-        contentType: "image",
-        date: page.updatedAt,
+      page.imagePaths.forEach((imgPath) => {
+        wikiItems.push({
+          type: "wiki",
+          id: null,
+          wikiPageId: page.id,
+          imagePaths: [imgPath],
+          title: page.title,
+          category: page.category,
+          tags: page.tags,
+          notes: "",
+          rating: page.rating || 0,
+          flame: !!page.flame,
+          interested: !!page.interested,
+          contentType: "image",
+          date: page.updatedAt,
+        });
       });
     }
-    // Images des variantes (héritent des tags de la page + tag du nom de la variante)
+    // Images des variantes : une carte par image
     const variantes = (page.meta && Array.isArray(page.meta.variantes)) ? page.meta.variantes : [];
     variantes.forEach((v) => {
       const allSubs = Array.isArray(v.variantes) ? v.variantes : [];
@@ -117,20 +119,22 @@ function buildItems(galleryImages, wikiPages) {
       varianteSources.forEach((vv) => {
         if (!Array.isArray(vv.images) || !vv.images.length) return;
         const extraTag = vv.nom ? [vv.nom.toLowerCase()] : [];
-        wikiItems.push({
-          type: "wiki",
-          id: null,
-          wikiPageId: page.id,
-          imagePaths: vv.images,
-          title: `${page.title} — ${vv.nom || "variante"}`,
-          category: page.category,
-          tags: [...page.tags, ...extraTag],
-          notes: "",
-          rating: page.rating || 0,
-          flame: !!page.flame,
-          interested: !!page.interested,
-          contentType: "image",
-          date: page.updatedAt,
+        vv.images.forEach((imgPath) => {
+          wikiItems.push({
+            type: "wiki",
+            id: null,
+            wikiPageId: page.id,
+            imagePaths: [imgPath],
+            title: `${page.title} — ${vv.nom || "variante"}`,
+            category: page.category,
+            tags: [...page.tags, ...extraTag],
+            notes: "",
+            rating: page.rating || 0,
+            flame: !!page.flame,
+            interested: !!page.interested,
+            contentType: "image",
+            date: page.updatedAt,
+          });
         });
       });
     });
@@ -171,10 +175,19 @@ function buildGalleryRouter(config) {
 
   router.get("/", (req, res) => {
     const { items, allTags } = getCtx();
+    const tagImageCounts = {};
+    const tagBdCounts = {};
+    items.forEach((item) => {
+      const isBd = item.contentType === "bd";
+      item.tags.forEach((t) => {
+        if (isBd) tagBdCounts[t] = (tagBdCounts[t] || 0) + 1;
+        else tagImageCounts[t] = (tagImageCounts[t] || 0) + 1;
+      });
+    });
     const favoriteGalleryIds = listFavoriteRows(req.user.id)
       .filter((r) => r.item_type === "gallery")
       .map((r) => r.item_id);
-    res.render("gallery", { config, items, allTags, categories: CATEGORIES, favoriteGalleryIds });
+    res.render("gallery", { config, items, allTags, categories: CATEGORIES, favoriteGalleryIds, tagImageCounts, tagBdCounts });
   });
 
   router.post("/", upload.array("images", 30), (req, res) => {

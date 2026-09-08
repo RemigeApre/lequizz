@@ -23,34 +23,39 @@
         <span id="gallery-result-count" class="wiki-result-count" hidden></span>
       </div>
 
-      <%# Type Image / BD %>
+      <%# Type Image / BD — toggle, pas de "Tout" %>
       <div class="wiki-filter-section">
         <div class="links-filter" id="gallery-type-filter">
-          <button type="button" class="tag-chip active" data-type="">Tout</button>
-          <button type="button" class="tag-chip" data-type="image">Image</button>
-          <button type="button" class="tag-chip" data-type="bd">BD</button>
+          <button type="button" class="tag-chip gallery-type-chip-image" data-type="image">Image</button>
+          <button type="button" class="tag-chip gallery-type-chip-bd" data-type="bd">BD</button>
         </div>
       </div>
 
-      <%# Catégories %>
+      <%# Catégories dans un volet réduit %>
       <% if (categories.length) { %>
-      <div class="wiki-filter-section">
+      <details class="gallery-cat-details">
+        <summary class="gallery-cat-summary">Cat&eacute;gories</summary>
         <div class="links-filter" id="gallery-category-filter">
-          <button type="button" class="tag-chip active" data-category="">Toutes</button>
           <% categories.forEach(function (c) { %>
             <button type="button" class="tag-chip" data-category="<%= c.key %>"><%= c.label %></button>
           <% }) %>
         </div>
-      </div>
+      </details>
       <% } %>
 
-      <%# Tags %>
+      <%# Tags avec X|Y (image | BD) %>
       <% if (allTags.length) { %>
       <div class="wiki-filter-section">
         <div class="wiki-tag-cloud" id="gallery-tag-filter">
           <% allTags.forEach(function(t) { %>
+            <% var ni = tagImageCounts[t] || 0; var nb = tagBdCounts[t] || 0; %>
             <button type="button" class="wiki-tag-chip" data-tag="<%= t %>" data-state="0">
               <span class="wtc-label"><%= t %></span>
+              <% if (ni || nb) { %>
+                <span class="wiki-tag-xy">
+                  <span class="wiki-tag-xy-pages"><%= ni %></span>|<span class="wiki-tag-xy-imgs"><%= nb %></span>
+                </span>
+              <% } %>
             </button>
           <% }) %>
         </div>
@@ -124,16 +129,11 @@
 
         <img src="<%= item.imagePaths[0] %>" alt="<%= item.title %>" class="gallery-img" loading="lazy" />
 
-        <% if (item.imagePaths.length > 1) { %>
-          <span class="gallery-album-badge" title="<%= item.imagePaths.length %> images">&#128247; <%= item.imagePaths.length %></span>
-        <% } %>
-
-        <% if (item.contentType === 'bd') { %>
-          <span class="gallery-type-badge gallery-type-bd">BD</span>
+        <% if (item.contentType === 'bd' && item.title) { %>
+          <div class="gallery-bd-title"><%= item.title %></div>
         <% } %>
 
         <div class="gallery-card-overlay">
-          <% if (cat) { %><span class="gallery-source-badge" style="background: hsl(<%= cat.hue %>, 55%, 45%)"><%= cat.label %></span><% } %>
           <span class="wiki-card-badges">
             <% if (item.rating) { %>
               <span class="wiki-card-mini-stars">
@@ -154,17 +154,6 @@
           </div>
         </div>
 
-        <% if (item.title || item.tags.length) { %>
-          <div class="gallery-card-body">
-            <% if (item.title) { %><p class="gallery-card-title"><%= item.title %></p><% } %>
-            <% if (item.tags.length) { %>
-              <div class="wiki-card-tags">
-                <% item.tags.slice(0,4).forEach(function(t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
-                <% if (item.tags.length > 4) { %><span class="wiki-card-tags-more">+<%= item.tags.length - 4 %></span><% } %>
-              </div>
-            <% } %>
-          </div>
-        <% } %>
       </div>
     <% }) %>
   </div>
@@ -172,11 +161,11 @@
   <%# ─── FAB + DROPDOWN ───────────────────────────────────────────────── %>
   <% if (currentUser) { %>
   <div class="gallery-fab-wrap" id="gallery-fab-wrap">
+    <button type="button" class="wiki-fab-add" id="gallery-fab-main" title="Ajouter">+</button>
     <div class="gallery-fab-menu" id="gallery-fab-menu" hidden>
       <button type="button" class="gallery-fab-option" id="gallery-fab-image">Image</button>
       <button type="button" class="gallery-fab-option" id="gallery-fab-bd">BD</button>
     </div>
-    <button type="button" class="wiki-fab-add" id="gallery-fab-main" title="Ajouter">+</button>
   </div>
 
   <%# Formulaire upload (commun aux deux types, content_type changé par JS) %>

@@ -197,25 +197,37 @@
     cards.forEach(function(c) { grid.appendChild(c); });
   }
 
-  // Type filter
+  // Type filter — toggle (cliquer sur actif = désactiver)
   if (typeFilter) {
-    typeFilter.querySelectorAll(".tag-chip").forEach(function (chip) {
+    typeFilter.querySelectorAll(".tag-chip[data-type]").forEach(function (chip) {
       chip.addEventListener("click", function () {
-        typeFilter.querySelectorAll(".tag-chip").forEach(function(c){ c.classList.remove("active"); });
-        chip.classList.add("active");
-        activeType = chip.dataset.type || "";
+        var t = chip.dataset.type || "";
+        if (activeType === t) {
+          chip.classList.remove("active");
+          activeType = "";
+        } else {
+          typeFilter.querySelectorAll(".tag-chip").forEach(function(c){ c.classList.remove("active"); });
+          chip.classList.add("active");
+          activeType = t;
+        }
         applyFilters();
       });
     });
   }
 
-  // Category filter
+  // Category filter — toggle
   if (categoryFilter) {
-    categoryFilter.querySelectorAll(".tag-chip").forEach(function (chip) {
+    categoryFilter.querySelectorAll(".tag-chip[data-category]").forEach(function (chip) {
       chip.addEventListener("click", function () {
-        categoryFilter.querySelectorAll(".tag-chip").forEach(function(c){ c.classList.remove("active"); });
-        chip.classList.add("active");
-        activeCategory = chip.dataset.category || "";
+        var t = chip.dataset.category || "";
+        if (activeCategory === t) {
+          chip.classList.remove("active");
+          activeCategory = "";
+        } else {
+          categoryFilter.querySelectorAll(".tag-chip").forEach(function(c){ c.classList.remove("active"); });
+          chip.classList.add("active");
+          activeCategory = t;
+        }
         applyFilters();
       });
     });
