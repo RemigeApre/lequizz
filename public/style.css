@@ -7637,6 +7637,22 @@ a.wiki-ql-label:hover .wiki-ql-text {
 }
 .tags-item:hover { transform: translateY(-2px); filter: brightness(1.1); }
 .tags-item-name { font-weight: 600; }
+.tags-item-right { display: flex; align-items: center; gap: 0.35rem; }
+.tags-item-wiki-link {
+  font-size: 0.75rem; line-height: 1;
+  color: rgba(120,230,140,0.85);
+  text-decoration: none;
+  padding: 0.1rem 0.2rem;
+  border-radius: 3px;
+  transition: color 0.12s, background 0.12s;
+}
+.tags-item-wiki-link:hover { color: #fff; background: rgba(120,230,140,0.25); }
+.tags-item--wiki-page {
+  background: color-mix(in oklab, hsl(138, 52%, 28%) 100%, transparent) !important;
+  border-color: hsl(138, 45%, 38%) !important;
+  color: hsl(138, 80%, 88%) !important;
+}
+.tags-item--wiki-page:hover { filter: brightness(1.15); }
 .tags-item-count {
   font-size: 0.7rem; opacity: 0.65;
   background: rgba(0,0,0,0.12); border-radius: 4px;

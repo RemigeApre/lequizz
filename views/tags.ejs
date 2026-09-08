@@ -56,13 +56,20 @@
   <%# ─── GRILLE DES TAGS ─────────────────────────────────────────────────── %>
   <div class="tags-grid" id="tags-grid">
     <% tags.forEach(function (item) { %>
-      <div class="tags-item tags-item--<%= item.type %>"
+      <% var wikiId = wikiPageByTitle[item.tag.toLowerCase()] || null; %>
+      <div class="tags-item tags-item--<%= item.type %><%= wikiId ? ' tags-item--wiki-page' : '' %>"
            data-tag="<%= item.tag %>"
            data-type="<%= item.type %>"
+           data-wiki-id="<%= wikiId || '' %>"
            data-breakdown='<%= JSON.stringify(item.breakdown).replace(/'/g, "&#39;") %>'
            style="--tag-pct: <%= item.pct.toFixed(3) %>">
         <span class="tags-item-name"><%= item.tag %></span>
-        <span class="tags-item-count"><%= item.count %></span>
+        <span class="tags-item-right">
+          <span class="tags-item-count"><%= item.count %></span>
+          <% if (wikiId) { %>
+            <a href="/wiki/<%= wikiId %>" class="tags-item-wiki-link" title="Voir la page wiki" aria-label="Voir la page wiki">&#8599;</a>
+          <% } %>
+        </span>
       </div>
     <% }) %>
     <p class="tags-empty" id="tags-empty" hidden>Aucun tag trouv&eacute;.</p>
@@ -359,6 +366,7 @@
 
   if (grid) {
     grid.addEventListener("click", function (e) {
+      if (e.target.closest(".tags-item-wiki-link")) return; // lien wiki : navigation normale
       var item = e.target.closest(".tags-item");
       if (item) openPopup(item.dataset.tag, item.dataset.type);
     });

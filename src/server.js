@@ -274,7 +274,14 @@ app.get("/tags", function (req, res) {
     return Object.assign({}, item, { pct: parseFloat(pct.toFixed(3)) });
   });
 
-  res.render("tags", { config, tags, currentUser: req.user || null });
+  var wikiPageByTitle = {};
+  try {
+    db.prepare("SELECT id, title FROM wiki_pages").all().forEach(function (p) {
+      wikiPageByTitle[p.title.toLowerCase().trim()] = p.id;
+    });
+  } catch (_) {}
+
+  res.render("tags", { config, tags, wikiPageByTitle, currentUser: req.user || null });
 });
 
 // ── API admin : créer un tag standalone ────────────────────────────────────
