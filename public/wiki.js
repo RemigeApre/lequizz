@@ -481,16 +481,18 @@
   var editPartMeta    = document.querySelector("#wiki-edit-form .wiki-partenaires-meta");
   var editLieuxMeta   = document.querySelector("#wiki-edit-form .wiki-lieux-meta");
   var editObjetsMeta  = document.querySelector("#wiki-edit-form .wiki-objets-meta");
+  var editScenarioField = document.getElementById("wf-scenario-field");
 
   function syncEditFields() {
     if (!editCatSelect) return;
     var cat = editCatSelect.value;
-    if (editOwned)      editOwned.hidden      = cat !== "objets" && cat !== "tenues";
-    if (editFantasMeta) editFantasMeta.hidden  = cat !== "fantasmes";
-    if (editPartMeta)   editPartMeta.hidden    = cat !== "partenaires";
-    if (editLieuxMeta)  editLieuxMeta.hidden   = cat !== "lieux";
-    if (editPosMeta)    editPosMeta.hidden      = cat !== "position";
-    if (editObjetsMeta) editObjetsMeta.hidden   = cat !== "objets";
+    if (editOwned)         editOwned.hidden         = cat !== "objets" && cat !== "tenues";
+    if (editFantasMeta)    editFantasMeta.hidden     = cat !== "fantasmes";
+    if (editPartMeta)      editPartMeta.hidden       = cat !== "partenaires";
+    if (editLieuxMeta)     editLieuxMeta.hidden      = cat !== "lieux";
+    if (editPosMeta)       editPosMeta.hidden        = cat !== "position";
+    if (editObjetsMeta)    editObjetsMeta.hidden     = cat !== "objets";
+    if (editScenarioField) editScenarioField.hidden  = cat !== "partenaires";
     // Cache la catégorie principale dans les options supplémentaires
     var editExtraOpts = document.querySelectorAll("#wiki-edit-extra-cats .wiki-extra-cat-option");
     editExtraOpts.forEach(function (opt) {
@@ -3037,6 +3039,7 @@
       searchBox.addEventListener("input", function () {
         var q = searchBox.value.trim().toLowerCase();
         panel.querySelectorAll(".wiki-panel-tag-chip").forEach(function (chip) {
+          if (chip.classList.contains("wf-tag-special")) return; // toujours visible
           chip.hidden = q && chip.dataset.tag.toLowerCase().indexOf(q) === -1;
         });
       });

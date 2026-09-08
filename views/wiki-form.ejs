@@ -1,17 +1,25 @@
 <%- include('partials/head', { title: page.id ? 'Modifier \u2014 ' + page.title : 'Nouvelle page' }) %>
 <main class="container">
   <%- include('partials/top-nav', { config: config }) %>
-  <a href="<%= page.id ? '/wiki/' + page.id : '/wiki' %>" class="link-button">&larr; Retour</a>
 
-  <% var cat = categories.find(function(c) { return c.key === page.category; }); %>
+  <%# Bouton retour élégant, hors de la colonne centrale %>
+  <a href="<%= returnTo || (page.id ? '/wiki/' + page.id : '/wiki') %>" class="wf-back-btn">&#8592; Retour</a>
 
   <script id="wiki-existing-pages" type="application/json"><%- JSON.stringify(pages.map(function(p){ return { id: p.id, title: p.title }; })) %></script>
+
+  <%
+    var pm = page.meta || {};
+    var SPECIAL_TAGS = ["ultra", "irréaliste"];
+    var panelNormal  = allTags.filter(function(t){ return SPECIAL_TAGS.indexOf(t) === -1; });
+    var panelSpecial = allTags.filter(function(t){ return SPECIAL_TAGS.indexOf(t) !== -1; });
+  %>
 
   <form method="POST" action="<%= page.id ? '/wiki/' + page.id : '/wiki/' %>" enctype="multipart/form-data" class="wiki-form" id="wiki-edit-form">
     <input type="hidden" name="_returnTo" value="<%= returnTo || '' %>" />
 
-    <%# ─ Catégorie : sélecteur discret ─ %>
-    <div class="wiki-form-top-row">
+    <%# ── 1. Titre + Catégorie sur la même ligne ── %>
+    <div class="wf-title-row">
+      <input type="text" name="title" class="wiki-title-input" required value="<%= page.title %>" placeholder="Titre&hellip;" />
       <select name="category" id="wiki-category-select" class="wiki-cat-inline-select">
         <% categories.forEach(function(c) { %>
           <option value="<%= c.key %>" data-hue="<%= c.hue %>" <%= c.key === page.category ? 'selected' : '' %>><%= c.label %></option>
@@ -19,63 +27,150 @@
       </select>
     </div>
 
-    <%# ─ Titre ─ %>
-    <input type="text" name="title" class="wiki-title-input" required value="<%= page.title %>" placeholder="Titre&hellip;" />
-
-    <%# ─ On possède ─ %>
+    <%# ── On possède (objets / tenues) ── %>
     <label class="chip-option wiki-owned-chip" id="wiki-owned-field" <%= (page.category === 'objets' || page.category === 'tenues') ? '' : 'hidden' %>>
       <input type="checkbox" name="owned" <%= page.owned ? 'checked' : '' %> />
       <span>On poss&egrave;de</span>
     </label>
 
-    <%# ─ Éditeur + panneau tags latéral ─ %>
-    <div class="wiki-editor-row">
-      <div class="wiki-editor">
-        <div class="md-toolbar">
-          <button type="button" class="md-btn" data-md="bold" title="Gras (Ctrl+B)"><strong>B</strong></button>
-          <button type="button" class="md-btn md-btn-italic" data-md="italic" title="Italique (Ctrl+I)"><em>I</em></button>
+    <%# ── 2. Description ── %>
+    <div class="wf-section-title">Description</div>
+    <div class="wiki-editor wf-editor-wrap">
+      <div class="wf-edit-area">
+        <textarea name="content" class="wiki-textarea" rows="10" placeholder="Description, notes\u2026 (Markdown support\u00e9)"><%= page.content %></textarea>
+        <div class="wiki-md-preview wiki-md" hidden></div>
+      </div>
+      <div class="md-toolbar wf-toolbar-vert">
+        <button type="button" class="md-btn" data-md="bold" title="Gras (Ctrl+B)"><strong>B</strong></button>
+        <button type="button" class="md-btn md-btn-italic" data-md="italic" title="Italique (Ctrl+I)"><em>I</em></button>
+        <span class="md-sep"></span>
+        <button type="button" class="md-btn" data-md="h2">H2</button>
+        <button type="button" class="md-btn" data-md="h3">H3</button>
+        <span class="md-sep"></span>
+        <button type="button" class="md-btn" data-md="list">&#8226;</button>
+        <button type="button" class="md-btn" data-md="hr">&mdash;</button>
+        <span class="md-sep"></span>
+        <button type="button" class="md-btn" data-md="link">&#128279;</button>
+        <span class="md-sep"></span>
+        <button type="button" class="md-btn md-preview-btn">Aper&ccedil;u</button>
+      </div>
+    </div>
+
+    <%# ── 3. Scénario (partenaires seulement) ── %>
+    <div id="wf-scenario-field" <%= page.category === 'partenaires' ? '' : 'hidden' %>>
+      <div class="wf-section-title">Sc&eacute;nario</div>
+      <div class="wiki-editor wf-editor-wrap">
+        <div class="wf-edit-area">
+          <textarea name="meta_scenario" class="wiki-textarea wiki-pos-textarea" rows="6" placeholder="Une courte histoire, un contexte&hellip;"><%= pm.scenario || '' %></textarea>
+          <div class="wiki-md-preview wiki-md" hidden></div>
+        </div>
+        <div class="md-toolbar wf-toolbar-vert">
+          <button type="button" class="md-btn" data-md="bold"><strong>B</strong></button>
+          <button type="button" class="md-btn md-btn-italic" data-md="italic"><em>I</em></button>
           <span class="md-sep"></span>
           <button type="button" class="md-btn" data-md="h2">H2</button>
           <button type="button" class="md-btn" data-md="h3">H3</button>
           <span class="md-sep"></span>
-          <button type="button" class="md-btn" data-md="list">&#8226;&nbsp;Liste</button>
+          <button type="button" class="md-btn" data-md="list">&#8226;</button>
           <button type="button" class="md-btn" data-md="hr">&mdash;</button>
           <span class="md-sep"></span>
-          <button type="button" class="md-btn" data-md="link" title="Lien vers une autre page du wiki">&#128279;</button>
-          <div class="md-toolbar-spacer"></div>
           <button type="button" class="md-btn md-preview-btn">Aper&ccedil;u</button>
         </div>
-        <textarea name="content" class="wiki-textarea" rows="10" placeholder="Description, notes\u2026 (Markdown support\u00e9)"><%= page.content %></textarea>
-        <div class="wiki-md-preview wiki-md" hidden></div>
+      </div>
+    </div>
+
+    <%# ── 4. Synonymes / termes dérivés ── %>
+    <%
+      var pmDerivedValue = (pm.termes_derives || []).map(function (t) {
+        if (typeof t === 'string') return t;
+        return t.term + (t.en ? '::en' : '');
+      }).join(', ');
+    %>
+    <div class="wf-section-title">Synonymes</div>
+    <div class="wiki-derived-row">
+      <div class="wiki-tags-widget wiki-derived-widget">
+        <div class="wiki-tags-board">
+          <input type="text" class="wiki-tags-typing" placeholder="Ajouter un terme\u2026 (bouton EN pour marquer anglais)" autocomplete="off" />
+        </div>
+        <input type="hidden" name="meta_termes_derives" class="wiki-tags-hidden" value="<%= pmDerivedValue %>" />
+      </div>
+    </div>
+
+    <%# ── 5. Tags (panel unifié) ── %>
+    <div class="wf-section-title">Tags</div>
+    <div class="wf-tags-unified">
+      <div class="wiki-tags-widget">
+        <div class="wiki-tags-board">
+          <input type="text" class="wiki-tags-typing" placeholder="Ajouter un tag\u2026" autocomplete="off" />
+        </div>
+        <input type="hidden" name="tags" class="wiki-tags-hidden" value="<%= page.tags.join(', ') %>" />
       </div>
 
       <% if (allTags.length) { %>
-        <aside class="wiki-form-tag-panel" aria-label="Suggestions de tags">
-          <p class="wiki-form-tag-panel-label">Tags disponibles</p>
-          <input type="search" class="wiki-form-tag-panel-search" placeholder="Filtrer&hellip;" autocomplete="off" />
-          <div class="wiki-form-tag-panel-chips">
-            <%
-              var SPECIAL_TAG_KEYS2 = ["ultra", "irréaliste"];
-              var panelNormal  = allTags.filter(function(t){ return SPECIAL_TAG_KEYS2.indexOf(t) === -1; });
-              var panelSpecial = allTags.filter(function(t){ return SPECIAL_TAG_KEYS2.indexOf(t) !== -1; });
-            %>
-            <% panelNormal.forEach(function(t) { %>
-              <button type="button" class="wiki-tag-suggest-chip wiki-panel-tag-chip" data-tag="<%= t %>"><%= t %></button>
-            <% }) %>
-            <% panelSpecial.forEach(function(t) { %>
-              <button type="button" class="wiki-tag-suggest-chip wiki-tag-suggest-chip--special wiki-panel-tag-chip" data-tag="<%= t %>"><%= t %></button>
-            <% }) %>
-          </div>
-        </aside>
+      <aside class="wiki-form-tag-panel wf-tags-panel-unified" aria-label="Tags disponibles">
+        <% if (panelSpecial.length) { %>
+        <div class="wf-tags-special-row">
+          <% panelSpecial.forEach(function(t) { %>
+            <button type="button" class="wiki-tag-suggest-chip wiki-tag-suggest-chip--special wiki-panel-tag-chip wf-tag-special" data-tag="<%= t %>"><%= t %></button>
+          <% }) %>
+        </div>
+        <% } %>
+        <input type="search" class="wiki-form-tag-panel-search wf-tags-search" placeholder="Filtrer les tags\u2026" autocomplete="off" />
+        <div class="wiki-form-tag-panel-chips">
+          <% panelNormal.forEach(function(t) { %>
+            <button type="button" class="wiki-tag-suggest-chip wiki-panel-tag-chip" data-tag="<%= t %>"><%= t %></button>
+          <% }) %>
+        </div>
+      </aside>
       <% } %>
     </div>
 
-    <%
-      var pm = page.meta || {};
-    %>
+    <%# ── 6. Images ── %>
+    <div class="wf-section-title">Images</div>
+    <div class="wiki-image-field">
+      <% if (page.imagePaths && page.imagePaths.length) { %>
+        <div class="wiki-images-existing">
+          <% page.imagePaths.forEach(function(src, idx) { %>
+            <div class="wiki-existing-img-wrap">
+              <img src="<%= src %>" alt="" class="wiki-form-existing-image" />
+              <label class="wiki-cover-radio-label" title="D&eacute;finir comme couverture">
+                <input type="radio" name="cover_image" value="<%= src %>" class="wiki-cover-radio" <%= idx === 0 ? 'checked' : '' %> />
+                <span class="wiki-cover-badge-icon">&#9733;</span>
+              </label>
+              <label class="wiki-img-remove-label">
+                <input type="checkbox" name="remove_image" value="<%= src %>" />
+                <span>&#215;</span>
+              </label>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+      <label class="wiki-image-add-label">
+        <span>+ Ajouter des images</span>
+        <input type="file" name="images" accept="image/*" multiple class="wiki-image-input" />
+      </label>
+      <div class="wiki-new-previews"></div>
+    </div>
 
-    <%# ─ Champs fantasmes ─ %>
+    <%# ── 7. Aussi dans… ── %>
+    <div class="wf-section-title">Aussi dans&hellip;</div>
+    <div class="wiki-extra-cats-field" id="wiki-edit-extra-cats">
+      <div class="wiki-meta-options">
+        <% categories.forEach(function(c) { %>
+          <label class="chip-option wiki-extra-cat-option" data-cat="<%= c.key %>">
+            <input type="checkbox" name="extra_categories" value="<%= c.key %>"
+              <%= (page.extraCategories || []).indexOf(c.key) !== -1 ? 'checked' : '' %> />
+            <span><%= c.label %></span>
+          </label>
+        <% }) %>
+      </div>
+    </div>
+
+    <%# ── 8. Paramètres spécifiques à la catégorie ── %>
+
+    <%# Fantasmes %>
     <div class="wiki-fantasmes-meta" <%= page.category === 'fantasmes' ? '' : 'hidden' %>>
+      <div class="wf-section-title">Cat&eacute;gorie fantasme</div>
       <div class="wiki-meta-group">
         <p class="wiki-meta-label">Sous-cat&eacute;gorie</p>
         <div class="wiki-meta-options">
@@ -86,13 +181,14 @@
       </div>
     </div>
 
-    <%# ─ Champs partenaires ─ %>
+    <%# Partenaires (sans scénario, déjà au-dessus) %>
     <%
       var pmPartTypes = Array.isArray(pm.types) ? pm.types : [];
       function ckPart(v) { return pmPartTypes.indexOf(v) !== -1 ? 'checked' : ''; }
       function raPart(field, v) { return pm[field] === v ? 'checked' : ''; }
     %>
     <div class="wiki-partenaires-meta" <%= page.category === 'partenaires' ? '' : 'hidden' %>>
+      <div class="wf-section-title">D&eacute;tails partenaire</div>
       <div class="wiki-meta-group">
         <p class="wiki-meta-label">Nombre total</p>
         <div class="wiki-meta-options">
@@ -127,14 +223,11 @@
           <label class="chip-option"><input type="checkbox" name="meta_types" value="autre"     <%= ckPart('autre') %>><span>Autre</span></label>
         </div>
       </div>
-      <div class="wiki-meta-group">
-        <p class="wiki-meta-label">Sc&eacute;nario <span class="wiki-md-hint">(courte mise en sc&egrave;ne)</span></p>
-        <textarea name="meta_scenario" class="wiki-textarea wiki-pos-textarea" rows="5" placeholder="Une courte histoire, un contexte&hellip;"><%= pm.scenario || '' %></textarea>
-      </div>
     </div>
 
-    <%# ─ Champs objets ─ %>
+    <%# Objets %>
     <div class="wiki-objets-meta" <%= page.category === 'objets' ? '' : 'hidden' %>>
+      <div class="wf-section-title">D&eacute;tails objet</div>
       <div class="wiki-meta-group">
         <p class="wiki-meta-label">Type de gode</p>
         <div class="wiki-meta-options">
@@ -145,8 +238,9 @@
       </div>
     </div>
 
-    <%# ─ Champs lieux ─ %>
+    <%# Lieux %>
     <div class="wiki-lieux-meta" <%= page.category === 'lieux' ? '' : 'hidden' %>>
+      <div class="wf-section-title">D&eacute;tails lieu</div>
       <div class="wiki-meta-group">
         <p class="wiki-meta-label">Type de lieu</p>
         <div class="wiki-meta-options">
@@ -157,7 +251,7 @@
       </div>
     </div>
 
-    <%# ─ Champs position ─ %>
+    <%# Position %>
     <%
       var pmCanal = Array.isArray(pm.canal) ? pm.canal : (pm.canal ? [pm.canal] : []);
       var pmOri   = Array.isArray(pm.orientation) ? pm.orientation : (pm.orientation ? [pm.orientation] : []);
@@ -166,16 +260,17 @@
       function ra(val, v)  { return val === v ? 'checked' : ''; }
     %>
     <div class="wiki-position-meta" <%= page.category === 'position' ? '' : 'hidden' %>>
+      <div class="wf-section-title">D&eacute;tails position</div>
       <div class="wiki-meta-group">
         <p class="wiki-meta-label">Cat&eacute;gorie</p>
         <div class="wiki-meta-options">
-          <label class="chip-option"><input type="radio" name="meta_categorie" value="penetration"         <%= ra(pm.categorie,'penetration') %>><span>P&eacute;n&eacute;tration</span></label>
+          <label class="chip-option"><input type="radio" name="meta_categorie" value="penetration"           <%= ra(pm.categorie,'penetration') %>><span>P&eacute;n&eacute;tration</span></label>
           <label class="chip-option"><input type="radio" name="meta_categorie" value="fellation_cunnilingus" <%= ra(pm.categorie,'fellation_cunnilingus') %>><span>Fellation&nbsp;/ Cunnilingus</span></label>
-          <label class="chip-option"><input type="radio" name="meta_categorie" value="anilingus"           <%= ra(pm.categorie,'anilingus') %>><span>Anilingus</span></label>
+          <label class="chip-option"><input type="radio" name="meta_categorie" value="anilingus"             <%= ra(pm.categorie,'anilingus') %>><span>Anilingus</span></label>
           <label class="chip-option"><input type="radio" name="meta_categorie" value="stimulation_manuelle" <%= ra(pm.categorie,'stimulation_manuelle') %>><span>Stimulation manuelle</span></label>
-          <label class="chip-option"><input type="radio" name="meta_categorie" value="double_penetration"  <%= ra(pm.categorie,'double_penetration') %>><span>Double p&eacute;n&eacute;tration</span></label>
-          <label class="chip-option"><input type="radio" name="meta_categorie" value="position_69"         <%= ra(pm.categorie,'position_69') %>><span>Position 69</span></label>
-          <label class="chip-option"><input type="radio" name="meta_categorie" value="autre"               <%= ra(pm.categorie,'autre') %>><span>Autre</span></label>
+          <label class="chip-option"><input type="radio" name="meta_categorie" value="double_penetration"   <%= ra(pm.categorie,'double_penetration') %>><span>Double p&eacute;n&eacute;tration</span></label>
+          <label class="chip-option"><input type="radio" name="meta_categorie" value="position_69"          <%= ra(pm.categorie,'position_69') %>><span>Position 69</span></label>
+          <label class="chip-option"><input type="radio" name="meta_categorie" value="autre"                <%= ra(pm.categorie,'autre') %>><span>Autre</span></label>
         </div>
       </div>
       <div class="wiki-meta-group">
@@ -238,8 +333,6 @@
           <label class="chip-option"><input type="checkbox" name="meta_supports" value="autre"  <%= ck(pmSup,'autre') %>><span>Autre</span></label>
         </div>
       </div>
-
-      <%# ─ Variantes ─ %>
       <div class="wiki-meta-group">
         <p class="wiki-meta-label">Variantes</p>
         <div class="wiki-var-editor" id="wiki-variante-editor">
@@ -248,93 +341,24 @@
         </div>
         <input type="hidden" name="meta_variantes" id="wiki-variantes-hidden" value="<%= JSON.stringify(pm.variantes || []) %>" />
       </div>
-
-      <%# ─ Informations utiles ─ %>
       <div class="wiki-meta-group">
         <p class="wiki-meta-label">Informations utiles <span class="wiki-md-hint">(Markdown support&eacute;)</span></p>
         <textarea name="meta_infos_utiles" class="wiki-textarea wiki-pos-textarea" rows="5" placeholder="Conditions, pr&eacute;requis, variantes contextuelles&hellip;"><%= pm.infos_utiles || '' %></textarea>
       </div>
-
-      <%# ─ Nouvelles ─ %>
       <div class="wiki-meta-group">
-        <p class="wiki-meta-label">Nouvelles <span class="wiki-md-hint">(courte histoire li&eacute;e &agrave; cette position)</span></p>
+        <p class="wiki-meta-label">Nouvelles</p>
         <textarea name="meta_nouvelles" class="wiki-textarea wiki-pos-textarea" rows="5" placeholder="Une courte histoire&hellip;"><%= pm.nouvelles || '' %></textarea>
       </div>
     </div>
 
-    <%# ─ Catégories supplémentaires ─ %>
-    <div class="wiki-extra-cats-field" id="wiki-edit-extra-cats">
-      <p class="wiki-meta-label">Aussi dans&hellip;</p>
-      <div class="wiki-meta-options">
-        <% categories.forEach(function(c) { %>
-          <label class="chip-option wiki-extra-cat-option" data-cat="<%= c.key %>">
-            <input type="checkbox" name="extra_categories" value="<%= c.key %>"
-              <%= (page.extraCategories || []).indexOf(c.key) !== -1 ? 'checked' : '' %> />
-            <span><%= c.label %></span>
-          </label>
-        <% }) %>
-      </div>
-    </div>
-
-    <%# ─ Termes dérivés : chaque synonyme a son propre bouton "EN" ─ %>
-    <%
-      var pmDerivedValue = (pm.termes_derives || []).map(function (t) {
-        if (typeof t === 'string') return t;
-        return t.term + (t.en ? '::en' : '');
-      }).join(', ');
-    %>
-    <div class="wiki-derived-row">
-      <div class="wiki-tags-widget wiki-derived-widget">
-        <p class="wiki-meta-label">Synonymes&nbsp;/ termes d&eacute;riv&eacute;s <span class="wiki-md-hint">(bouton EN sur un terme pour le marquer anglais)</span></p>
-        <div class="wiki-tags-board">
-          <input type="text" class="wiki-tags-typing" placeholder="Ajouter un terme&hellip;" autocomplete="off" />
-        </div>
-        <input type="hidden" name="meta_termes_derives" class="wiki-tags-hidden" value="<%= pmDerivedValue %>" />
-      </div>
-    </div>
-
-    <%# ─ Tags ─ %>
-    <div class="wiki-tags-widget">
-      <div class="wiki-tags-board">
-        <input type="text" class="wiki-tags-typing" placeholder="Ajouter un tag&hellip;" autocomplete="off" />
-      </div>
-      <input type="hidden" name="tags" class="wiki-tags-hidden" value="<%= page.tags.join(', ') %>" />
-    </div>
-
-    <%# ─ Images ─ %>
-    <div class="wiki-image-field">
-      <% if (page.imagePaths && page.imagePaths.length) { %>
-        <div class="wiki-images-existing">
-          <% page.imagePaths.forEach(function(src, idx) { %>
-            <div class="wiki-existing-img-wrap">
-              <img src="<%= src %>" alt="" class="wiki-form-existing-image" />
-              <label class="wiki-cover-radio-label" title="Définir comme couverture">
-                <input type="radio" name="cover_image" value="<%= src %>" class="wiki-cover-radio" <%= idx === 0 ? 'checked' : '' %> />
-                <span class="wiki-cover-badge-icon">&#9733;</span>
-              </label>
-              <label class="wiki-img-remove-label">
-                <input type="checkbox" name="remove_image" value="<%= src %>" />
-                <span>&#215;</span>
-              </label>
-            </div>
-          <% }) %>
-        </div>
-      <% } %>
-      <label class="wiki-image-add-label">
-        <span>+ Ajouter des images</span>
-        <input type="file" name="images" accept="image/*" multiple class="wiki-image-input" />
-      </label>
-      <div class="wiki-new-previews"></div>
-    </div>
-
+    <%# ── Actions ── %>
     <div class="wiki-form-actions">
       <button type="submit">Enregistrer</button>
-      <a href="<%= page.id ? '/wiki/' + page.id : '/wiki' %>" class="link-button">Annuler</a>
+      <a href="<%= returnTo || (page.id ? '/wiki/' + page.id : '/wiki') %>" class="link-button">Annuler</a>
     </div>
   </form>
 
   <% if (page.id) { %>
-  <%# ─ Pages liées : gérées ici, jamais affichées en lecture ─ %>
   <div class="wiki-page-links" data-page-id="<%= page.id %>">
     <h3 class="wiki-pl-heading">Pages li&eacute;es</h3>
     <div class="wiki-pl-body">
@@ -352,7 +376,6 @@
     </div>
   </div>
 
-  <%# ─ Questions liées au quizz : idem ─ %>
   <div class="wiki-question-links" data-page-id="<%= page.id %>">
     <h3 class="wiki-ql-heading">Questions du quizz li&eacute;es</h3>
     <ul class="wiki-ql-list"></ul>
