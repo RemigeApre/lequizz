@@ -8869,3 +8869,81 @@ a.wiki-ql-label:hover .wiki-ql-text {
   background: rgba(91,79,207,0.22);
   color: #fff;
 }
+
+/* ── Wiki maturity badge (card top-right, admin only) ────────────────────── */
+.wiki-maturity-badge {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.62rem;
+  font-weight: 700;
+  z-index: 4;
+  pointer-events: none;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+.wiki-maturity-badge[data-level="0"] { background: #555; color: #ddd; }
+.wiki-maturity-badge[data-level="1"] { background: #2e7d32; color: #fff; }
+.wiki-maturity-badge[data-level="2"] { background: #1565c0; color: #fff; }
+.wiki-maturity-badge[data-level="3"] { background: #6a1fa0; color: #fff; }
+.wiki-maturity-badge[data-level="4"] { background: #e65100; color: #fff; }
+.wiki-maturity-badge[data-level="5"] { background: #b71c1c; color: #fff; }
+
+/* ── Wiki maturity widget (detail page sidebar, admin only) ──────────────── */
+.wiki-maturity-widget {
+  margin-top: 0.9rem;
+  padding: 0.65rem 0.75rem;
+  background: var(--card);
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+}
+.wiki-maturity-label {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  opacity: 0.55;
+  display: block;
+  margin-bottom: 0.45rem;
+}
+.wiki-maturity-levels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.wiki-maturity-lvl {
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--fg);
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.wiki-maturity-lvl.active { background: var(--accent); color: #fff; border-color: transparent; }
+.wiki-maturity-lvl:hover:not(.active) { background: rgba(91,79,207,0.18); }
+
+/* ── Wiki maturity filter (sidebar, admin only) ───────────────────────────── */
+.wiki-maturity-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.3rem;
+}
+.wiki-maturity-filter-btn {
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--fg);
+  font-size: 0.68rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.wiki-maturity-filter-btn.active { background: var(--accent); color: #fff; border-color: transparent; }
+.wiki-maturity-filter-btn:hover:not(.active) { background: rgba(91,79,207,0.18); }

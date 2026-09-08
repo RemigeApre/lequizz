@@ -102,6 +102,20 @@
             </div>
           </div>
 
+          <% if (currentUser && currentUser.isAdmin) { %>
+          <div class="wiki-filter-section">
+            <span class="wiki-filter-label">Maturit&eacute;</span>
+            <div class="wiki-maturity-filter" id="wiki-maturity-filter">
+              <button type="button" class="wiki-maturity-filter-btn" data-level="0">0&nbsp;Brouillon</button>
+              <button type="button" class="wiki-maturity-filter-btn" data-level="1">1&nbsp;&Eacute;crite</button>
+              <button type="button" class="wiki-maturity-filter-btn" data-level="2">2</button>
+              <button type="button" class="wiki-maturity-filter-btn" data-level="3">3</button>
+              <button type="button" class="wiki-maturity-filter-btn" data-level="4">4</button>
+              <button type="button" class="wiki-maturity-filter-btn" data-level="5">5&nbsp;&#9201;</button>
+            </div>
+          </div>
+          <% } %>
+
           <% if (allTags.length) { %>
             <div class="wiki-filter-section">
               <input type="search" id="wiki-tag-search" class="wiki-tag-search-input" placeholder="Chercher un tag&hellip;" autocomplete="off" />

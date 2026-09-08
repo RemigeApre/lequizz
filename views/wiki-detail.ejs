@@ -342,6 +342,17 @@
           <div class="wiki-right-actions">
             <a href="/wiki/<%= page.id %>/edit" class="wiki-edit-icon-btn" title="Modifier" aria-label="Modifier">&#9998;</a>
           </div>
+          <div class="wiki-maturity-widget" id="wiki-maturity-widget" data-id="<%= page.id %>" data-level="<%= page.maturity || 0 %>">
+            <span class="wiki-maturity-label">Maturit&eacute;</span>
+            <div class="wiki-maturity-levels">
+              <button type="button" class="wiki-maturity-lvl<%= (page.maturity || 0) === 0 ? ' active' : '' %>" data-level="0">Brouillon</button>
+              <button type="button" class="wiki-maturity-lvl<%= (page.maturity || 0) === 1 ? ' active' : '' %>" data-level="1">&Eacute;crite</button>
+              <button type="button" class="wiki-maturity-lvl<%= (page.maturity || 0) === 2 ? ' active' : '' %>" data-level="2">2</button>
+              <button type="button" class="wiki-maturity-lvl<%= (page.maturity || 0) === 3 ? ' active' : '' %>" data-level="3">3</button>
+              <button type="button" class="wiki-maturity-lvl<%= (page.maturity || 0) === 4 ? ' active' : '' %>" data-level="4">4</button>
+              <button type="button" class="wiki-maturity-lvl<%= (page.maturity || 0) === 5 ? ' active' : '' %>" data-level="5">5&nbsp;&#9201;</button>
+            </div>
+          </div>
         <% } %>
 
         </div><%# /wiki-right-body %>

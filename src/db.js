@@ -64,6 +64,8 @@ try { db.exec("ALTER TABLE wiki_pages ADD COLUMN interested INTEGER NOT NULL DEF
 try { db.exec("ALTER TABLE wiki_pages ADD COLUMN views INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
 try { db.exec("ALTER TABLE wiki_pages ADD COLUMN extra_categories TEXT NOT NULL DEFAULT '[]'"); } catch (_) {}
 try { db.exec("ALTER TABLE wiki_pages ADD COLUMN featured INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
+try { db.exec("ALTER TABLE wiki_pages ADD COLUMN maturity INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
+try { db.exec("ALTER TABLE wiki_pages ADD COLUMN maturity_set_at TEXT"); } catch (_) {}
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS gallery_images (
@@ -432,6 +434,14 @@ function deleteLink(id) {
 }
 
 function rowToWikiPage(row) {
+  // Decay level 5 → 4 after 3 months (lazy, on read)
+  if (row.maturity === 5 && row.maturity_set_at) {
+    const THREE_MONTHS_MS = 3 * 30 * 24 * 60 * 60 * 1000;
+    if (Date.now() - new Date(row.maturity_set_at).getTime() > THREE_MONTHS_MS) {
+      db.prepare("UPDATE wiki_pages SET maturity = 4, maturity_set_at = NULL WHERE id = ?").run(row.id);
+      row = Object.assign({}, row, { maturity: 4, maturity_set_at: null });
+    }
+  }
   let imagePaths = JSON.parse(row.image_paths || "[]");
   if (!imagePaths.length && row.image_path) imagePaths = [row.image_path];
   return {
@@ -448,6 +458,8 @@ function rowToWikiPage(row) {
     interested: !!row.interested,
     views: row.views || 0,
     featured: !!row.featured,
+    maturity: row.maturity || 0,
+    maturitySetAt: row.maturity_set_at || null,
     extraCategories: (() => { try { return JSON.parse(row.extra_categories || "[]"); } catch (_) { return []; } })(),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -456,6 +468,12 @@ function rowToWikiPage(row) {
 
 function setWikiPageFeatured(id, featured) {
   db.prepare("UPDATE wiki_pages SET featured = ? WHERE id = ?").run(featured ? 1 : 0, id);
+}
+
+function setWikiPageMaturity(id, level) {
+  const now = new Date().toISOString();
+  const setAt = level === 5 ? now : null;
+  db.prepare("UPDATE wiki_pages SET maturity = ?, maturity_set_at = ? WHERE id = ?").run(level, setAt, id);
 }
 
 function listFeaturedWikiPages() {
@@ -1014,6 +1032,7 @@ module.exports = {
   listGalleryParodies,
   updateGalleryImageMeta,
   setWikiPageFeatured,
+  setWikiPageMaturity,
   listFeaturedWikiPages,
   listBdBooks,
   getBdBook,

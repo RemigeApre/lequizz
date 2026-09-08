@@ -10,6 +10,7 @@ const {
   reactWikiPage,
   deleteWikiPage,
   incrementWikiViews,
+  setWikiPageMaturity,
   getWikiPageLinks,
   getWikiBacklinks,
   addWikiPageLink,
@@ -622,6 +623,14 @@ function buildWikiRouter(config) {
     const { rating, flame, interested } = req.body;
     reactWikiPage(id, { rating, flame, interested });
     res.json({ ok: true });
+  });
+
+  router.post("/:id/maturity", requireAdmin, express.json(), (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.status(400).json({ ok: false });
+    const level = Math.max(0, Math.min(5, Math.round(Number(req.body.level))));
+    setWikiPageMaturity(id, level);
+    res.json({ ok: true, maturity: level });
   });
 
   router.post("/:id/note", requireUserJson, (req, res) => {

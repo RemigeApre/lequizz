@@ -80,12 +80,14 @@
       wcBannerText = 'Ultra';       wcBannerMod = 'ultra';
     }
   %>
-  data-extra-cats="<%= (page.extraCategories || []).join('|') %>">
+  data-extra-cats="<%= (page.extraCategories || []).join('|') %>"
+  data-maturity="<%= page.maturity || 0 %>">
 
   <% if (page.imagePaths && page.imagePaths.length && currentUser) { %>
     <%# ── Carte AVEC image ───────────────────────────────────────────── %>
     <div class="wiki-card-image" data-images="<%= page.imagePaths.join('|') %>">
       <% if (wcBannerText) { %><span class="wiki-card-banner wiki-card-banner--<%= wcBannerMod %>"><%= wcBannerText %></span><% } %>
+      <% if (currentUser && currentUser.isAdmin) { %><span class="wiki-maturity-badge" data-level="<%= page.maturity || 0 %>"><%= page.maturity || 0 %></span><% } %>
       <img src="<%= page.imagePaths[0] %>" alt="" class="wiki-card-img" />
       <div class="wiki-card-overlay">
         <% if (wcShowBadge) { %><span class="wiki-category-badge" style="background: hsl(<%= cat ? cat.hue : 220 %>, 55%, 45%)"><%= cat ? cat.label : page.category %></span><% } %>
@@ -107,6 +109,7 @@
     <% var ph = cat ? cat.hue : 220; %>
     <div class="wiki-card-image">
       <% if (wcBannerText) { %><span class="wiki-card-banner wiki-card-banner--<%= wcBannerMod %>"><%= wcBannerText %></span><% } %>
+      <% if (currentUser && currentUser.isAdmin) { %><span class="wiki-maturity-badge" data-level="<%= page.maturity || 0 %>"><%= page.maturity || 0 %></span><% } %>
       <svg class="wiki-card-placeholder-svg" viewBox="0 0 160 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
         <defs>
           <radialGradient id="rg-<%= page.id %>" cx="50%" cy="50%" r="65%">

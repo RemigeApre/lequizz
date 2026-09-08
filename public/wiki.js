@@ -647,6 +647,7 @@
   var advMinRating    = Number(localStorage.getItem("wiki-filter-rating")) || 0;
   var activeCols      = Number(localStorage.getItem("wiki-cols")) || 3;
   var activeSpecialFilter = localStorage.getItem("wiki-filter-special") || "";
+  var activeMaturityFilter = Number(localStorage.getItem("wiki-filter-maturity") || "-1"); // -1 = pas de filtre
   var includedExtraCats = new Set();
   var excludedExtraCats = new Set();
   var currentPage     = 1;
@@ -877,12 +878,13 @@
       var okOwned      = propStates["owned"]      === 0 ? true : (propStates["owned"]      === 1 ? card.dataset.owned === "1"      : card.dataset.owned !== "1");
       var okFlame      = propStates["flame"]      === 0 ? true : (propStates["flame"]      === 1 ? card.dataset.flame === "1"      : card.dataset.flame !== "1");
       var okInterested = propStates["interested"] === 0 ? true : (propStates["interested"] === 1 ? card.dataset.interested === "1" : card.dataset.interested !== "1");
+      var okMaturity   = activeMaturityFilter < 0 || Number(card.dataset.maturity || 0) === activeMaturityFilter;
 
       // Track which cards pass all non-tag filters (for smart tag chip visibility)
-      var okNonTag = okCat && okUltra && okIrrealiste && okSpecial && okExtraCat && okSearch && okRating && okNotRated && okOwned && okFlame && okInterested;
+      var okNonTag = okCat && okUltra && okIrrealiste && okSpecial && okExtraCat && okSearch && okRating && okNotRated && okOwned && okFlame && okInterested && okMaturity;
       card._passesNonTag = okNonTag;
       // Track which cards pass all filters except the category (for 9/27 chip counts)
-      card._passesNonCat = okUltra && okIrrealiste && okSpecial && okExtraCat && okSearch && okRating && okNotRated && okOwned && okFlame && okInterested && okTag;
+      card._passesNonCat = okUltra && okIrrealiste && okSpecial && okExtraCat && okSearch && okRating && okNotRated && okOwned && okFlame && okInterested && okMaturity && okTag;
       card.hidden = !(okNonTag && okTag);
     });
 
@@ -1163,6 +1165,33 @@
         btn.dataset.state = String(s);
         propStates[prop] = s;
         localStorage.setItem("wiki-prop-" + prop, String(s));
+        applyFilters();
+      });
+    });
+  }
+
+  // Filtre maturité (admin uniquement)
+  var maturityFilterWrap = document.getElementById("wiki-maturity-filter");
+  if (maturityFilterWrap) {
+    // Restaure visuellement le filtre mémorisé
+    if (activeMaturityFilter >= 0) {
+      var restoredMBtn = maturityFilterWrap.querySelector('[data-level="' + activeMaturityFilter + '"]');
+      if (restoredMBtn) restoredMBtn.classList.add("active");
+    }
+    maturityFilterWrap.querySelectorAll(".wiki-maturity-filter-btn").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var lvl = Number(btn.dataset.level);
+        if (activeMaturityFilter === lvl) {
+          // Désactiver le filtre (toggle off)
+          activeMaturityFilter = -1;
+          localStorage.setItem("wiki-filter-maturity", "-1");
+          maturityFilterWrap.querySelectorAll(".wiki-maturity-filter-btn").forEach(function(b) { b.classList.remove("active"); });
+        } else {
+          activeMaturityFilter = lvl;
+          localStorage.setItem("wiki-filter-maturity", String(lvl));
+          maturityFilterWrap.querySelectorAll(".wiki-maturity-filter-btn").forEach(function(b) { b.classList.remove("active"); });
+          btn.classList.add("active");
+        }
         applyFilters();
       });
     });
@@ -3026,6 +3055,31 @@
       clearTimeout(timer);
       status.textContent = "";
       timer = setTimeout(save, 1200);
+    });
+  })();
+
+  // ══════════════════════════════════════════════════
+  // MATURITÉ (widget admin sur la page de lecture)
+  // ══════════════════════════════════════════════════
+  (function () {
+    var matWidget = document.getElementById("wiki-maturity-widget");
+    if (!matWidget) return;
+    var matId = Number(matWidget.dataset.id);
+    if (!matId) return;
+    var matBtns = matWidget.querySelectorAll(".wiki-maturity-lvl");
+    matBtns.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var lvl = Number(btn.dataset.level);
+        fetch("/wiki/" + matId + "/maturity", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ level: lvl }),
+        }).then(function (r) { return r.json(); }).then(function (data) {
+          if (!data.ok) return;
+          matBtns.forEach(function (b) { b.classList.toggle("active", Number(b.dataset.level) === data.maturity); });
+          matWidget.dataset.level = data.maturity;
+        });
+      });
     });
   })();
 
