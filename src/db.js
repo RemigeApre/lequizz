@@ -85,6 +85,8 @@ try { db.exec("ALTER TABLE gallery_images ADD COLUMN flame INTEGER NOT NULL DEFA
 try { db.exec("ALTER TABLE gallery_images ADD COLUMN interested INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
 try { db.exec("ALTER TABLE gallery_images ADD COLUMN wiki_page_id INTEGER"); } catch (_) {}
 try { db.exec("ALTER TABLE gallery_images ADD COLUMN image_paths TEXT NOT NULL DEFAULT '[]'"); } catch (_) {}
+try { db.exec("ALTER TABLE gallery_images ADD COLUMN author TEXT NOT NULL DEFAULT ''"); } catch (_) {}
+try { db.exec("ALTER TABLE gallery_images ADD COLUMN parody TEXT NOT NULL DEFAULT ''"); } catch (_) {}
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS bd_books (
@@ -609,6 +611,8 @@ function rowToGalleryImage(row) {
     category: row.category || "",
     tags: (() => { try { return JSON.parse(row.tags || "[]"); } catch(_) { return []; } })(),
     notes: row.notes || "",
+    author: row.author || "",
+    parody: row.parody || "",
     rating: row.rating || 0,
     flame: !!row.flame,
     interested: !!row.interested,
@@ -627,17 +631,17 @@ function getGalleryImage(id) {
   return row ? rowToGalleryImage(row) : null;
 }
 
-function insertGalleryImage({ imagePaths, title, tags, notes, category, wikiPageId }) {
+function insertGalleryImage({ imagePaths, title, tags, notes, category, wikiPageId, author, parody }) {
   const now = new Date().toISOString();
   const paths = imagePaths || [];
   const info = db.prepare(
-    `INSERT INTO gallery_images (filename, image_paths, title, tags, notes, category, wiki_page_id, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  ).run(paths[0] || "", JSON.stringify(paths), title || "", JSON.stringify(tags || []), notes || "", category || "", wikiPageId || null, now, now);
+    `INSERT INTO gallery_images (filename, image_paths, title, tags, notes, category, wiki_page_id, author, parody, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run(paths[0] || "", JSON.stringify(paths), title || "", JSON.stringify(tags || []), notes || "", category || "", wikiPageId || null, author || "", parody || "", now, now);
   return info.lastInsertRowid;
 }
 
-function updateGalleryImage(id, { title, category, tags, notes, imagePaths, wikiPageId }) {
+function updateGalleryImage(id, { title, category, tags, notes, imagePaths, wikiPageId, author, parody }) {
   const existing = db.prepare("SELECT image_paths, filename FROM gallery_images WHERE id = ?").get(id);
   if (!existing) return false;
   // Si imagePaths n'est pas fourni, conserver les images existantes
@@ -647,9 +651,9 @@ function updateGalleryImage(id, { title, category, tags, notes, imagePaths, wiki
     if (!finalImagePaths.length && existing.filename) finalImagePaths = [existing.filename];
   }
   db.prepare(
-    `UPDATE gallery_images SET title = ?, category = ?, tags = ?, notes = ?, filename = ?, image_paths = ?, wiki_page_id = ?, updated_at = ?
+    `UPDATE gallery_images SET title = ?, category = ?, tags = ?, notes = ?, filename = ?, image_paths = ?, wiki_page_id = ?, author = ?, parody = ?, updated_at = ?
      WHERE id = ?`
-  ).run(title || "", category || "", JSON.stringify(tags || []), notes || "", finalImagePaths[0] || "", JSON.stringify(finalImagePaths), wikiPageId || null, new Date().toISOString(), id);
+  ).run(title || "", category || "", JSON.stringify(tags || []), notes || "", finalImagePaths[0] || "", JSON.stringify(finalImagePaths), wikiPageId || null, author || "", parody || "", new Date().toISOString(), id);
   return true;
 }
 
@@ -661,6 +665,19 @@ function reactGalleryImage(id, { rating, flame, interested }) {
 
 function deleteGalleryImage(id) {
   db.prepare("DELETE FROM gallery_images WHERE id = ?").run(id);
+}
+
+function listGalleryAuthors() {
+  return db.prepare("SELECT DISTINCT author FROM gallery_images WHERE author != '' ORDER BY author COLLATE NOCASE").all().map(r => r.author);
+}
+function listGalleryParodies() {
+  return db.prepare("SELECT DISTINCT parody FROM gallery_images WHERE parody != '' ORDER BY parody COLLATE NOCASE").all().map(r => r.parody);
+}
+
+function updateGalleryImageMeta(id, { tags, author, parody }) {
+  db.prepare("UPDATE gallery_images SET tags = ?, author = ?, parody = ?, updated_at = ? WHERE id = ?")
+    .run(JSON.stringify(tags || []), author || "", parody || "", new Date().toISOString(), id);
+  return true;
 }
 
 // ── Tag metadata ──────────────────────────────────────────────────────────
@@ -757,6 +774,9 @@ module.exports = {
   updateGalleryImage,
   reactGalleryImage,
   deleteGalleryImage,
+  listGalleryAuthors,
+  listGalleryParodies,
+  updateGalleryImageMeta,
   setWikiPageFeatured,
   listFeaturedWikiPages,
   listBdBooks,

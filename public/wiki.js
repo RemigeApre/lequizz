@@ -941,6 +941,12 @@
       }
     }
 
+    var heroCountEl = document.querySelector(".wiki-chapter-hero-count");
+    if (heroCountEl) {
+      var hasFilter = q || hasAdv || (categoryFilter && activeCategory !== "") || includedTagsSet.size > 0 || excludedTagsSet.size > 0;
+      heroCountEl.textContent = hasFilter ? (visible.length + "/" + cards.length) : cards.length;
+    }
+
     // Page d'accueil wiki : bascule entre la vue native (intro + strips)
     // et la grille filtrée selon qu'un filtre est actif ou non.
     if (indexNative) {
@@ -1468,6 +1474,35 @@
     '<div class="wiki-lightbox-inner">',
       '<img class="wiki-lightbox-img" alt="" />',
       '<div class="wiki-lightbox-panel" hidden>',
+        '<div class="wiki-lb-meta-section">',
+          '<div class="wiki-lb-meta-tags"></div>',
+          '<div class="wiki-lb-meta-fields">',
+            '<div class="wiki-lb-meta-field" data-field="author">',
+              '<span class="wiki-lb-meta-label">Auteur</span>',
+              '<span class="wiki-lb-meta-value"></span>',
+              '<div class="wiki-lb-meta-edit" hidden>',
+                '<input type="text" class="wiki-lb-meta-input" placeholder="Auteur\u2026" autocomplete="off" />',
+                '<ul class="wiki-lb-meta-suggest"></ul>',
+              '</div>',
+            '</div>',
+            '<div class="wiki-lb-meta-field" data-field="parody">',
+              '<span class="wiki-lb-meta-label">Parodie</span>',
+              '<span class="wiki-lb-meta-value"></span>',
+              '<div class="wiki-lb-meta-edit" hidden>',
+                '<input type="text" class="wiki-lb-meta-input" placeholder="Parodie\u2026" autocomplete="off" />',
+                '<ul class="wiki-lb-meta-suggest"></ul>',
+              '</div>',
+            '</div>',
+          '</div>',
+          '<div class="wiki-lb-meta-tag-edit" hidden>',
+            '<input type="text" class="wiki-lb-meta-tag-input" placeholder="Ajouter un tag\u2026" autocomplete="off" />',
+          '</div>',
+          '<button class="wiki-lb-meta-edit-btn" hidden>Modifier</button>',
+          '<div class="wiki-lb-meta-save-row" hidden>',
+            '<button class="wiki-lb-meta-save">Enregistrer</button>',
+            '<button class="wiki-lb-meta-cancel">Annuler</button>',
+          '</div>',
+        '</div>',
         '<div class="wiki-lightbox-panel-title">Pages li&#233;es</div>',
         '<ul class="wiki-lightbox-links"></ul>',
         '<div class="wiki-lightbox-search">',
@@ -1488,6 +1523,19 @@
   var lbCloseBtn = lightbox.querySelector(".wiki-lightbox-close");
   var lbPrevBtn  = lightbox.querySelector(".wiki-lightbox-prev");
   var lbNextBtn  = lightbox.querySelector(".wiki-lightbox-next");
+
+  var lbMetaSection  = lightbox.querySelector(".wiki-lb-meta-section");
+  var lbMetaTags     = lightbox.querySelector(".wiki-lb-meta-tags");
+  var lbMetaFields   = lightbox.querySelector(".wiki-lb-meta-fields");
+  var lbMetaEditBtn  = lightbox.querySelector(".wiki-lb-meta-edit-btn");
+  var lbMetaSaveRow  = lightbox.querySelector(".wiki-lb-meta-save-row");
+  var lbMetaSaveBtn  = lightbox.querySelector(".wiki-lb-meta-save");
+  var lbMetaCancelBtn= lightbox.querySelector(".wiki-lb-meta-cancel");
+  var lbTagEditWrap  = lightbox.querySelector(".wiki-lb-meta-tag-edit");
+  var lbTagInput     = lightbox.querySelector(".wiki-lb-meta-tag-input");
+  var lbCurrentMeta  = null; // { id, tags, author, parody }
+  var lbEditMode     = false;
+  var lbCanEdit      = typeof window.GALLERY_CAN_EDIT !== "undefined" ? window.GALLERY_CAN_EDIT : false;
 
   // Liste des src de la page dans l'ordre DOM, et index courant
   var lbSrcs = [];
@@ -1560,6 +1608,77 @@
       });
   }
 
+  function renderMetaTags(tags, editable) {
+    lbMetaTags.innerHTML = "";
+    tags.forEach(function(tag) {
+      var chip = document.createElement("span");
+      chip.className = "wiki-lb-tag-chip";
+      chip.textContent = tag;
+      if (editable) {
+        var rm = document.createElement("button");
+        rm.type = "button";
+        rm.className = "wiki-lb-tag-rm";
+        rm.innerHTML = "&#215;";
+        rm.title = "Supprimer";
+        rm.addEventListener("click", function() {
+          lbCurrentMeta.tags = lbCurrentMeta.tags.filter(function(t) { return t !== tag; });
+          renderMetaTags(lbCurrentMeta.tags, true);
+        });
+        chip.appendChild(rm);
+      }
+      lbMetaTags.appendChild(chip);
+    });
+  }
+
+  function enterEditMode() {
+    if (!lbCurrentMeta) return;
+    lbEditMode = true;
+    lbMetaEditBtn.hidden = true;
+    lbMetaSaveRow.hidden = false;
+    lbTagEditWrap.hidden = false;
+    renderMetaTags(lbCurrentMeta.tags, true);
+    // Champs author/parody
+    lbMetaFields.querySelectorAll(".wiki-lb-meta-field").forEach(function(field) {
+      field.querySelector(".wiki-lb-meta-value").hidden = true;
+      field.querySelector(".wiki-lb-meta-edit").hidden = false;
+      var input = field.querySelector(".wiki-lb-meta-input");
+      input.value = lbCurrentMeta[field.dataset.field] || "";
+    });
+  }
+
+  function exitEditMode() {
+    lbEditMode = false;
+    lbMetaEditBtn.hidden = !lbCanEdit || !lbCurrentMeta;
+    lbMetaSaveRow.hidden = true;
+    lbTagEditWrap.hidden = true;
+    if (!lbCurrentMeta) return;
+    renderMetaTags(lbCurrentMeta.tags, false);
+    lbMetaFields.querySelectorAll(".wiki-lb-meta-field").forEach(function(field) {
+      field.querySelector(".wiki-lb-meta-value").hidden = false;
+      field.querySelector(".wiki-lb-meta-edit").hidden = true;
+      var val = lbCurrentMeta[field.dataset.field] || "";
+      field.querySelector(".wiki-lb-meta-value").textContent = val;
+      field.closest(".wiki-lb-meta-field").hidden = !val;
+    });
+  }
+
+  function loadMeta() {
+    if (!lbCurrentSrc.startsWith("/uploads/")) {
+      lbMetaSection.hidden = true;
+      lbCurrentMeta = null;
+      return;
+    }
+    fetch("/galerie/image-meta?src=" + encodeURIComponent(lbCurrentSrc))
+      .then(function(r) { return r.json(); })
+      .then(function(meta) {
+        if (!meta) { lbMetaSection.hidden = true; lbCurrentMeta = null; return; }
+        lbMetaSection.hidden = false;
+        lbCurrentMeta = meta;
+        lbEditMode = false;
+        exitEditMode();
+      });
+  }
+
   // Recherche de pages à associer
   var lbSearchTimer;
   lbSearch.addEventListener("input", function () {
@@ -1598,6 +1717,7 @@
       lbPanel.hidden = false;
       lbSearch.value = "";
       lbResults.innerHTML = "";
+      loadMeta();
       loadLinks();
     } else {
       lbPanel.hidden = true;
@@ -1626,6 +1746,82 @@
     lbIndex = (lbIndex + dir + lbSrcs.length) % lbSrcs.length;
     showImage(lbSrcs[lbIndex]);
   }
+
+  // Bouton Modifier (affiche formulaire d'édition)
+  lbMetaEditBtn.addEventListener("click", enterEditMode);
+
+  // Bouton Annuler
+  lbMetaCancelBtn.addEventListener("click", function() {
+    // Réinitialiser depuis le meta courant (pas encore modifié)
+    fetch("/galerie/image-meta?src=" + encodeURIComponent(lbCurrentSrc))
+      .then(function(r) { return r.json(); })
+      .then(function(meta) {
+        lbCurrentMeta = meta || lbCurrentMeta;
+        exitEditMode();
+      });
+  });
+
+  // Bouton Enregistrer
+  lbMetaSaveBtn.addEventListener("click", function() {
+    if (!lbCurrentMeta) return;
+    // Récupérer les valeurs des inputs author/parody
+    lbMetaFields.querySelectorAll(".wiki-lb-meta-field").forEach(function(field) {
+      lbCurrentMeta[field.dataset.field] = field.querySelector(".wiki-lb-meta-input").value.trim();
+    });
+    fetch("/galerie/image-meta", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: lbCurrentMeta.id, tags: lbCurrentMeta.tags, author: lbCurrentMeta.author, parody: lbCurrentMeta.parody }),
+    }).then(function(r) { return r.json(); }).then(function(d) {
+      if (d.ok) exitEditMode();
+    });
+  });
+
+  // Ajout d'un tag via input
+  lbTagInput.addEventListener("keydown", function(e) {
+    if (e.key !== "Enter") return;
+    var tag = lbTagInput.value.trim().toLowerCase();
+    if (tag && lbCurrentMeta && lbCurrentMeta.tags.indexOf(tag) === -1) {
+      lbCurrentMeta.tags.push(tag);
+      renderMetaTags(lbCurrentMeta.tags, true);
+    }
+    lbTagInput.value = "";
+  });
+
+  // Autocomplete pour author/parody
+  lbMetaFields.querySelectorAll(".wiki-lb-meta-field").forEach(function(field) {
+    var input   = field.querySelector(".wiki-lb-meta-input");
+    var suggest = field.querySelector(".wiki-lb-meta-suggest");
+    var apiPath = field.dataset.field === "author" ? "/galerie/autocomplete/authors" : "/galerie/autocomplete/parodies";
+    var timer;
+    input.addEventListener("input", function() {
+      clearTimeout(timer);
+      var q = input.value.trim();
+      if (!q) { suggest.innerHTML = ""; suggest.hidden = true; return; }
+      timer = setTimeout(function() {
+        fetch(apiPath + "?q=" + encodeURIComponent(q))
+          .then(function(r) { return r.json(); })
+          .then(function(results) {
+            suggest.innerHTML = "";
+            if (!results.length) { suggest.hidden = true; return; }
+            suggest.hidden = false;
+            results.forEach(function(val) {
+              var li = document.createElement("li");
+              li.textContent = val;
+              li.addEventListener("click", function() {
+                input.value = val;
+                suggest.innerHTML = "";
+                suggest.hidden = true;
+              });
+              suggest.appendChild(li);
+            });
+          });
+      }, 200);
+    });
+    input.addEventListener("blur", function() {
+      setTimeout(function() { suggest.hidden = true; }, 200);
+    });
+  });
 
   // Boutons close / prev / next
   lbCloseBtn.addEventListener("click", function (e) { e.stopPropagation(); closeLightbox(); });

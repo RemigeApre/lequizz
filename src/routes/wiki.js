@@ -458,7 +458,12 @@ function buildWikiRouter(config) {
     const pageIsFavorite = req.user ? isFavorite(req.user.id, "wiki", id) : false;
     let userNote = "";
     try { userNote = req.user ? getUserNote(id, req.user.id) : ""; } catch (_) {}
-    res.render("wiki-detail", { config, page, pages: allPages, suggestions, prevPage, nextPage, backHref: back.href, backLabel: back.label, isFavorite: pageIsFavorite, userNote, ...CTX });
+    // Compteurs X|Y par tag (pages wiki | images galerie)
+    const tagPageCounts = {};
+    allPages.forEach((p) => p.tags.forEach((t) => { tagPageCounts[t] = (tagPageCounts[t] || 0) + 1; }));
+    const tagImageCounts = {};
+    listGalleryImages().forEach((img) => img.tags.forEach((t) => { tagImageCounts[t] = (tagImageCounts[t] || 0) + 1; }));
+    res.render("wiki-detail", { config, page, pages: allPages, suggestions, prevPage, nextPage, backHref: back.href, backLabel: back.label, isFavorite: pageIsFavorite, userNote, tagPageCounts, tagImageCounts, ...CTX });
   });
 
   router.get("/ajouter", requireUser, (req, res) => {

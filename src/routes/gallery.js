@@ -9,6 +9,9 @@ const {
   updateGalleryImage,
   reactGalleryImage,
   deleteGalleryImage,
+  listGalleryAuthors,
+  listGalleryParodies,
+  updateGalleryImageMeta,
   listWikiPages,
   getWikiPage,
   listFavoriteRows,
@@ -47,6 +50,13 @@ const upload = multer({
     cb(null, Object.prototype.hasOwnProperty.call(ALLOWED_EXT, file.mimetype));
   },
 });
+
+// Trouve l'entrée gallery_images dont image_paths contient une src donnée
+function findImageBySrc(src, galleryImages) {
+  return galleryImages.find(function(g) {
+    return g.imagePaths && g.imagePaths.indexOf(src) !== -1;
+  }) || null;
+}
 
 function parseTags(raw) {
   return String(raw || "").split(/[,;]+/).map((t) => t.trim()).filter(Boolean);
@@ -209,6 +219,40 @@ function buildGalleryRouter(config) {
       return res.json({ ok: false });
     }
     res.json({ ok: true });
+  });
+
+  // Métadonnées d'une image galerie par son src (pour le lightbox)
+  router.get("/image-meta", function(req, res) {
+    var src = String(req.query.src || "");
+    if (!src) return res.json(null);
+    var img = findImageBySrc(src, listGalleryImages());
+    if (!img) return res.json(null);
+    res.json({ id: img.id, tags: img.tags, author: img.author, parody: img.parody });
+  });
+
+  // Mise à jour des métadonnées (admin only = requireUser déjà sur le router)
+  router.post("/image-meta", function(req, res) {
+    var id = Number(req.body.id);
+    if (!id) return res.json({ ok: false });
+    var tags   = [].concat(req.body.tags || []).filter(Boolean);
+    var author = String(req.body.author || "").trim();
+    var parody = String(req.body.parody || "").trim();
+    updateGalleryImageMeta(id, { tags, author, parody });
+    res.json({ ok: true });
+  });
+
+  // Autocomplete auteurs
+  router.get("/autocomplete/authors", function(req, res) {
+    var q = String(req.query.q || "").toLowerCase();
+    var all = listGalleryAuthors();
+    res.json(q ? all.filter(function(a) { return a.toLowerCase().indexOf(q) !== -1; }) : all);
+  });
+
+  // Autocomplete parodies
+  router.get("/autocomplete/parodies", function(req, res) {
+    var q = String(req.query.q || "").toLowerCase();
+    var all = listGalleryParodies();
+    res.json(q ? all.filter(function(a) { return a.toLowerCase().indexOf(q) !== -1; }) : all);
   });
 
   router.get("/:id/edit", (req, res) => {

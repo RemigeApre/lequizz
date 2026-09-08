@@ -206,17 +206,25 @@
       <%# ─ COLONNE DROITE : panneau info (PC) ─ %>
       <aside class="wiki-detail-right">
 
-        <%# ─ Retour ─ %>
-        <a href="<%= backHref %>" class="wiki-right-back" title="<%= backLabel %>">&#8592; <span class="wiki-right-back-label"><%= backLabel %></span></a>
+        <%# ─ Header : retour + catégories ─ %>
+        <div class="wiki-right-header">
+          <a href="<%= backHref %>" class="wiki-right-back" title="<%= backLabel %>">&#8592;</a>
+          <div class="wiki-right-header-cats">
+            <% if (cat) { %>
+              <a href="/wiki/categorie/<%= page.category %>" class="wiki-right-cat-text"><%= cat.label %></a>
+            <% } %>
+            <% (page.extraCategories || []).forEach(function (eck) { var ecat = categories.find(function (c) { return c.key === eck; }); if (ecat) { %>
+              <span class="wiki-right-cat-sep">&middot;</span>
+              <a href="/wiki/categorie/<%= eck %>" class="wiki-right-cat-text"><%= ecat.label %></a>
+            <% } }) %>
+            <% if (page.owned) { %><span class="wiki-right-owned-tag">&#9733;</span><% } %>
+          </div>
+        </div>
 
-        <%# ─ Navigation PC : catégorie encadrée par prev/next ─ %>
+        <%# ─ Navigation PC : titre encadré par prev/next ─ %>
         <div class="wiki-right-nav">
           <a href="<%= prevPage ? '/wiki/' + prevPage.id : '#' %>" class="wiki-right-nav-btn<%= prevPage ? '' : ' disabled' %>" title="<%= prevPage ? prevPage.title : '' %>">&#8249;</a>
-          <% if (cat) { %>
-            <a href="/wiki/categorie/<%= page.category %>" class="wiki-right-nav-cat"><%= cat.label %></a>
-          <% } else { %>
-            <span class="wiki-right-nav-cat">Wiki</span>
-          <% } %>
+          <span class="wiki-right-nav-title"><%= page.title %></span>
           <a href="<%= nextPage ? '/wiki/' + nextPage.id : '#' %>" class="wiki-right-nav-btn<%= nextPage ? '' : ' disabled' %>" title="<%= nextPage ? nextPage.title : '' %>">&#8250;</a>
         </div>
 
@@ -258,8 +266,12 @@
         <% if (hasAnyTags) { %>
           <div class="wiki-right-tags">
             <% page.tags.forEach(function (t) { %>
+              <%
+                var _tp = tagPageCounts && tagPageCounts[t] ? tagPageCounts[t] : 0;
+                var _ti = tagImageCounts && tagImageCounts[t] ? tagImageCounts[t] : 0;
+              %>
               <a href="/wiki?tag=<%= encodeURIComponent(t.toLowerCase()) %>"
-                 class="link-tag-pill wiki-right-tag-link"><%= t %></a>
+                 class="link-tag-pill wiki-right-tag-link"><%= t %><% if (_tp || _ti) { %><span class="wiki-tag-xy"> <%= _tp %>|<%= _ti %></span><% } %></a>
             <% }) %>
             <% if (derivedTerms.length) { %>
               <span class="wiki-derived-sep">&mdash;</span>
@@ -322,5 +334,6 @@
 
   </article>
 </main>
+<script>window.GALLERY_CAN_EDIT = <%= currentUser ? 'true' : 'false' %>;</script>
 <script src="/wiki.js?v=<%= assetVersion %>"></script>
 <%- include('partials/foot') %>

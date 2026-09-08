@@ -184,5 +184,6 @@
   </div>
 </div>
 
+<script>window.GALLERY_CAN_EDIT = <%= currentUser ? 'true' : 'false' %>;</script>
 <script src="/gallery.js?v=<%= assetVersion %>"></script>
 <%- include('partials/foot') %>
