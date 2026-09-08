@@ -561,9 +561,48 @@
     return (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   }
 
+  // ── Trigrammes : tolérance aux fautes de frappe ───────────────────────
+  // Génère l'ensemble des trigrammes d'un mot (ex: "assis" → {" as","ass","ssi","sis","is "})
+  function trigrams(w) {
+    var s = " " + w + " ";
+    var set = {};
+    for (var i = 0; i < s.length - 2; i++) set[s.slice(i, i + 3)] = true;
+    return set;
+  }
+
+  // Similarité de Jaccard sur les trigrammes, entre 0 et 1
+  function trigramSim(a, b) {
+    if (!a || !b) return 0;
+    var ta = trigrams(a);
+    var tb = trigrams(b);
+    var inter = 0, union = 0;
+    var all = {};
+    Object.keys(ta).forEach(function (k) { all[k] = true; });
+    Object.keys(tb).forEach(function (k) { all[k] = true; });
+    Object.keys(all).forEach(function (k) {
+      if (ta[k] && tb[k]) inter++;
+      union++;
+    });
+    return union ? inter / union : 0;
+  }
+
+  // Score fuzzy d'un mot de query contre un champ texte.
+  // Retourne 0..1 : 1 = correspondance exacte, >0.4 = faute tolérable.
+  function fuzzyScore(word, field) {
+    if (!word || !field) return 0;
+    if (field.includes(word)) return 1; // correspondance exacte → priorité
+    var best = 0;
+    field.split(/\s+/).forEach(function (fw) {
+      if (!fw) return;
+      var sim = trigramSim(word, fw);
+      if (sim > best) best = sim;
+    });
+    return best;
+  }
+
   // Score de pertinence d'une carte pour un terme de recherche
   function scoreCard(card, q) {
-    if (!q) return 1; // tout passe si pas de query
+    if (!q) return 1;
     var words = q.split(/\s+/).filter(Boolean);
     var title     = norm(card.dataset.title || "");
     var derived   = norm(card.dataset.derived || "");
@@ -572,17 +611,40 @@
     var variantes = norm(card.dataset.variantes || "");
     var cat       = norm(card.dataset.category || "");
 
-    var score = 0;
-    words.forEach(function (w) {
-      if (title === w)              score += 12;
-      else if (title.startsWith(w)) score += 8;
-      else if (title.includes(w))   score += 5;
+    // Texte combiné pour détecter les requêtes multi-mots réparties
+    // entre le titre et les variantes (ex: "assis de dos")
+    var combined  = title + " " + variantes;
 
-      if (derived.includes(w))      score += 4;
-      if (tags.includes(w))         score += 3;
-      if (variantes.includes(w))    score += 3;
-      if (content.includes(w))      score += 2;
-      if (cat.includes(w))          score += 1;
+    var score = 0;
+
+    // Bonus si la requête complète apparaît dans le texte combiné
+    var fullQ = words.join(" ");
+    if (combined.includes(fullQ))     score += 10;
+    else if (title.includes(fullQ))   score += 10;
+
+    words.forEach(function (w) {
+      // ── Correspondances exactes (titre) ──
+      if (title === w)                score += 12;
+      else if (title.startsWith(w))   score += 8;
+      else if (title.includes(w))     score += 5;
+
+      // ── Correspondances exactes (autres champs) ──
+      if (derived.includes(w))        score += 4;
+      if (tags.includes(w))           score += 3;
+      if (variantes.includes(w))      score += 3;
+      if (content.includes(w))        score += 2;
+      if (cat.includes(w))            score += 1;
+
+      // ── Fuzzy (seulement si pas de correspondance exacte) ──
+      // Tolère ~1 caractère de différence (sim > 0.5)
+      var titleSim = fuzzyScore(w, title);
+      if (titleSim >= 0.5 && !title.includes(w))  score += titleSim * 4;
+
+      var varSim = fuzzyScore(w, variantes);
+      if (varSim >= 0.5 && !variantes.includes(w)) score += varSim * 2;
+
+      var derSim = fuzzyScore(w, derived);
+      if (derSim >= 0.5 && !derived.includes(w))  score += derSim * 2;
     });
     return score;
   }
@@ -610,7 +672,8 @@
 
       // Recherche textuelle
       var sc = scoreCard(card, q);
-      var okSearch = !q || sc > 0;
+      // Seuil ≥ 1 pour éviter les faux-positifs du fuzzy (0 < sim < 0.5)
+      var okSearch = !q || sc >= 1;
       scores.set(card, sc);
 
       // Filtres avancés
@@ -953,7 +1016,7 @@
 
   function rebuildSrcList() {
     lbSrcs = [];
-    document.querySelectorAll(".wiki-infobox-img, .wiki-gallery-img, .wiki-form-existing-image, .wiki-card-img").forEach(function (img) {
+    document.querySelectorAll(".wiki-infobox-img, .wiki-gallery-img, .wiki-form-existing-image, .wiki-card-img, .wiki-var-img").forEach(function (img) {
       var src = lbGetSrc(img);
       if (src) lbSrcs.push(src);
     });
@@ -1106,9 +1169,9 @@
     if (Math.abs(dx) > 50) lbNavigate(dx < 0 ? +1 : -1);
   }, { passive: true });
 
-  // Rend cliquables toutes les images de la galerie et des formulaires
+  // Rend cliquables toutes les images de la galerie, des formulaires et des variantes
   function attachLightboxToImages() {
-    document.querySelectorAll(".wiki-infobox-img, .wiki-gallery-img, .wiki-form-existing-image, .wiki-card-img").forEach(function (img) {
+    document.querySelectorAll(".wiki-infobox-img, .wiki-gallery-img, .wiki-form-existing-image, .wiki-card-img, .wiki-var-img").forEach(function (img) {
       if (img.dataset.lbBound) return;
       img.dataset.lbBound = "1";
       img.style.cursor = "zoom-in";
@@ -1118,6 +1181,13 @@
     });
   }
   attachLightboxToImages();
+
+  // Rebind au premier open de chaque variante (images pas encore dans le DOM visuel)
+  document.querySelectorAll(".wiki-var-detail").forEach(function (det) {
+    det.addEventListener("toggle", function () {
+      if (det.open) attachLightboxToImages();
+    });
+  });
 
   // ══════════════════════════════════════════════════
   // 9. NAVIGATION ENTRE PAGES WIKI (←/→ + swipe)
