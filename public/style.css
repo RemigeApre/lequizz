@@ -6640,6 +6640,15 @@ a.wiki-ql-label:hover .wiki-ql-text {
   /* ── Wiki sidebar sur mobile : masquer le hero (titre dans le header) ── */
   .wiki-cat-sidebar .wiki-chapter-hero { display: none; }
 
+  /* ── Pousser le contenu sous le header sticky ───────────────────────── */
+  /* Le margin-top: -1.5rem global est conçu pour le desktop ; sur mobile  */
+  /* on le remet à zéro et on ajoute un padding interne pour l'air.        */
+  .wiki-cat-sidebar,
+  .gallery-sidebar {
+    margin-top: 0.5rem;
+    padding-top: 0;
+  }
+
   /* ── Filtre panel : details collapsible sur mobile ─────────────────── */
   .wiki-sidebar-filter-details {
     border: 1px solid rgba(255,255,255,0.15);
@@ -6647,6 +6656,10 @@ a.wiki-ql-label:hover .wiki-ql-text {
     overflow: hidden;
   }
   .wiki-sidebar-filter-summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     padding: 0.6rem 0.9rem;
     font-size: 0.85rem;
     font-weight: 600;
@@ -6654,6 +6667,17 @@ a.wiki-ql-label:hover .wiki-ql-text {
     cursor: pointer;
     list-style: none;
     user-select: none;
+  }
+  .wiki-sidebar-filter-summary::before,
+  .wiki-sidebar-filter-summary::after {
+    content: "▾";
+    font-size: 0.75rem;
+    opacity: 0.7;
+    transition: transform 0.2s;
+  }
+  .wiki-sidebar-filter-details[open] .wiki-sidebar-filter-summary::before,
+  .wiki-sidebar-filter-details[open] .wiki-sidebar-filter-summary::after {
+    content: "▴";
   }
   .wiki-sidebar-filter-summary::-webkit-details-marker { display: none; }
   .wiki-sidebar-filter-details[open] .wiki-sidebar-filter-summary { border-bottom: 1px solid rgba(255,255,255,0.1); }
@@ -6663,13 +6687,20 @@ a.wiki-ql-label:hover .wiki-ql-text {
     margin-bottom: 1rem;
   }
   .wiki-intro-summary {
+    display: block;
+    width: fit-content;
+    margin: 0 auto;
     font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--muted);
+    font-weight: 700;
+    color: var(--fg);
     cursor: pointer;
-    padding: 0.3rem 0;
+    padding: 0.4rem 1.2rem;
     list-style: none;
     user-select: none;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--card);
+    text-align: center;
   }
   .wiki-intro-summary::-webkit-details-marker { display: none; }
   .wiki-intro-details .wiki-index-intro { margin-top: 0.5rem; }
