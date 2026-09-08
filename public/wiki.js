@@ -875,14 +875,17 @@
     // Mise à jour des chips catégories avec les compteurs "x/y"
     if (categoryFilter) {
       var anyNonCatFilter = !!q || includedTagsSet.size > 0 || excludedTagsSet.size > 0 || advMinRating > 0 || _anyPropAdv;
+      // catTotal : catégorie principale seulement (évite le double-comptage des extra_categories).
+      // catFiltered : pages passant les filtres non-catégorie, dans cette catégorie (primary OR extra).
       var catFiltered = {}, catTotal = {};
       cards.forEach(function(card) {
-        var cats = [card.dataset.category].concat((card.dataset.extraCats || "").split("|").filter(Boolean));
-        cats.forEach(function(cat) {
-          if (!cat) return;
-          catTotal[cat] = (catTotal[cat] || 0) + 1;
-          if (card._passesNonCat) catFiltered[cat] = (catFiltered[cat] || 0) + 1;
-        });
+        var primary = card.dataset.category;
+        if (primary) catTotal[primary] = (catTotal[primary] || 0) + 1;
+        // Pour le compteur filtré, on inclut primary + extra_cats (cohérent avec le filtre catégorie)
+        var allCats = [primary].concat((card.dataset.extraCats || "").split("|").filter(Boolean));
+        if (card._passesNonCat) {
+          allCats.forEach(function(cat) { if (cat) catFiltered[cat] = (catFiltered[cat] || 0) + 1; });
+        }
       });
       var totalPasses = cards.filter(function(c) { return c._passesNonCat; }).length;
       categoryFilter.querySelectorAll(".tag-chip[data-category]").forEach(function(chip) {
@@ -2728,6 +2731,74 @@
       status.textContent = "";
       timer = setTimeout(save, 1200);
     });
+  })();
+
+  // ══════════════════════════════════════════════════
+  // 18. PANNEAU TAGS LATÉRAL (formulaire d'édition)
+  // ══════════════════════════════════════════════════
+  (function () {
+    var panel = document.querySelector(".wiki-form-tag-panel");
+    if (!panel) return;
+    // Trouver le widget tags principal (non dérivé)
+    var mainWidget = null;
+    document.querySelectorAll(".wiki-tags-widget").forEach(function (w) {
+      if (!w.classList.contains("wiki-derived-widget")) mainWidget = w;
+    });
+    if (!mainWidget) return;
+
+    // Recherche dans le panneau
+    var searchBox = panel.querySelector(".wiki-form-tag-panel-search");
+    if (searchBox) {
+      searchBox.addEventListener("input", function () {
+        var q = searchBox.value.trim().toLowerCase();
+        panel.querySelectorAll(".wiki-panel-tag-chip").forEach(function (chip) {
+          chip.hidden = q && chip.dataset.tag.toLowerCase().indexOf(q) === -1;
+        });
+      });
+    }
+
+    // Clic sur un chip du panneau → ajoute dans le widget principal
+    panel.addEventListener("click", function (e) {
+      var chip = e.target.closest(".wiki-panel-tag-chip");
+      if (!chip) return;
+      // Déclenche un clic sur le chip équivalent dans le suggestBox du widget principal
+      var suggestBox = mainWidget.querySelector(".wiki-tag-suggestions");
+      var match = suggestBox && suggestBox.querySelector('[data-tag="' + chip.dataset.tag + '"]');
+      if (match) {
+        match.click();
+      } else {
+        // Tag non présent dans les suggestions locales : ajoute directement via l'input
+        var typer = mainWidget.querySelector(".wiki-tags-typing");
+        var hidden = mainWidget.querySelector(".wiki-tags-hidden");
+        if (typer) {
+          typer.value = chip.dataset.tag;
+          typer.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+          typer.value = "";
+        }
+      }
+      // Sync visuel sur le chip du panneau
+      chip.classList.toggle("active", mainWidget.querySelector('.wiki-tag-suggest-chip[data-tag="' + chip.dataset.tag + '"]')
+        ? mainWidget.querySelector('.wiki-tag-suggest-chip[data-tag="' + chip.dataset.tag + '"]').classList.contains("active")
+        : false);
+    });
+
+    // Sync de l'état des chips du panneau quand le widget met à jour ses chips
+    function syncPanelChips() {
+      var hidden = mainWidget.querySelector(".wiki-tags-hidden");
+      if (!hidden) return;
+      var activeTags = (hidden.value || "").split(/[,;]+/).map(function (t) { return t.trim().toLowerCase(); });
+      panel.querySelectorAll(".wiki-panel-tag-chip").forEach(function (chip) {
+        chip.classList.toggle("active", activeTags.indexOf(chip.dataset.tag.toLowerCase()) !== -1);
+      });
+    }
+    // Observer les changements du champ caché
+    var hiddenInput = mainWidget.querySelector(".wiki-tags-hidden");
+    if (hiddenInput) {
+      new MutationObserver(syncPanelChips).observe(hiddenInput, { attributes: true, attributeFilter: ["value"] });
+      // Fallback : re-sync après chaque clic dans le widget
+      mainWidget.addEventListener("click", function () { setTimeout(syncPanelChips, 50); });
+    }
+    syncPanelChips();
   })();
 
 })();

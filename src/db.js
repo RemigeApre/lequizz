@@ -664,7 +664,9 @@ function deleteGalleryImage(id) {
 }
 
 // ── Tag metadata ──────────────────────────────────────────────────────────
-const VALID_TAG_TYPES = new Set(["normal", "ultra", "irrealiste", "fantaisie"]);
+const VALID_TAG_TYPES = new Set(["normal", "ultra", "irrealiste"]);
+// Migration : les tags en type "fantaisie" rejoignent "irrealiste"
+try { db.exec("UPDATE tag_meta SET type='irrealiste' WHERE type='fantaisie'"); } catch (_) {}
 
 function getAllTagMeta() {
   const rows = db.prepare("SELECT tag, type FROM tag_meta").all();

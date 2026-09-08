@@ -3062,6 +3062,57 @@ input[type="text"], input[type="password"] {
 }
 
 /* Markdown toolbar */
+/* Rangée éditeur + panneau tags latéral */
+.wiki-editor-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+@media (min-width: 900px) {
+  .wiki-editor-row {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .wiki-editor-row .wiki-editor { flex: 1; min-width: 0; }
+}
+
+/* Panneau tags latéral */
+.wiki-form-tag-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 170px;
+  max-width: 220px;
+  max-height: 340px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+@media (max-width: 899px) {
+  .wiki-form-tag-panel { max-width: 100%; max-height: 180px; }
+}
+.wiki-form-tag-panel-label {
+  font-size: 0.72rem; font-weight: 600; color: var(--muted);
+  margin: 0; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.wiki-form-tag-panel-search {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 0.25rem 0.5rem;
+  font-size: 0.8rem; color: var(--fg); width: 100%;
+}
+.wiki-form-tag-panel-chips {
+  display: flex; flex-wrap: wrap; gap: 0.3rem;
+  overflow-y: auto; flex: 1;
+}
+.wiki-panel-tag-chip.active {
+  background: color-mix(in srgb, var(--accent) 20%, var(--card)) !important;
+  border-color: var(--accent) !important;
+}
+
 .wiki-editor {
   display: flex;
   flex-direction: column;
@@ -6550,6 +6601,13 @@ a.wiki-ql-label:hover .wiki-ql-text {
   flex-wrap: wrap;
 }
 .tags-type-btn.active { outline: 2px solid rgba(255,255,255,0.6); }
+/* État "exclu" sur les chips de filtre */
+.tags-type-excluded {
+  opacity: 0.5;
+  text-decoration: line-through;
+  outline: 2px solid rgba(220,60,60,0.7) !important;
+}
+.tag-chip.tags-type-excluded { opacity: 0.55; text-decoration: line-through; }
 .tags-admin-feedback {
   font-size: 0.8rem;
 }

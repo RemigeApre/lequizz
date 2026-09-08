@@ -76,10 +76,13 @@ function unlinkFiles(paths) {
 // Une page wiki avec plusieurs photos ne fait plus qu'une seule entrée
 // (album) dans la galerie, au lieu d'une carte par image.
 function buildItems(galleryImages, wikiPages) {
+  // Pages déjà couvertes par un enregistrement gallery lié → pas de doublon
+  const linkedPageIds = new Set(galleryImages.filter((g) => g.wikiPageId).map((g) => g.wikiPageId));
+
   const wikiItems = [];
   wikiPages.forEach((page) => {
-    // Images principales de la page
-    if (page.imagePaths && page.imagePaths.length) {
+    // Images principales : ignorées si un enregistrement gallery est déjà lié
+    if (page.imagePaths && page.imagePaths.length && !linkedPageIds.has(page.id)) {
       wikiItems.push({
         type: "wiki",
         id: null,

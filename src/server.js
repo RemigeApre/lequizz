@@ -224,7 +224,7 @@ function parseTags(raw) {
 
 // Détermine le type d'un tag : priorité au tag_meta, puis détection automatique
 // par le nom ("ultra" et "irréaliste" sont des types spéciaux).
-var AUTO_TYPES = { ultra: "ultra", "irréaliste": "irrealiste", fantaisie: "fantaisie" };
+var AUTO_TYPES = { ultra: "ultra", "irréaliste": "irrealiste", fantaisie: "irrealiste" };
 function resolveTagType(tagName, metaMap) {
   if (metaMap && metaMap[tagName]) return metaMap[tagName];
   return AUTO_TYPES[tagName] || "normal";

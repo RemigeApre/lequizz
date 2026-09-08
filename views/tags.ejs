@@ -25,11 +25,10 @@
         <div class="wiki-filter-section">
           <span class="wiki-filter-label">Type</span>
           <div class="links-filter" id="tags-type-filter">
-            <button type="button" class="tag-chip active" data-type-filter="">Tous</button>
-            <button type="button" class="tag-chip" data-type-filter="normal">Normal</button>
-            <button type="button" class="tag-chip tags-type-ultra" data-type-filter="ultra">Ultra</button>
-            <button type="button" class="tag-chip tags-type-irrealiste" data-type-filter="irrealiste">Irr&eacute;aliste</button>
-            <button type="button" class="tag-chip tags-type-fantaisie" data-type-filter="fantaisie">Fantaisie</button>
+            <button type="button" class="tag-chip active" data-type-filter="" data-state="0">Tous</button>
+            <button type="button" class="tag-chip" data-type-filter="normal" data-state="0">Normal</button>
+            <button type="button" class="tag-chip tags-type-ultra" data-type-filter="ultra" data-state="0">Ultra</button>
+            <button type="button" class="tag-chip tags-type-irrealiste" data-type-filter="irrealiste" data-state="0">Irr&eacute;aliste</button>
           </div>
         </div>
 
@@ -44,7 +43,6 @@
               <option value="normal">Normal</option>
               <option value="ultra">Ultra</option>
               <option value="irrealiste">Irr&eacute;aliste</option>
-              <option value="fantaisie">Fantaisie</option>
             </select>
             <button type="submit" class="tags-create-btn">+ Cr&eacute;er</button>
           </form>
@@ -95,7 +93,6 @@
                 <button type="button" class="tag-chip tags-type-btn" data-type-val="normal">Normal</button>
                 <button type="button" class="tag-chip tags-type-ultra tags-type-btn" data-type-val="ultra">Ultra</button>
                 <button type="button" class="tag-chip tags-type-irrealiste tags-type-btn" data-type-val="irrealiste">Irr&eacute;aliste</button>
-                <button type="button" class="tag-chip tags-type-fantaisie tags-type-btn" data-type-val="fantaisie">Fantaisie</button>
               </div>
             </div>
             <p class="tags-admin-feedback" id="tags-admin-feedback" hidden></p>
@@ -129,33 +126,69 @@
   var grid          = document.getElementById("tags-grid");
   var emptyMsg      = document.getElementById("tags-empty");
   var countDisplay  = document.getElementById("tags-count-display");
-  var activeTypeFilter = "";
+  // Filtres type : map type → état (0=neutre, 1=inclus, 2=exclu)
+  var typeStates = {};
 
   function applyFilters() {
     if (!grid) return;
     var q = searchInput ? searchInput.value.trim().toLowerCase() : "";
+    var includedTypes = [], excludedTypes = [];
+    Object.keys(typeStates).forEach(function (t) {
+      if (typeStates[t] === 1) includedTypes.push(t);
+      else if (typeStates[t] === 2) excludedTypes.push(t);
+    });
     var visible = 0;
     grid.querySelectorAll(".tags-item").forEach(function (item) {
       var matchQ    = !q || item.dataset.tag.toLowerCase().indexOf(q) !== -1;
-      var matchType = !activeTypeFilter || item.dataset.type === activeTypeFilter;
+      var t = item.dataset.type || "normal";
+      var matchType = (includedTypes.length === 0 || includedTypes.indexOf(t) !== -1)
+                    && excludedTypes.indexOf(t) === -1;
       var show = matchQ && matchType;
       item.hidden = !show;
       if (show) visible++;
     });
-    if (emptyMsg) emptyMsg.hidden = visible > 0 || (!q && !activeTypeFilter);
+    var hasFilter = q || includedTypes.length > 0 || excludedTypes.length > 0;
+    if (emptyMsg) emptyMsg.hidden = visible > 0 || !hasFilter;
     if (countDisplay) countDisplay.textContent = visible;
   }
 
   if (searchInput) searchInput.addEventListener("input", applyFilters);
 
-  /* ── Filtre par type ── */
+  /* ── Filtre par type : 3 états (neutre → inclus → exclu) ── */
   var typeFilter = document.getElementById("tags-type-filter");
   if (typeFilter) {
+    var STATE_CLASSES = ["", "active", "tags-type-excluded"];
+    function resetTypeChips() {
+      typeStates = {};
+      typeFilter.querySelectorAll(".tag-chip[data-type-filter]").forEach(function (b) {
+        b.dataset.state = "0";
+        STATE_CLASSES.forEach(function (c) { if (c) b.classList.remove(c); });
+      });
+      // Tous chip back to active
+      var allChip = typeFilter.querySelector('[data-type-filter=""]');
+      if (allChip) allChip.classList.add("active");
+    }
     typeFilter.querySelectorAll(".tag-chip[data-type-filter]").forEach(function (btn) {
+      var typeVal = btn.dataset.typeFilter;
+      if (!typeVal) {
+        // "Tous" chip : reset
+        btn.addEventListener("click", function () {
+          resetTypeChips();
+          applyFilters();
+        });
+        return;
+      }
       btn.addEventListener("click", function () {
-        typeFilter.querySelectorAll(".tag-chip").forEach(function (b) { b.classList.remove("active"); });
-        btn.classList.add("active");
-        activeTypeFilter = btn.dataset.typeFilter || "";
+        var s = Number(btn.dataset.state || 0);
+        s = (s + 1) % 3;
+        btn.dataset.state = String(s);
+        STATE_CLASSES.forEach(function (c) { if (c) btn.classList.remove(c); });
+        if (s > 0) btn.classList.add(STATE_CLASSES[s]);
+        typeStates[typeVal] = s;
+        // Tous chip : ôter active si un type est sélectionné
+        var allChip = typeFilter.querySelector('[data-type-filter=""]');
+        var anyActive = Object.values(typeStates).some(function (v) { return v > 0; });
+        if (allChip) allChip.classList.toggle("active", !anyActive);
         applyFilters();
       });
     });

@@ -27,24 +27,46 @@
       <span>On poss&egrave;de</span>
     </label>
 
-    <%# ─ Éditeur ─ %>
-    <div class="wiki-editor">
-      <div class="md-toolbar">
-        <button type="button" class="md-btn" data-md="bold" title="Gras (Ctrl+B)"><strong>B</strong></button>
-        <button type="button" class="md-btn md-btn-italic" data-md="italic" title="Italique (Ctrl+I)"><em>I</em></button>
-        <span class="md-sep"></span>
-        <button type="button" class="md-btn" data-md="h2">H2</button>
-        <button type="button" class="md-btn" data-md="h3">H3</button>
-        <span class="md-sep"></span>
-        <button type="button" class="md-btn" data-md="list">&#8226;&nbsp;Liste</button>
-        <button type="button" class="md-btn" data-md="hr">&mdash;</button>
-        <span class="md-sep"></span>
-        <button type="button" class="md-btn" data-md="link" title="Lien vers une autre page du wiki">&#128279;</button>
-        <div class="md-toolbar-spacer"></div>
-        <button type="button" class="md-btn md-preview-btn">Aper&ccedil;u</button>
+    <%# ─ Éditeur + panneau tags latéral ─ %>
+    <div class="wiki-editor-row">
+      <div class="wiki-editor">
+        <div class="md-toolbar">
+          <button type="button" class="md-btn" data-md="bold" title="Gras (Ctrl+B)"><strong>B</strong></button>
+          <button type="button" class="md-btn md-btn-italic" data-md="italic" title="Italique (Ctrl+I)"><em>I</em></button>
+          <span class="md-sep"></span>
+          <button type="button" class="md-btn" data-md="h2">H2</button>
+          <button type="button" class="md-btn" data-md="h3">H3</button>
+          <span class="md-sep"></span>
+          <button type="button" class="md-btn" data-md="list">&#8226;&nbsp;Liste</button>
+          <button type="button" class="md-btn" data-md="hr">&mdash;</button>
+          <span class="md-sep"></span>
+          <button type="button" class="md-btn" data-md="link" title="Lien vers une autre page du wiki">&#128279;</button>
+          <div class="md-toolbar-spacer"></div>
+          <button type="button" class="md-btn md-preview-btn">Aper&ccedil;u</button>
+        </div>
+        <textarea name="content" class="wiki-textarea" rows="10" placeholder="Description, notes\u2026 (Markdown support\u00e9)"><%= page.content %></textarea>
+        <div class="wiki-md-preview wiki-md" hidden></div>
       </div>
-      <textarea name="content" class="wiki-textarea" rows="10" placeholder="Description, notes\u2026 (Markdown support\u00e9)"><%= page.content %></textarea>
-      <div class="wiki-md-preview wiki-md" hidden></div>
+
+      <% if (allTags.length) { %>
+        <aside class="wiki-form-tag-panel" aria-label="Suggestions de tags">
+          <p class="wiki-form-tag-panel-label">Tags disponibles</p>
+          <input type="search" class="wiki-form-tag-panel-search" placeholder="Filtrer&hellip;" autocomplete="off" />
+          <div class="wiki-form-tag-panel-chips">
+            <%
+              var SPECIAL_TAG_KEYS2 = ["ultra", "irréaliste"];
+              var panelNormal  = allTags.filter(function(t){ return SPECIAL_TAG_KEYS2.indexOf(t) === -1; });
+              var panelSpecial = allTags.filter(function(t){ return SPECIAL_TAG_KEYS2.indexOf(t) !== -1; });
+            %>
+            <% panelNormal.forEach(function(t) { %>
+              <button type="button" class="wiki-tag-suggest-chip wiki-panel-tag-chip" data-tag="<%= t %>"><%= t %></button>
+            <% }) %>
+            <% panelSpecial.forEach(function(t) { %>
+              <button type="button" class="wiki-tag-suggest-chip wiki-tag-suggest-chip--special wiki-panel-tag-chip" data-tag="<%= t %>"><%= t %></button>
+            <% }) %>
+          </div>
+        </aside>
+      <% } %>
     </div>
 
     <%
