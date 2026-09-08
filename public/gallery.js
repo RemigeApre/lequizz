@@ -312,21 +312,23 @@
 
   function applyGalleryTagOverflow() {
     if (!tagFilter) return;
-    var chips = tagFilter.querySelectorAll(".wiki-tag-chip[data-tag]");
-    var shown = 0;
-    chips.forEach(function(chip) {
-      if (chip.hidden) { chip.classList.remove("wiki-tag-overflow-hidden"); return; }
-      if (shown < gTagExpandedCount) {
+    var allChips = Array.from(tagFilter.querySelectorAll(".wiki-tag-chip[data-tag]"));
+    // Les chips actives (include/exclude) restent toujours visibles
+    var neutralIdx = 0;
+    allChips.forEach(function(chip) {
+      var isActive = (tagStates[(chip.dataset.tag || "").toLowerCase()] || 0) !== 0;
+      if (isActive) {
         chip.classList.remove("wiki-tag-overflow-hidden");
-        shown++;
       } else {
-        chip.classList.add("wiki-tag-overflow-hidden");
+        chip.classList.toggle("wiki-tag-overflow-hidden", neutralIdx >= gTagExpandedCount);
+        neutralIdx++;
       }
     });
     if (gTagExpandBtn) {
-      var overflow = shown >= gTagExpandedCount && chips.length > gTagExpandedCount;
-      var canExpand = gTagExpandedCount < GTAG_MAX;
-      gTagExpandBtn.hidden = !(overflow && canExpand);
+      var neutralTotal = allChips.filter(function(c) {
+        return (tagStates[(c.dataset.tag || "").toLowerCase()] || 0) === 0;
+      }).length;
+      gTagExpandBtn.hidden = !(neutralTotal > gTagExpandedCount && gTagExpandedCount < GTAG_MAX);
     }
   }
 

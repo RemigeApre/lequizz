@@ -48,9 +48,23 @@
       <% } %>
       <div class="pc-nav-actions">
         <button type="button" class="pc-icon-btn" id="pc-search-btn" aria-label="Rechercher sur tout le site">&#128269;</button>
-        <a href="<%= currentUser ? (currentUser.isAdmin ? '/admin' : '/favoris') : '/admin/login?next=' + encodeURIComponent(locals.currentPath || '/') %>"
-           class="pc-icon-btn"
-           title="<%= currentUser ? currentUser.displayName : 'Connexion' %>">&#128273;</a>
+        <% if (currentUser) { %>
+          <div class="pc-nav-item pc-has-drop">
+            <button type="button" class="pc-icon-btn" title="<%= currentUser.displayName %>">&#128273;</button>
+            <div class="pc-drop pc-drop-right">
+              <a href="/favoris" class="pc-drop-link">Profil</a>
+              <% if (currentUser.isAdmin) { %>
+                <a href="/admin" class="pc-drop-link">Admin</a>
+              <% } %>
+              <form method="POST" action="/admin/logout" style="margin:0">
+                <button type="submit" class="pc-drop-link pc-drop-link-btn">D&eacute;connexion</button>
+              </form>
+            </div>
+          </div>
+        <% } else { %>
+          <a href="/admin/login?next=<%= encodeURIComponent(locals.currentPath || '/') %>"
+             class="pc-icon-btn" title="Connexion">&#128273;</a>
+        <% } %>
       </div>
     </div>
 
@@ -100,8 +114,17 @@
   </nav>
 
   <div class="nav-drawer-footer">
-    <a href="<%= currentUser ? (currentUser.isAdmin ? '/admin' : '/favoris') : '/admin/login?next=' + encodeURIComponent(locals.currentPath || '/') %>"
-       class="nav-drawer-admin"
-       title="<%= currentUser ? currentUser.displayName : 'Connexion' %>">&#128273;</a>
+    <% if (currentUser) { %>
+      <a href="/favoris" class="nav-drawer-link">Profil</a>
+      <% if (currentUser.isAdmin) { %>
+        <a href="/admin" class="nav-drawer-link">Admin</a>
+      <% } %>
+      <form method="POST" action="/admin/logout" style="margin:0">
+        <button type="submit" class="nav-drawer-link nav-drawer-link-btn">D&eacute;connexion</button>
+      </form>
+    <% } else { %>
+      <a href="/admin/login?next=<%= encodeURIComponent(locals.currentPath || '/') %>"
+         class="nav-drawer-admin" title="Connexion">&#128273;</a>
+    <% } %>
   </div>
 </aside>

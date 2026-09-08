@@ -89,6 +89,7 @@ try { db.exec("ALTER TABLE gallery_images ADD COLUMN author TEXT NOT NULL DEFAUL
 try { db.exec("ALTER TABLE gallery_images ADD COLUMN parody TEXT NOT NULL DEFAULT ''"); } catch (_) {}
 try { db.exec("ALTER TABLE gallery_images ADD COLUMN content_type TEXT NOT NULL DEFAULT 'image'"); } catch(_) {}
 try { db.exec("ALTER TABLE gallery_images ADD COLUMN processed INTEGER NOT NULL DEFAULT 0"); } catch(_) {}
+try { db.exec("ALTER TABLE gallery_images ADD COLUMN featured INTEGER NOT NULL DEFAULT 0"); } catch(_) {}
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS bd_books (
@@ -149,6 +150,16 @@ db.exec(`
     item_id INTEGER NOT NULL,
     created_at TEXT NOT NULL,
     UNIQUE(user_id, item_type, item_id)
+  )
+`);
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS connection_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    ip TEXT NOT NULL DEFAULT '',
+    user_agent TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL
   )
 `);
 
@@ -621,6 +632,7 @@ function rowToGalleryImage(row) {
     wikiPageId: row.wiki_page_id || null,
     contentType: row.content_type || "image",
     processed: !!row.processed,
+    featured: !!row.featured,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -712,6 +724,49 @@ function createStandaloneTag(tag) {
   if (!t) return false;
   db.prepare("INSERT OR IGNORE INTO tag_meta (tag, type) VALUES (?, 'normal')").run(t);
   return true;
+}
+
+function deleteUser(id) {
+  db.prepare("DELETE FROM favorites WHERE user_id = ?").run(id);
+  db.prepare("DELETE FROM wiki_page_user_notes WHERE user_id = ?").run(id);
+  db.prepare("UPDATE submissions SET user_id = NULL WHERE user_id = ?").run(id);
+  db.prepare("DELETE FROM attempts WHERE token = ?").run("user:" + id);
+  db.prepare("DELETE FROM users WHERE id = ?").run(id);
+}
+
+function getUserFavoritesWithDetails(userId) {
+  return db.prepare(
+    `SELECT f.item_type, f.item_id, f.created_at,
+       COALESCE(wp.title, gi.title, '') AS title
+     FROM favorites f
+     LEFT JOIN wiki_pages wp ON f.item_type = 'wiki' AND f.item_id = wp.id
+     LEFT JOIN gallery_images gi ON f.item_type = 'gallery' AND f.item_id = gi.id
+     WHERE f.user_id = ?
+     ORDER BY f.id DESC`
+  ).all(userId).map(function(r) {
+    return { itemType: r.item_type, itemId: r.item_id, createdAt: r.created_at, title: r.title || "" };
+  });
+}
+
+function logConnection(userId, ip, userAgent) {
+  db.prepare(
+    "INSERT INTO connection_logs (user_id, ip, user_agent, created_at) VALUES (?, ?, ?, ?)"
+  ).run(userId || null, ip || "", userAgent || "", new Date().toISOString());
+}
+
+function listConnectionLogs(limit) {
+  return db.prepare(
+    `SELECT cl.id, cl.user_id, cl.ip, cl.user_agent, cl.created_at, u.display_name
+     FROM connection_logs cl
+     LEFT JOIN users u ON u.id = cl.user_id
+     ORDER BY cl.id DESC LIMIT ?`
+  ).all(limit || 200).map(function(r) {
+    return { id: r.id, userId: r.user_id, ip: r.ip, userAgent: r.user_agent, createdAt: r.created_at, userDisplayName: r.display_name || null };
+  });
+}
+
+function setGalleryImageFeatured(id, featured) {
+  db.prepare("UPDATE gallery_images SET featured = ? WHERE id = ?").run(featured ? 1 : 0, id);
 }
 
 function renameTagEverywhere(oldTag, newTag) {
@@ -811,4 +866,9 @@ module.exports = {
   setTagType,
   createStandaloneTag,
   renameTagEverywhere,
+  deleteUser,
+  getUserFavoritesWithDetails,
+  logConnection,
+  listConnectionLogs,
+  setGalleryImageFeatured,
 };
