@@ -86,7 +86,7 @@
 
   <% if (page.imagePaths && page.imagePaths.length && currentUser) { %>
     <%# ── Carte AVEC image ───────────────────────────────────────────── %>
-    <div class="wiki-card-image">
+    <div class="wiki-card-image" data-images="<%= page.imagePaths.join('|') %>">
       <img src="<%= page.imagePaths[0] %>" alt="" class="wiki-card-img" />
       <div class="wiki-card-overlay">
         <% if (wcShowBadge) { %><span class="wiki-category-badge" style="background: hsl(<%= cat ? cat.hue : 220 %>, 55%, 45%)"><%= cat ? cat.label : page.category %></span><% } %>

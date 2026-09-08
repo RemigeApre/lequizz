@@ -542,6 +542,10 @@
   var advInterested   = document.getElementById("adv-interested");
   var advNotRated     = document.getElementById("adv-not-rated");
   var tagSearchInput  = document.getElementById("wiki-tag-search");
+  var colsSelector    = document.getElementById("wiki-cols-selector");
+  var paginationEl    = document.getElementById("wiki-pagination");
+  var specialFilter   = document.getElementById("wiki-special-filter");
+  var extraCatFilter  = document.getElementById("wiki-extra-cat-filter");
 
   var activeCategory  = localStorage.getItem("wiki-filter-cat") || "";
   var activeTag       = localStorage.getItem("wiki-filter-tag") || "";
@@ -551,6 +555,12 @@
   var hideIrrealiste  = localStorage.getItem("wiki-hide-irrealiste") !== "0";
   var searchQuery     = localStorage.getItem("wiki-filter-search") || "";
   var advMinRating    = Number(localStorage.getItem("wiki-filter-rating")) || 0;
+  var activeCols      = Number(localStorage.getItem("wiki-cols")) || 3;
+  var activeSpecialFilter = localStorage.getItem("wiki-filter-special") || "";
+  var includedExtraCats = new Set();
+  var excludedExtraCats = new Set();
+  var currentPage     = 1;
+  var _paginationNavigation = false;
 
   // La recherche du sommaire (page d'accueil) arrive ici en ?q=... : elle
   // prend le pas sur la recherche mémorisée et devient la nouvelle valeur.
@@ -655,6 +665,7 @@
 
   function applyFilters() {
     if (!wikiList) return;
+    if (!_paginationNavigation) currentPage = 1;
     var cards   = Array.from(wikiList.querySelectorAll(".wiki-card"));
     var q       = norm(searchQuery);
     var hasAdv  = advMinRating > 0 ||
@@ -673,8 +684,31 @@
           : card.dataset.category === activeCategory || extraCats.indexOf(activeCategory) !== -1);
       var cardTags  = (card.dataset.tags || "").split("|");
       var okTag     = !activeTag || cardTags.indexOf(activeTag) !== -1;
-      var okUltra      = !hideUltra    || card.dataset.ultra     !== "1";
+      // Ultra toggle only applies to cards that are ultra but NOT irréaliste
+      var okUltra = !hideUltra || card.dataset.ultra !== "1" || card.dataset.irrealiste === "1";
+      // Irréaliste toggle controls all irréaliste cards
       var okIrrealiste = !hideIrrealiste || card.dataset.irrealiste !== "1";
+
+      // Filtre spécial (ultra/irréaliste inclusif)
+      var okSpecial = true;
+      if (activeSpecialFilter === "ultra") {
+        okSpecial = card.dataset.ultra === "1" && card.dataset.irrealiste !== "1";
+      } else if (activeSpecialFilter === "irrealiste") {
+        okSpecial = card.dataset.irrealiste === "1";
+      } else if (activeSpecialFilter === "both") {
+        okSpecial = card.dataset.ultra === "1" || card.dataset.irrealiste === "1";
+      }
+
+      // Filtre catégories liées (3 états : inclure / exclure / neutre)
+      var okExtraCat = true;
+      if (includedExtraCats.size > 0) {
+        var ecList = (card.dataset.extraCats || "").split("|").filter(Boolean);
+        okExtraCat = Array.from(includedExtraCats).some(function(ec) { return ecList.indexOf(ec) !== -1; });
+      }
+      if (okExtraCat && excludedExtraCats.size > 0) {
+        var ecList2 = (card.dataset.extraCats || "").split("|").filter(Boolean);
+        okExtraCat = !Array.from(excludedExtraCats).some(function(ec) { return ecList2.indexOf(ec) !== -1; });
+      }
 
       // Recherche textuelle
       var sc = scoreCard(card, q);
@@ -693,7 +727,7 @@
       var okFlame      = !(advFlame && advFlame.checked) || card.dataset.flame === "1";
       var okInterested = !(advInterested && advInterested.checked) || card.dataset.interested === "1";
 
-      card.hidden = !(okCat && okTag && okUltra && okIrrealiste && okSearch && okRating && okOwned && okFlame && okInterested);
+      card.hidden = !(okCat && okTag && okUltra && okIrrealiste && okSpecial && okExtraCat && okSearch && okRating && okOwned && okFlame && okInterested);
     });
 
     // Tri
@@ -716,6 +750,9 @@
     });
     visible.forEach(function (card) { wikiList.appendChild(card); });
 
+    // Pagination
+    applyPagination(visible);
+
     // Compteur
     if (resultCount) {
       var showCount = q || hasAdv;
@@ -725,6 +762,143 @@
         resultCount.textContent = n + "\u00a0r\u00e9sultat" + (n > 1 ? "s" : "");
       }
     }
+  }
+
+  // ── Pagination ─────────────────────────────────────────────────────────────
+  function applyPagination(visibleCards) {
+    var pageSize = Math.ceil(25 / activeCols) * activeCols;
+    var totalPages = Math.ceil(visibleCards.length / pageSize);
+    if (totalPages <= 1) {
+      visibleCards.forEach(function (c) { c.classList.remove("wiki-page-hidden"); });
+      if (paginationEl) paginationEl.hidden = true;
+      return;
+    }
+    if (currentPage > totalPages) currentPage = totalPages;
+    var start = (currentPage - 1) * pageSize;
+    var end = start + pageSize;
+    visibleCards.forEach(function (c, i) {
+      c.classList.toggle("wiki-page-hidden", i < start || i >= end);
+    });
+    if (paginationEl) {
+      paginationEl.hidden = false;
+      renderPagination(totalPages);
+    }
+  }
+
+  function renderPagination(totalPages) {
+    while (paginationEl.firstChild) paginationEl.removeChild(paginationEl.firstChild);
+    function makePage(label, page, disabled) {
+      var btn = document.createElement("button");
+      btn.type = "button"; btn.textContent = label;
+      btn.className = "wiki-page-btn" + (page === currentPage ? " active" : "") + (disabled ? " disabled" : "");
+      if (!disabled) {
+        btn.addEventListener("click", function () {
+          _paginationNavigation = true;
+          currentPage = page;
+          applyFilters();
+          _paginationNavigation = false;
+          wikiList.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      }
+      return btn;
+    }
+    paginationEl.appendChild(makePage("\u2190", currentPage - 1, currentPage <= 1));
+    for (var p = 1; p <= totalPages; p++) {
+      if (p === 1 || p === totalPages || (p >= currentPage - 1 && p <= currentPage + 1)) {
+        paginationEl.appendChild(makePage(String(p), p, false));
+      } else if (p === currentPage - 2 || p === currentPage + 2) {
+        var ellipsis = document.createElement("span");
+        ellipsis.className = "wiki-page-ellipsis"; ellipsis.textContent = "\u2026";
+        paginationEl.appendChild(ellipsis);
+      }
+    }
+    paginationEl.appendChild(makePage("\u2192", currentPage + 1, currentPage >= totalPages));
+  }
+
+  // ── Cols selector ───────────────────────────────────────────────────────────
+  function applyCols() {
+    if (!wikiList) return;
+    wikiList.className = wikiList.className.replace(/\bwiki-grid--cols-\d\b/g, "");
+    wikiList.classList.add("wiki-grid--cols-" + activeCols);
+    // Carousel: only in 1-2 cols mode
+    var doCarousel = activeCols <= 2;
+    wikiList.querySelectorAll(".wiki-card-image[data-images]").forEach(function (imgDiv) {
+      var paths = imgDiv.dataset.images.split("|").filter(Boolean);
+      if (paths.length <= 1) return;
+      if (doCarousel) {
+        enableCarousel(imgDiv, paths);
+      } else {
+        disableCarousel(imgDiv, paths[0]);
+      }
+    });
+    // Update col buttons
+    if (colsSelector) {
+      colsSelector.querySelectorAll(".wiki-cols-btn").forEach(function (btn) {
+        btn.classList.toggle("active", Number(btn.dataset.cols) === activeCols);
+      });
+    }
+  }
+
+  function enableCarousel(imgDiv, paths) {
+    if (imgDiv.dataset.carouselActive === "1") return;
+    imgDiv.dataset.carouselActive = "1";
+    var idx = Number(imgDiv.dataset.imgIdx || 0);
+    var img = imgDiv.querySelector(".wiki-card-img");
+    if (!img) return;
+
+    var prevBtn = document.createElement("button");
+    prevBtn.type = "button"; prevBtn.className = "wiki-card-carousel-btn wiki-card-carousel-btn--prev";
+    prevBtn.setAttribute("aria-label", "Image pr\u00e9c\u00e9dente"); prevBtn.textContent = "\u2039";
+    var nextBtn = document.createElement("button");
+    nextBtn.type = "button"; nextBtn.className = "wiki-card-carousel-btn wiki-card-carousel-btn--next";
+    nextBtn.setAttribute("aria-label", "Image suivante"); nextBtn.textContent = "\u203a";
+
+    var dots = document.createElement("div");
+    dots.className = "wiki-card-carousel-dots";
+    paths.forEach(function (_, i) {
+      var dot = document.createElement("span");
+      dot.className = "wiki-card-carousel-dot" + (i === idx ? " active" : "");
+      dot.addEventListener("click", function (e) { e.preventDefault(); goTo(i); });
+      dots.appendChild(dot);
+    });
+
+    function goTo(newIdx) {
+      idx = ((newIdx % paths.length) + paths.length) % paths.length;
+      img.src = paths[idx];
+      imgDiv.dataset.imgIdx = idx;
+      dots.querySelectorAll(".wiki-card-carousel-dot").forEach(function (d, i) {
+        d.classList.toggle("active", i === idx);
+      });
+    }
+
+    prevBtn.addEventListener("click", function (e) { e.preventDefault(); goTo(idx - 1); });
+    nextBtn.addEventListener("click", function (e) { e.preventDefault(); goTo(idx + 1); });
+
+    imgDiv.appendChild(prevBtn);
+    imgDiv.appendChild(nextBtn);
+    imgDiv.appendChild(dots);
+  }
+
+  function disableCarousel(imgDiv, firstPath) {
+    if (imgDiv.dataset.carouselActive !== "1") return;
+    imgDiv.dataset.carouselActive = "0";
+    imgDiv.dataset.imgIdx = "0";
+    var img = imgDiv.querySelector(".wiki-card-img");
+    if (img) img.src = firstPath;
+    imgDiv.querySelectorAll(".wiki-card-carousel-btn, .wiki-card-carousel-dots").forEach(function (el) {
+      el.remove();
+    });
+  }
+
+  if (colsSelector) {
+    colsSelector.querySelectorAll(".wiki-cols-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        activeCols = Number(btn.dataset.cols);
+        localStorage.setItem("wiki-cols", activeCols);
+        applyCols();
+        applyFilters();
+      });
+    });
   }
 
   // Barre de recherche
@@ -885,7 +1059,7 @@
   function applyChapterStripFilters() {
     document.querySelectorAll(".wiki-chapter-strip .wiki-card").forEach(function (card) {
       var isI = card.dataset.irrealiste === "1";
-      var isU = card.dataset.ultra === "1";
+      var isU = card.dataset.ultra === "1" && !isI; // pure ultra only (not irréaliste)
       card.hidden = (hideIrrealiste && isI) || (hideUltra && isU);
     });
   }
@@ -928,6 +1102,55 @@
     filtersPanel.open = true;
   }
 
+  // Filtre spécial (ultra/irréaliste inclusif)
+  if (specialFilter) {
+    // Restaure l'état actif
+    if (activeSpecialFilter) {
+      specialFilter.querySelectorAll(".tag-chip").forEach(function (chip) {
+        chip.classList.toggle("active", (chip.dataset.special || "") === activeSpecialFilter);
+      });
+    }
+    specialFilter.querySelectorAll(".tag-chip").forEach(function (chip) {
+      chip.addEventListener("click", function () {
+        activeSpecialFilter = chip.dataset.special || "";
+        localStorage.setItem("wiki-filter-special", activeSpecialFilter);
+        specialFilter.querySelectorAll(".tag-chip").forEach(function (c) { c.classList.remove("active"); });
+        chip.classList.add("active");
+        applyFilters();
+      });
+    });
+  }
+
+  // Filtre catégories liées (3 états)
+  if (extraCatFilter) {
+    extraCatFilter.querySelectorAll(".wiki-extra-cat-chip").forEach(function (chip) {
+      chip.addEventListener("click", function () {
+        var cat = chip.dataset.cat;
+        var state = chip.dataset.state || "0";
+        if (state === "0") {
+          chip.dataset.state = "1";
+          includedExtraCats.add(cat);
+          excludedExtraCats.delete(cat);
+          chip.classList.add("wiki-extra-cat-include");
+          chip.classList.remove("wiki-extra-cat-exclude");
+        } else if (state === "1") {
+          chip.dataset.state = "2";
+          includedExtraCats.delete(cat);
+          excludedExtraCats.add(cat);
+          chip.classList.remove("wiki-extra-cat-include");
+          chip.classList.add("wiki-extra-cat-exclude");
+        } else {
+          chip.dataset.state = "0";
+          includedExtraCats.delete(cat);
+          excludedExtraCats.delete(cat);
+          chip.classList.remove("wiki-extra-cat-include", "wiki-extra-cat-exclude");
+        }
+        applyFilters();
+      });
+    });
+  }
+
+  applyCols(); // applique le nombre de colonnes et les carousels
   applyFilters(); // toujours appelé au chargement
 
   // ══════════════════════════════════════════════════

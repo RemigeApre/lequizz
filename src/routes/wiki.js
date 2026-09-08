@@ -404,6 +404,18 @@ function buildWikiRouter(config) {
     res.render("wiki-detail", { config, page, pages: allPages, suggestions, prevPage, nextPage, backHref: back.href, backLabel: back.label, isFavorite: pageIsFavorite, userNote, ...CTX });
   });
 
+  router.get("/ajouter", requireUser, (req, res) => {
+    const preCategory = String(req.query.category || "");
+    const pages = sortedPages();
+    const blankPage = {
+      id: null, title: "", category: preCategory || (CATEGORIES[0] && CATEGORIES[0].key) || "",
+      content: "", tags: [], imagePaths: [], owned: false, meta: {},
+      extraCategories: [], rating: 0, flame: false, interested: false,
+      updatedAt: new Date().toISOString()
+    };
+    res.render("wiki-form", { config, page: blankPage, pages, allTags: getAllTags(pages), ...CTX });
+  });
+
   router.get("/:id/edit", requireUser, (req, res) => {
     const id = Number(req.params.id);
     const page = Number.isInteger(id) ? getWikiPage(id) : null;

@@ -17,6 +17,9 @@
           <span class="wiki-chapter-hero-count"><%= pages.length %></span>
         </div>
         <% if (lockedCategory.desc) { %><p class="wiki-chapter-hero-desc"><%= lockedCategory.desc %></p><% } %>
+        <% if (currentUser) { %>
+          <a href="/wiki/ajouter?category=<%= lockedCategory.key %>" class="wiki-add-page-btn">+ Ajouter</a>
+        <% } %>
       </div>
 
       <%# ─ Corps scrollable : recherche + filtres ─ %>
@@ -36,6 +39,17 @@
         <div class="wiki-sidebar-filters">
 
           <div class="wiki-filter-section">
+            <span class="wiki-filter-label">Cartes par ligne</span>
+            <div class="wiki-cols-selector" id="wiki-cols-selector">
+              <button type="button" class="wiki-cols-btn" data-cols="1">1</button>
+              <button type="button" class="wiki-cols-btn" data-cols="2">2</button>
+              <button type="button" class="wiki-cols-btn wiki-cols-btn--active" data-cols="3">3</button>
+              <button type="button" class="wiki-cols-btn" data-cols="4">4</button>
+              <button type="button" class="wiki-cols-btn" data-cols="5">5</button>
+            </div>
+          </div>
+
+          <div class="wiki-filter-section">
             <span class="wiki-filter-label">Trier</span>
             <select id="wiki-sort-select" class="wiki-sort-select">
               <option value="alpha-asc">A &rarr; Z</option>
@@ -50,6 +64,41 @@
             <button type="button" id="wiki-ultra-toggle" class="wiki-ultra-btn">Ultra</button>
             <button type="button" id="wiki-irrealiste-toggle" class="wiki-ultra-btn">Irr&eacute;aliste</button>
           </div>
+
+          <div class="wiki-filter-section">
+            <span class="wiki-filter-label">Afficher seulement</span>
+            <div class="wiki-special-filter" id="wiki-special-filter">
+              <button type="button" class="tag-chip active" data-special="">Tous</button>
+              <button type="button" class="tag-chip" data-special="ultra">Ultra</button>
+              <button type="button" class="tag-chip" data-special="irrealiste">Irr&eacute;aliste</button>
+              <button type="button" class="tag-chip" data-special="both">Les deux</button>
+            </div>
+          </div>
+
+          <%
+            var availExtraCats = [];
+            pages.forEach(function(p) {
+              (p.extraCategories || []).forEach(function(ec) {
+                if (ec !== lockedCategory.key && availExtraCats.indexOf(ec) === -1) {
+                  availExtraCats.push(ec);
+                }
+              });
+            });
+            var availExtraCatObjs = availExtraCats.map(function(ec) {
+              return categories.find(function(c) { return c.key === ec; });
+            }).filter(Boolean);
+          %>
+          <% if (availExtraCatObjs.length) { %>
+            <div class="wiki-filter-section">
+              <span class="wiki-filter-label">Cat&eacute;gories li&eacute;es</span>
+              <p class="wiki-extra-cat-hint">1 clic = inclure &bull; 2 clics = exclure &bull; 3 clics = neutre</p>
+              <div class="wiki-extra-cat-filter" id="wiki-extra-cat-filter">
+                <% availExtraCatObjs.forEach(function(ec) { %>
+                  <button type="button" class="tag-chip wiki-extra-cat-chip" data-cat="<%= ec.key %>" style="--ec-hue: <%= ec.hue %>"><%= ec.label %></button>
+                <% }); %>
+              </div>
+            </div>
+          <% } %>
 
           <div class="wiki-filter-section">
             <span class="wiki-filter-label">Note min.</span>
@@ -129,6 +178,21 @@
         </div>
 
         <div class="wiki-controls">
+          <div class="wiki-cols-selector" id="wiki-cols-selector">
+            <button type="button" class="wiki-cols-btn" data-cols="1">1</button>
+            <button type="button" class="wiki-cols-btn" data-cols="2">2</button>
+            <button type="button" class="wiki-cols-btn wiki-cols-btn--active" data-cols="3">3</button>
+            <button type="button" class="wiki-cols-btn" data-cols="4">4</button>
+            <button type="button" class="wiki-cols-btn" data-cols="5">5</button>
+          </div>
+
+          <div class="wiki-special-filter" id="wiki-special-filter">
+            <button type="button" class="tag-chip active" data-special="">Tous</button>
+            <button type="button" class="tag-chip" data-special="ultra">Ultra</button>
+            <button type="button" class="tag-chip" data-special="irrealiste">Irr&eacute;aliste</button>
+            <button type="button" class="tag-chip" data-special="both">Les deux</button>
+          </div>
+
           <div class="links-filter" id="wiki-category-filter">
             <button type="button" class="tag-chip active" data-category="">Tous</button>
             <% categories.forEach(function (c) { %>
@@ -175,6 +239,7 @@
       <%- include('partials/wiki-card', { page: page, categories: categories, showCategoryBadge: !lockedCategory }) %>
     <% }) %>
   </div>
+  <div class="wiki-pagination" id="wiki-pagination" hidden></div>
 </main>
 <script src="/wiki.js?v=<%= assetVersion %>"></script>
 <%- include('partials/foot') %>

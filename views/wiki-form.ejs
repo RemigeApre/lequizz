@@ -1,13 +1,13 @@
-<%- include('partials/head', { title: 'Modifier \u2014 ' + page.title }) %>
+<%- include('partials/head', { title: page.id ? 'Modifier \u2014 ' + page.title : 'Nouvelle page' }) %>
 <main class="container">
   <%- include('partials/top-nav', { config: config }) %>
-  <a href="/wiki/<%= page.id %>" class="link-button">&larr; Retour</a>
+  <a href="<%= page.id ? '/wiki/' + page.id : '/wiki' %>" class="link-button">&larr; Retour</a>
 
   <% var cat = categories.find(function(c) { return c.key === page.category; }); %>
 
   <script id="wiki-existing-pages" type="application/json"><%- JSON.stringify(pages.map(function(p){ return { id: p.id, title: p.title }; })) %></script>
 
-  <form method="POST" action="/wiki/<%= page.id %>" enctype="multipart/form-data" class="wiki-form" id="wiki-edit-form">
+  <form method="POST" action="<%= page.id ? '/wiki/' + page.id : '/wiki/' %>" enctype="multipart/form-data" class="wiki-form" id="wiki-edit-form">
 
     <%# ─ Catégorie : sélecteur discret ─ %>
     <div class="wiki-form-top-row">
@@ -323,10 +323,11 @@
 
     <div class="wiki-form-actions">
       <button type="submit">Enregistrer</button>
-      <a href="/wiki/<%= page.id %>" class="link-button">Annuler</a>
+      <a href="<%= page.id ? '/wiki/' + page.id : '/wiki' %>" class="link-button">Annuler</a>
     </div>
   </form>
 
+  <% if (page.id) { %>
   <%# ─ Pages liées : gérées ici, jamais affichées en lecture ─ %>
   <div class="wiki-page-links" data-page-id="<%= page.id %>">
     <h3 class="wiki-pl-heading">Pages li&eacute;es</h3>
@@ -358,6 +359,7 @@
   <form method="POST" action="/wiki/<%= page.id %>/delete" class="link-delete-form-inline">
     <button type="submit" class="link-delete-btn-text">Supprimer la page</button>
   </form>
+  <% } %>
 </main>
 <script src="/wiki.js?v=<%= assetVersion %>"></script>
 <%- include('partials/foot') %>

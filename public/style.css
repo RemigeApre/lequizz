@@ -6052,3 +6052,80 @@ a.wiki-ql-label:hover .wiki-ql-text {
   .wiki-cat-sidebar .wiki-adv-checks { gap: 0.3rem; }
 }
 
+/* ── Bouton Ajouter page (sidebar catégorie) ──────── */
+.wiki-add-page-btn {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  background: rgba(255,255,255,0.12); color: #fff;
+  border: 1px solid rgba(255,255,255,0.25); border-radius: 6px;
+  padding: 0.3rem 0.8rem; font-size: 0.8rem; font-weight: 600;
+  text-decoration: none; margin-top: 0.5rem; align-self: flex-start;
+}
+.wiki-add-page-btn:hover { background: rgba(255,255,255,0.22); }
+
+/* ── Grille : nombres de colonnes ─────────────────── */
+.wiki-grid--cols-1 { grid-template-columns: 1fr !important; }
+.wiki-grid--cols-2 { grid-template-columns: repeat(2, 1fr) !important; }
+.wiki-grid--cols-4 { grid-template-columns: repeat(4, 1fr) !important; }
+.wiki-grid--cols-5 { grid-template-columns: repeat(5, 1fr) !important; }
+
+.wiki-cols-selector { display: flex; gap: 0.3rem; }
+.wiki-cols-btn {
+  flex: 1; padding: 0.3rem; border-radius: 5px;
+  font-size: 0.82rem; font-weight: 700; cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--card); color: var(--fg);
+}
+.wiki-cols-btn--active, .wiki-cols-btn.active {
+  background: var(--accent); color: #fff; border-color: var(--accent);
+}
+
+/* ── Carousel (1-2 cols) ──────────────────────────── */
+.wiki-card-carousel-wrap { position: relative; height: 100%; }
+.wiki-card-carousel-btn {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: rgba(0,0,0,0.5); color: #fff; border: none;
+  width: 2rem; height: 2rem; border-radius: 50%; cursor: pointer;
+  z-index: 4; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.15s;
+}
+.wiki-card-image:hover .wiki-card-carousel-btn { opacity: 1; }
+.wiki-card-carousel-btn--prev { left: 0.4rem; }
+.wiki-card-carousel-btn--next { right: 0.4rem; }
+.wiki-card-carousel-dots {
+  position: absolute; bottom: 2.5rem; left: 0; right: 0;
+  display: flex; justify-content: center; gap: 0.3rem; z-index: 4;
+}
+.wiki-card-carousel-dot {
+  width: 0.4rem; height: 0.4rem; border-radius: 50%;
+  background: rgba(255,255,255,0.5); cursor: pointer;
+}
+.wiki-card-carousel-dot.active { background: #fff; }
+
+/* ── Pagination ───────────────────────────────────── */
+.wiki-page-hidden { display: none !important; }
+.wiki-pagination {
+  display: flex; align-items: center; justify-content: center;
+  flex-wrap: wrap; gap: 0.4rem; padding: 1rem 0;
+}
+.wiki-page-btn {
+  min-width: 2rem; padding: 0.3rem 0.6rem; border-radius: 5px;
+  border: 1px solid var(--border); background: var(--card); color: var(--fg);
+  cursor: pointer; font-size: 0.85rem;
+}
+.wiki-page-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.wiki-page-btn.disabled { opacity: 0.4; pointer-events: none; }
+.wiki-page-ellipsis { padding: 0 0.3rem; color: var(--fg); opacity: 0.5; }
+
+/* ── Filtre catégories liées (3 états) ────────────── */
+.wiki-extra-cat-chip.wiki-extra-cat-include {
+  background: #1a5c1a; color: #e0ffe0; border-color: #2a7a2a;
+}
+.wiki-extra-cat-chip.wiki-extra-cat-exclude {
+  background: #6a1515; color: #ffe0e0; border-color: #8a2020;
+}
+.wiki-extra-cat-hint {
+  font-size: 0.67rem; color: rgba(255,255,255,0.45); margin: 0;
+}
+.wiki-extra-cat-filter { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.wiki-special-filter { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+
