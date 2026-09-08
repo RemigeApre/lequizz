@@ -5,7 +5,7 @@
     <span class="bd-reader-title"><%= book.title %></span>
     <span class="bd-reader-counter" id="bd-counter">1 / <%= book.imagePaths.length %></span>
     <button type="button" class="bd-reader-fav link-button<%= isFavorite ? ' active' : '' %>" id="bd-fav-btn" data-item-id="<%= book.id %>" title="Favori">&#128278;</button>
-    <a href="/bd/<%= book.id %>/edit" class="bd-reader-edit link-button">Modifier</a>
+    <% if (currentUser && currentUser.isAdmin) { %><a href="/bd/<%= book.id %>/edit" class="bd-reader-edit link-button">Modifier</a><% } %>
   </div>
 
   <% if (!book.imagePaths.length) { %>

@@ -222,10 +222,10 @@
     <% }) %>
   </div>
   <div class="wiki-pagination" id="wiki-pagination" hidden></div>
-  <% if (currentUser && lockedCategory) { %>
+  <% if (currentUser && currentUser.isAdmin && lockedCategory) { %>
     <a href="/wiki/ajouter?category=<%= lockedCategory.key %>" class="wiki-fab-add" title="Ajouter une page">+</a>
   <% } %>
 </main>
-<script>window.GALLERY_CAN_EDIT = <%= currentUser ? 'true' : 'false' %>;</script>
+<script>window.GALLERY_CAN_EDIT = <%= (currentUser && currentUser.isAdmin) ? 'true' : 'false' %>;</script>
 <script src="/wiki.js?v=<%= assetVersion %>"></script>
 <%- include('partials/foot') %>

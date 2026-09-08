@@ -17,7 +17,7 @@ const {
   listFavoriteRows,
   logGalleryView,
 } = require("../db");
-const { requireUser } = require("../auth");
+const { requireUser, requireAdmin } = require("../auth");
 
 const CATEGORIES = [
   { key: "position",    label: "Positions",   hue: 270 },
@@ -198,7 +198,7 @@ function buildGalleryRouter(config) {
     res.render("gallery", { config, items, allTags, categories: CATEGORIES, favoriteGalleryIds, tagImageCounts, tagBdCounts });
   });
 
-  router.post("/", upload.array("images", 30), (req, res) => {
+  router.post("/", requireAdmin, upload.array("images", 30), (req, res) => {
     const files = req.files || [];
     if (!files.length) return res.redirect("/galerie");
     const title = String(req.body.title || "").trim();
@@ -214,7 +214,7 @@ function buildGalleryRouter(config) {
   // ── Actions groupées : sélectionner plusieurs cartes de galerie
   // (jamais les images issues du wiki) pour les taguer/supprimer d'un coup.
   // Placé avant "/:id" pour ne pas être confondu avec un identifiant.
-  router.post("/bulk", (req, res) => {
+  router.post("/bulk", requireAdmin, (req, res) => {
     const ids = [].concat(req.body.ids || []).map(Number).filter(Number.isInteger);
     const action = String(req.body.action || "");
     if (!ids.length) return res.json({ ok: false });
@@ -255,8 +255,7 @@ function buildGalleryRouter(config) {
     res.json({ id: img.id, tags: img.tags, author: img.author, parody: img.parody });
   });
 
-  // Mise à jour des métadonnées (admin only = requireUser déjà sur le router)
-  router.post("/image-meta", express.json(), function(req, res) {
+  router.post("/image-meta", requireAdmin, express.json(), function(req, res) {
     var id = Number(req.body.id);
     if (!id) return res.json({ ok: false });
     var tags   = [].concat(req.body.tags || []).filter(Boolean);
@@ -282,7 +281,7 @@ function buildGalleryRouter(config) {
     res.json(q ? all.filter(function(a) { return a.toLowerCase().indexOf(q) !== -1; }) : all);
   });
 
-  router.get("/:id/edit", (req, res) => {
+  router.get("/:id/edit", requireAdmin, (req, res) => {
     const id = Number(req.params.id);
     const image = Number.isInteger(id) ? getGalleryImage(id) : null;
     if (!image) return res.redirect("/galerie");
@@ -299,7 +298,7 @@ function buildGalleryRouter(config) {
     res.json({ ok: true });
   });
 
-  router.post("/:id/processed", express.json(), (req, res) => {
+  router.post("/:id/processed", requireAdmin, express.json(), (req, res) => {
     const id = Number(req.params.id);
     if (!Number.isInteger(id)) return res.json({ ok: false });
     const image = getGalleryImage(id);
@@ -309,7 +308,7 @@ function buildGalleryRouter(config) {
     res.json({ ok: true, processed });
   });
 
-  router.post("/:id", upload.array("images", 30), (req, res) => {
+  router.post("/:id", requireAdmin, upload.array("images", 30), (req, res) => {
     const id = Number(req.params.id);
     const image = Number.isInteger(id) ? getGalleryImage(id) : null;
     if (!image) return res.redirect("/galerie");
@@ -368,7 +367,7 @@ function buildGalleryRouter(config) {
     res.json({ ok: true });
   });
 
-  router.post("/:id/delete", (req, res) => {
+  router.post("/:id/delete", requireAdmin, (req, res) => {
     const id = Number(req.params.id);
     if (Number.isInteger(id)) {
       const image = getGalleryImage(id);

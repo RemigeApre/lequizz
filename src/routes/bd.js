@@ -3,7 +3,7 @@ const fs = require("fs");
 const express = require("express");
 const multer = require("multer");
 const { listBdBooks, getBdBook, insertBdBook, updateBdBook, deleteBdBook, isFavorite } = require("../db");
-const { requireUser } = require("../auth");
+const { requireUser, requireAdmin } = require("../auth");
 
 const uploadsDir = path.join(__dirname, "..", "..", "data", "uploads", "bd");
 fs.mkdirSync(uploadsDir, { recursive: true });
@@ -64,11 +64,11 @@ function buildBdRouter(config) {
     res.render("bd", { config, books });
   });
 
-  router.get("/new", (req, res) => {
+  router.get("/new", requireAdmin, (req, res) => {
     res.render("bd-form", { config, book: null });
   });
 
-  router.post("/", upload.array("images", 200), (req, res) => {
+  router.post("/", requireAdmin, upload.array("images", 200), (req, res) => {
     const title = String(req.body.title || "").trim();
     if (!title) return res.redirect("/bd/new");
     const description = String(req.body.description || "").trim();
@@ -79,13 +79,13 @@ function buildBdRouter(config) {
     res.redirect(`/bd/${id}`);
   });
 
-  router.get("/:id/edit", (req, res) => {
+  router.get("/:id/edit", requireAdmin, (req, res) => {
     const book = getBdBook(Number(req.params.id));
     if (!book) return res.redirect("/bd");
     res.render("bd-form", { config, book });
   });
 
-  router.post("/:id/delete", (req, res) => {
+  router.post("/:id/delete", requireAdmin, (req, res) => {
     const id = Number(req.params.id);
     const book = getBdBook(id);
     if (book) {
@@ -97,7 +97,7 @@ function buildBdRouter(config) {
     res.redirect("/bd");
   });
 
-  router.post("/:id", upload.array("images", 200), (req, res) => {
+  router.post("/:id", requireAdmin, upload.array("images", 200), (req, res) => {
     const id = Number(req.params.id);
     const book = getBdBook(id);
     if (!book) return res.redirect("/bd");

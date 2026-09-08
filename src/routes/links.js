@@ -1,7 +1,7 @@
 const express = require("express");
 const { insertLink, listLinks, deleteLink } = require("../db");
 const { fetchPageTitle } = require("../linkTitle");
-const { requireUser } = require("../auth");
+const { requireUser, requireAdmin } = require("../auth");
 
 function parseTags(raw) {
   return String(raw || "")
@@ -31,7 +31,7 @@ function buildLinksRouter(config) {
     res.render("links", { config, links, allTags });
   });
 
-  router.post("/", async (req, res) => {
+  router.post("/", requireAdmin, async (req, res) => {
     const url = String(req.body.url || "").trim();
     const type = req.body.type === "video" ? "video" : "site";
     const description = String(req.body.description || "").trim();
@@ -50,7 +50,7 @@ function buildLinksRouter(config) {
     res.redirect("/liens");
   });
 
-  router.post("/:id/delete", (req, res) => {
+  router.post("/:id/delete", requireAdmin, (req, res) => {
     const id = Number(req.params.id);
     if (Number.isInteger(id)) deleteLink(id);
     res.redirect("/liens");

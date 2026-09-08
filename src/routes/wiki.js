@@ -29,7 +29,7 @@ const {
   updateGalleryImage,
   listGalleryImages,
 } = require("../db");
-const { requireUser, requireUserJson } = require("../auth");
+const { requireUser, requireUserJson, requireAdmin } = require("../auth");
 
 const CATEGORIES = [
   { key: "position",   label: "Positions",   desc: "Postures, Kama-sutra et toutes leurs variantes.",                               hue: 270 },
@@ -381,7 +381,7 @@ function buildWikiRouter(config) {
     res.render("wiki", { config, pages, allTags: getAllTags(pages), tagCounts: getTagCounts(pages), lockedCategory: cat, ...CTX });
   });
 
-  router.post("/", requireUser, upload.any(), (req, res) => {
+  router.post("/", requireAdmin, upload.any(), (req, res) => {
     const title = String(req.body.title || "").trim();
     if (!title) return res.redirect("/wiki");
 
@@ -487,7 +487,7 @@ function buildWikiRouter(config) {
     res.render("wiki-detail", { config, page, pages: allPages, suggestions, prevPage, nextPage, backHref: back.href, backLabel: back.label, isFavorite: pageIsFavorite, userNote, tagPageCounts, tagImageCounts, ...CTX });
   });
 
-  router.get("/:id/edit", requireUser, (req, res) => {
+  router.get("/:id/edit", requireAdmin, (req, res) => {
     const id = Number(req.params.id);
     const page = Number.isInteger(id) ? getWikiPage(id) : null;
     if (!page) return res.redirect("/wiki");
@@ -496,7 +496,7 @@ function buildWikiRouter(config) {
     res.render("wiki-form", { config, page, pages, allTags, ...CTX });
   });
 
-  router.post("/:id", requireUser, upload.any(), (req, res) => {
+  router.post("/:id", requireAdmin, upload.any(), (req, res) => {
     const id = Number(req.params.id);
     const existing = Number.isInteger(id) ? getWikiPage(id) : null;
     if (!existing) return res.redirect("/wiki");
@@ -619,7 +619,7 @@ function buildWikiRouter(config) {
     res.json({ ok: true });
   });
 
-  router.post("/:id/delete", requireUser, (req, res) => {
+  router.post("/:id/delete", requireAdmin, (req, res) => {
     const id = Number(req.params.id);
     let cat = "";
     if (Number.isInteger(id)) {

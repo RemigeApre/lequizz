@@ -93,7 +93,7 @@
       </div>
 
       <%# Sélection groupée %>
-      <% if (currentUser) { %>
+      <% if (currentUser && currentUser.isAdmin) { %>
       <div class="wiki-filter-section">
         <button type="button" class="link-button gallery-select-toggle" id="gallery-select-toggle" hidden>S&eacute;lectionner</button>
       </div>
@@ -172,7 +172,7 @@
   <div class="gallery-pagination" id="gallery-pagination-bot" hidden></div>
 
   <%# ─── FAB + DROPDOWN ───────────────────────────────────────────────── %>
-  <% if (currentUser) { %>
+  <% if (currentUser && currentUser.isAdmin) { %>
   <div class="gallery-fab-wrap" id="gallery-fab-wrap">
     <button type="button" class="wiki-fab-add" id="gallery-fab-main" title="Ajouter">+</button>
     <div class="gallery-fab-menu" id="gallery-fab-menu" hidden>
@@ -252,7 +252,7 @@
         <% } %>
       </div>
       <button type="button" class="gallery-card-btn gallery-lb-fav-btn" id="gallery-lb-fav-btn" title="Favori">&#128278;</button>
-      <% if (currentUser) { %>
+      <% if (currentUser && currentUser.isAdmin) { %>
         <button type="button" class="gallery-card-btn gallery-lb-edit-btn" id="gallery-lb-edit-btn" title="Modifier">&#9998;</button>
         <button type="button" class="gallery-lb-processed-btn link-button" id="gallery-lb-processed-btn" hidden>Marquer trait&#233;</button>
       <% } %>
@@ -261,6 +261,6 @@
 
 </div>
 
-<script>window.GALLERY_CAN_EDIT = <%= currentUser ? 'true' : 'false' %>;</script>
+<script>window.GALLERY_CAN_EDIT = <%= (currentUser && currentUser.isAdmin) ? 'true' : 'false' %>;</script>
 <script src="/gallery.js?v=<%= assetVersion %>"></script>
 <%- include('partials/foot') %>

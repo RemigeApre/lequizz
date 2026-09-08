@@ -301,7 +301,7 @@
         <% } %>
 
         <%# Actions : modifier ─ %>
-        <% if (currentUser) { %>
+        <% if (currentUser && currentUser.isAdmin) { %>
           <div class="wiki-right-actions">
             <a href="/wiki/<%= page.id %>/edit" class="wiki-edit-icon-btn" title="Modifier" aria-label="Modifier">&#9998;</a>
           </div>
@@ -346,12 +346,14 @@
     <% if (currentUser) { %>
       <div class="wiki-detail-actions wiki-detail-actions-mobile">
         <button type="button" class="wiki-edit-icon-btn wiki-fav-icon-btn<%= isFavorite ? ' active' : '' %>" id="wiki-fav-btn-mobile" data-item-id="<%= page.id %>" title="Favori" aria-label="Favori">&#128278;</button>
-        <a href="/wiki/<%= page.id %>/edit" class="wiki-edit-icon-btn" title="Modifier" aria-label="Modifier">&#9998;</a>
+        <% if (currentUser.isAdmin) { %>
+          <a href="/wiki/<%= page.id %>/edit" class="wiki-edit-icon-btn" title="Modifier" aria-label="Modifier">&#9998;</a>
+        <% } %>
       </div>
     <% } %>
 
   </article>
 </main>
-<script>window.GALLERY_CAN_EDIT = <%= currentUser ? 'true' : 'false' %>;</script>
+<script>window.GALLERY_CAN_EDIT = <%= (currentUser && currentUser.isAdmin) ? 'true' : 'false' %>;</script>
 <script src="/wiki.js?v=<%= assetVersion %>"></script>
 <%- include('partials/foot') %>
