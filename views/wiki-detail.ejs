@@ -66,47 +66,53 @@
 
     <%# ═══ LAYOUT 2 COLONNES (PC) ══════════════════════════════════════════ %>
     <div class="wiki-detail-layout">
+      <%
+        var hasMetaRows = hasPartMeta || hasPosMeta
+          || (page.category === 'objets' && pm.type_gode && GODE[pm.type_gode])
+          || (page.category === 'lieux'  && pm.type_lieu  && LIEU[pm.type_lieu])
+          || (page.category === 'fantasmes' && pm.sous_cat && FSUBS[pm.sous_cat]);
+      %>
+
+      <%# ─ VOLET GAUCHE : métadonnées page (PC) ─ %>
+      <aside class="wiki-detail-left">
+        <% if (cat) { %>
+          <a href="/wiki/categorie/<%= page.category %>" class="wiki-left-cat-link"><%= cat.label %></a>
+        <% } %>
+        <% if (page.owned) { %>
+          <span class="wiki-left-owned">&#9733;&nbsp;Poss&eacute;d&eacute;</span>
+        <% } %>
+        <% if (hasMetaRows) { %>
+          <dl class="wiki-left-meta">
+            <% if (page.category === 'fantasmes' && pm.sous_cat && FSUBS[pm.sous_cat]) { %>
+              <div class="wiki-left-meta-row"><dt>Sous-cat&eacute;gorie</dt><dd><%= FSUBS[pm.sous_cat] %></dd></div>
+            <% } %>
+            <% if (hasPartMeta) { %>
+              <% if (nbTotal) { %><div class="wiki-left-meta-row"><dt>Nombre total</dt><dd><%= nbTotal === 'nombreux' ? 'Nombreux' : nbTotal === 'variable' ? 'Variable' : nbTotal %></dd></div><% } %>
+              <% if (nbFem)   { %><div class="wiki-left-meta-row"><dt>F&eacute;minin</dt><dd><%= nbFem === 'nombreux' ? 'Nombreuses' : nbFem === 'variable' ? 'Variable' : nbFem %></dd></div><% } %>
+              <% if (nbMasc)  { %><div class="wiki-left-meta-row"><dt>Masculin</dt><dd><%= nbMasc === 'nombreux' ? 'Nombreux' : nbMasc === 'variable' ? 'Variable' : nbMasc %></dd></div><% } %>
+              <% if (pmTypes.length) { %><div class="wiki-left-meta-row"><dt>Type</dt><dd><%= pmTypes.map(function(t){ return TYPES_PART[t] || t; }).join(' &middot; ') %></dd></div><% } %>
+            <% } %>
+            <% if (page.category === 'objets' && pm.type_gode && GODE[pm.type_gode]) { %>
+              <div class="wiki-left-meta-row"><dt>Type</dt><dd><%= GODE[pm.type_gode] %></dd></div>
+            <% } %>
+            <% if (page.category === 'lieux' && pm.type_lieu && LIEU[pm.type_lieu]) { %>
+              <div class="wiki-left-meta-row"><dt>Type de lieu</dt><dd><%= LIEU[pm.type_lieu] %></dd></div>
+            <% } %>
+            <% if (hasPosMeta) { %>
+              <% if (pm.categorie && POSCAT[pm.categorie]) { %><div class="wiki-left-meta-row"><dt>Cat&eacute;gorie</dt><dd><%= POSCAT[pm.categorie] %></dd></div><% } %>
+              <% if (pm.qui_dessus && QUI[pm.qui_dessus]) { %><div class="wiki-left-meta-row"><dt>Au-dessus</dt><dd><%= QUI[pm.qui_dessus] %></dd></div><% } %>
+              <% if (pm.canal && pm.canal.length) { %><div class="wiki-left-meta-row"><dt>Canal</dt><dd><%= pm.canal.map(function(c){ return CAN[c] || c; }).join(' &middot; ') %></dd></div><% } %>
+              <% if (pmOri.length) { %><div class="wiki-left-meta-row"><dt>Orientation</dt><dd><%= pmOri.map(function(o){ return ORI[o] || o; }).join(' &middot; ') %></dd></div><% } %>
+              <% if (pm.nb_partenaires && NBPART[pm.nb_partenaires]) { %><div class="wiki-left-meta-row"><dt>Partenaires</dt><dd><%= NBPART[pm.nb_partenaires] %></dd></div><% } %>
+              <% if (pm.partenaire_actif && ACTIF[pm.partenaire_actif]) { %><div class="wiki-left-meta-row"><dt>Partenaire actif</dt><dd><%= ACTIF[pm.partenaire_actif] %></dd></div><% } %>
+              <% if (pmSup.length) { %><div class="wiki-left-meta-row"><dt>Supports</dt><dd><%= pmSup.map(function(s){ return SUP[s] || s; }).join(' &middot; ') %></dd></div><% } %>
+            <% } %>
+          </dl>
+        <% } %>
+      </aside>
 
       <%# ─ COLONNE GAUCHE : contenu texte ─ %>
       <div class="wiki-detail-body">
-
-        <%# Métadonnées catégorie (positions, partenaires, etc.) ─ %>
-        <%
-          var hasMetaRows = hasPartMeta || hasPosMeta
-            || (page.category === 'objets' && pm.type_gode && GODE[pm.type_gode])
-            || (page.category === 'lieux'  && pm.type_lieu  && LIEU[pm.type_lieu])
-            || (page.category === 'fantasmes' && pm.sous_cat && FSUBS[pm.sous_cat]);
-        %>
-        <% if (hasMetaRows) { %>
-          <dl class="wiki-infotable-body wiki-detail-meta-dl">
-
-            <% if (page.category === 'fantasmes' && pm.sous_cat && FSUBS[pm.sous_cat]) { %>
-              <div class="wiki-infobox-row"><dt>Sous-cat&eacute;gorie</dt><dd><%= FSUBS[pm.sous_cat] %></dd></div>
-            <% } %>
-            <% if (hasPartMeta) { %>
-              <% if (nbTotal) { %><div class="wiki-infobox-row"><dt>Nombre total</dt><dd><%= nbTotal === 'nombreux' ? 'Nombreux' : nbTotal === 'variable' ? 'Variable' : nbTotal %></dd></div><% } %>
-              <% if (nbFem)   { %><div class="wiki-infobox-row"><dt>F&eacute;minin</dt><dd><%= nbFem === 'nombreux' ? 'Nombreuses' : nbFem === 'variable' ? 'Variable' : nbFem %></dd></div><% } %>
-              <% if (nbMasc)  { %><div class="wiki-infobox-row"><dt>Masculin</dt><dd><%= nbMasc === 'nombreux' ? 'Nombreux' : nbMasc === 'variable' ? 'Variable' : nbMasc %></dd></div><% } %>
-              <% if (pmTypes.length) { %><div class="wiki-infobox-row"><dt>Type</dt><dd><%= pmTypes.map(function(t){ return TYPES_PART[t] || t; }).join(' · ') %></dd></div><% } %>
-            <% } %>
-            <% if (page.category === 'objets' && pm.type_gode && GODE[pm.type_gode]) { %>
-              <div class="wiki-infobox-row"><dt>Type</dt><dd><%= GODE[pm.type_gode] %></dd></div>
-            <% } %>
-            <% if (page.category === 'lieux' && pm.type_lieu && LIEU[pm.type_lieu]) { %>
-              <div class="wiki-infobox-row"><dt>Type</dt><dd><%= LIEU[pm.type_lieu] %></dd></div>
-            <% } %>
-            <% if (hasPosMeta) { %>
-              <% if (pm.categorie && POSCAT[pm.categorie]) { %><div class="wiki-infobox-row"><dt>Cat&eacute;gorie</dt><dd><%= POSCAT[pm.categorie] %></dd></div><% } %>
-              <% if (pm.qui_dessus && QUI[pm.qui_dessus]) { %><div class="wiki-infobox-row"><dt>Au-dessus</dt><dd><%= QUI[pm.qui_dessus] %></dd></div><% } %>
-              <% if (pm.canal && pm.canal.length) { %><div class="wiki-infobox-row"><dt>Canal</dt><dd><%= pm.canal.map(function(c){ return CAN[c] || c; }).join(' · ') %></dd></div><% } %>
-              <% if (pmOri.length) { %><div class="wiki-infobox-row"><dt>Orientation</dt><dd><%= pmOri.map(function(o){ return ORI[o] || o; }).join(' · ') %></dd></div><% } %>
-              <% if (pm.nb_partenaires && NBPART[pm.nb_partenaires]) { %><div class="wiki-infobox-row"><dt>Partenaires</dt><dd><%= NBPART[pm.nb_partenaires] %></dd></div><% } %>
-              <% if (pm.partenaire_actif && ACTIF[pm.partenaire_actif]) { %><div class="wiki-infobox-row"><dt>Partenaire actif</dt><dd><%= ACTIF[pm.partenaire_actif] %></dd></div><% } %>
-              <% if (pmSup.length) { %><div class="wiki-infobox-row"><dt>Supports</dt><dd><%= pmSup.map(function(s){ return SUP[s] || s; }).join(' · ') %></dd></div><% } %>
-            <% } %>
-
-          </dl>
-        <% } %>
 
         <%# Description markdown ─ %>
         <% if (page.content) { %>
@@ -200,28 +206,18 @@
       <%# ─ COLONNE DROITE : panneau info (PC) ─ %>
       <aside class="wiki-detail-right">
 
-        <%# ─ Navigation PC : compacte, collée au-dessus de l'image ─ %>
-        <div class="wiki-right-nav">
-          <a href="<%= backHref %>" class="wiki-right-back" title="<%= backLabel %>">&#8592;</a>
-          <span class="wiki-right-nav-sep"></span>
-          <a href="<%= prevPage ? '/wiki/' + prevPage.id : '#' %>" class="wiki-right-nav-btn<%= prevPage ? '' : ' disabled' %>" title="<%= prevPage ? prevPage.title : '' %>">&#8592;</a>
-          <span class="wiki-right-nav-title"><%= page.title %></span>
-          <a href="<%= nextPage ? '/wiki/' + nextPage.id : '#' %>" class="wiki-right-nav-btn<%= nextPage ? '' : ' disabled' %>" title="<%= nextPage ? nextPage.title : '' %>">&#8594;</a>
-        </div>
+        <%# ─ Retour ─ %>
+        <a href="<%= backHref %>" class="wiki-right-back" title="<%= backLabel %>">&#8592; <span class="wiki-right-back-label"><%= backLabel %></span></a>
 
-        <%# b) Catégories ─ %>
-        <div class="wiki-right-cats">
+        <%# ─ Navigation PC : catégorie encadrée par prev/next ─ %>
+        <div class="wiki-right-nav">
+          <a href="<%= prevPage ? '/wiki/' + prevPage.id : '#' %>" class="wiki-right-nav-btn<%= prevPage ? '' : ' disabled' %>" title="<%= prevPage ? prevPage.title : '' %>">&#8249;</a>
           <% if (cat) { %>
-            <a href="/wiki/categorie/<%= page.category %>" class="wiki-category-badge wiki-right-cat-badge"
-               style="background: hsl(<%= cat.hue %>, 55%, 55%)"><%= cat.label %></a>
+            <a href="/wiki/categorie/<%= page.category %>" class="wiki-right-nav-cat"><%= cat.label %></a>
+          <% } else { %>
+            <span class="wiki-right-nav-cat">Wiki</span>
           <% } %>
-          <% (page.extraCategories || []).forEach(function (eck) { var ecat = categories.find(function (c) { return c.key === eck; }); if (ecat) { %>
-            <a href="/wiki/categorie/<%= eck %>" class="wiki-category-badge wiki-right-cat-badge"
-               style="background: hsl(<%= ecat.hue %>, 55%, 55%)"><%= ecat.label %></a>
-          <% } }) %>
-          <% if (page.owned) { %>
-            <span class="wiki-right-owned">&#9733; Poss&eacute;d&eacute;</span>
-          <% } %>
+          <a href="<%= nextPage ? '/wiki/' + nextPage.id : '#' %>" class="wiki-right-nav-btn<%= nextPage ? '' : ' disabled' %>" title="<%= nextPage ? nextPage.title : '' %>">&#8250;</a>
         </div>
 
         <%# c) Image principale ─ %>
@@ -247,9 +243,9 @@
         <% if (currentUser) { %>
           <div class="wiki-react wiki-right-reactions"
                data-id="<%= page.id %>"
-               data-flame="<%= page.flame ? '1' : '0' %>"
+               data-flame="<%= (page.flame || isFavorite) ? '1' : '0' %>"
                data-interested="<%= page.interested ? '1' : '0' %>">
-            <button type="button" class="wiki-react-btn wiki-react-flame<%= page.flame ? ' active' : '' %>" data-key="flame">
+            <button type="button" class="wiki-react-btn wiki-react-flame<%= (page.flame || isFavorite) ? ' active' : '' %>" data-key="flame">
               <span class="wiki-react-icon">&#128293;</span><span class="wiki-react-label">J&apos;adore</span>
             </button>
             <button type="button" class="wiki-react-btn wiki-react-interest<%= page.interested ? ' active' : '' %>" data-key="interested">
@@ -274,10 +270,9 @@
           </div>
         <% } %>
 
-        <%# Actions : favoris + modifier ─ %>
+        <%# Actions : modifier ─ %>
         <% if (currentUser) { %>
           <div class="wiki-right-actions">
-            <button type="button" class="wiki-edit-icon-btn wiki-fav-icon-btn<%= isFavorite ? ' active' : '' %>" id="wiki-fav-btn" data-item-id="<%= page.id %>" title="Favori" aria-label="Favori">&#128278;</button>
             <a href="/wiki/<%= page.id %>/edit" class="wiki-edit-icon-btn" title="Modifier" aria-label="Modifier">&#9998;</a>
           </div>
         <% } %>

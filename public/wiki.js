@@ -2484,30 +2484,6 @@
   })();
 
   // ══════════════════════════════════════════════════
-  // 15. FAVORI (page wiki) — bouton dans la page de lecture
-  // ══════════════════════════════════════════════════
-  (function () {
-    var btns = [
-      document.getElementById("wiki-fav-btn"),
-      document.getElementById("wiki-fav-btn-mobile"),
-    ].filter(Boolean);
-    if (!btns.length) return;
-    btns.forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        fetch("/favoris/toggle", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ itemType: "wiki", itemId: Number(btn.dataset.itemId) }),
-        })
-          .then(function (r) { return r.json(); })
-          .then(function (d) {
-            if (d.ok) btns.forEach(function (b) { b.classList.toggle("active", d.active); });
-          });
-      });
-    });
-  })();
-
-  // ══════════════════════════════════════════════════
   // 16. ÉDITEUR DE VARIANTES (formulaire position)
   // ══════════════════════════════════════════════════
   (function () {
