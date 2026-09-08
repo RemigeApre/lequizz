@@ -5442,7 +5442,6 @@ a.wiki-ql-label:hover .wiki-ql-text {
   color: rgba(255,255,255,0.8);
 }
 
-.gallery-lb-wiki-link { align-self: flex-start; }
 
 /* Dots de l'album, dans la lightbox */
 .gallery-lb-dots {
@@ -5523,23 +5522,85 @@ a.wiki-ql-label:hover .wiki-ql-text {
   z-index: 3;
 }
 
+/* Bouton wiki élégant */
+.gallery-lb-wiki-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  align-self: stretch;
+  padding: 0.55rem 0.9rem;
+  border-radius: 10px;
+  background: rgba(91, 79, 207, 0.18);
+  border: 1px solid rgba(91, 79, 207, 0.4);
+  color: #a89dff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  margin-top: 0.1rem;
+}
+.gallery-lb-wiki-btn::after { content: " ↗"; opacity: 0.7; font-weight: 400; }
+.gallery-lb-wiki-btn:hover { background: rgba(91, 79, 207, 0.32); border-color: rgba(91, 79, 207, 0.7); color: #c8bfff; }
+.gallery-lb-wiki-btn[hidden] { display: none; }
+
 .gallery-lb-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+
+/* Rangée étoiles + cœur */
+.gallery-lb-react-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.gallery-lb-rating {
+  display: flex;
+  gap: 0.2rem;
+  cursor: pointer;
+}
+.gallery-lb-rating .gallery-star {
+  font-size: 1.5rem;
+  color: rgba(255,255,255,0.2);
+  transition: color 0.12s, transform 0.1s;
+}
+.gallery-lb-rating .gallery-star:hover { transform: scale(1.15); }
+.gallery-lb-rating .gallery-star.filled { color: var(--wiki-gold); }
+.gallery-lb-rating:hover .gallery-star { color: rgba(255,255,255,0.15); }
+.gallery-lb-rating:hover .gallery-star:hover,
+.gallery-lb-rating:hover .gallery-star:hover ~ .gallery-star { color: rgba(255,255,255,0.15); }
+
+/* Bouton favori cœur */
+.gallery-lb-fav-btn {
+  flex-shrink: 0;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.45);
+  font-size: 1.15rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
+}
+.gallery-lb-fav-btn:hover { background: rgba(220,50,80,0.2); border-color: rgba(220,50,80,0.5); color: #ff7090; transform: scale(1.1); }
+.gallery-lb-fav-btn.active { background: rgba(220,50,80,0.3); border-color: rgba(220,50,80,0.7); color: #ff5070; }
+.gallery-lb-fav-btn.active:hover { background: rgba(220,50,80,0.15); color: rgba(255,255,255,0.5); }
+
+/* Rangée admin (edit + traité) */
+.gallery-lb-admin-row {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-top: 0.5rem;
-  flex-wrap: wrap;
 }
-.gallery-lb-rating {
-  display: flex;
-  gap: 0.1rem;
-  cursor: pointer;
-}
-.gallery-lb-rating .gallery-star { font-size: 1.1rem; }
-.gallery-lb-rating .gallery-star.filled { color: var(--wiki-gold); }
-.gallery-lb-fav-btn.active { background: var(--wiki-gold); color: #fff; }
-.gallery-lb-processed-btn { font-size: 0.75rem; color: rgba(255,255,255,0.6); }
-.gallery-lb-processed-btn:hover { color: #7c3aed; }
+.gallery-lb-processed-btn { font-size: 0.75rem; color: rgba(255,255,255,0.5); }
+.gallery-lb-processed-btn:hover { color: #a78bfa; }
 
 .gallery-select-toggle {
   margin-bottom: 0.85rem;

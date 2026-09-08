@@ -150,6 +150,7 @@
   var hideIrrealiste = localStorage.getItem("gallery-hide-irrealiste") === "1";
   var activeRating   = 0;
   var sortMode       = "date-desc";
+  var randomSeeds    = null; // Map<card, number> — persistant entre pages
   var currentPage    = 0;
   var MOBILE_BREAK   = 641;
   var ITEMS_PER_PAGE = window.innerWidth < MOBILE_BREAK ? 10 : 50;
@@ -245,10 +246,14 @@
     if (!grid) return;
     var cards = Array.from(grid.querySelectorAll(".gallery-card:not([hidden])"));
     if (sortMode === "random") {
-      for (var i = cards.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var tmp = cards[i]; cards[i] = cards[j]; cards[j] = tmp;
+      // Initialise les seeds sur TOUTES les cartes (une seule fois)
+      if (!randomSeeds) {
+        randomSeeds = new Map();
+        Array.from(grid.querySelectorAll(".gallery-card")).forEach(function(c) {
+          randomSeeds.set(c, Math.random());
+        });
       }
+      cards.sort(function(a, b) { return (randomSeeds.get(a) || 0) - (randomSeeds.get(b) || 0); });
     } else {
       cards.sort(function(a, b) {
         if (sortMode === "alpha-asc") return (a.dataset.title || "").localeCompare(b.dataset.title || "", "fr");
@@ -444,7 +449,9 @@
   var sortSelect = document.getElementById("gallery-sort-select");
   if (sortSelect) {
     sortSelect.addEventListener("change", function () {
+      if (sortSelect.value === "random") randomSeeds = null; // nouveau mélange
       sortMode = sortSelect.value;
+      currentPage = 0;
       sortCards();
     });
   }
@@ -471,9 +478,8 @@
   var lightbox  = document.getElementById("gallery-lightbox");
   var lbImg     = lightbox ? lightbox.querySelector(".gallery-lb-img")       : null;
   var lbDots    = document.getElementById("gallery-lb-dots");
-  var lbTitle   = lightbox ? lightbox.querySelector(".gallery-lb-title")     : null;
   var lbTags    = lightbox ? lightbox.querySelector(".gallery-lb-tags")      : null;
-  var lbLink    = lightbox ? lightbox.querySelector(".gallery-lb-wiki-link") : null;
+  var lbLink    = lightbox ? lightbox.querySelector(".gallery-lb-wiki-btn")  : null;
   var lbNotes   = lightbox ? lightbox.querySelector(".gallery-lb-notes")     : null;
   var lbClose   = lightbox ? lightbox.querySelector(".gallery-lb-close")     : null;
   var lbPrev    = lightbox ? lightbox.querySelector(".gallery-lb-prev")      : null;
@@ -512,13 +518,12 @@
     var card = currentCard();
     if (!lightbox || !card) return;
     var images  = currentImages();
-    var src     = images[lbImgIndex] || "";
-    var title   = card.dataset.title || "";
-    var tags    = (card.dataset.tags || "").split("|").filter(Boolean);
-    var wikiId  = card.dataset.wikiId || "";
+    var src          = images[lbImgIndex] || "";
+    var displayTitle = card.dataset.displayTitle || card.dataset.title || "";
+    var tags         = (card.dataset.tags || "").split("|").filter(Boolean);
+    var wikiId       = card.dataset.wikiId || "";
 
     if (lbImg) lbImg.src = src;
-    if (lbTitle) lbTitle.textContent = title || "";
     if (lbTags) {
       lbTags.innerHTML = "";
       tags.forEach(function(t) {
@@ -532,7 +537,10 @@
     }
     if (lbLink) {
       lbLink.hidden = !wikiId;
-      if (wikiId) lbLink.href = "/wiki/" + wikiId;
+      if (wikiId) {
+        lbLink.href = "/wiki/" + wikiId;
+        lbLink.textContent = displayTitle ? "Wiki : " + displayTitle : "Voir la page wiki";
+      }
     }
 
     // Auteur / parodie

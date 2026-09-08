@@ -129,6 +129,7 @@
         data-ultra="<%= item.tags.indexOf('ultra') !== -1 ? '1' : '0' %>"
         data-bd="<%= (item.contentType === 'bd') ? '1' : '0' %>"
         data-title="<%= (item.title || '').toLowerCase() %>"
+        data-display-title="<%= (item.title || '').replace(/"/g, '') %>"
         data-images="<%= item.imagePaths.join('|') %>"
         data-wiki-id="<%= item.wikiPageId || '' %>"
         data-gallery-id="<%= item.id || '' %>"
@@ -241,20 +242,23 @@
   <%# Volet droit : infos décorrélées de l'image %>
   <aside class="gallery-lb-panel">
     <button type="button" class="gallery-lb-close" title="Fermer">&#215;</button>
-    <p class="gallery-lb-title"></p>
     <div class="gallery-lb-tags"></div>
-    <a class="gallery-lb-wiki-link link-button" href="" hidden>Voir la page wiki &rarr;</a>
+    <a class="gallery-lb-wiki-btn" href="" hidden></a>
     <div class="gallery-lb-notes"></div>
     <div class="gallery-lb-actions" id="gallery-lb-actions" hidden>
-      <div class="gallery-lb-rating" id="gallery-lb-rating">
-        <% for (var lri = 1; lri <= 5; lri++) { %>
-          <span class="gallery-star" data-val="<%= lri %>">&#9733;</span>
-        <% } %>
+      <div class="gallery-lb-react-row">
+        <div class="gallery-lb-rating" id="gallery-lb-rating">
+          <% for (var lri = 1; lri <= 5; lri++) { %>
+            <span class="gallery-star" data-val="<%= lri %>">&#9733;</span>
+          <% } %>
+        </div>
+        <button type="button" class="gallery-lb-fav-btn" id="gallery-lb-fav-btn" title="Favori">&#10084;</button>
       </div>
-      <button type="button" class="gallery-card-btn gallery-lb-fav-btn" id="gallery-lb-fav-btn" title="Favori">&#128278;</button>
       <% if (currentUser && currentUser.isAdmin) { %>
-        <button type="button" class="gallery-card-btn gallery-lb-edit-btn" id="gallery-lb-edit-btn" title="Modifier">&#9998;</button>
-        <button type="button" class="gallery-lb-processed-btn link-button" id="gallery-lb-processed-btn" hidden>Marquer trait&#233;</button>
+        <div class="gallery-lb-admin-row">
+          <button type="button" class="gallery-card-btn gallery-lb-edit-btn" id="gallery-lb-edit-btn" title="Modifier">&#9998;</button>
+          <button type="button" class="gallery-lb-processed-btn link-button" id="gallery-lb-processed-btn" hidden>Marquer trait&#233;</button>
+        </div>
       <% } %>
     </div>
   </aside>
