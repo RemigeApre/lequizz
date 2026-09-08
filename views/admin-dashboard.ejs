@@ -133,6 +133,33 @@
       </div>
     </div>
 
+    <%# ── Top pages ── %>
+    <% if (wikiKPIs.topPages.length) { %>
+    <div class="admin-kpi-top-section">
+      <div class="admin-kpi-top-header">
+        <span class="admin-kpi-top-title">Pages les plus consult&eacute;es</span>
+        <div class="admin-kpi-limit-toggle" id="wiki-limit-toggle">
+          <button class="active" data-limit="10">10</button>
+          <button data-limit="20">20</button>
+        </div>
+      </div>
+      <table class="admin-table admin-kpi-top-table" id="wiki-top-table">
+        <thead><tr><th>#</th><th>Page</th><th>Cat&eacute;gorie</th><th style="text-align:right">Vues</th></tr></thead>
+        <tbody>
+          <% wikiKPIs.topPages.forEach(function(p, i) { %>
+          <tr data-rank="<%= i + 1 %>"<%= i >= 10 ? ' class="admin-rank-hidden"' : '' %>>
+            <td class="admin-kpi-rank"><%= i + 1 %></td>
+            <td><a href="/wiki/<%= p.id %>"><%= p.title %></a></td>
+            <td class="admin-muted"><%= p.category %></td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums"><%= p.views %></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% } %>
+
+    <%# ── Par utilisateur ── %>
     <% if (wikiKPIs.perUser.length) { %>
     <div class="admin-kpi-users">
       <h3 class="admin-kpi-users-title">Par utilisateur</h3>
@@ -140,7 +167,7 @@
       <% wikiKPIs.perUser.forEach(function(u) { %>
       <details class="admin-kpi-user-row">
         <summary class="admin-kpi-user-summary">
-          <span class="admin-kpi-user-name"><%= u.displayName %></span>
+          <span class="admin-kpi-user-name<%= u.userId === null ? ' admin-kpi-anon' : '' %>"><%= u.displayName %></span>
           <div class="admin-kpi-bar-wrap">
             <div class="admin-kpi-bar" style="width:<%= Math.round((u.views / wikiMax) * 100) %>%"></div>
           </div>
@@ -219,6 +246,57 @@
       </div>
     </div>
 
+    <%# ── Top images ── %>
+    <% if (galleryKPIs.topImages.length) { %>
+    <div class="admin-kpi-top-section">
+      <div class="admin-kpi-top-header">
+        <span class="admin-kpi-top-title">Images les plus consult&eacute;es</span>
+        <div class="admin-kpi-limit-toggle" id="gal-img-limit-toggle">
+          <button class="active" data-limit="10">10</button>
+          <button data-limit="20">20</button>
+        </div>
+      </div>
+      <table class="admin-table admin-kpi-top-table" id="gal-img-top-table">
+        <thead><tr><th>#</th><th>Image</th><th style="text-align:right">Vues</th></tr></thead>
+        <tbody>
+          <% galleryKPIs.topImages.forEach(function(img, i) { %>
+          <tr data-rank="<%= i + 1 %>"<%= i >= 10 ? ' class="admin-rank-hidden"' : '' %>>
+            <td class="admin-kpi-rank"><%= i + 1 %></td>
+            <td><a href="/galerie/<%= img.id %>/edit"><%= img.title || '—' %></a></td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums"><%= img.views %></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% } %>
+
+    <%# ── Top BD ── %>
+    <% if (galleryKPIs.topBd.length) { %>
+    <div class="admin-kpi-top-section">
+      <div class="admin-kpi-top-header">
+        <span class="admin-kpi-top-title">BD les plus consult&eacute;es</span>
+        <div class="admin-kpi-limit-toggle" id="gal-bd-limit-toggle">
+          <button class="active" data-limit="10">10</button>
+          <button data-limit="20">20</button>
+        </div>
+      </div>
+      <table class="admin-table admin-kpi-top-table" id="gal-bd-top-table">
+        <thead><tr><th>#</th><th>BD</th><th style="text-align:right">Vues</th></tr></thead>
+        <tbody>
+          <% galleryKPIs.topBd.forEach(function(img, i) { %>
+          <tr data-rank="<%= i + 1 %>"<%= i >= 10 ? ' class="admin-rank-hidden"' : '' %>>
+            <td class="admin-kpi-rank"><%= i + 1 %></td>
+            <td><a href="/galerie/<%= img.id %>/edit"><%= img.title || '—' %></a></td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums"><%= img.views %></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% } %>
+
+    <%# ── Par utilisateur ── %>
     <% if (galleryKPIs.perUser.length) { %>
     <div class="admin-kpi-users">
       <h3 class="admin-kpi-users-title">Par utilisateur</h3>
@@ -226,7 +304,7 @@
       <% galleryKPIs.perUser.forEach(function(u) { %>
       <details class="admin-kpi-user-row">
         <summary class="admin-kpi-user-summary">
-          <span class="admin-kpi-user-name"><%= u.displayName %></span>
+          <span class="admin-kpi-user-name<%= u.userId === null ? ' admin-kpi-anon' : '' %>"><%= u.displayName %></span>
           <div class="admin-kpi-bar-wrap">
             <div class="admin-kpi-bar" style="width:<%= Math.round((u.views / galMax) * 100) %>%"></div>
           </div>
@@ -318,6 +396,21 @@
   if (hash && document.querySelector(".admin-tab-btn[data-tab='" + hash + "']")) {
     activateTab(hash);
   }
+
+  // ── Top 10/20 toggles ────────────────────────────
+  document.querySelectorAll(".admin-kpi-limit-toggle").forEach(function(toggle) {
+    var tableId = toggle.id.replace("-limit-toggle", "-top-table");
+    var table = document.getElementById(tableId);
+    toggle.addEventListener("click", function(e) {
+      var btn = e.target.closest("button[data-limit]");
+      if (!btn || !table) return;
+      var limit = Number(btn.dataset.limit);
+      toggle.querySelectorAll("button").forEach(function(b) { b.classList.toggle("active", b === btn); });
+      table.querySelectorAll("tr[data-rank]").forEach(function(row) {
+        row.classList.toggle("admin-rank-hidden", Number(row.dataset.rank) > limit);
+      });
+    });
+  });
 
   // ── Wiki featured toggle ──────────────────────────
   document.querySelectorAll("#wiki-featured-list .admin-featured-toggle").forEach(function(btn) {

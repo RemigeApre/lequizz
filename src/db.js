@@ -588,30 +588,33 @@ function getWikiKPIs() {
   const weekViews = db.prepare(
     "SELECT COUNT(*) AS v FROM wiki_page_views WHERE created_at >= datetime('now', '-7 days')"
   ).get().v;
+  // Top pages all-time (counter historique)
+  const topPages = db.prepare(
+    "SELECT id, title, category, views FROM wiki_pages WHERE views > 0 ORDER BY views DESC LIMIT 20"
+  ).all();
+  // Per user (anonymous inclus)
   const perUser = db.prepare(
-    `SELECT u.id, u.display_name, COUNT(*) AS views
-     FROM wiki_page_views wpv JOIN users u ON u.id = wpv.user_id
-     WHERE wpv.user_id IS NOT NULL
+    `SELECT COALESCE(u.display_name, 'Anonyme') AS display_name, wpv.user_id,
+       COUNT(*) AS views
+     FROM wiki_page_views wpv LEFT JOIN users u ON u.id = wpv.user_id
      GROUP BY wpv.user_id ORDER BY views DESC`
   ).all();
   const topRows = db.prepare(
     `SELECT wpv.user_id, wp.title, wp.id AS page_id, COUNT(*) AS views
      FROM wiki_page_views wpv JOIN wiki_pages wp ON wp.id = wpv.page_id
-     WHERE wpv.user_id IS NOT NULL
      GROUP BY wpv.user_id, wpv.page_id
      ORDER BY wpv.user_id, views DESC`
   ).all();
   const topByUser = {};
   topRows.forEach(function(r) {
-    if (!topByUser[r.user_id]) topByUser[r.user_id] = [];
-    if (topByUser[r.user_id].length < 5) topByUser[r.user_id].push({ title: r.title, pageId: r.page_id, views: r.views });
+    const k = String(r.user_id);
+    if (!topByUser[k]) topByUser[k] = [];
+    if (topByUser[k].length < 5) topByUser[k].push({ title: r.title, pageId: r.page_id, views: r.views });
   });
   return {
-    totalViews,
-    monthViews,
-    weekViews,
+    totalViews, monthViews, weekViews, topPages,
     perUser: perUser.map(function(r) {
-      return { userId: r.id, displayName: r.display_name, views: r.views, topPages: topByUser[r.id] || [] };
+      return { userId: r.user_id, displayName: r.display_name, views: r.views, topPages: topByUser[String(r.user_id)] || [] };
     }),
   };
 }
@@ -624,30 +627,37 @@ function getGalleryKPIs() {
   const weekViews = db.prepare(
     "SELECT COUNT(*) AS v FROM gallery_views WHERE created_at >= datetime('now', '-7 days')"
   ).get().v;
+  // Top images et BD séparés
+  const topAllRows = db.prepare(
+    `SELECT gi.id, gi.title, gi.content_type, COUNT(*) AS views
+     FROM gallery_views gv JOIN gallery_images gi ON gi.id = gv.gallery_id
+     GROUP BY gv.gallery_id ORDER BY views DESC LIMIT 60`
+  ).all();
+  const topImages = topAllRows.filter(function(r) { return r.content_type !== "bd"; }).slice(0, 20);
+  const topBd     = topAllRows.filter(function(r) { return r.content_type === "bd"; }).slice(0, 20);
+  // Per user (anonymous inclus)
   const perUser = db.prepare(
-    `SELECT u.id, u.display_name, COUNT(*) AS views
-     FROM gallery_views gv JOIN users u ON u.id = gv.user_id
-     WHERE gv.user_id IS NOT NULL
+    `SELECT COALESCE(u.display_name, 'Anonyme') AS display_name, gv.user_id,
+       COUNT(*) AS views
+     FROM gallery_views gv LEFT JOIN users u ON u.id = gv.user_id
      GROUP BY gv.user_id ORDER BY views DESC`
   ).all();
   const topRows = db.prepare(
     `SELECT gv.user_id, gi.title, gi.id AS gallery_id, COUNT(*) AS views
      FROM gallery_views gv JOIN gallery_images gi ON gi.id = gv.gallery_id
-     WHERE gv.user_id IS NOT NULL
      GROUP BY gv.user_id, gv.gallery_id
      ORDER BY gv.user_id, views DESC`
   ).all();
   const topByUser = {};
   topRows.forEach(function(r) {
-    if (!topByUser[r.user_id]) topByUser[r.user_id] = [];
-    if (topByUser[r.user_id].length < 5) topByUser[r.user_id].push({ title: r.title, galleryId: r.gallery_id, views: r.views });
+    const k = String(r.user_id);
+    if (!topByUser[k]) topByUser[k] = [];
+    if (topByUser[k].length < 5) topByUser[k].push({ title: r.title, galleryId: r.gallery_id, views: r.views });
   });
   return {
-    totalViews,
-    monthViews,
-    weekViews,
+    totalViews, monthViews, weekViews, topImages, topBd,
     perUser: perUser.map(function(r) {
-      return { userId: r.id, displayName: r.display_name, views: r.views, topImages: topByUser[r.id] || [] };
+      return { userId: r.user_id, displayName: r.display_name, views: r.views, topImages: topByUser[String(r.user_id)] || [] };
     }),
   };
 }

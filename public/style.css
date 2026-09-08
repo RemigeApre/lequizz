@@ -4760,6 +4760,64 @@ a.wiki-ql-label:hover .wiki-ql-text {
   color: var(--muted);
 }
 
+/* KPI top table */
+.admin-kpi-top-section {
+  margin-bottom: 1.25rem;
+}
+
+.admin-kpi-top-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.admin-kpi-top-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.admin-kpi-limit-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.admin-kpi-limit-toggle button {
+  background: none;
+  border: none;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+  color: var(--muted);
+  transition: background 0.12s, color 0.12s;
+}
+.admin-kpi-limit-toggle button + button {
+  border-left: 1px solid var(--border);
+}
+.admin-kpi-limit-toggle button.active {
+  background: #7f1d1d;
+  color: #fff;
+}
+.admin-kpi-limit-toggle button:hover:not(.active) {
+  background: var(--surface);
+  color: var(--fg);
+}
+
+.admin-rank-hidden { display: none; }
+
+.admin-kpi-rank {
+  width: 2rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
 /* KPI per-user section */
 .admin-kpi-users {
   margin-bottom: 1.75rem;
@@ -4805,6 +4863,11 @@ a.wiki-ql-label:hover .wiki-ql-text {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.admin-kpi-anon {
+  color: var(--muted);
+  font-style: italic;
 }
 
 .admin-kpi-bar-wrap {
