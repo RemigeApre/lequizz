@@ -33,52 +33,55 @@
           <span id="wiki-result-count" class="wiki-result-count" hidden></span>
         </div>
 
-        <details class="wiki-filters-panel" id="wiki-filters-panel">
-          <summary class="wiki-filters-summary">Filtres &amp; tri</summary>
-          <div class="wiki-filters-body">
+        <div class="wiki-sidebar-filters">
 
-            <button type="button" id="wiki-adv-toggle" class="wiki-adv-toggle">Filtres avancés &#9662;</button>
-            <div id="wiki-adv-panel" class="wiki-adv-panel" hidden>
-              <div class="wiki-adv-row">
-                <label class="wiki-adv-label">Note min.</label>
-                <div class="wiki-adv-stars" id="wiki-adv-stars">
-                  <% for (var si = 1; si <= 5; si++) { %>
-                    <button type="button" class="wiki-adv-star" data-value="<%= si %>">&#9734;</button>
-                  <% } %>
-                  <button type="button" class="wiki-adv-star-reset" id="wiki-adv-star-reset">&#10006;</button>
-                </div>
-              </div>
-              <div class="wiki-adv-checks">
-                <label class="chip-option"><input type="checkbox" id="adv-owned" /><span>&#9733; Poss&eacute;d&eacute;</span></label>
-                <label class="chip-option"><input type="checkbox" id="adv-flame" /><span>&#128293; J&apos;adore</span></label>
-                <label class="chip-option"><input type="checkbox" id="adv-interested" /><span>&#10024; Int&eacute;ress&eacute;e</span></label>
-              </div>
+          <div class="wiki-filter-section">
+            <span class="wiki-filter-label">Trier</span>
+            <select id="wiki-sort-select" class="wiki-sort-select">
+              <option value="alpha-asc">A &rarr; Z</option>
+              <option value="alpha-desc">Z &rarr; A</option>
+              <option value="date-desc">Plus r&eacute;cent</option>
+              <option value="date-asc">Plus ancien</option>
+              <option value="rating-desc">Mieux not&eacute;</option>
+            </select>
+          </div>
+
+          <div class="wiki-filter-section wiki-filter-toggles">
+            <button type="button" id="wiki-ultra-toggle" class="wiki-ultra-btn">&#128274; Masquer Ultra</button>
+            <button type="button" id="wiki-fantaisie-toggle" class="wiki-ultra-btn">&#10024; Masquer Fantaisie</button>
+          </div>
+
+          <div class="wiki-filter-section">
+            <span class="wiki-filter-label">Note min.</span>
+            <div class="wiki-adv-stars" id="wiki-adv-stars">
+              <% for (var si = 1; si <= 5; si++) { %>
+                <button type="button" class="wiki-adv-star" data-value="<%= si %>">&#9734;</button>
+              <% } %>
+              <button type="button" class="wiki-adv-star-reset" id="wiki-adv-star-reset">&#10006;</button>
             </div>
+            <label class="chip-option wiki-notrated-opt"><input type="checkbox" id="adv-not-rated" /><span>Pas encore not&eacute;</span></label>
+          </div>
 
-            <% if (allTags.length) { %>
-              <div class="links-filter" id="wiki-tag-filter">
-                <button type="button" class="tag-chip active" data-tag="">Tous les tags</button>
+          <div class="wiki-filter-section wiki-adv-checks">
+            <label class="chip-option"><input type="checkbox" id="adv-owned" /><span>&#9733; Poss&eacute;d&eacute;</span></label>
+            <label class="chip-option"><input type="checkbox" id="adv-flame" /><span>&#128293; J&apos;adore</span></label>
+            <label class="chip-option"><input type="checkbox" id="adv-interested" /><span>&#10024; Int&eacute;ress&eacute;e</span></label>
+          </div>
+
+          <% if (allTags.length) { %>
+            <div class="wiki-filter-section">
+              <span class="wiki-filter-label">Tags</span>
+              <input type="search" id="wiki-tag-search" class="wiki-tag-search-input" placeholder="Chercher un tag&hellip;" autocomplete="off" />
+              <div class="links-filter wiki-tag-cloud" id="wiki-tag-filter">
+                <button type="button" class="tag-chip active" data-tag="">Tous</button>
                 <% allTags.forEach(function (tag) { %>
                   <button type="button" class="tag-chip" data-tag="<%= tag %>"><%= tag %></button>
                 <% }) %>
               </div>
-            <% } %>
-
-            <div class="wiki-sort-row">
-              <button type="button" id="wiki-ultra-toggle" class="wiki-ultra-btn">&#128274; Masquer Ultra</button>
-              <button type="button" id="wiki-fantaisie-toggle" class="wiki-ultra-btn">&#10024; Masquer Fantaisie</button>
-              <label class="wiki-sort-label" for="wiki-sort-select">Trier&nbsp;:</label>
-              <select id="wiki-sort-select" class="wiki-sort-select">
-                <option value="alpha-asc" selected>A &rarr; Z</option>
-                <option value="alpha-desc">Z &rarr; A</option>
-                <option value="date-desc">Plus r&eacute;cent</option>
-                <option value="date-asc">Plus ancien</option>
-                <option value="rating-desc">Mieux not&eacute;</option>
-              </select>
             </div>
+          <% } %>
 
-          </div>
-        </details>
+        </div><%# /wiki-sidebar-filters %>
 
       </div><%# /wiki-sidebar-body %>
     </aside>
@@ -117,6 +120,7 @@
               <button type="button" class="wiki-adv-star-reset" id="wiki-adv-star-reset">&#10006;</button>
             </div>
           </div>
+          <label class="chip-option" style="margin-top:0.25rem"><input type="checkbox" id="adv-not-rated" /><span>Pas encore not&eacute;</span></label>
           <div class="wiki-adv-checks">
             <label class="chip-option"><input type="checkbox" id="adv-owned" /><span>&#9733; Poss&eacute;d&eacute;</span></label>
             <label class="chip-option"><input type="checkbox" id="adv-flame" /><span>&#128293; J&apos;adore</span></label>

@@ -64,9 +64,25 @@
   data-ultra="<%= (page.tags.indexOf('ultra') !== -1 || page.tags.indexOf('irréaliste') !== -1) ? '1' : '0' %>"
   data-irrealiste="<%= page.tags.indexOf('irréaliste') !== -1 ? '1' : '0' %>"
   data-fantaisie="<%= page.tags.indexOf('fantaisie') !== -1 ? '1' : '0' %>"
+  <%
+    var wcIsUltra     = page.tags.indexOf('ultra') !== -1 || page.tags.indexOf('irréaliste') !== -1;
+    var wcIsFantaisie = page.tags.indexOf('fantaisie') !== -1;
+    var wcBannerText  = '';
+    var wcBannerMod   = '';
+    if (wcIsUltra && wcIsFantaisie) {
+      wcBannerText = 'Fantaisie & Ultra';  wcBannerMod = 'both';
+    } else if (page.tags.indexOf('irréaliste') !== -1) {
+      wcBannerText = 'Irr\u00e9aliste';   wcBannerMod = 'irrealiste';
+    } else if (wcIsUltra) {
+      wcBannerText = 'Ultra';              wcBannerMod = 'ultra';
+    } else if (wcIsFantaisie) {
+      wcBannerText = 'Fantaisie';          wcBannerMod = 'fantaisie';
+    }
+  %>
   data-extra-cats="<%= (page.extraCategories || []).join('|') %>">
 
   <span class="wiki-card-accent" style="background: <%= wcAccent %>"></span>
+  <% if (wcBannerText) { %><span class="wiki-card-banner wiki-card-banner--<%= wcBannerMod %>"><%= wcBannerText %></span><% } %>
 
   <% if (page.imagePaths && page.imagePaths.length && currentUser) { %>
     <%# ── Carte AVEC image ───────────────────────────────────────────── %>

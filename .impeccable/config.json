@@ -1,0 +1,16 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "public/wiki.js"
+        ],
+        "createdAt": "2026-09-08T10:59:13.373Z"
+      }
+    ]
+  }
+}

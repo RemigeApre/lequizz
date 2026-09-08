@@ -540,6 +540,8 @@
   var advOwned        = document.getElementById("adv-owned");
   var advFlame        = document.getElementById("adv-flame");
   var advInterested   = document.getElementById("adv-interested");
+  var advNotRated     = document.getElementById("adv-not-rated");
+  var tagSearchInput  = document.getElementById("wiki-tag-search");
 
   var activeCategory  = localStorage.getItem("wiki-filter-cat") || "";
   var activeTag       = localStorage.getItem("wiki-filter-tag") || "";
@@ -656,6 +658,7 @@
     var cards   = Array.from(wikiList.querySelectorAll(".wiki-card"));
     var q       = norm(searchQuery);
     var hasAdv  = advMinRating > 0 ||
+                  (advNotRated && advNotRated.checked) ||
                   (advOwned && advOwned.checked) ||
                   (advFlame && advFlame.checked) ||
                   (advInterested && advInterested.checked);
@@ -680,7 +683,12 @@
       scores.set(card, sc);
 
       // Filtres avancés
-      var okRating     = !advMinRating || Number(card.dataset.rating) >= advMinRating;
+      var okRating;
+      if (advNotRated && advNotRated.checked) {
+        okRating = Number(card.dataset.rating) === 0;
+      } else {
+        okRating = !advMinRating || Number(card.dataset.rating) >= advMinRating;
+      }
       var okOwned      = !(advOwned && advOwned.checked) || card.dataset.owned === "1";
       var okFlame      = !(advFlame && advFlame.checked) || card.dataset.flame === "1";
       var okInterested = !(advInterested && advInterested.checked) || card.dataset.interested === "1";
@@ -781,6 +789,7 @@
     [advOwned,      "wiki-filter-owned"],
     [advFlame,      "wiki-filter-flame"],
     [advInterested, "wiki-filter-interested"],
+    [advNotRated,   "wiki-filter-not-rated"],
   ];
   advCbMap.forEach(function (pair) {
     var cb = pair[0], key = pair[1];
@@ -836,6 +845,18 @@
       }
     }
   }
+  if (tagSearchInput) {
+    tagSearchInput.addEventListener("input", function () {
+      var q = tagSearchInput.value.trim().toLowerCase();
+      if (tagFilter) {
+        tagFilter.querySelectorAll(".tag-chip").forEach(function (chip) {
+          var tag = (chip.dataset.tag || "").toLowerCase();
+          chip.hidden = q.length > 0 && tag.length > 0 && tag.indexOf(q) === -1;
+        });
+      }
+    });
+  }
+
   if (sortSelect) {
     sortSelect.value = activeSort;
     sortSelect.addEventListener("change", function () {
@@ -893,6 +914,7 @@
   }
   // Ouvre le panneau avancé si un filtre avancé est actif
   var anyAdv = advMinRating > 0 ||
+      (advNotRated && advNotRated.checked) ||
       (advOwned && advOwned.checked) ||
       (advFlame && advFlame.checked) ||
       (advInterested && advInterested.checked);
