@@ -3177,8 +3177,8 @@
     });
   })();
 
-  // Sur desktop, le volet filtre est ouvert par défaut
-  if (window.innerWidth >= 641) {
+  // Sur grand écran (sidebar fixe), le volet filtre est ouvert par défaut
+  if (window.innerWidth >= 1101) {
     document.querySelectorAll(".wiki-sidebar-filter-details").forEach(function (el) {
       el.setAttribute("open", "");
     });

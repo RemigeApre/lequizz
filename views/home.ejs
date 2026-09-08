@@ -2,16 +2,61 @@
 <main class="container wide">
   <%- include('partials/top-nav', { config: config }) %>
 
-  <p class="home-message"><%= config.intro %></p>
+  <div class="home-intro">
+
+    <p class="home-intro-lead">Avant d&rsquo;entrer dans <em>Confidences</em>, il faut poser une distinction essentielle&nbsp;: un fantasme n&rsquo;est ni une intention, ni un consentement futur, ni une opinion morale. Nous vous proposons de penser vos fantasmes selon quatre grandes cat&eacute;gories.</p>
+
+    <div class="home-cats">
+
+      <div class="home-cat home-cat--i">
+        <div class="home-cat-header">
+          <span class="home-cat-num">I</span>
+          <span class="home-cat-subtitle">Le possible et le consenti</span>
+        </div>
+        <p class="home-cat-body">Les fantasmes que vous aimez, que vous avez d&eacute;j&agrave; pratiqu&eacute;s ou que vous pourriez souhaiter pratiquer. Ils appartiennent au domaine du possible, du consenti et du r&eacute;alisable.</p>
+      </div>
+
+      <div class="home-cat home-cat--ii">
+        <div class="home-cat-header">
+          <span class="home-cat-num">II</span>
+          <span class="home-cat-subtitle">L&rsquo;imaginaire pr&eacute;f&eacute;r&eacute;</span>
+        </div>
+        <p class="home-cat-body">Les fantasmes que vous pr&eacute;f&eacute;rez conserver dans l&rsquo;imaginaire. Vous pouvez les appr&eacute;cier, les explorer ou les comprendre sans souhaiter les r&eacute;aliser. Certains peuvent &ecirc;tre simplement incompatibles avec vos envies r&eacute;elles&nbsp;; d&rsquo;autres peuvent &ecirc;tre dangereux, immoraux ou interdits par la loi. Fantasmer n&rsquo;oblige jamais &agrave; agir.</p>
+      </div>
+
+      <div class="home-cat home-cat--iii">
+        <div class="home-cat-header">
+          <span class="home-cat-num">III</span>
+          <span class="home-cat-subtitle">L&rsquo;impossible</span>
+        </div>
+        <p class="home-cat-body">Ils rel&egrave;vent de la fiction, de la magie, de cr&eacute;atures, de transformations ou de situations qui ne peuvent pas exister dans la r&eacute;alit&eacute;. Ils appartiennent pleinement &agrave; l&rsquo;imaginaire.</p>
+      </div>
+
+      <div class="home-cat home-cat--iv">
+        <div class="home-cat-header">
+          <span class="home-cat-num">IV</span>
+          <span class="home-cat-subtitle">Ce qui ne vous attire pas</span>
+        </div>
+        <p class="home-cat-body">Certaines pratiques, situations ou fantasmes peuvent vous laisser indiff&eacute;rent ou vous d&eacute;go&ucirc;ter. Les conna&icirc;tre ou les explorer intellectuellement ne signifie pas les d&eacute;sirer.</p>
+      </div>
+
+    </div>
+
+    <p class="home-cta">Si cette architecture vous convient, vous &ecirc;tes au bon endroit pour explorer.</p>
+
+    <div class="home-about">
+      <p><em>Confidences</em> propose un wiki consacr&eacute; aux pratiques, fantasmes, lieux, objets, partenaires et imaginaires li&eacute;s &agrave; la sexualit&eacute;. Nous expliquons leur existence, leur histoire, leurs variantes et, lorsque c&rsquo;est utile, les raisons pour lesquelles certaines personnes peuvent les trouver attirants.</p>
+      <p>Lorsque des pratiques pr&eacute;sentent des risques pour la sant&eacute;, des enjeux de consentement ou des interdictions l&eacute;gales, ceux-ci sont signal&eacute;s clairement.</p>
+      <p>Les utilisateurs majeurs disposant d&rsquo;un compte peuvent &eacute;galement acc&eacute;der aux illustrations et &agrave; la galerie de dessins associ&eacute;es au wiki.</p>
+      <p>Les quiz permettent enfin d&rsquo;explorer vos propres envies, limites, curiosit&eacute;s et pratiques. Ils sont con&ccedil;us pour rester courts et pr&eacute;cis, et peuvent &ecirc;tre refaits r&eacute;guli&egrave;rement&nbsp;: les fantasmes comme les d&eacute;sirs peuvent &eacute;voluer avec le temps.</p>
+    </div>
+
+  </div>
 
   <div class="home-shortcuts">
     <a href="/wiki" class="home-shortcut">Wiki</a>
     <% if (currentUser) { %><a href="/liens" class="home-shortcut">Liens</a><% } %>
   </div>
-
-  <% if (!currentUser) { %>
-    <p class="intro">Connecte-toi (ic&ocirc;ne &#128273; en haut) pour acc&eacute;der &agrave; la galerie, la BD, le quizz et les images du wiki.</p>
-  <% } %>
 
   <% if (currentUser && featuredPages && featuredPages.length) { %>
   <section class="home-featured">
