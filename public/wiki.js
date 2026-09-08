@@ -1203,6 +1203,7 @@
   var TAG_MAX  = 24; // maximum affiché dans la sidebar
   var tagExpandedCount = TAG_PAGE;
   var tagExpandBtn = document.getElementById("wiki-tag-expand-btn");
+  var tagAllLink   = document.getElementById("wiki-tag-all-link");
 
   function applyTagOverflow() {
     if (!tagFilter) return;
@@ -1220,11 +1221,15 @@
         chip.classList.add("wiki-tag-overflow-hidden");
       }
     });
-    // Bouton : visible si des chips débordent ET qu'on n'a pas atteint le max
+    // Bouton Plus : visible si des chips débordent ET qu'on n'a pas atteint le max
     if (tagExpandBtn) {
       var overflow = smartVisible.length > tagExpandedCount;
       var canExpand = tagExpandedCount < TAG_MAX;
       tagExpandBtn.hidden = !(overflow && canExpand);
+    }
+    // Lien "Tous les tags" : visible seulement quand la liste est étendue (au moins 1 clic sur Plus)
+    if (tagAllLink) {
+      tagAllLink.hidden = tagExpandedCount <= TAG_PAGE;
     }
   }
 
@@ -1907,6 +1912,8 @@
   function attachLightboxToImages() {
     document.querySelectorAll(".wiki-infobox-img, .wiki-gallery-img, .wiki-form-existing-image, .wiki-card-img, .wiki-var-img, .wiki-right-img, .wiki-secondary-img").forEach(function (img) {
       if (img.dataset.lbBound) return;
+      // Les images dans les cartes de liste naviguent vers la page wiki — pas de lightbox
+      if (img.closest(".wiki-card")) return;
       img.dataset.lbBound = "1";
       img.style.cursor = "zoom-in";
       img.addEventListener("click", function () {

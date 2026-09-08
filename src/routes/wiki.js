@@ -342,21 +342,21 @@ function buildWikiRouter(config) {
     const visiblePages = pages.filter((p) => !isUltra(p));
     const chapters = CATEGORIES.map((cat) => {
       const allCatPages = pagesForCategory(visiblePages, cat.key);
-      // count = catégorie principale seulement (évite double-comptage dans l'accueil)
-      const primaryCount = visiblePages.filter((p) => p.category === cat.key).length;
+      // count global (ultra + irréaliste inclus) pour la carte de catégorie
+      const primaryCount = pages.filter((p) => p.category === cat.key).length;
       return { ...cat, pages: allCatPages, count: primaryCount, preview: allCatPages.slice(0, 6) };
     });
     const allPages = listWikiPages();
     const recentAdded = [...allPages]
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .slice(0, 15);
+      .slice(0, 30);
     const recentUpdated = [...allPages]
       .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-      .slice(0, 15);
+      .slice(0, 30);
     const popular = allPages
       .filter((p) => p.rating > 0)
       .sort((a, b) => b.rating - a.rating)
-      .slice(0, 15);
+      .slice(0, 30);
     res.render("wiki-index", {
       config, chapters, pages,
       allTags: getAllTags(pages),

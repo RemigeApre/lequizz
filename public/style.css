@@ -6287,8 +6287,8 @@ a.wiki-ql-label:hover .wiki-ql-text {
 
 /* ── Tag footer : voir plus + lien tous les tags ──── */
 .wiki-tag-footer {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-top: 0.35rem; gap: 0.4rem;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 0.35rem; gap: 0.6rem;
 }
 .wiki-tag-expand-btn {
   font-size: 0.72rem; padding: 0.2rem 0.55rem;
@@ -6300,10 +6300,8 @@ a.wiki-ql-label:hover .wiki-ql-text {
 .wiki-tag-all-link {
   font-size: 0.72rem; color: rgba(255,255,255,0.55);
   text-decoration: none; white-space: nowrap;
-  display: block; text-align: center; width: 100%;
 }
 .wiki-tag-all-link:hover { color: #fff; }
-.wiki-tag-footer { justify-content: center; }
 
 /* ── Note min : titre + croix sur même ligne ─────── */
 .wiki-filter-label-row {
