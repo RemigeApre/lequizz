@@ -1609,12 +1609,40 @@
       });
   }
 
+  var lbTagCounts = null; // { pages: {tag: n}, images: {tag: n} }
+  function ensureTagCounts(cb) {
+    if (lbTagCounts) { cb(); return; }
+    fetch("/wiki/tag-counts")
+      .then(function(r) { return r.json(); })
+      .then(function(data) { lbTagCounts = data; cb(); })
+      .catch(function() { lbTagCounts = { pages: {}, images: {} }; cb(); });
+  }
+
   function renderMetaTags(tags, editable) {
     lbMetaTags.innerHTML = "";
     tags.forEach(function(tag) {
       var chip = document.createElement("span");
       chip.className = "wiki-lb-tag-chip";
-      chip.textContent = tag;
+      var label = document.createTextNode(tag);
+      chip.appendChild(label);
+      if (!editable && lbTagCounts) {
+        var np = lbTagCounts.pages[tag] || 0;
+        var ni = lbTagCounts.images[tag] || 0;
+        if (np || ni) {
+          var xy = document.createElement("span");
+          xy.className = "wiki-tag-xy";
+          var sp = document.createElement("span");
+          sp.className = "wiki-tag-xy-pages";
+          sp.textContent = np;
+          var si = document.createElement("span");
+          si.className = "wiki-tag-xy-imgs";
+          si.textContent = ni;
+          xy.appendChild(sp);
+          xy.appendChild(document.createTextNode("|"));
+          xy.appendChild(si);
+          chip.appendChild(xy);
+        }
+      }
       if (editable) {
         var rm = document.createElement("button");
         rm.type = "button";
@@ -1675,6 +1703,7 @@
       lbCurrentMeta = null;
       return;
     }
+    ensureTagCounts(function() {
     fetch("/galerie/image-meta?src=" + encodeURIComponent(lbCurrentSrc))
       .then(function(r) { return r.json(); })
       .then(function(meta) {
@@ -1698,6 +1727,7 @@
           field.hidden = false;
         });
       });
+    }); // ensureTagCounts
   }
 
   // Recherche de pages à associer

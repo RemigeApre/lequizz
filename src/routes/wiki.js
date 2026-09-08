@@ -432,6 +432,15 @@ function buildWikiRouter(config) {
     res.json(results);
   });
 
+  // ── Compteurs X|Y par tag ───────────────────────────
+  router.get("/tag-counts", (req, res) => {
+    const pages = {};
+    listWikiPages().forEach((p) => p.tags.forEach((t) => { pages[t] = (pages[t] || 0) + 1; }));
+    const images = {};
+    listGalleryImages().forEach((img) => img.tags.forEach((t) => { images[t] = (images[t] || 0) + 1; }));
+    res.json({ pages, images });
+  });
+
   // ── Recherche de pages (pour associer) ─────────────
   router.get("/search", (req, res) => {
     const q = String(req.query.q || "").toLowerCase().trim();
