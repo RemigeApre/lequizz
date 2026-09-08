@@ -6428,3 +6428,136 @@ a.wiki-ql-label:hover .wiki-ql-text {
   width: 2rem;
 }
 
+/* ══ TAGS PAGE — layout sidebar + couleurs par type ═══════════════════════ */
+
+/* Sur mobile la page de tags reste un layout normal (pas de sidebar fixe) */
+.tags-page-locked .tags-grid {
+  padding: 0;
+}
+
+/* Couleurs des tags par type — écrasent le gradient normal */
+.tags-item--ultra {
+  background: hsl(10, 65%, 22%) !important;
+  border-color: hsl(10, 60%, 35%) !important;
+  color: hsl(15, 90%, 82%) !important;
+}
+.tags-item--irrealiste {
+  background: hsl(215, 55%, 16%) !important;
+  border-color: hsl(215, 50%, 28%) !important;
+  color: hsl(200, 75%, 72%) !important;
+}
+.tags-item--fantaisie {
+  background: hsl(315, 50%, 20%) !important;
+  border-color: hsl(315, 48%, 35%) !important;
+  color: hsl(315, 80%, 82%) !important;
+}
+
+/* Chips de type dans la sidebar et dans le popup admin */
+.tags-type-ultra     { background: hsl(10, 55%, 28%)  !important; border-color: hsl(10, 50%, 40%)  !important; color: hsl(15, 90%, 82%)  !important; }
+.tags-type-irrealiste{ background: hsl(215, 50%, 22%) !important; border-color: hsl(215, 45%, 34%) !important; color: hsl(200, 75%, 72%) !important; }
+.tags-type-fantaisie { background: hsl(315, 45%, 25%) !important; border-color: hsl(315, 42%, 38%) !important; color: hsl(315, 80%, 82%) !important; }
+.tags-type-ultra.active,     .tags-type-ultra:hover     { filter: brightness(1.25); }
+.tags-type-irrealiste.active, .tags-type-irrealiste:hover { filter: brightness(1.25); }
+.tags-type-fantaisie.active,  .tags-type-fantaisie:hover  { filter: brightness(1.25); }
+
+/* Formulaire de création de tag (sidebar admin) */
+.tags-create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+.tags-create-input {
+  width: 100%;
+}
+.tags-create-type {
+  width: 100%;
+}
+.tags-create-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.tags-create-btn:hover { opacity: 0.88; }
+.tags-create-feedback {
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+/* Admin section dans le popup */
+.tags-popup-admin {
+  border-top: 1px solid var(--border);
+  padding: 0.5rem 1rem;
+}
+.tags-admin-details { }
+.tags-admin-summary {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0.25rem 0;
+  user-select: none;
+}
+.tags-admin-summary:hover { color: var(--fg); }
+.tags-admin-body {
+  margin-top: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.tags-admin-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.tags-admin-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+  white-space: nowrap;
+  min-width: 5rem;
+}
+.tags-admin-input {
+  flex: 1;
+  min-width: 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.85rem;
+  color: var(--fg);
+}
+.tags-admin-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.tags-admin-btn:disabled { opacity: 0.5; cursor: default; }
+.tags-admin-type-btns {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+.tags-type-btn.active { outline: 2px solid rgba(255,255,255,0.6); }
+.tags-admin-feedback {
+  font-size: 0.8rem;
+}
+
+/* Tags grid dans le layout sidebar (doit prendre toute la largeur dispo) */
+@media (min-width: 641px) {
+  .tags-page-locked .tags-grid {
+    padding: 0;
+  }
+}
+

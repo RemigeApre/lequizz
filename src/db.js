@@ -158,6 +158,15 @@ db.exec(`
   )
 `);
 
+// Métadonnées des tags : type (normal/ultra/irrealiste/fantaisie) et
+// possibilité de créer des tags "standalone" sans aucun contenu associé.
+db.exec(`
+  CREATE TABLE IF NOT EXISTS tag_meta (
+    tag  TEXT PRIMARY KEY,
+    type TEXT NOT NULL DEFAULT 'normal'
+  )
+`);
+
 function rowToUser(row) {
   if (!row) return null;
   return {
@@ -654,6 +663,62 @@ function deleteGalleryImage(id) {
   db.prepare("DELETE FROM gallery_images WHERE id = ?").run(id);
 }
 
+// ── Tag metadata ──────────────────────────────────────────────────────────
+const VALID_TAG_TYPES = new Set(["normal", "ultra", "irrealiste", "fantaisie"]);
+
+function getAllTagMeta() {
+  const rows = db.prepare("SELECT tag, type FROM tag_meta").all();
+  const result = {};
+  rows.forEach((r) => { result[r.tag] = r.type; });
+  return result;
+}
+
+function setTagType(tag, type) {
+  if (!VALID_TAG_TYPES.has(type)) type = "normal";
+  db.prepare("INSERT OR REPLACE INTO tag_meta (tag, type) VALUES (?, ?)").run(tag, type);
+}
+
+function createStandaloneTag(tag) {
+  const t = String(tag || "").trim();
+  if (!t) return false;
+  db.prepare("INSERT OR IGNORE INTO tag_meta (tag, type) VALUES (?, 'normal')").run(t);
+  return true;
+}
+
+function renameTagEverywhere(oldTag, newTag) {
+  const now = new Date().toISOString();
+  const tables = [
+    { name: "wiki_pages",      hasUpdatedAt: true  },
+    { name: "gallery_images",  hasUpdatedAt: true  },
+    { name: "bd_books",        hasUpdatedAt: true  },
+    { name: "links",           hasUpdatedAt: false },
+  ];
+  for (const { name, hasUpdatedAt } of tables) {
+    const rows = db.prepare(`SELECT id, tags FROM ${name}`).all();
+    for (const row of rows) {
+      try {
+        const tags = JSON.parse(row.tags || "[]");
+        const idx = tags.findIndex((t) => String(t).toLowerCase().trim() === oldTag.toLowerCase());
+        if (idx === -1) continue;
+        tags[idx] = newTag;
+        if (hasUpdatedAt) {
+          db.prepare(`UPDATE ${name} SET tags = ?, updated_at = ? WHERE id = ?`)
+            .run(JSON.stringify(tags), now, row.id);
+        } else {
+          db.prepare(`UPDATE ${name} SET tags = ? WHERE id = ?`)
+            .run(JSON.stringify(tags), row.id);
+        }
+      } catch (_) {}
+    }
+  }
+  // Déplace les métadonnées vers le nouveau nom
+  const meta = db.prepare("SELECT type FROM tag_meta WHERE tag = ?").get(oldTag);
+  if (meta) {
+    db.prepare("DELETE FROM tag_meta WHERE tag = ?").run(oldTag);
+    db.prepare("INSERT OR IGNORE INTO tag_meta (tag, type) VALUES (?, ?)").run(newTag, meta.type);
+  }
+}
+
 module.exports = {
   db,
   insertSubmission,
@@ -710,4 +775,8 @@ module.exports = {
   countFavorites,
   getUserNote,
   setUserNote,
+  getAllTagMeta,
+  setTagType,
+  createStandaloneTag,
+  renameTagEverywhere,
 };

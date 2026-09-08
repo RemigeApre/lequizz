@@ -785,11 +785,46 @@
       // Track which cards pass all non-tag filters (for smart tag chip visibility)
       var okNonTag = okCat && okUltra && okIrrealiste && okSpecial && okExtraCat && okSearch && okRating && okNotRated && okOwned && okFlame && okInterested;
       card._passesNonTag = okNonTag;
+      // Track which cards pass all filters except the category (for 9/27 chip counts)
+      card._passesNonCat = okUltra && okIrrealiste && okSpecial && okExtraCat && okSearch && okRating && okNotRated && okOwned && okFlame && okInterested && okTag;
       card.hidden = !(okNonTag && okTag);
     });
 
     var baseCards = cards.filter(function(c) { return c._passesNonTag; });
     updateTagChipVisibility(baseCards);
+
+    // Mise à jour des chips catégories avec les compteurs "x/y"
+    if (categoryFilter) {
+      var anyNonCatFilter = !!q || includedTagsSet.size > 0 || excludedTagsSet.size > 0 || advMinRating > 0 || _anyPropAdv;
+      var catFiltered = {}, catTotal = {};
+      cards.forEach(function(card) {
+        var cats = [card.dataset.category].concat((card.dataset.extraCats || "").split("|").filter(Boolean));
+        cats.forEach(function(cat) {
+          if (!cat) return;
+          catTotal[cat] = (catTotal[cat] || 0) + 1;
+          if (card._passesNonCat) catFiltered[cat] = (catFiltered[cat] || 0) + 1;
+        });
+      });
+      var totalPasses = cards.filter(function(c) { return c._passesNonCat; }).length;
+      categoryFilter.querySelectorAll(".tag-chip[data-category]").forEach(function(chip) {
+        var cat   = chip.dataset.category || "";
+        var label = chip.dataset.label || chip.textContent.trim();
+        if (!chip.dataset.label) chip.dataset.label = label; // cache on first call
+        if (!anyNonCatFilter) {
+          chip.textContent = (cat === "__owned__" ? "\u2605\u00a0" : "") + chip.dataset.label;
+        } else if (cat === "") {
+          chip.textContent = chip.dataset.label + "\u00a0" + totalPasses + "/" + cards.length;
+        } else if (cat === "__owned__") {
+          var ownedTotal = cards.filter(function(c) { return c.dataset.owned === "1"; }).length;
+          var ownedFilt  = cards.filter(function(c) { return c.dataset.owned === "1" && c._passesNonCat; }).length;
+          chip.textContent = "\u2605\u00a0" + chip.dataset.label + "\u00a0" + ownedFilt + "/" + ownedTotal;
+        } else {
+          var f = catFiltered[cat] || 0;
+          var t = catTotal[cat] || 0;
+          chip.textContent = chip.dataset.label + (t > 0 ? "\u00a0" + f + "/" + t : "");
+        }
+      });
+    }
 
     // Tri
     var visible = cards.filter(function (c) { return !c.hidden; });

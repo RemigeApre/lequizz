@@ -13,7 +13,7 @@ const buildGalleryRouter = require("./routes/gallery");
 const buildBdRouter = require("./routes/bd");
 const buildFavoritesRouter = require("./routes/favorites");
 const { attachUser } = require("./auth");
-const { db } = require("./db");
+const { db, getAllTagMeta, setTagType, createStandaloneTag, renameTagEverywhere } = require("./db");
 
 // Store de sessions SQLite : survit aux redemarrages contrairement au
 // memory store par defaut. Implémenté directement avec better-sqlite3
@@ -221,6 +221,15 @@ app.get("/api/search", function (req, res) {
 function parseTags(raw) {
   try { return JSON.parse(raw || "[]"); } catch (_) { return []; }
 }
+
+// Détermine le type d'un tag : priorité au tag_meta, puis détection automatique
+// par le nom ("ultra" et "irréaliste" sont des types spéciaux).
+var AUTO_TYPES = { ultra: "ultra", "irréaliste": "irrealiste", fantaisie: "fantaisie" };
+function resolveTagType(tagName, metaMap) {
+  if (metaMap && metaMap[tagName]) return metaMap[tagName];
+  return AUTO_TYPES[tagName] || "normal";
+}
+
 app.get("/tags", function (req, res) {
   var wiki = {}, galerie = {}, bd = {};
   function fill(rows, target) {
@@ -236,22 +245,98 @@ app.get("/tags", function (req, res) {
     try { fill(db.prepare("SELECT tags FROM gallery_images").all(), galerie); } catch (_) {}
     try { fill(db.prepare("SELECT tags FROM bd_books").all(), bd); } catch (_) {}
   }
+  var metaMap = {};
+  try { metaMap = getAllTagMeta(); } catch (_) {}
+
+  // Tags venant du contenu
   var allKeys = new Set(Object.keys(wiki).concat(Object.keys(galerie)).concat(Object.keys(bd)));
+  // Tags standalone (dans tag_meta mais pas dans le contenu)
+  Object.keys(metaMap).forEach(function (t) { allKeys.add(t); });
+
   var tags = Array.from(allKeys).map(function (t) {
-    return { tag: t, count: (wiki[t] || 0) + (galerie[t] || 0) + (bd[t] || 0),
-             breakdown: { wiki: wiki[t] || 0, galerie: galerie[t] || 0, bd: bd[t] || 0 } };
+    return {
+      tag:       t,
+      count:     (wiki[t] || 0) + (galerie[t] || 0) + (bd[t] || 0),
+      breakdown: { wiki: wiki[t] || 0, galerie: galerie[t] || 0, bd: bd[t] || 0 },
+      type:      resolveTagType(t, metaMap),
+    };
   }).sort(function (a, b) {
     var d = b.count - a.count;
     return d !== 0 ? d : a.tag.localeCompare(b.tag, "fr");
   });
+
+  // Gradient basé sur le count réel (pas le rang) : même count → même couleur
+  var maxCount = tags.length > 0 ? tags[0].count : 1;
+  var minCount = tags.length > 0 ? tags[tags.length - 1].count : 0;
+  var range = maxCount - minCount;
+  tags = tags.map(function (item) {
+    var pct = range > 0 ? (maxCount - item.count) / range : 0;
+    return Object.assign({}, item, { pct: parseFloat(pct.toFixed(3)) });
+  });
+
   res.render("tags", { config, tags, currentUser: req.user || null });
+});
+
+// ── API admin : créer un tag standalone ────────────────────────────────────
+app.post("/api/tags/create", function (req, res) {
+  if (!req.user || !req.user.isAdmin) return res.status(403).json({ ok: false, error: "Interdit" });
+  var tag = String(req.body.tag || "").toLowerCase().trim();
+  if (!tag) return res.status(400).json({ ok: false, error: "Tag vide" });
+  createStandaloneTag(tag);
+  res.json({ ok: true, tag: tag });
+});
+
+// ── API admin : renommer un tag partout ────────────────────────────────────
+app.put("/api/tags/rename", function (req, res) {
+  if (!req.user || !req.user.isAdmin) return res.status(403).json({ ok: false, error: "Interdit" });
+  var oldTag = String(req.body.oldTag || "").toLowerCase().trim();
+  var newTag = String(req.body.newTag || "").toLowerCase().trim();
+  if (!oldTag || !newTag) return res.status(400).json({ ok: false, error: "Tags invalides" });
+  if (oldTag === newTag) return res.json({ ok: true });
+  // Vérification de doublon : le nouveau tag ne doit pas déjà exister dans le contenu
+  try {
+    var exists = false;
+    [
+      "SELECT tags FROM wiki_pages",
+      "SELECT tags FROM gallery_images",
+      "SELECT tags FROM bd_books",
+    ].forEach(function (q) {
+      if (exists) return;
+      db.prepare(q).all().forEach(function (r) {
+        if (exists) return;
+        try {
+          if (JSON.parse(r.tags || "[]").some(function (t) {
+            return String(t).toLowerCase().trim() === newTag;
+          })) exists = true;
+        } catch (_) {}
+      });
+    });
+    if (exists) return res.status(409).json({ ok: false, error: "Ce tag existe déjà" });
+    renameTagEverywhere(oldTag, newTag);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: String(e.message) });
+  }
+});
+
+// ── API admin : changer le type d'un tag ───────────────────────────────────
+app.put("/api/tags/type", function (req, res) {
+  if (!req.user || !req.user.isAdmin) return res.status(403).json({ ok: false, error: "Interdit" });
+  var tag  = String(req.body.tag  || "").toLowerCase().trim();
+  var type = String(req.body.type || "normal");
+  if (!tag) return res.status(400).json({ ok: false, error: "Tag vide" });
+  setTagType(tag, type);
+  res.json({ ok: true });
 });
 
 // ── API : résultats pour un tag donné ──────────────────────────────────────
 app.get("/api/tags/results", function (req, res) {
   var tag = String(req.query.tag || "").toLowerCase().trim();
-  if (!tag) return res.json({ wiki: [], galerie: [], bd: [] });
-  var result = { wiki: [], galerie: [], bd: [] };
+  if (!tag) return res.json({ wiki: [], galerie: [], bd: [], type: "normal" });
+  var metaMap = {};
+  try { metaMap = getAllTagMeta(); } catch (_) {}
+  var type = resolveTagType(tag, metaMap);
+  var result = { wiki: [], galerie: [], bd: [], type: type };
   function hasTag(raw) {
     return parseTags(raw).some(function (t) { return String(t).toLowerCase().trim() === tag; });
   }

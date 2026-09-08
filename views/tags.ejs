@@ -1,30 +1,68 @@
 <%- include('partials/head', { title: 'Tous les tags' }) %>
-<main class="container">
+<main class="container wide wiki-locked tags-page-locked" style="--ch-hue: 270">
   <%- include('partials/top-nav', { config: config }) %>
 
-  <%# ── Hero bandeau (style wiki-detail-banner) ── %>
-  <div class="tags-hero">
-    <a href="#" class="tags-hero-back" id="tags-back-btn" title="Page précédente">&larr;</a>
-    <h1 class="tags-hero-title">Tous les tags</h1>
-    <span class="tags-hero-count"><%= tags.length %></span>
-  </div>
+  <%# ─── SIDEBAR ─────────────────────────────────────────────────────────── %>
+  <aside class="wiki-cat-sidebar tags-sidebar">
+    <div class="wiki-chapter-hero">
+      <div class="wiki-chapter-hero-top">
+        <a href="#" class="wiki-chapter-hero-back" id="tags-back-btn" title="Page précédente">&larr;</a>
+        <h1 class="wiki-chapter-hero-title">Tags</h1>
+        <span class="wiki-chapter-hero-count" id="tags-count-display"><%= tags.length %></span>
+      </div>
+    </div>
 
-  <div class="tags-search-wrap">
-    <input type="search" id="tags-search-input" class="tags-search-input"
-           placeholder="Recherche&hellip;" autocomplete="off" />
-  </div>
+    <div class="wiki-sidebar-body">
+      <div class="wiki-search-wrap">
+        <div class="wiki-search-bar">
+          <input type="search" id="tags-search-input" class="wiki-search-input"
+                 placeholder="Recherche" autocomplete="off" />
+        </div>
+      </div>
 
+      <div class="wiki-sidebar-filters">
+        <%# ─ Filtre par type ─ %>
+        <div class="wiki-filter-section">
+          <span class="wiki-filter-label">Type</span>
+          <div class="links-filter" id="tags-type-filter">
+            <button type="button" class="tag-chip active" data-type-filter="">Tous</button>
+            <button type="button" class="tag-chip" data-type-filter="normal">Normal</button>
+            <button type="button" class="tag-chip tags-type-ultra" data-type-filter="ultra">Ultra</button>
+            <button type="button" class="tag-chip tags-type-irrealiste" data-type-filter="irrealiste">Irr&eacute;aliste</button>
+            <button type="button" class="tag-chip tags-type-fantaisie" data-type-filter="fantaisie">Fantaisie</button>
+          </div>
+        </div>
+
+        <% if (currentUser && currentUser.isAdmin) { %>
+        <%# ─ Admin : créer un tag ─ %>
+        <div class="wiki-filter-section">
+          <span class="wiki-filter-label">Nouveau tag</span>
+          <form id="tags-create-form" class="tags-create-form">
+            <input type="text" id="tags-create-input" class="wiki-search-input tags-create-input"
+                   placeholder="Nom du tag&hellip;" autocomplete="off" />
+            <select id="tags-create-type" class="wiki-sort-select tags-create-type">
+              <option value="normal">Normal</option>
+              <option value="ultra">Ultra</option>
+              <option value="irrealiste">Irr&eacute;aliste</option>
+              <option value="fantaisie">Fantaisie</option>
+            </select>
+            <button type="submit" class="tags-create-btn">+ Cr&eacute;er</button>
+          </form>
+          <p class="tags-create-feedback" id="tags-create-feedback" hidden></p>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </aside>
+
+  <%# ─── GRILLE DES TAGS ─────────────────────────────────────────────────── %>
   <div class="tags-grid" id="tags-grid">
-    <% var total = tags.length; %>
-    <% tags.forEach(function (item, idx) { %>
-      <%
-        var pct = total > 1 ? idx / (total - 1) : 0;
-        var bk = item.breakdown || { wiki: 0, galerie: 0, bd: 0 };
-        var bdStr = JSON.stringify(bk).replace(/'/g, '&#39;');
-      %>
-      <div class="tags-item" data-tag="<%= item.tag %>"
-           data-breakdown='<%= bdStr %>'
-           style="--tag-pct: <%= pct.toFixed(3) %>">
+    <% tags.forEach(function (item) { %>
+      <div class="tags-item tags-item--<%= item.type %>"
+           data-tag="<%= item.tag %>"
+           data-type="<%= item.type %>"
+           data-breakdown='<%= JSON.stringify(item.breakdown).replace(/'/g, "&#39;") %>'
+           style="--tag-pct: <%= item.pct.toFixed(3) %>">
         <span class="tags-item-name"><%= item.tag %></span>
         <span class="tags-item-count"><%= item.count %></span>
       </div>
@@ -32,7 +70,7 @@
     <p class="tags-empty" id="tags-empty" hidden>Aucun tag trouv&eacute;.</p>
   </div>
 
-  <%# ── Popup résultats tag ── %>
+  <%# ─── Popup résultats tag ── %>
   <div class="tags-popup-overlay" id="tags-popup-overlay" hidden>
     <div class="tags-popup" id="tags-popup">
       <div class="tags-popup-header">
@@ -41,15 +79,41 @@
       </div>
       <div class="tags-popup-tabs" id="tags-popup-tabs"></div>
       <div class="tags-popup-body" id="tags-popup-body"></div>
+      <% if (currentUser && currentUser.isAdmin) { %>
+      <div class="tags-popup-admin" id="tags-popup-admin">
+        <details class="tags-admin-details">
+          <summary class="tags-admin-summary">&#9881; Admin</summary>
+          <div class="tags-admin-body">
+            <div class="tags-admin-row">
+              <label class="tags-admin-label">Renommer</label>
+              <input type="text" id="tags-rename-input" class="tags-admin-input" placeholder="Nouveau nom&hellip;" />
+              <button type="button" class="tags-admin-btn" id="tags-rename-btn">OK</button>
+            </div>
+            <div class="tags-admin-row">
+              <label class="tags-admin-label">Type</label>
+              <div class="tags-admin-type-btns" id="tags-admin-type-btns">
+                <button type="button" class="tag-chip tags-type-btn" data-type-val="normal">Normal</button>
+                <button type="button" class="tag-chip tags-type-ultra tags-type-btn" data-type-val="ultra">Ultra</button>
+                <button type="button" class="tag-chip tags-type-irrealiste tags-type-btn" data-type-val="irrealiste">Irr&eacute;aliste</button>
+                <button type="button" class="tag-chip tags-type-fantaisie tags-type-btn" data-type-val="fantaisie">Fantaisie</button>
+              </div>
+            </div>
+            <p class="tags-admin-feedback" id="tags-admin-feedback" hidden></p>
+          </div>
+        </details>
+      </div>
+      <% } %>
     </div>
   </div>
 
-  <%# ── Tooltip hover ── %>
+  <%# ─── Tooltip hover ── %>
   <div class="tags-tooltip" id="tags-tooltip" hidden></div>
 </main>
 
 <script>
 (function () {
+  var isAdmin = <%= currentUser && currentUser.isAdmin ? 'true' : 'false' %>;
+
   /* ── Retour page précédente ── */
   var backBtn = document.getElementById("tags-back-btn");
   if (backBtn) {
@@ -61,19 +125,39 @@
   }
 
   /* ── Recherche ── */
-  var searchInput = document.getElementById("tags-search-input");
-  var grid        = document.getElementById("tags-grid");
-  var emptyMsg    = document.getElementById("tags-empty");
-  if (searchInput && grid) {
-    searchInput.addEventListener("input", function () {
-      var q = searchInput.value.trim().toLowerCase();
-      var any = false;
-      grid.querySelectorAll(".tags-item").forEach(function (item) {
-        var match = !q || item.dataset.tag.toLowerCase().indexOf(q) !== -1;
-        item.hidden = !match;
-        if (match) any = true;
+  var searchInput   = document.getElementById("tags-search-input");
+  var grid          = document.getElementById("tags-grid");
+  var emptyMsg      = document.getElementById("tags-empty");
+  var countDisplay  = document.getElementById("tags-count-display");
+  var activeTypeFilter = "";
+
+  function applyFilters() {
+    if (!grid) return;
+    var q = searchInput ? searchInput.value.trim().toLowerCase() : "";
+    var visible = 0;
+    grid.querySelectorAll(".tags-item").forEach(function (item) {
+      var matchQ    = !q || item.dataset.tag.toLowerCase().indexOf(q) !== -1;
+      var matchType = !activeTypeFilter || item.dataset.type === activeTypeFilter;
+      var show = matchQ && matchType;
+      item.hidden = !show;
+      if (show) visible++;
+    });
+    if (emptyMsg) emptyMsg.hidden = visible > 0 || (!q && !activeTypeFilter);
+    if (countDisplay) countDisplay.textContent = visible;
+  }
+
+  if (searchInput) searchInput.addEventListener("input", applyFilters);
+
+  /* ── Filtre par type ── */
+  var typeFilter = document.getElementById("tags-type-filter");
+  if (typeFilter) {
+    typeFilter.querySelectorAll(".tag-chip[data-type-filter]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        typeFilter.querySelectorAll(".tag-chip").forEach(function (b) { b.classList.remove("active"); });
+        btn.classList.add("active");
+        activeTypeFilter = btn.dataset.typeFilter || "";
+        applyFilters();
       });
-      if (emptyMsg) emptyMsg.hidden = any || !q;
     });
   }
 
@@ -130,12 +214,22 @@
   var popupTabs = document.getElementById("tags-popup-tabs");
   var popupBody = document.getElementById("tags-popup-body");
   var closeBtn  = document.getElementById("tags-popup-close");
+  var adminSection  = document.getElementById("tags-popup-admin");
+  var renameInput   = document.getElementById("tags-rename-input");
+  var renameBtn     = document.getElementById("tags-rename-btn");
+  var adminTypeBtns = document.getElementById("tags-admin-type-btns");
+  var adminFeedback = document.getElementById("tags-admin-feedback");
 
   var SECTION_LABELS = { wiki: "Wiki", galerie: "Galerie", bd: "BD" };
   var SECTION_URLS   = { wiki: "/wiki/", galerie: null, bd: null };
 
-  function openPopup(tag) {
+  var currentPopupTag = null;
+  var currentPopupType = "normal";
+
+  function openPopup(tag, tagType) {
     if (!overlay || !popupTag) return;
+    currentPopupTag  = tag;
+    currentPopupType = tagType || "normal";
     hideTooltip();
     popupTag.textContent = tag;
     while (popupTabs.firstChild) popupTabs.removeChild(popupTabs.firstChild);
@@ -146,9 +240,26 @@
     popupBody.appendChild(loading);
     overlay.hidden = false;
 
+    // Admin panel init
+    if (isAdmin && renameInput) renameInput.value = tag;
+    if (isAdmin && adminTypeBtns) {
+      adminTypeBtns.querySelectorAll(".tags-type-btn").forEach(function (btn) {
+        btn.classList.toggle("active", btn.dataset.typeVal === currentPopupType);
+      });
+    }
+    if (isAdmin && adminFeedback) adminFeedback.hidden = true;
+
     fetch("/api/tags/results?tag=" + encodeURIComponent(tag))
       .then(function (r) { return r.json(); })
-      .then(function (data) { renderPopup(data); })
+      .then(function (data) {
+        currentPopupType = data.type || currentPopupType;
+        if (isAdmin && adminTypeBtns) {
+          adminTypeBtns.querySelectorAll(".tags-type-btn").forEach(function (btn) {
+            btn.classList.toggle("active", btn.dataset.typeVal === currentPopupType);
+          });
+        }
+        renderPopup(data);
+      })
       .catch(function () {
         while (popupBody.firstChild) popupBody.removeChild(popupBody.firstChild);
         var err = document.createElement("p"); err.className = "tags-popup-err";
@@ -160,7 +271,9 @@
   function renderPopup(data) {
     while (popupTabs.firstChild) popupTabs.removeChild(popupTabs.firstChild);
     while (popupBody.firstChild) popupBody.removeChild(popupBody.firstChild);
-    var sections = Object.keys(data).filter(function (k) { return data[k] && data[k].length > 0; });
+    var sections = Object.keys(data).filter(function (k) {
+      return k !== "type" && data[k] && data[k].length > 0;
+    });
     if (!sections.length) {
       var empty = document.createElement("p"); empty.className = "tags-popup-empty";
       empty.textContent = "Aucun r\u00e9sultat.";
@@ -214,9 +327,162 @@
   if (grid) {
     grid.addEventListener("click", function (e) {
       var item = e.target.closest(".tags-item");
-      if (item) openPopup(item.dataset.tag);
+      if (item) openPopup(item.dataset.tag, item.dataset.type);
     });
   }
+  // Supprimé : ne pas dupliquer le listener de clic — on utilise la délégation sur `grid` ci-dessus.
+
+  /* ── Admin : renommer ── */
+  function showFeedback(msg, ok) {
+    if (!adminFeedback) return;
+    adminFeedback.textContent = msg;
+    adminFeedback.style.color = ok ? "var(--accent)" : "#e05555";
+    adminFeedback.hidden = false;
+  }
+
+  if (isAdmin && renameBtn) {
+    renameBtn.addEventListener("click", function () {
+      var newName = renameInput ? renameInput.value.trim().toLowerCase() : "";
+      if (!newName || !currentPopupTag || newName === currentPopupTag) return;
+      renameBtn.disabled = true;
+      fetch("/api/tags/rename", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ oldTag: currentPopupTag, newTag: newName })
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.ok) {
+            // Mise à jour du DOM
+            var oldTag = currentPopupTag;
+            currentPopupTag = newName;
+            if (popupTag) popupTag.textContent = newName;
+            var gridItem = grid ? grid.querySelector('[data-tag="' + oldTag + '"]') : null;
+            if (gridItem) {
+              gridItem.dataset.tag = newName;
+              var nameEl = gridItem.querySelector(".tags-item-name");
+              if (nameEl) nameEl.textContent = newName;
+            }
+            showFeedback("Tag renommé !", true);
+          } else {
+            showFeedback(d.error || "Erreur", false);
+          }
+        })
+        .catch(function () { showFeedback("Erreur réseau", false); })
+        .finally(function () { renameBtn.disabled = false; });
+    });
+  }
+
+  /* ── Admin : changer le type ── */
+  if (isAdmin && adminTypeBtns) {
+    adminTypeBtns.querySelectorAll(".tags-type-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var newType = btn.dataset.typeVal;
+        if (!currentPopupTag) return;
+        fetch("/api/tags/type", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tag: currentPopupTag, type: newType })
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (d.ok) {
+              currentPopupType = newType;
+              adminTypeBtns.querySelectorAll(".tags-type-btn").forEach(function (b) {
+                b.classList.toggle("active", b.dataset.typeVal === newType);
+              });
+              // Met à jour le type dans la grille
+              var gridItem = grid ? grid.querySelector('[data-tag="' + currentPopupTag + '"]') : null;
+              if (gridItem) {
+                gridItem.dataset.type = newType;
+                gridItem.className = "tags-item tags-item--" + newType;
+              }
+              showFeedback("Type modifié !", true);
+            } else {
+              showFeedback(d.error || "Erreur", false);
+            }
+          })
+          .catch(function () { showFeedback("Erreur réseau", false); });
+      });
+    });
+  }
+
+  /* ── Admin : créer un tag ── */
+  var createForm     = document.getElementById("tags-create-form");
+  var createInput    = document.getElementById("tags-create-input");
+  var createType     = document.getElementById("tags-create-type");
+  var createFeedback = document.getElementById("tags-create-feedback");
+
+  if (isAdmin && createForm) {
+    createForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var tag  = createInput ? createInput.value.trim().toLowerCase() : "";
+      var type = createType ? createType.value : "normal";
+      if (!tag) return;
+      // Vérifie si le tag existe déjà dans la grille
+      if (grid && grid.querySelector('[data-tag="' + tag + '"]')) {
+        if (createFeedback) {
+          createFeedback.textContent = "Ce tag existe déjà.";
+          createFeedback.style.color = "#e05555";
+          createFeedback.hidden = false;
+        }
+        return;
+      }
+      var p1 = fetch("/api/tags/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tag: tag })
+      }).then(function (r) { return r.json(); });
+      var p2 = type !== "normal"
+        ? fetch("/api/tags/type", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ tag: tag, type: type })
+          }).then(function (r) { return r.json(); })
+        : Promise.resolve({ ok: true });
+
+      Promise.all([p1, p2]).then(function (results) {
+        if (results[0].ok) {
+          // Ajoute le tag dans la grille
+          var div = document.createElement("div");
+          div.className = "tags-item tags-item--" + type;
+          div.dataset.tag  = tag;
+          div.dataset.type = type;
+          div.dataset.breakdown = '{"wiki":0,"galerie":0,"bd":0}';
+          div.style.setProperty("--tag-pct", "1");
+          var nameSpan = document.createElement("span");
+          nameSpan.className = "tags-item-name"; nameSpan.textContent = tag;
+          var countSpan = document.createElement("span");
+          countSpan.className = "tags-item-count"; countSpan.textContent = "0";
+          div.appendChild(nameSpan); div.appendChild(countSpan);
+          if (grid) {
+            var emptyEl = document.getElementById("tags-empty");
+            grid.insertBefore(div, emptyEl || null);
+          }
+          if (createInput) createInput.value = "";
+          if (createFeedback) {
+            createFeedback.textContent = "Tag \u00ab\u00a0" + tag + "\u00a0\u00bb cr\u00e9\u00e9 !";
+            createFeedback.style.color = "var(--accent)";
+            createFeedback.hidden = false;
+          }
+        } else {
+          if (createFeedback) {
+            createFeedback.textContent = results[0].error || "Erreur";
+            createFeedback.style.color = "#e05555";
+            createFeedback.hidden = false;
+          }
+        }
+      }).catch(function () {
+        if (createFeedback) {
+          createFeedback.textContent = "Erreur r\u00e9seau";
+          createFeedback.style.color = "#e05555";
+          createFeedback.hidden = false;
+        }
+      });
+    });
+  }
+
+
 })();
 </script>
 
