@@ -621,8 +621,13 @@ function buildWikiRouter(config) {
 
   router.post("/:id/delete", requireUser, (req, res) => {
     const id = Number(req.params.id);
-    if (Number.isInteger(id)) deleteWikiPage(id);
-    res.redirect("/wiki");
+    let cat = "";
+    if (Number.isInteger(id)) {
+      const page = getWikiPage(id);
+      cat = page ? page.category : "";
+      deleteWikiPage(id);
+    }
+    res.redirect(cat ? `/wiki/categorie/${cat}` : "/wiki");
   });
 
   router.use((err, req, res, next) => {

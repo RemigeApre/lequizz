@@ -4500,6 +4500,7 @@ a.wiki-ql-label:hover .wiki-ql-text {
   width: 100%;
   display: block;
   object-fit: cover;
+  aspect-ratio: 3 / 4;
 }
 
 /* Toujours visible (comme les cartes du wiki) : catégorie, note et
@@ -4713,6 +4714,37 @@ a.wiki-ql-label:hover .wiki-ql-text {
   border-color: var(--wiki-gold);
   color: #fff;
 }
+/* Checkboxes visibles uniquement en mode sélection */
+.gallery-select-check { display: none; }
+.gallery-grid.gallery-selecting .gallery-select-check { display: block; }
+
+.gallery-processed-badge {
+  position: absolute;
+  top: 0; left: 0;
+  width: 0; height: 0;
+  border-style: solid;
+  border-width: 28px 28px 0 0;
+  border-color: #7c3aed transparent transparent transparent;
+  z-index: 3;
+}
+
+.gallery-lb-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+.gallery-lb-rating {
+  display: flex;
+  gap: 0.1rem;
+  cursor: pointer;
+}
+.gallery-lb-rating .gallery-star { font-size: 1.1rem; }
+.gallery-lb-rating .gallery-star.filled { color: var(--wiki-gold); }
+.gallery-lb-fav-btn.active { background: var(--wiki-gold); color: #fff; }
+.gallery-lb-processed-btn { font-size: 0.75rem; color: rgba(255,255,255,0.6); }
+.gallery-lb-processed-btn:hover { color: #7c3aed; }
 
 .gallery-select-toggle {
   margin-bottom: 0.85rem;

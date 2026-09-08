@@ -88,6 +88,7 @@ try { db.exec("ALTER TABLE gallery_images ADD COLUMN image_paths TEXT NOT NULL D
 try { db.exec("ALTER TABLE gallery_images ADD COLUMN author TEXT NOT NULL DEFAULT ''"); } catch (_) {}
 try { db.exec("ALTER TABLE gallery_images ADD COLUMN parody TEXT NOT NULL DEFAULT ''"); } catch (_) {}
 try { db.exec("ALTER TABLE gallery_images ADD COLUMN content_type TEXT NOT NULL DEFAULT 'image'"); } catch(_) {}
+try { db.exec("ALTER TABLE gallery_images ADD COLUMN processed INTEGER NOT NULL DEFAULT 0"); } catch(_) {}
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS bd_books (
@@ -619,6 +620,7 @@ function rowToGalleryImage(row) {
     interested: !!row.interested,
     wikiPageId: row.wiki_page_id || null,
     contentType: row.content_type || "image",
+    processed: !!row.processed,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -677,11 +679,12 @@ function listGalleryParodies() {
   return db.prepare("SELECT DISTINCT parody FROM gallery_images WHERE parody != '' ORDER BY parody COLLATE NOCASE").all().map(r => r.parody);
 }
 
-function updateGalleryImageMeta(id, { tags, author, parody, title, notes }) {
+function updateGalleryImageMeta(id, { tags, author, parody, title, notes, processed } = {}) {
   const sets = ["tags = ?", "author = ?", "parody = ?", "updated_at = ?"];
   const params = [JSON.stringify(tags || []), author || "", parody || "", new Date().toISOString()];
   if (title !== undefined) { sets.splice(sets.length - 1, 0, "title = ?"); params.splice(params.length - 1, 0, title); }
   if (notes !== undefined) { sets.splice(sets.length - 1, 0, "notes = ?"); params.splice(params.length - 1, 0, notes); }
+  if (typeof processed === "number") { sets.splice(sets.length - 1, 0, "processed = ?"); params.splice(params.length - 1, 0, processed); }
   params.push(id);
   db.prepare(`UPDATE gallery_images SET ${sets.join(", ")} WHERE id = ?`).run(...params);
   return true;

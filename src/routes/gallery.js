@@ -59,7 +59,7 @@ function findImageBySrc(src, galleryImages) {
 }
 
 function parseTags(raw) {
-  return String(raw || "").split(/[,;]+/).map((t) => t.trim()).filter(Boolean);
+  return String(raw || "").split(/[,;]+/).map((t) => t.trim().toLowerCase()).filter(Boolean);
 }
 
 // La catégorie est optionnelle pour une image de galerie (contrairement au
@@ -153,6 +153,7 @@ function buildItems(galleryImages, wikiPages) {
     flame: img.flame,
     interested: img.interested,
     contentType: img.contentType || "image",
+    processed: !!img.processed,
     date: img.createdAt,
   }));
 
@@ -163,9 +164,15 @@ function getCtx() {
   const wikiPages = listWikiPages();
   const galleryImages = listGalleryImages();
   const items = buildItems(galleryImages, wikiPages);
-  const allTags = Array.from(new Set(items.flatMap((i) => i.tags))).sort((a, b) =>
-    a.localeCompare(b, "fr")
-  );
+  const tagTotalCounts = {};
+  items.forEach((item) => {
+    item.tags.forEach((t) => { tagTotalCounts[t] = (tagTotalCounts[t] || 0) + 1; });
+  });
+  const allTags = Array.from(new Set(items.flatMap((i) => i.tags)))
+    .sort((a, b) => {
+      const diff = (tagTotalCounts[b] || 0) - (tagTotalCounts[a] || 0);
+      return diff !== 0 ? diff : a.localeCompare(b, "fr");
+    });
   return { items, allTags };
 }
 
@@ -281,6 +288,16 @@ function buildGalleryRouter(config) {
     const { allTags } = getCtx();
     const linkedPage = image.wikiPageId ? getWikiPage(image.wikiPageId) : null;
     res.render("gallery-form", { config, image, allTags, categories: CATEGORIES, linkedPage });
+  });
+
+  router.post("/:id/processed", express.json(), (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.json({ ok: false });
+    const image = getGalleryImage(id);
+    if (!image) return res.json({ ok: false });
+    const processed = image.processed ? 0 : 1;
+    updateGalleryImageMeta(id, { processed });
+    res.json({ ok: true, processed });
   });
 
   router.post("/:id", upload.array("images", 30), (req, res) => {

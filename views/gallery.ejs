@@ -59,6 +59,9 @@
             </button>
           <% }) %>
         </div>
+        <div class="gallery-tag-footer">
+          <button type="button" id="gallery-tag-expand-btn" class="wiki-tag-expand-btn" hidden>&#9660; Plus</button>
+        </div>
       </div>
       <% } %>
 
@@ -127,9 +130,15 @@
         data-wiki-id="<%= item.wikiPageId || '' %>"
         data-gallery-id="<%= item.id || '' %>"
         data-date="<%= item.date || '' %>"
-        data-rating="<%= item.rating || 0 %>">
+        data-rating="<%= item.rating || 0 %>"
+        data-fav="<%= favoriteGalleryIds.indexOf(item.id) !== -1 ? '1' : '0' %>"
+        data-processed="<%= (item.processed && item.type === 'gallery') ? '1' : '0' %>">
 
         <% if (cat) { %><span class="wiki-card-accent" style="background: hsl(<%= cat.hue %>, 55%, 45%)"></span><% } %>
+
+        <% if (item.processed && item.type === 'gallery' && currentUser) { %>
+          <span class="gallery-processed-badge" aria-label="Trait&#233;"></span>
+        <% } %>
 
         <% if (item.type === 'gallery' && item.id) { %>
           <label class="gallery-select-check">
@@ -149,22 +158,9 @@
             <% if (item.flame) { %><span class="wiki-card-react-badge" title="J'adore">&#128293;</span><% } %>
             <% if (item.interested) { %><span class="wiki-card-react-badge" title="Ça m'intéresse">&#10024;</span><% } %>
           </span>
-          <% if (item.id) { %>
-            <div class="gallery-card-rating" data-gallery-id="<%= item.id %>">
-              <% for (var ri = 1; ri <= 5; ri++) { %>
-                <span class="gallery-star<%= (item.rating || 0) >= ri ? ' filled' : '' %>" data-val="<%= ri %>">&#9733;</span>
-              <% } %>
-            </div>
-          <% } %>
           <div class="gallery-card-btns">
             <% if (item.wikiPageId) { %>
               <a href="/wiki/<%= item.wikiPageId %>" class="gallery-card-btn gallery-wiki-badge-btn" title="Page wiki associ&#233;e">W</a>
-            <% } %>
-            <% if (item.type === 'gallery' && item.id) { %>
-              <button type="button" class="gallery-card-btn gallery-fav-btn<%= favoriteGalleryIds.indexOf(item.id) !== -1 ? ' active' : '' %>" data-item-id="<%= item.id %>" title="Favori">&#128278;</button>
-              <% if (currentUser) { %>
-                <button type="button" class="gallery-card-btn gallery-quick-edit-btn" data-gallery-id="<%= item.id %>" data-is-bd="<%= item.contentType === 'bd' ? '1' : '0' %>" title="Modifier">&#9998;</button>
-              <% } %>
             <% } %>
           </div>
         </div>
@@ -243,6 +239,18 @@
       <div class="gallery-lb-tags"></div>
       <a class="gallery-lb-wiki-link link-button" href="" hidden>Voir la page wiki &rarr;</a>
       <div class="gallery-lb-notes"></div>
+      <div class="gallery-lb-actions" id="gallery-lb-actions" hidden>
+        <div class="gallery-lb-rating" id="gallery-lb-rating">
+          <% for (var lri = 1; lri <= 5; lri++) { %>
+            <span class="gallery-star" data-val="<%= lri %>">&#9733;</span>
+          <% } %>
+        </div>
+        <button type="button" class="gallery-card-btn gallery-lb-fav-btn" id="gallery-lb-fav-btn" title="Favori">&#128278;</button>
+        <% if (currentUser) { %>
+          <button type="button" class="gallery-card-btn gallery-lb-edit-btn" id="gallery-lb-edit-btn" title="Modifier">&#9998;</button>
+          <button type="button" class="gallery-lb-processed-btn link-button" id="gallery-lb-processed-btn" hidden>Marquer trait&#233;</button>
+        <% } %>
+      </div>
     </div>
   </div>
 </div>

@@ -161,6 +161,7 @@
   function applyFilters() {
     currentPage = 0;
     renderPage();
+    if (typeof applyGalleryTagOverflow === "function") applyGalleryTagOverflow();
   }
 
   function renderPage() {
@@ -303,6 +304,41 @@
     });
   }
 
+  // ── Tag overflow galerie (20 par palier, max 40) ──────────────────────────
+  var GTAG_PAGE = 20;
+  var GTAG_MAX  = 40;
+  var gTagExpandedCount = GTAG_PAGE;
+  var gTagExpandBtn = document.getElementById("gallery-tag-expand-btn");
+
+  function applyGalleryTagOverflow() {
+    if (!tagFilter) return;
+    var chips = tagFilter.querySelectorAll(".wiki-tag-chip[data-tag]");
+    var shown = 0;
+    chips.forEach(function(chip) {
+      if (chip.hidden) { chip.classList.remove("wiki-tag-overflow-hidden"); return; }
+      if (shown < gTagExpandedCount) {
+        chip.classList.remove("wiki-tag-overflow-hidden");
+        shown++;
+      } else {
+        chip.classList.add("wiki-tag-overflow-hidden");
+      }
+    });
+    if (gTagExpandBtn) {
+      var overflow = shown >= gTagExpandedCount && chips.length > gTagExpandedCount;
+      var canExpand = gTagExpandedCount < GTAG_MAX;
+      gTagExpandBtn.hidden = !(overflow && canExpand);
+    }
+  }
+
+  if (gTagExpandBtn) {
+    gTagExpandBtn.addEventListener("click", function() {
+      gTagExpandedCount = Math.min(gTagExpandedCount + GTAG_PAGE, GTAG_MAX);
+      applyGalleryTagOverflow();
+    });
+  }
+
+  applyGalleryTagOverflow();
+
   // Search
   if (searchInput) {
     searchInput.addEventListener("input", function () {
@@ -391,6 +427,11 @@
   var lbClose   = lightbox ? lightbox.querySelector(".gallery-lb-close")     : null;
   var lbPrev    = lightbox ? lightbox.querySelector(".gallery-lb-prev")      : null;
   var lbNext    = lightbox ? lightbox.querySelector(".gallery-lb-next")      : null;
+  var lbActions    = document.getElementById("gallery-lb-actions");
+  var lbRating     = document.getElementById("gallery-lb-rating");
+  var lbFavBtn     = document.getElementById("gallery-lb-fav-btn");
+  var lbEditBtn    = document.getElementById("gallery-lb-edit-btn");
+  var lbProcessBtn = document.getElementById("gallery-lb-processed-btn");
 
   var lbVisible    = [];
   var lbCardIndex  = 0;
@@ -457,6 +498,37 @@
     var atLast  = lbCardIndex === lbVisible.length - 1 && lbImgIndex === images.length - 1;
     if (lbPrev) lbPrev.hidden = atFirst;
     if (lbNext) lbNext.hidden = atLast;
+
+    // Actions : rating, fav, edit (uniquement pour les images de galerie avec ID)
+    var galleryId = card ? Number(card.dataset.galleryId) : 0;
+    if (lbActions) {
+      lbActions.hidden = !galleryId;
+      if (galleryId) {
+        // Rating
+        var rating = Number(card.dataset.rating) || 0;
+        if (lbRating) {
+          lbRating.dataset.galleryId = galleryId;
+          lbRating.querySelectorAll(".gallery-star").forEach(function(s, i) {
+            s.classList.toggle("filled", i < rating);
+          });
+        }
+        // Fav
+        if (lbFavBtn) {
+          lbFavBtn.dataset.itemId = galleryId;
+          lbFavBtn.classList.toggle("active", card.dataset.fav === "1");
+        }
+        // Edit + Processed
+        if (lbEditBtn) {
+          lbEditBtn.dataset.galleryId = galleryId;
+          lbEditBtn.dataset.isBd = card.dataset.type === "bd" ? "1" : "0";
+        }
+        if (lbProcessBtn) {
+          lbProcessBtn.dataset.galleryId = galleryId;
+          lbProcessBtn.hidden = !window.GALLERY_CAN_EDIT;
+          lbProcessBtn.textContent = card.dataset.processed === "1" ? "Retirer trait\u00e9" : "Marquer trait\u00e9";
+        }
+      }
+    }
   }
 
   function openLightbox(cardIdx, imgIdx) {
@@ -498,6 +570,87 @@
   if (lightbox) {
     lightbox.addEventListener("click", function(e) {
       if (e.target === lightbox) closeLightbox();
+    });
+  }
+
+  // Rating in lightbox
+  if (lbRating) {
+    lbRating.addEventListener("click", function(e) {
+      var star = e.target.closest(".gallery-star");
+      if (!star) return;
+      var galleryId = Number(lbRating.dataset.galleryId);
+      if (!galleryId) return;
+      var val = Number(star.dataset.val);
+      var current = lbRating.querySelectorAll(".gallery-star.filled").length;
+      var newRating = current === val ? 0 : val;
+      fetch("/galerie/" + galleryId + "/react", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rating: newRating }),
+      }).then(function(r){ return r.json(); }).then(function(data){
+        if (data.ok) {
+          lbRating.querySelectorAll(".gallery-star").forEach(function(s, i){ s.classList.toggle("filled", i < newRating); });
+          var card = currentCard();
+          if (card) card.dataset.rating = newRating;
+        }
+      });
+    });
+  }
+
+  // Fav in lightbox
+  if (lbFavBtn) {
+    lbFavBtn.addEventListener("click", function() {
+      var itemId = Number(lbFavBtn.dataset.itemId);
+      if (!itemId) return;
+      var isActive = lbFavBtn.classList.contains("active");
+      fetch("/favoris/toggle", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ item_type: "gallery", item_id: itemId, action: isActive ? "remove" : "add" }),
+      }).then(function(r){ return r.json(); }).then(function(data){
+        if (data.ok) {
+          lbFavBtn.classList.toggle("active", !isActive);
+          var card = currentCard();
+          if (card) card.dataset.fav = isActive ? "0" : "1";
+        }
+      });
+    });
+  }
+
+  // Edit in lightbox — ouvre le quick-edit panel
+  if (lbEditBtn) {
+    lbEditBtn.addEventListener("click", function() {
+      var galleryId = Number(lbEditBtn.dataset.galleryId);
+      var isBd = lbEditBtn.dataset.isBd === "1";
+      var card = currentCard();
+      openQuickEdit(galleryId, isBd, card);
+    });
+  }
+
+  // Processed toggle in lightbox
+  if (lbProcessBtn) {
+    lbProcessBtn.addEventListener("click", function() {
+      var galleryId = Number(lbProcessBtn.dataset.galleryId);
+      if (!galleryId) return;
+      fetch("/galerie/" + galleryId + "/processed", { method: "POST" })
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+          if (!data.ok) return;
+          var card = currentCard();
+          if (card) {
+            card.dataset.processed = data.processed ? "1" : "0";
+            // Mise à jour du badge sur la carte
+            var badge = card.querySelector(".gallery-processed-badge");
+            if (data.processed && !badge) {
+              var b = document.createElement("span");
+              b.className = "gallery-processed-badge";
+              card.insertBefore(b, card.firstChild);
+            } else if (!data.processed && badge) {
+              badge.remove();
+            }
+          }
+          lbProcessBtn.textContent = data.processed ? "Retirer trait\u00e9" : "Marquer trait\u00e9";
+        });
     });
   }
 
@@ -544,6 +697,13 @@
     var checkboxes = Array.from(grid.querySelectorAll(".gallery-select-input"));
     if (selectToggle) selectToggle.hidden = checkboxes.length === 0;
 
+    if (selectToggle) {
+      selectToggle.addEventListener("click", function() {
+        grid.classList.toggle("gallery-selecting");
+        selectToggle.textContent = grid.classList.contains("gallery-selecting") ? "Annuler s\u00e9lection" : "S\u00e9lectionner";
+      });
+    }
+
     function selectedIds() {
       return checkboxes.filter(function (cb) { return cb.checked; }).map(function (cb) { return cb.value; });
     }
@@ -560,6 +720,8 @@
       bulkCancel.addEventListener("click", function () {
         checkboxes.forEach(function (cb) { cb.checked = false; });
         syncBar();
+        grid.classList.remove("gallery-selecting");
+        if (selectToggle) selectToggle.textContent = "S\u00e9lectionner";
       });
     }
 
@@ -579,57 +741,7 @@
   })();
 
   // ══════════════════════════════════════════════════
-  // 6. FAVORIS
-  // ══════════════════════════════════════════════════
-  if (grid) {
-    grid.addEventListener("click", function (e) {
-      var btn = e.target.closest(".gallery-fav-btn");
-      if (!btn) return;
-      e.stopPropagation();
-      var itemId = btn.dataset.itemId;
-      var isActive = btn.classList.contains("active");
-      fetch("/favoris/toggle", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ item_type: "gallery", item_id: Number(itemId), action: isActive ? "remove" : "add" }),
-      }).then(function(r){ return r.json(); }).then(function(data){
-        if (data.ok) btn.classList.toggle("active", !isActive);
-      });
-    });
-  }
-
-  // ══════════════════════════════════════════════════
-  // 7. NOTE PAR ÉTOILE SUR LES CARTES
-  // ══════════════════════════════════════════════════
-  if (grid) {
-    grid.addEventListener("click", function(e) {
-      var star = e.target.closest(".gallery-star");
-      if (!star) return;
-      e.stopPropagation();
-      var ratingEl = star.closest(".gallery-card-rating");
-      if (!ratingEl) return;
-      var galleryId = Number(ratingEl.dataset.galleryId);
-      var val = Number(star.dataset.val);
-      var currentRating = Array.from(ratingEl.querySelectorAll(".gallery-star.filled")).length;
-      var newRating = currentRating === val ? 0 : val;
-      fetch("/galerie/" + galleryId + "/react", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rating: newRating }),
-      }).then(function(r){ return r.json(); }).then(function(data){
-        if (data.ok) {
-          ratingEl.querySelectorAll(".gallery-star").forEach(function(s, i){
-            s.classList.toggle("filled", i < newRating);
-          });
-          var card = ratingEl.closest(".gallery-card");
-          if (card) card.dataset.rating = newRating;
-        }
-      });
-    });
-  }
-
-  // ══════════════════════════════════════════════════
-  // 8. ÉDITION RAPIDE (admin)
+  // 6. ÉDITION RAPIDE (admin)
   // ══════════════════════════════════════════════════
   var quickEditPanel = null;
   var quickEditCurrentId = null;
