@@ -4948,6 +4948,7 @@ a.wiki-ql-label:hover .wiki-ql-text {
    avec ~ (et pas +) tout ce qui suit le top-nav. */
 .top-nav ~ .wiki-hero,
 .top-nav ~ .wiki-chapter-hero,
+.top-nav ~ .wiki-cat-sidebar,
 .top-nav ~ .wiki-detail {
   margin-top: -1.5rem;
 }
@@ -5839,3 +5840,187 @@ a.wiki-ql-label:hover .wiki-ql-text {
 }
 
 .bd-sort-remove input { display: none; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   WIKI CATÉGORIE — sidebar gauche (desktop) / bloc inline (mobile)
+═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Mobile : le sidebar est un bloc normal au-dessus de la grille ── */
+.wiki-cat-sidebar {
+  /* Reset du margin-top injecté par .top-nav ~ : appliqué sur le sidebar */
+}
+
+.wiki-cat-sidebar .wiki-chapter-hero {
+  /* Le hero garde son style habituel sur mobile */
+}
+
+.wiki-sidebar-body {
+  /* Corps de la sidebar : search + filtres, inline sur mobile */
+}
+
+/* ── Desktop : panneau fixe pleine hauteur à gauche ─────────────────── */
+@media (min-width: 641px) {
+  /* La sidebar se place en fixed sans toucher au flux de la grille */
+  .wiki-cat-sidebar {
+    position: fixed;
+    left: 0;
+    top: var(--topnav-height);
+    bottom: 0;
+    width: 248px;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(
+      180deg,
+      hsl(var(--ch-hue, 220), 52%, 20%) 0%,
+      hsl(var(--ch-hue, 220), 44%, 16%) 100%
+    );
+    z-index: 5;
+    overflow: hidden;
+    /* Annule le margin-top hérité du sélecteur top-nav ~ * */
+    margin-top: 0;
+  }
+
+  /* En-tête de la sidebar : hero sans son propre fond */
+  .wiki-cat-sidebar .wiki-chapter-hero {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0;
+    box-shadow: none;
+    margin: 0;
+    padding: 1.4rem 1.1rem 1.25rem;
+  }
+
+  /* Corps scrollable : search + filtres */
+  .wiki-sidebar-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 1rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  }
+
+  /* Search bar : fond semi-transparent sur fond sombre */
+  .wiki-cat-sidebar .wiki-search-wrap {
+    margin-bottom: 0;
+  }
+  .wiki-cat-sidebar .wiki-search-bar {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+  .wiki-cat-sidebar .wiki-search-input {
+    background: transparent;
+    border: none;
+    color: #fff;
+    box-shadow: none !important;
+  }
+  .wiki-cat-sidebar .wiki-search-input:focus {
+    border: none;
+    box-shadow: none !important;
+  }
+  .wiki-cat-sidebar .wiki-search-input::placeholder {
+    color: rgba(255, 255, 255, 0.45);
+  }
+  .wiki-cat-sidebar .wiki-search-icon { opacity: 0.55; }
+  .wiki-cat-sidebar .wiki-search-clear { color: rgba(255, 255, 255, 0.6); }
+  .wiki-cat-sidebar .wiki-search-clear:hover { color: #fff; }
+  .wiki-cat-sidebar .wiki-result-count {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.78rem;
+  }
+
+  /* Filtres : couleurs adaptées au fond sombre */
+  .wiki-cat-sidebar .wiki-filters-panel {
+    border-color: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .wiki-cat-sidebar .wiki-filters-summary {
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 0.85rem;
+    padding: 0.6rem 0.75rem;
+  }
+  .wiki-cat-sidebar .wiki-filters-summary::before {
+    background: rgba(255, 255, 255, 0.55);
+  }
+  .wiki-cat-sidebar .wiki-filters-body {
+    padding: 0.6rem 0.75rem 0.75rem;
+  }
+  .wiki-cat-sidebar .wiki-adv-toggle {
+    color: rgba(255, 255, 255, 0.75);
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 0.76rem;
+  }
+  .wiki-cat-sidebar .wiki-adv-toggle:hover {
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+  }
+  .wiki-cat-sidebar .wiki-adv-label { color: rgba(255, 255, 255, 0.7); }
+  .wiki-cat-sidebar .wiki-adv-star {
+    color: rgba(255, 255, 255, 0.6);
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.07);
+  }
+  .wiki-cat-sidebar .wiki-adv-star.active,
+  .wiki-cat-sidebar .wiki-adv-star:hover { color: var(--wiki-gold); }
+  .wiki-cat-sidebar .wiki-adv-star-reset {
+    color: rgba(255, 255, 255, 0.45);
+    border: none; background: none;
+  }
+  .wiki-cat-sidebar .chip-option span {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.78rem;
+  }
+  .wiki-cat-sidebar .chip-option input:checked + span {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: #fff;
+  }
+  .wiki-cat-sidebar .tag-chip {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.76rem;
+  }
+  .wiki-cat-sidebar .tag-chip.active,
+  .wiki-cat-sidebar .tag-chip:hover {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: #fff;
+  }
+  .wiki-cat-sidebar .wiki-ultra-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.76rem;
+  }
+  .wiki-cat-sidebar .wiki-ultra-btn:hover,
+  .wiki-cat-sidebar .wiki-ultra-btn.active {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+  }
+  .wiki-cat-sidebar .wiki-sort-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+  }
+  .wiki-cat-sidebar .wiki-sort-label { color: rgba(255, 255, 255, 0.7); font-size: 0.78rem; }
+  .wiki-cat-sidebar .wiki-sort-select {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-size: 0.82rem;
+    width: 100%;
+  }
+  .wiki-cat-sidebar .links-filter { flex-wrap: wrap; gap: 0.3rem; }
+}
+
