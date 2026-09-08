@@ -1,5 +1,5 @@
 <%- include('partials/head', { title: page.title }) %>
-<main class="container">
+<main class="container wide">
   <%- include('partials/top-nav', { config: config }) %>
 
   <% var cat = categories.find(function (c) { return c.key === page.category; }); %>
@@ -7,7 +7,6 @@
     var pm = page.meta || {};
 
     var FSUBS = { jeux_role: 'Jeux de rôle et comportement', hardcore: 'Hardcore', bdsm: 'BDSM', classique: 'Classique', fantaisie: 'Fantaisie' };
-    // Partenaires : nouveaux champs + compat anciennes pages (nb_femmes/nb_hommes)
     var nbTotal   = pm.nb_total    || '';
     var nbFem     = pm.nb_feminin  || pm.nb_femmes || '';
     var nbMasc    = pm.nb_masculin || pm.nb_hommes || '';
@@ -28,8 +27,6 @@
     var hasPosMeta = page.category === 'position' && (pm.categorie || pm.qui_dessus || (pm.canal && pm.canal.length) || pmOri.length || pm.nb_partenaires || pm.partenaire_actif || pmSup.length);
 
     var hasImages = page.imagePaths && page.imagePaths.length;
-    // Compat : anciennes pages où termes_derives est un tableau de
-    // chaînes brutes, avant le passage au marquage anglais par terme.
     var derivedTerms = (pm.termes_derives || []).map(function (t) {
       return typeof t === 'string' ? { term: t, en: false } : t;
     });
@@ -41,7 +38,7 @@
 
   <article class="wiki-detail" style="--ch-hue: <%= cat ? cat.hue : 220 %>">
 
-    <%# ─ Bandeau : couleur du chapitre, retour à gauche, titre centré ─ %>
+    <%# ─ Bandeau : retour + titre ─ %>
     <div class="wiki-detail-banner">
       <a href="<%= backHref %>" class="wiki-detail-banner-back" title="<%= backLabel %>" aria-label="<%= backLabel %>">&#8592;</a>
       <h1 class="wiki-detail-banner-title"><%= page.title %></h1>
@@ -55,13 +52,7 @@
       <% } %>
     </div>
 
-    <%# ─ Navigation : sous le bandeau sur PC, discrète et flottante à
-         mi-hauteur sur téléphone (voir CSS). Suit la position dans le
-         contexte de navigation courant (recherche, chapitre…), avec
-         repli sur l'ordre alphabétique global si aucun contexte. ─ %>
-    <%# Toujours la même structure (a + arrow + label), même sans page
-         précédente/suivante : le JS de contexte (recherche, chapitre…)
-         doit pouvoir l'activer/la remplir sans reconstruire le DOM. ─ %>
+    <%# ─ Navigation prev/next ─ %>
     <nav class="wiki-page-nav" aria-label="Navigation entre pages">
       <a href="<%= prevPage ? '/wiki/' + prevPage.id : '#' %>" class="wiki-page-nav-btn wiki-page-nav-prev<%= prevPage ? '' : ' wiki-page-nav-disabled' %>" id="wiki-nav-prev" title="<%= prevPage ? prevPage.title : '' %>">
         <span class="wiki-page-nav-arrow">&#8592;</span>
@@ -73,253 +64,218 @@
       </a>
     </nav>
 
-    <%# ─ Note : grosse, centrée, fonctionnelle — c'est ici qu'on note ─
-         Réservée aux profils connectés, comme les images et réactions. %>
-    <% if (currentUser) { %>
-      <div class="wiki-detail-rating" data-id="<%= page.id %>" data-rating="<%= page.rating %>">
-        <% for (var i = 1; i <= 5; i++) { %>
-          <button type="button" class="wiki-star wiki-star-lg" data-value="<%= i %>"><%- i <= page.rating ? '&#9733;' : '&#9734;' %></button>
-        <% } %>
-      </div>
-    <% } %>
+    <%# ═══ LAYOUT 2 COLONNES (PC) ══════════════════════════════════════════ %>
+    <div class="wiki-detail-layout">
 
-    <%# ─ Image principale ─ Les images restent privées même si le texte
-         du wiki devient public : rien à afficher pour un visiteur anonyme. %>
-    <% if (hasImages && currentUser) { %>
-      <div class="wiki-infobox-images wiki-detail-main-images">
-        <img src="<%= page.imagePaths[0] %>" alt="" class="wiki-infobox-img" />
-      </div>
-    <% } %>
+      <%# ─ COLONNE GAUCHE : contenu texte ─ %>
+      <div class="wiki-detail-body">
 
-    <%# ─ Bandeau d'information façon Wikipedia, collé au pied de
-         l'image : un simple filet coloré (plus de nom de catégorie en
-         titre, elle apparaît comme une ligne d'info parmi les autres),
-         puis les faits, puis j'adore/intéressée dans le même bloc ─ %>
-    <div class="wiki-infotable">
-      <dl class="wiki-infotable-body">
+        <%# Métadonnées catégorie (positions, partenaires, etc.) ─ %>
+        <%
+          var hasMetaRows = hasPartMeta || hasPosMeta
+            || (page.category === 'objets' && pm.type_gode && GODE[pm.type_gode])
+            || (page.category === 'lieux'  && pm.type_lieu  && LIEU[pm.type_lieu])
+            || (page.category === 'fantasmes' && pm.sous_cat && FSUBS[pm.sous_cat]);
+        %>
+        <% if (hasMetaRows) { %>
+          <dl class="wiki-infotable-body wiki-detail-meta-dl">
 
-        <div class="wiki-infobox-row">
-          <dt>Cat&eacute;gorie</dt>
-          <dd><%= cat ? cat.label : page.category %></dd>
-        </div>
+            <% if (page.category === 'fantasmes' && pm.sous_cat && FSUBS[pm.sous_cat]) { %>
+              <div class="wiki-infobox-row"><dt>Sous-cat&eacute;gorie</dt><dd><%= FSUBS[pm.sous_cat] %></dd></div>
+            <% } %>
+            <% if (hasPartMeta) { %>
+              <% if (nbTotal) { %><div class="wiki-infobox-row"><dt>Nombre total</dt><dd><%= nbTotal === 'nombreux' ? 'Nombreux' : nbTotal === 'variable' ? 'Variable' : nbTotal %></dd></div><% } %>
+              <% if (nbFem)   { %><div class="wiki-infobox-row"><dt>F&eacute;minin</dt><dd><%= nbFem === 'nombreux' ? 'Nombreuses' : nbFem === 'variable' ? 'Variable' : nbFem %></dd></div><% } %>
+              <% if (nbMasc)  { %><div class="wiki-infobox-row"><dt>Masculin</dt><dd><%= nbMasc === 'nombreux' ? 'Nombreux' : nbMasc === 'variable' ? 'Variable' : nbMasc %></dd></div><% } %>
+              <% if (pmTypes.length) { %><div class="wiki-infobox-row"><dt>Type</dt><dd><%= pmTypes.map(function(t){ return TYPES_PART[t] || t; }).join(' · ') %></dd></div><% } %>
+            <% } %>
+            <% if (page.category === 'objets' && pm.type_gode && GODE[pm.type_gode]) { %>
+              <div class="wiki-infobox-row"><dt>Type</dt><dd><%= GODE[pm.type_gode] %></dd></div>
+            <% } %>
+            <% if (page.category === 'lieux' && pm.type_lieu && LIEU[pm.type_lieu]) { %>
+              <div class="wiki-infobox-row"><dt>Type</dt><dd><%= LIEU[pm.type_lieu] %></dd></div>
+            <% } %>
+            <% if (hasPosMeta) { %>
+              <% if (pm.categorie && POSCAT[pm.categorie]) { %><div class="wiki-infobox-row"><dt>Cat&eacute;gorie</dt><dd><%= POSCAT[pm.categorie] %></dd></div><% } %>
+              <% if (pm.qui_dessus && QUI[pm.qui_dessus]) { %><div class="wiki-infobox-row"><dt>Au-dessus</dt><dd><%= QUI[pm.qui_dessus] %></dd></div><% } %>
+              <% if (pm.canal && pm.canal.length) { %><div class="wiki-infobox-row"><dt>Canal</dt><dd><%= pm.canal.map(function(c){ return CAN[c] || c; }).join(' · ') %></dd></div><% } %>
+              <% if (pmOri.length) { %><div class="wiki-infobox-row"><dt>Orientation</dt><dd><%= pmOri.map(function(o){ return ORI[o] || o; }).join(' · ') %></dd></div><% } %>
+              <% if (pm.nb_partenaires && NBPART[pm.nb_partenaires]) { %><div class="wiki-infobox-row"><dt>Partenaires</dt><dd><%= NBPART[pm.nb_partenaires] %></dd></div><% } %>
+              <% if (pm.partenaire_actif && ACTIF[pm.partenaire_actif]) { %><div class="wiki-infobox-row"><dt>Partenaire actif</dt><dd><%= ACTIF[pm.partenaire_actif] %></dd></div><% } %>
+              <% if (pmSup.length) { %><div class="wiki-infobox-row"><dt>Supports</dt><dd><%= pmSup.map(function(s){ return SUP[s] || s; }).join(' · ') %></dd></div><% } %>
+            <% } %>
 
-        <% if (page.category === 'fantasmes' && pm.sous_cat && FSUBS[pm.sous_cat]) { %>
-          <div class="wiki-infobox-row">
-            <dt>Sous-cat&eacute;gorie</dt>
-            <dd><%= FSUBS[pm.sous_cat] %></dd>
-          </div>
-        <% } %>
-
-        <% if (hasPartMeta) { %>
-          <% if (nbTotal) { %>
-            <div class="wiki-infobox-row">
-              <dt>Nombre total</dt>
-              <dd><%= nbTotal === 'nombreux' ? 'Nombreux' : nbTotal === 'variable' ? 'Variable' : nbTotal %></dd>
-            </div>
-          <% } %>
-          <% if (nbFem) { %>
-            <div class="wiki-infobox-row">
-              <dt>F&eacute;minin</dt>
-              <dd><%= nbFem === 'nombreux' ? 'Nombreuses' : nbFem === 'variable' ? 'Variable' : nbFem %></dd>
-            </div>
-          <% } %>
-          <% if (nbMasc) { %>
-            <div class="wiki-infobox-row">
-              <dt>Masculin</dt>
-              <dd><%= nbMasc === 'nombreux' ? 'Nombreux' : nbMasc === 'variable' ? 'Variable' : nbMasc %></dd>
-            </div>
-          <% } %>
-          <% if (pmTypes.length) { %>
-            <div class="wiki-infobox-row">
-              <dt>Type</dt>
-              <dd><%= pmTypes.map(function(t){ return TYPES_PART[t] || t; }).join(' &middot; ') %></dd>
-            </div>
-          <% } %>
+          </dl>
         <% } %>
 
-        <% if (page.category === 'objets' && pm.type_gode && GODE[pm.type_gode]) { %>
-          <div class="wiki-infobox-row">
-            <dt>Type</dt>
-            <dd><%= GODE[pm.type_gode] %></dd>
-          </div>
+        <%# Description markdown ─ %>
+        <% if (page.content) { %>
+          <div class="wiki-md"><span class="wiki-md-raw" hidden><%= page.content %></span></div>
         <% } %>
 
-        <% if (page.category === 'lieux' && pm.type_lieu && LIEU[pm.type_lieu]) { %>
-          <div class="wiki-infobox-row">
-            <dt>Type</dt>
-            <dd><%= LIEU[pm.type_lieu] %></dd>
-          </div>
-        <% } %>
-
-        <% if (hasPosMeta) { %>
-          <% if (pm.categorie && POSCAT[pm.categorie]) { %>
-            <div class="wiki-infobox-row">
-              <dt>Cat&eacute;gorie</dt>
-              <dd><%= POSCAT[pm.categorie] %></dd>
-            </div>
-          <% } %>
-          <% if (pm.qui_dessus && QUI[pm.qui_dessus]) { %>
-            <div class="wiki-infobox-row">
-              <dt>Au-dessus</dt>
-              <dd><%= QUI[pm.qui_dessus] %></dd>
-            </div>
-          <% } %>
-          <% if (pm.canal && pm.canal.length) { %>
-            <div class="wiki-infobox-row">
-              <dt>Canal</dt>
-              <dd><%= pm.canal.map(function(c){ return CAN[c] || c; }).join(' &middot; ') %></dd>
-            </div>
-          <% } %>
-          <% if (pmOri.length) { %>
-            <div class="wiki-infobox-row">
-              <dt>Orientation</dt>
-              <dd><%= pmOri.map(function(o){ return ORI[o] || o; }).join(' &middot; ') %></dd>
-            </div>
-          <% } %>
-          <% if (pm.nb_partenaires && NBPART[pm.nb_partenaires]) { %>
-            <div class="wiki-infobox-row">
-              <dt>Partenaires</dt>
-              <dd><%= NBPART[pm.nb_partenaires] %></dd>
-            </div>
-          <% } %>
-          <% if (pm.partenaire_actif && ACTIF[pm.partenaire_actif]) { %>
-            <div class="wiki-infobox-row">
-              <dt>Partenaire actif</dt>
-              <dd><%= ACTIF[pm.partenaire_actif] %></dd>
-            </div>
-          <% } %>
-          <% if (pmSup.length) { %>
-            <div class="wiki-infobox-row">
-              <dt>Supports</dt>
-              <dd><%= pmSup.map(function(s){ return SUP[s] || s; }).join(' &middot; ') %></dd>
-            </div>
-          <% } %>
-        <% } %>
-
-      </dl>
-
-      <% if (currentUser) { %>
-        <div class="wiki-react wiki-infotable-reactions"
-          data-id="<%= page.id %>"
-          data-flame="<%= page.flame ? '1' : '0' %>"
-          data-interested="<%= page.interested ? '1' : '0' %>">
-          <button type="button" class="wiki-react-btn wiki-react-flame<%= page.flame ? ' active' : '' %>" data-key="flame">
-            <span class="wiki-react-icon">&#128293;</span><span class="wiki-react-label">J&apos;adore</span>
-          </button>
-          <button type="button" class="wiki-react-btn wiki-react-interest<%= page.interested ? ' active' : '' %>" data-key="interested">
-            <span class="wiki-react-icon">&#10024;</span><span class="wiki-react-label">Int&eacute;ress&eacute;e</span>
-          </button>
-        </div>
-      <% } %>
-    </div>
-
-    <%# ─ Description : section principale + sections repliables ─ %>
-    <% if (page.content) { %>
-      <div class="wiki-md"><span class="wiki-md-raw" hidden><%= page.content %></span></div>
-    <% } %>
-
-    <%# ─ Variantes (positions seulement) ─ %>
-    <% if (page.category === 'position' && pm.variantes && pm.variantes.length) { %>
-      <div class="wiki-pos-section wiki-pos-variantes">
-        <h3 class="wiki-pos-section-heading">Variantes</h3>
-        <% pm.variantes.forEach(function(v) { %>
-          <% if (!v.nom) return; %>
-          <details class="wiki-var-detail">
-            <summary class="wiki-var-summary"><%= v.nom %></summary>
-            <div class="wiki-var-body">
-              <% if (v.description) { %><div class="wiki-md"><span class="wiki-md-raw" hidden><%= v.description %></span></div><% } %>
-              <% if (currentUser && v.images && v.images.length) { %>
-                <div class="wiki-var-images">
-                  <% v.images.forEach(function(src) { %>
-                    <img src="<%= src %>" alt="" class="wiki-var-img" />
-                  <% }) %>
-                </div>
-              <% } %>
-              <% if (v.variantes && v.variantes.length) { %>
-                <% v.variantes.forEach(function(sv) { %>
-                  <% if (!sv.nom) return; %>
-                  <details class="wiki-var-detail wiki-var-sub-detail">
-                    <summary class="wiki-var-summary"><%= sv.nom %></summary>
-                    <div class="wiki-var-body">
-                      <% if (sv.description) { %><div class="wiki-md"><span class="wiki-md-raw" hidden><%= sv.description %></span></div><% } %>
-                      <% if (currentUser && sv.images && sv.images.length) { %>
-                        <div class="wiki-var-images">
-                          <% sv.images.forEach(function(src) { %>
-                            <img src="<%= src %>" alt="" class="wiki-var-img" />
-                          <% }) %>
+        <%# Variantes (positions) ─ %>
+        <% if (page.category === 'position' && pm.variantes && pm.variantes.length) { %>
+          <div class="wiki-pos-section wiki-pos-variantes">
+            <h3 class="wiki-pos-section-heading">Variantes</h3>
+            <% pm.variantes.forEach(function(v) { %>
+              <% if (!v.nom) return; %>
+              <details class="wiki-var-detail">
+                <summary class="wiki-var-summary"><%= v.nom %></summary>
+                <div class="wiki-var-body">
+                  <% if (v.description) { %><div class="wiki-md"><span class="wiki-md-raw" hidden><%= v.description %></span></div><% } %>
+                  <% if (currentUser && v.images && v.images.length) { %>
+                    <div class="wiki-var-images"><% v.images.forEach(function(src) { %><img src="<%= src %>" alt="" class="wiki-var-img" /><% }) %></div>
+                  <% } %>
+                  <% if (v.variantes && v.variantes.length) { %>
+                    <% v.variantes.forEach(function(sv) { %>
+                      <% if (!sv.nom) return; %>
+                      <details class="wiki-var-detail wiki-var-sub-detail">
+                        <summary class="wiki-var-summary"><%= sv.nom %></summary>
+                        <div class="wiki-var-body">
+                          <% if (sv.description) { %><div class="wiki-md"><span class="wiki-md-raw" hidden><%= sv.description %></span></div><% } %>
+                          <% if (currentUser && sv.images && sv.images.length) { %>
+                            <div class="wiki-var-images"><% sv.images.forEach(function(src) { %><img src="<%= src %>" alt="" class="wiki-var-img" /><% }) %></div>
+                          <% } %>
                         </div>
-                      <% } %>
-                    </div>
-                  </details>
-                <% }) %>
-              <% } %>
-            </div>
-          </details>
-        <% }) %>
-      </div>
-    <% } %>
+                      </details>
+                    <% }) %>
+                  <% } %>
+                </div>
+              </details>
+            <% }) %>
+          </div>
+        <% } %>
 
-    <%# ─ Scénario (partenaires seulement) ─ %>
-    <% if (page.category === 'partenaires' && pm.scenario) { %>
-      <div class="wiki-pos-section wiki-pos-nouvelles">
-        <h3 class="wiki-pos-section-heading">Sc&eacute;nario</h3>
-        <div class="wiki-pos-nouvelles-text"><%= pm.scenario %></div>
-      </div>
-    <% } %>
+        <%# Scénario (partenaires) ─ %>
+        <% if (page.category === 'partenaires' && pm.scenario) { %>
+          <div class="wiki-pos-section wiki-pos-nouvelles">
+            <h3 class="wiki-pos-section-heading">Sc&eacute;nario</h3>
+            <div class="wiki-pos-nouvelles-text"><%= pm.scenario %></div>
+          </div>
+        <% } %>
 
-    <%# ─ Informations utiles (positions seulement) ─ %>
-    <% if (page.category === 'position' && pm.infos_utiles) { %>
-      <div class="wiki-pos-section wiki-pos-infos">
-        <h3 class="wiki-pos-section-heading">Informations utiles</h3>
-        <div class="wiki-md"><span class="wiki-md-raw" hidden><%= pm.infos_utiles %></span></div>
-      </div>
-    <% } %>
+        <%# Informations utiles (positions) ─ %>
+        <% if (page.category === 'position' && pm.infos_utiles) { %>
+          <div class="wiki-pos-section wiki-pos-infos">
+            <h3 class="wiki-pos-section-heading">Informations utiles</h3>
+            <div class="wiki-md"><span class="wiki-md-raw" hidden><%= pm.infos_utiles %></span></div>
+          </div>
+        <% } %>
 
-    <%# ─ Nouvelles (positions seulement) ─ %>
-    <% if (page.category === 'position' && pm.nouvelles) { %>
-      <div class="wiki-pos-section wiki-pos-nouvelles">
-        <h3 class="wiki-pos-section-heading">Nouvelles</h3>
-        <div class="wiki-pos-nouvelles-text"><%= pm.nouvelles %></div>
-      </div>
-    <% } %>
+        <%# Nouvelles (positions) ─ %>
+        <% if (page.category === 'position' && pm.nouvelles) { %>
+          <div class="wiki-pos-section wiki-pos-nouvelles">
+            <h3 class="wiki-pos-section-heading">Nouvelles</h3>
+            <div class="wiki-pos-nouvelles-text"><%= pm.nouvelles %></div>
+          </div>
+        <% } %>
 
-    <%# ─ Images suivantes : carrousel, après la description ─ %>
-    <% if (hasImages && page.imagePaths.length > 1 && currentUser) { %>
-      <div class="wiki-infobox-images wiki-infobox-images-rest">
-        <% page.imagePaths.slice(1).forEach(function (src) { %>
-          <img src="<%= src %>" alt="" class="wiki-infobox-img" />
-        <% }) %>
-      </div>
-    <% } %>
+        <%# Images secondaires (toutes sauf la première) — galerie dans le texte ─ %>
+        <% if (hasImages && page.imagePaths.length > 1 && currentUser) { %>
+          <div class="wiki-secondary-imgs">
+            <% page.imagePaths.slice(1).forEach(function (src) { %>
+              <div class="wiki-secondary-img-wrap">
+                <img src="<%= src %>" alt="" class="wiki-secondary-img" loading="lazy" />
+              </div>
+            <% }) %>
+          </div>
+        <% } %>
 
-    <%# ─ Pages liées : lecture seule, en carrousel (édition dans "Modifier") ─ %>
-    <div class="wiki-page-links-view" data-page-id="<%= page.id %>" hidden>
-      <h3 class="wiki-pl-heading">Pages li&eacute;es</h3>
-      <div class="wiki-pl-cards" data-role="links"></div>
-    </div>
+        <%# Pages liées ─ %>
+        <div class="wiki-page-links-view" data-page-id="<%= page.id %>" hidden>
+          <h3 class="wiki-pl-heading">Pages li&eacute;es</h3>
+          <div class="wiki-pl-cards" data-role="links"></div>
+        </div>
 
-    <%# ─ Questions du quizz liées : idem, lecture seule. Le quizz est
-         privé, donc ce bloc (et l'API qui l'alimente) le reste aussi. ─ %>
-    <% if (currentUser) { %>
-      <div class="wiki-question-links-view" data-page-id="<%= page.id %>" hidden>
-        <h3 class="wiki-ql-heading">Questions du quizz li&eacute;es</h3>
-        <ul class="wiki-ql-list"></ul>
-      </div>
-    <% } %>
+        <%# Questions du quizz liées ─ %>
+        <% if (currentUser) { %>
+          <div class="wiki-question-links-view" data-page-id="<%= page.id %>" hidden>
+            <h3 class="wiki-ql-heading">Questions du quizz li&eacute;es</h3>
+            <ul class="wiki-ql-list"></ul>
+          </div>
+        <% } %>
 
-    <%# ─ Tag : tags + mots dérivés, dans un espace réduit et centré ─ %>
-    <% if (hasAnyTags) { %>
-      <div class="wiki-detail-tag-block">
-        <p class="wiki-detail-tag-label">Tag</p>
-        <div class="link-card-tags wiki-detail-tags">
-          <% page.tags.forEach(function (t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
-          <% if (derivedTerms.length) { %>
-            <span class="wiki-derived-sep">&mdash;</span>
-            <% derivedTerms.forEach(function (t) { %><span class="wiki-derived-pill"><%= t.term %><% if (t.en) { %> <span class="wiki-derived-en" title="Terme anglais">&#127468;&#127463;</span><% } %></span><% }) %>
+      </div><%# /wiki-detail-body %>
+
+      <%# ─ COLONNE DROITE : panneau info (PC) ─ %>
+      <aside class="wiki-detail-right">
+
+        <%# a) Nom de la page ─ %>
+        <h2 class="wiki-right-title"><%= page.title %></h2>
+
+        <%# b) Catégories ─ %>
+        <div class="wiki-right-cats">
+          <% if (cat) { %>
+            <a href="/wiki/categorie/<%= page.category %>" class="wiki-category-badge wiki-right-cat-badge"
+               style="background: hsl(<%= cat.hue %>, 55%, 42%)"><%= cat.label %></a>
+          <% } %>
+          <% (page.extraCategories || []).forEach(function (eck) { var ecat = categories.find(function (c) { return c.key === eck; }); if (ecat) { %>
+            <a href="/wiki/categorie/<%= eck %>" class="wiki-category-badge wiki-right-cat-badge"
+               style="background: hsl(<%= ecat.hue %>, 55%, 42%)"><%= ecat.label %></a>
+          <% } }) %>
+          <% if (page.owned) { %>
+            <span class="wiki-right-owned">&#9733; Poss&eacute;d&eacute;</span>
           <% } %>
         </div>
-      </div>
-    <% } %>
+
+        <%# c) Image principale ─ %>
+        <% if (hasImages && currentUser) { %>
+          <div class="wiki-right-img-wrap">
+            <img src="<%= page.imagePaths[0] %>" alt="" class="wiki-right-img" />
+          </div>
+        <% } %>
+
+        <%# d) Notation ─ %>
+        <% if (currentUser) { %>
+          <div class="wiki-detail-rating wiki-right-rating" data-id="<%= page.id %>" data-rating="<%= page.rating %>">
+            <% for (var i = 1; i <= 5; i++) { %>
+              <button type="button" class="wiki-star wiki-star-lg" data-value="<%= i %>"><%- i <= page.rating ? '&#9733;' : '&#9734;' %></button>
+            <% } %>
+          </div>
+        <% } %>
+
+        <%# e) Réactions côte à côte ─ %>
+        <% if (currentUser) { %>
+          <div class="wiki-react wiki-right-reactions"
+               data-id="<%= page.id %>"
+               data-flame="<%= page.flame ? '1' : '0' %>"
+               data-interested="<%= page.interested ? '1' : '0' %>">
+            <button type="button" class="wiki-react-btn wiki-react-flame<%= page.flame ? ' active' : '' %>" data-key="flame">
+              <span class="wiki-react-icon">&#128293;</span><span class="wiki-react-label">J&apos;adore</span>
+            </button>
+            <button type="button" class="wiki-react-btn wiki-react-interest<%= page.interested ? ' active' : '' %>" data-key="interested">
+              <span class="wiki-react-icon">&#10024;</span><span class="wiki-react-label">Int&eacute;ress&eacute;e</span>
+            </button>
+          </div>
+        <% } %>
+
+        <%# f) Tags cliquables → accueil wiki avec tag filtré ─ %>
+        <% if (hasAnyTags) { %>
+          <div class="wiki-right-tags">
+            <% page.tags.forEach(function (t) { %>
+              <a href="/wiki?tag=<%= encodeURIComponent(t.toLowerCase()) %>"
+                 class="link-tag-pill wiki-right-tag-link"><%= t %></a>
+            <% }) %>
+            <% if (derivedTerms.length) { %>
+              <span class="wiki-derived-sep">&mdash;</span>
+              <% derivedTerms.forEach(function (t) { %>
+                <span class="wiki-derived-pill"><%= t.term %><% if (t.en) { %> <span class="wiki-derived-en" title="Terme anglais">&#127468;&#127463;</span><% } %></span>
+              <% }) %>
+            <% } %>
+          </div>
+        <% } %>
+
+        <%# Actions : favoris + modifier ─ %>
+        <% if (currentUser) { %>
+          <div class="wiki-right-actions">
+            <button type="button" class="wiki-edit-icon-btn wiki-fav-icon-btn<%= isFavorite ? ' active' : '' %>" id="wiki-fav-btn" data-item-id="<%= page.id %>" title="Favori" aria-label="Favori">&#128278;</button>
+            <a href="/wiki/<%= page.id %>/edit" class="wiki-edit-icon-btn" title="Modifier" aria-label="Modifier">&#9998;</a>
+          </div>
+        <% } %>
+
+      </aside><%# /wiki-detail-right %>
+
+    </div><%# /wiki-detail-layout %>
 
     <%# ─ Suggestions ─ %>
     <% if (suggestions && suggestions.length) { %>
@@ -330,9 +286,7 @@
             <% var scat = categories.find(function (c) { return c.key === s.category; }); %>
             <a href="/wiki/<%= s.id %>" class="wiki-sugg-card">
               <% if (s.imagePaths && s.imagePaths.length && currentUser) { %>
-                <div class="wiki-sugg-img-wrap">
-                  <img src="<%= s.imagePaths[0] %>" alt="" class="wiki-sugg-img" />
-                </div>
+                <div class="wiki-sugg-img-wrap"><img src="<%= s.imagePaths[0] %>" alt="" class="wiki-sugg-img" /></div>
               <% } %>
               <span class="wiki-sugg-badge" style="background: hsl(<%= scat ? scat.hue : 220 %>, 55%, 45%)"><%= scat ? scat.label : s.category %></span>
               <span class="wiki-sugg-title"><%= s.title %></span>
@@ -343,18 +297,19 @@
       </div>
     <% } %>
 
-    <%# ─ Notes personnelles : privées, per-user, sauvegardées en AJAX ─ %>
+    <%# ─ Notes personnelles ─ %>
     <% if (currentUser) { %>
       <div class="wiki-user-note" data-page-id="<%= page.id %>">
         <h3 class="wiki-pos-section-heading wiki-user-note-heading">Mes notes</h3>
-        <textarea class="wiki-user-note-area" placeholder="Tes notes personnelles sur cette page\u2026" rows="4"><%= locals.userNote || '' %></textarea>
+        <textarea class="wiki-user-note-area" placeholder="Tes notes personnelles sur cette page…" rows="4"><%= locals.userNote || '' %></textarea>
         <p class="wiki-user-note-status" aria-live="polite"></p>
       </div>
     <% } %>
 
+    <%# Actions mobile (fav + edit) — masquées sur PC où elles sont dans la sidebar droite ─ %>
     <% if (currentUser) { %>
-      <div class="wiki-detail-actions">
-        <button type="button" class="wiki-edit-icon-btn wiki-fav-icon-btn<%= isFavorite ? ' active' : '' %>" id="wiki-fav-btn" data-item-id="<%= page.id %>" title="Favori" aria-label="Favori">&#128278;</button>
+      <div class="wiki-detail-actions wiki-detail-actions-mobile">
+        <button type="button" class="wiki-edit-icon-btn wiki-fav-icon-btn<%= isFavorite ? ' active' : '' %>" id="wiki-fav-btn-mobile" data-item-id="<%= page.id %>" title="Favori" aria-label="Favori">&#128278;</button>
         <a href="/wiki/<%= page.id %>/edit" class="wiki-edit-icon-btn" title="Modifier" aria-label="Modifier">&#9998;</a>
       </div>
     <% } %>

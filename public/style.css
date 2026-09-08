@@ -6561,3 +6561,169 @@ a.wiki-ql-label:hover .wiki-ql-text {
   }
 }
 
+/* ─────────────────────────────────────────────────────────
+   Wiki intro : texte justifié et élégant
+───────────────────────────────────────────────────────── */
+.wiki-index-intro p { text-align: justify; }
+
+/* ─────────────────────────────────────────────────────────
+   Bouton « Plus » sidebar tags : plus fin et discret
+───────────────────────────────────────────────────────── */
+.wiki-tag-expand-btn {
+  font-size: 0.68rem;
+  padding: 0.06rem 0.55rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.13);
+  background: transparent;
+  color: rgba(255,255,255,0.42);
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: color 0.15s, border-color 0.15s;
+}
+.wiki-tag-expand-btn:hover {
+  background: transparent;
+  color: rgba(255,255,255,0.78);
+  border-color: rgba(255,255,255,0.3);
+}
+
+/* ─────────────────────────────────────────────────────────
+   Wiki detail : mise en page 2 colonnes (PC seulement)
+───────────────────────────────────────────────────────── */
+.wiki-detail-layout { display: block; }
+.wiki-detail-right  { display: none; }
+.wiki-detail-actions-mobile { display: flex; gap: 0.6rem; margin-top: 1.25rem; }
+
+@media (min-width: 800px) {
+  .wiki-detail-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 265px;
+    gap: 2rem;
+    align-items: start;
+    margin-top: 1rem;
+  }
+
+  .wiki-detail-right {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    position: sticky;
+    top: calc(var(--topnav-height) + 1rem);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem;
+    max-height: calc(100vh - var(--topnav-height) - 2rem);
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  .wiki-detail-actions-mobile { display: none; }
+}
+
+/* ── Panneau droit : titre ──────────────────────────── */
+.wiki-right-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.3;
+  color: var(--fg);
+}
+
+/* ── Catégories + owned ─────────────────────────────── */
+.wiki-right-cats { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.wiki-right-cat-badge {
+  font-size: 0.72rem; padding: 0.18rem 0.6rem;
+  border-radius: 20px; color: #fff; text-decoration: none;
+  font-weight: 600; transition: opacity 0.15s;
+}
+.wiki-right-cat-badge:hover { opacity: 0.82; }
+.wiki-right-owned {
+  font-size: 0.72rem; padding: 0.18rem 0.6rem;
+  border-radius: 20px; background: hsl(45, 65%, 25%);
+  color: hsl(45, 90%, 78%); font-weight: 600;
+}
+
+/* ── Image principale ───────────────────────────────── */
+.wiki-right-img-wrap { border-radius: 9px; overflow: hidden; line-height: 0; }
+.wiki-right-img {
+  width: 100%; display: block;
+  max-height: 240px; object-fit: cover;
+}
+
+/* ── Notation ───────────────────────────────────────── */
+.wiki-right-rating { display: flex; gap: 0.12rem; }
+
+/* ── Réactions côte à côte ──────────────────────────── */
+.wiki-right-reactions { display: flex; gap: 0.5rem; }
+.wiki-right-reactions .wiki-react-btn {
+  flex: 1; justify-content: center;
+  font-size: 0.78rem; padding: 0.38rem 0.4rem;
+}
+
+/* ── Tags cliquables ────────────────────────────────── */
+.wiki-right-tags {
+  display: flex; flex-wrap: wrap;
+  gap: 0.35rem; align-items: center;
+}
+.wiki-right-tag-link {
+  font-size: 0.72rem; padding: 0.14rem 0.5rem;
+  border-radius: 20px;
+  background: rgba(128,128,128,0.1);
+  color: var(--muted); text-decoration: none;
+  border: 1px solid var(--border);
+  transition: background 0.15s, color 0.15s;
+}
+.wiki-right-tag-link:hover {
+  background: rgba(128,128,128,0.2); color: var(--fg);
+}
+.wiki-derived-sep { color: var(--border); }
+.wiki-derived-pill {
+  font-size: 0.72rem; padding: 0.14rem 0.5rem;
+  border-radius: 20px; background: rgba(128,128,128,0.07);
+  color: var(--muted); font-style: italic;
+}
+
+/* ── Actions fav + édition ──────────────────────────── */
+.wiki-right-actions {
+  display: flex; gap: 0.5rem;
+  justify-content: flex-end; margin-top: 0.2rem;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Images secondaires dans le corps de la page
+───────────────────────────────────────────────────────── */
+.wiki-secondary-imgs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 0.75rem; margin: 1.5rem 0;
+}
+.wiki-secondary-img {
+  width: 100%; display: block;
+  border-radius: 8px;
+  height: 150px; object-fit: cover;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Autocomplete dropdown (formulaire tag)
+───────────────────────────────────────────────────────── */
+.wiki-tags-widget { position: relative; }
+.wiki-tag-autocomplete {
+  position: absolute;
+  left: 0; right: 0;
+  top: 100%; z-index: 60;
+  list-style: none; margin: 2px 0 0; padding: 0.3rem 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  max-height: 220px; overflow-y: auto;
+}
+.wiki-tag-ac-item {
+  padding: 0.35rem 0.85rem;
+  cursor: pointer; font-size: 0.88rem; color: var(--fg);
+}
+.wiki-tag-ac-item:hover,
+.wiki-tag-ac-item.selected {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+

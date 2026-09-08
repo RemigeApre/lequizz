@@ -235,7 +235,7 @@
       if (e.target === board) typer.focus();
     });
 
-    // Suggestions
+    // Suggestions (chips statiques)
     if (suggestBox) {
       suggestBox.querySelectorAll(".wiki-tag-suggest-chip").forEach(function (chip) {
         chip.addEventListener("click", function () {
@@ -245,6 +245,73 @@
         });
       });
     }
+
+    // ── Autocomplete dropdown (temps réel pendant la saisie) ──────────────
+    var allAvailTags = [];
+    if (suggestBox) {
+      suggestBox.querySelectorAll(".wiki-tag-suggest-chip[data-tag]").forEach(function (chip) {
+        allAvailTags.push(chip.dataset.tag);
+      });
+    }
+
+    var acDrop = document.createElement("ul");
+    acDrop.className = "wiki-tag-autocomplete";
+    acDrop.hidden = true;
+    board.parentNode.insertBefore(acDrop, board.nextSibling);
+    var acSelected = -1;
+
+    function closeAc() { acDrop.hidden = true; acDrop.innerHTML = ""; acSelected = -1; }
+
+    function showAc(query) {
+      var q = (query || "").trim().toLowerCase();
+      if (!q) { closeAc(); return; }
+      var matches = allAvailTags.filter(function (t) {
+        return t.toLowerCase().indexOf(q) !== -1 && !findTag(t);
+      }).slice(0, 9);
+      if (!matches.length) { closeAc(); return; }
+      acDrop.innerHTML = "";
+      acSelected = -1;
+      matches.forEach(function (t) {
+        var li = document.createElement("li");
+        li.className = "wiki-tag-ac-item";
+        li.textContent = t;
+        li.addEventListener("mousedown", function (e) {
+          e.preventDefault(); // empêche blur du typer
+          addTag(t);
+          typer.value = "";
+          closeAc();
+          typer.focus();
+        });
+        acDrop.appendChild(li);
+      });
+      acDrop.hidden = false;
+    }
+
+    typer.addEventListener("input", function () { showAc(typer.value); });
+    typer.addEventListener("blur",  function () { setTimeout(closeAc, 160); });
+
+    // Navigation clavier dans le dropdown (capture → avant le handler Enter existant)
+    typer.addEventListener("keydown", function (e) {
+      if (acDrop.hidden) return;
+      var items = acDrop.querySelectorAll(".wiki-tag-ac-item");
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        acSelected = Math.min(acSelected + 1, items.length - 1);
+        items.forEach(function (li, i) { li.classList.toggle("selected", i === acSelected); });
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        acSelected = Math.max(acSelected - 1, 0);
+        items.forEach(function (li, i) { li.classList.toggle("selected", i === acSelected); });
+      } else if ((e.key === "Enter" || e.key === "Tab") && acSelected >= 0 && items[acSelected]) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        addTag(items[acSelected].textContent);
+        typer.value = "";
+        closeAc();
+      } else if (e.key === "Escape") {
+        closeAc();
+      }
+    }, true); // capture phase → s'exécute avant le handler Enter/virgule existant
 
     renderBoard();
   }
@@ -574,6 +641,18 @@
   if (urlSearchQuery !== null) {
     searchQuery = urlSearchQuery;
     localStorage.setItem("wiki-filter-search", searchQuery);
+  }
+
+  // Un lien tag depuis une page wiki arrive en ?tag=... : sélectionne le tag
+  // comme filtre actif (mode "inclus") et efface les filtres tags précédents.
+  var urlTagParam = new URLSearchParams(window.location.search).get("tag");
+  if (urlTagParam !== null) {
+    var _urlTag = urlTagParam.toLowerCase();
+    includedTagsSet.clear();
+    excludedTagsSet.clear();
+    includedTagsSet.add(_urlTag);
+    localStorage.setItem("wiki-filter-tags-inc", JSON.stringify([_urlTag]));
+    localStorage.setItem("wiki-filter-tags-exc", "[]");
   }
 
   // Normalise une chaîne : minuscules + sans accents
@@ -2405,18 +2484,23 @@
   // 15. FAVORI (page wiki) — bouton dans la page de lecture
   // ══════════════════════════════════════════════════
   (function () {
-    var btn = document.getElementById("wiki-fav-btn");
-    if (!btn) return;
-    btn.addEventListener("click", function () {
-      fetch("/favoris/toggle", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ itemType: "wiki", itemId: Number(btn.dataset.itemId) }),
-      })
-        .then(function (r) { return r.json(); })
-        .then(function (d) {
-          if (d.ok) btn.classList.toggle("active", d.active);
-        });
+    var btns = [
+      document.getElementById("wiki-fav-btn"),
+      document.getElementById("wiki-fav-btn-mobile"),
+    ].filter(Boolean);
+    if (!btns.length) return;
+    btns.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        fetch("/favoris/toggle", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ itemType: "wiki", itemId: Number(btn.dataset.itemId) }),
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (d.ok) btns.forEach(function (b) { b.classList.toggle("active", d.active); });
+          });
+      });
     });
   })();
 
