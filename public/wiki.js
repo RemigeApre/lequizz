@@ -1476,6 +1476,9 @@
       '<div class="wiki-lightbox-panel" hidden>',
         '<div class="wiki-lb-meta-section">',
           '<div class="wiki-lb-meta-tags"></div>',
+          '<div class="wiki-lb-meta-tag-edit" hidden>',
+            '<input type="text" class="wiki-lb-meta-tag-input" placeholder="Ajouter un tag\u2026" autocomplete="off" />',
+          '</div>',
           '<div class="wiki-lb-meta-fields">',
             '<div class="wiki-lb-meta-field" data-field="author">',
               '<span class="wiki-lb-meta-label">Auteur</span>',
@@ -1493,9 +1496,6 @@
                 '<ul class="wiki-lb-meta-suggest"></ul>',
               '</div>',
             '</div>',
-          '</div>',
-          '<div class="wiki-lb-meta-tag-edit" hidden>',
-            '<input type="text" class="wiki-lb-meta-tag-input" placeholder="Ajouter un tag\u2026" autocomplete="off" />',
           '</div>',
           '<button class="wiki-lb-meta-edit-btn" hidden>Modifier</button>',
           '<div class="wiki-lb-meta-save-row" hidden>',
@@ -1640,10 +1640,10 @@
     renderMetaTags(lbCurrentMeta.tags, true);
     // Champs author/parody
     lbMetaFields.querySelectorAll(".wiki-lb-meta-field").forEach(function(field) {
+      field.querySelector(".wiki-lb-meta-label").hidden = true;
       field.querySelector(".wiki-lb-meta-value").hidden = true;
       field.querySelector(".wiki-lb-meta-edit").hidden = false;
-      var input = field.querySelector(".wiki-lb-meta-input");
-      input.value = lbCurrentMeta[field.dataset.field] || "";
+      field.querySelector(".wiki-lb-meta-input").value = lbCurrentMeta[field.dataset.field] || "";
     });
   }
 
@@ -1660,6 +1660,7 @@
       var key = field.dataset.field;
       var val = lbCurrentMeta[key] || "";
       var valueEl = field.querySelector(".wiki-lb-meta-value");
+      field.querySelector(".wiki-lb-meta-label").hidden = false;
       valueEl.hidden = false;
       valueEl.textContent = val || LB_FIELD_PLACEHOLDER[key] || "\u2014";
       valueEl.classList.toggle("wiki-lb-meta-placeholder", !val);
