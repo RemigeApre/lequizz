@@ -244,12 +244,19 @@
   function sortCards() {
     if (!grid) return;
     var cards = Array.from(grid.querySelectorAll(".gallery-card:not([hidden])"));
-    cards.sort(function(a, b) {
-      if (sortMode === "alpha-asc") return (a.dataset.title || "").localeCompare(b.dataset.title || "", "fr");
-      if (sortMode === "rating-desc") return (Number(b.dataset.rating) || 0) - (Number(a.dataset.rating) || 0);
-      if (sortMode === "date-asc") return (a.dataset.date || "").localeCompare(b.dataset.date || "");
-      return (b.dataset.date || "").localeCompare(a.dataset.date || "");
-    });
+    if (sortMode === "random") {
+      for (var i = cards.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = cards[i]; cards[i] = cards[j]; cards[j] = tmp;
+      }
+    } else {
+      cards.sort(function(a, b) {
+        if (sortMode === "alpha-asc") return (a.dataset.title || "").localeCompare(b.dataset.title || "", "fr");
+        if (sortMode === "rating-desc") return (Number(b.dataset.rating) || 0) - (Number(a.dataset.rating) || 0);
+        if (sortMode === "date-asc") return (a.dataset.date || "").localeCompare(b.dataset.date || "");
+        return (b.dataset.date || "").localeCompare(a.dataset.date || "");
+      });
+    }
     cards.forEach(function(c) { grid.appendChild(c); });
   }
 

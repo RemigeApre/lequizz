@@ -6696,9 +6696,6 @@ a.wiki-ql-label:hover .wiki-ql-text {
 
 /* ── Desktop : details always open, summary hidden ───────────────────── */
 @media (min-width: 641px) {
-  .wiki-sidebar-filter-details {
-    display: contents;
-  }
   .wiki-sidebar-filter-details > .wiki-sidebar-filter-summary { display: none; }
   .wiki-intro-details { display: contents; }
   .wiki-intro-details > .wiki-intro-summary { display: none; }
