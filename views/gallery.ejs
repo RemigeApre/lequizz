@@ -178,47 +178,50 @@
     <button type="button" class="wiki-fab-add" id="gallery-fab-main" title="Ajouter une image">+</button>
   </div>
 
-  <%# Formulaire upload (commun aux deux types, content_type changé par JS) %>
-  <div id="gallery-upload-panel" hidden>
-    <form method="POST" action="/galerie" enctype="multipart/form-data" class="gallery-upload-form">
-      <input type="hidden" name="content_type" id="gallery-upload-type" value="image" />
-      <div class="gallery-form-row">
+  <%# Modale upload %>
+  <div id="gallery-upload-panel" class="gallery-upload-modal" hidden>
+    <div class="gallery-upload-modal-back" id="gallery-upload-back"></div>
+    <div class="gallery-upload-modal-box">
+      <div class="gallery-upload-modal-header">
         <span id="gallery-upload-type-label" class="gallery-upload-type-chip">Image</span>
+        <button type="button" id="gallery-upload-cancel" class="gallery-upload-modal-close" title="Fermer">&#215;</button>
+      </div>
+      <form method="POST" action="/galerie" enctype="multipart/form-data" class="gallery-upload-form">
+        <input type="hidden" name="content_type" id="gallery-upload-type" value="image" />
         <input type="text" name="title" class="gallery-title-input" placeholder="Titre (optionnel)&hellip;" autocomplete="off" />
-      </div>
-      <div class="wiki-form-top-row">
-        <select name="category" class="wiki-cat-inline-select">
-          <option value="">Sans cat&eacute;gorie</option>
-          <% categories.forEach(function (c) { %>
-            <option value="<%= c.key %>"><%= c.label %></option>
-          <% }) %>
-        </select>
-      </div>
-      <div class="wiki-tags-widget">
-        <div class="wiki-tags-board">
-          <input type="text" class="wiki-tags-typing" placeholder="Tags&hellip;" autocomplete="off" />
-        </div>
-        <input type="hidden" name="tags" class="wiki-tags-hidden" value="" />
-        <% if (allTags.length) { %>
-          <div class="wiki-tag-suggestions">
-            <% allTags.forEach(function(t) { %>
-              <button type="button" class="wiki-tag-suggest-chip" data-tag="<%= t %>"><%= t %></button>
+        <div class="wiki-form-top-row">
+          <select name="category" class="wiki-cat-inline-select">
+            <option value="">Sans cat&eacute;gorie</option>
+            <% categories.forEach(function (c) { %>
+              <option value="<%= c.key %>"><%= c.label %></option>
             <% }) %>
+          </select>
+        </div>
+        <div class="wiki-tags-widget">
+          <div class="wiki-tags-board">
+            <input type="text" class="wiki-tags-typing" placeholder="Tags&hellip;" autocomplete="off" />
           </div>
-        <% } %>
-      </div>
-      <textarea name="notes" class="gallery-notes-input" rows="2" placeholder="Notes&hellip;"></textarea>
-      <div class="gallery-upload-file-row">
-        <label class="wiki-image-add-label gallery-file-label">
-          <span>Choisir des images</span>
-          <input type="file" name="images" accept="image/*" multiple class="gallery-file-input" required />
-        </label>
-        <button type="submit" class="gallery-submit-btn">Ajouter</button>
-        <button type="button" id="gallery-upload-cancel" class="link-button">Annuler</button>
-      </div>
-      <p class="wiki-md-hint">Plusieurs images choisies ensemble forment un seul album.</p>
-      <div class="gallery-upload-previews" id="gallery-upload-previews"></div>
-    </form>
+          <input type="hidden" name="tags" class="wiki-tags-hidden" value="" />
+          <% if (allTags.length) { %>
+            <div class="wiki-tag-suggestions">
+              <% allTags.forEach(function(t) { %>
+                <button type="button" class="wiki-tag-suggest-chip" data-tag="<%= t %>"><%= t %></button>
+              <% }) %>
+            </div>
+          <% } %>
+        </div>
+        <textarea name="notes" class="gallery-notes-input" rows="2" placeholder="Notes&hellip;"></textarea>
+        <div class="gallery-upload-file-row">
+          <label class="wiki-image-add-label gallery-file-label">
+            <span>Choisir des images</span>
+            <input type="file" name="images" accept="image/*" multiple class="gallery-file-input" required />
+          </label>
+          <button type="submit" class="gallery-submit-btn">Ajouter</button>
+        </div>
+        <p class="wiki-md-hint">Plusieurs images choisies ensemble forment un seul album.</p>
+        <div class="gallery-upload-previews" id="gallery-upload-previews"></div>
+      </form>
+    </div>
   </div>
   <% } %>
 

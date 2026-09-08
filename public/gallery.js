@@ -103,6 +103,11 @@
     });
   }
   if (cancelBtn) cancelBtn.addEventListener("click", closeUpload);
+  var uploadBack = document.getElementById("gallery-upload-back");
+  if (uploadBack) uploadBack.addEventListener("click", closeUpload);
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && uploadPanel && !uploadPanel.hidden) closeUpload();
+  });
 
   if (fileInput && previewZone) {
     fileInput.addEventListener("change", function () {
