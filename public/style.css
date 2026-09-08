@@ -5578,4 +5578,264 @@ a.wiki-ql-label:hover .wiki-ql-text {
   text-align: right;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   PC NAV — barre de navigation desktop
+   Visible uniquement à partir de 641px. Le drawer mobile est inchangé.
+═══════════════════════════════════════════════════════════════════════════ */
+
+/* Caché par défaut (mobile-first) */
+.pc-nav { display: none; }
+
+@media (min-width: 641px) {
+  /* Masque les éléments mobile de la barre */
+  .top-nav > .top-nav-brand,
+  .top-nav > .nav-burger { display: none; }
+
+  /* La pc-nav remplit toute la barre */
+  .pc-nav {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Colonne gauche : liens vers la gauche, mais poussés vers le centre */
+  .pc-nav-left {
+    display: flex;
+    align-items: center;
+    gap: 0.1rem;
+    flex: 1;
+    justify-content: flex-end;
+  }
+
+  /* Brand centré */
+  .pc-nav-brand-link {
+    flex-shrink: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 700;
+    font-style: italic;
+    font-size: 1.2rem;
+    letter-spacing: 0.03em;
+    color: var(--fg);
+    text-decoration: none;
+    padding: 0 1.75rem;
+    transition: color 0.15s;
+    white-space: nowrap;
+  }
+  .pc-nav-brand-link:hover { color: var(--wiki-gold); }
+
+  /* Colonne droite : liens vers la droite, poussés vers le centre */
+  .pc-nav-right {
+    display: flex;
+    align-items: center;
+    gap: 0.1rem;
+    flex: 1;
+    justify-content: flex-start;
+  }
+
+  /* Liens de navigation */
+  .pc-nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: 6px;
+    color: var(--fg);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+  }
+  .pc-nav-link:hover {
+    background: var(--bg);
+    color: var(--accent);
+  }
+
+  /* Conteneur d'un lien avec dropdown */
+  .pc-nav-item { position: relative; }
+
+  /* Dropdown */
+  .pc-drop {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 175px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.13);
+    padding: 0.35rem;
+    display: none;
+    flex-direction: column;
+    z-index: 200;
+    /* Pont invisible entre le lien et le menu pour ne pas perdre le hover */
+    margin-top: 0;
+  }
+  .pc-has-drop::after {
+    /* zone de pontage hover entre le lien et le dropdown */
+    content: "";
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    right: 0;
+    height: 8px;
+  }
+  .pc-has-drop:hover .pc-drop { display: flex; }
+
+  .pc-drop-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 6px;
+    color: var(--fg);
+    text-decoration: none;
+    font-size: 0.84rem;
+    white-space: nowrap;
+    transition: background 0.12s, color 0.12s;
+  }
+  .pc-drop-link:hover {
+    background: var(--bg);
+    color: var(--accent);
+  }
+
+  .pc-drop-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Icônes connexion + recherche — séparées à droite */
+  .pc-nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-left: auto;
+    padding-left: 0.75rem;
+    border-left: 1px solid var(--border);
+  }
+
+  .pc-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--fg);
+    font-size: 1rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  .pc-icon-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--bg);
+  }
+}
+
+/* ── Overlay de recherche globale ────────────────────────────────────────── */
+.pc-search-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 400;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 4.5rem;
+}
+/* [hidden] est déjà géré globalement par `[hidden] { display:none!important }` */
+
+.pc-search-box {
+  background: var(--card);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  width: min(580px, 92vw);
+  overflow: hidden;
+}
+
+.pc-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.pc-search-icon { font-size: 1.1rem; color: var(--muted); }
+
+.pc-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  color: var(--fg);
+  outline: none;
+}
+.pc-search-input::placeholder { color: var(--muted); }
+
+.pc-search-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s;
+}
+.pc-search-close-btn:hover { color: var(--fg); border-color: var(--fg); }
+
+.pc-search-results {
+  max-height: 55vh;
+  overflow-y: auto;
+  padding: 0.4rem;
+}
+
+.pc-search-section { margin-bottom: 0.4rem; }
+
+.pc-search-section-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  padding: 0.45rem 0.7rem 0.2rem;
+}
+
+.pc-search-result-link {
+  display: block;
+  padding: 0.45rem 0.75rem;
+  border-radius: 6px;
+  color: var(--fg);
+  text-decoration: none;
+  font-size: 0.88rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 0.12s, color 0.12s;
+}
+.pc-search-result-link:hover {
+  background: var(--bg);
+  color: var(--accent);
+}
+
+.pc-search-empty {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+  padding: 1.5rem 1rem;
+}
+
 .bd-sort-remove input { display: none; }

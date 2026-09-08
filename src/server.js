@@ -124,8 +124,10 @@ app.use(attachUser);
 
 // Expose le chemin courant pour que le lien "Se connecter" dans la nav
 // puisse y revenir après connexion (paramètre ?next=).
+// Expose aussi les catégories wiki pour le menu déroulant desktop.
 app.use((req, res, next) => {
   res.locals.currentPath = req.originalUrl;
+  res.locals.wikiCategories = buildWikiRouter.CATEGORIES || [];
   next();
 });
 
@@ -139,6 +141,81 @@ app.use(
   (req, res, next) => (req.user ? next() : res.status(403).end()),
   express.static(uploadsDir)
 );
+
+// ── Recherche globale multi-section ─────────────────────────────────────────
+app.get("/api/search", function (req, res) {
+  var q = String(req.query.q || "").trim();
+  if (q.length < 2) return res.json({ results: {} });
+  var ql = q.toLowerCase();
+  var pat = "%" + ql + "%";
+  var results = {};
+
+  // Wiki — public (texte accessible sans connexion)
+  try {
+    var wikiRows = db
+      .prepare(
+        "SELECT id, title FROM wiki_pages WHERE lower(title) LIKE ? OR lower(content) LIKE ? OR lower(tags) LIKE ? OR lower(meta) LIKE ? LIMIT 6"
+      )
+      .all(pat, pat, pat, pat);
+    if (wikiRows.length)
+      results.wiki = wikiRows.map(function (r) {
+        return { title: r.title, url: "/wiki/" + r.id };
+      });
+  } catch (_) {}
+
+  // Contenus privés — connexion requise
+  if (req.user) {
+    try {
+      var galRows = db
+        .prepare(
+          "SELECT id, title FROM gallery_images WHERE lower(title) LIKE ? OR lower(notes) LIKE ? OR lower(tags) LIKE ? LIMIT 5"
+        )
+        .all(pat, pat, pat);
+      if (galRows.length)
+        results.galerie = galRows.map(function (r) {
+          return { title: r.title || "Image #" + r.id, url: "/galerie" };
+        });
+    } catch (_) {}
+
+    try {
+      var bdRows = db
+        .prepare(
+          "SELECT id, title FROM bd_books WHERE lower(title) LIKE ? OR lower(description) LIKE ? OR lower(tags) LIKE ? LIMIT 5"
+        )
+        .all(pat, pat, pat);
+      if (bdRows.length)
+        results.bd = bdRows.map(function (r) {
+          return { title: r.title, url: "/bd" };
+        });
+    } catch (_) {}
+
+    try {
+      var linkRows = db
+        .prepare(
+          "SELECT id, title FROM links WHERE lower(title) LIKE ? OR lower(description) LIKE ? LIMIT 5"
+        )
+        .all(pat, pat);
+      if (linkRows.length)
+        results.liens = linkRows.map(function (r) {
+          return { title: r.title, url: "/liens" };
+        });
+    } catch (_) {}
+
+    try {
+      var quizzResults = [];
+      (config.sections || []).forEach(function (s, si) {
+        (s.questions || []).forEach(function (qq) {
+          if (quizzResults.length >= 5) return;
+          if ((qq.question || "").toLowerCase().indexOf(ql) !== -1)
+            quizzResults.push({ title: qq.question, url: "/section/" + si });
+        });
+      });
+      if (quizzResults.length) results.quizz = quizzResults;
+    } catch (_) {}
+  }
+
+  res.json({ results: results });
+});
 
 app.use("/", buildQuizRouter(config));
 app.use("/admin", buildAdminRouter(config));

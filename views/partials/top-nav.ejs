@@ -1,8 +1,68 @@
 <div class="top-nav">
+
+  <%# ─── Mobile : brand + burger (masqués sur desktop) ────────────────── %>
   <a href="/" class="top-nav-brand"><%= config.title %></a>
   <button type="button" class="nav-burger" id="nav-burger" aria-label="Menu" aria-expanded="false" aria-controls="nav-drawer">
     &#9776;
   </button>
+
+  <%# ─── Desktop : barre pleine largeur (masquée sur mobile) ──────────── %>
+  <div class="pc-nav" id="pc-nav">
+
+    <div class="pc-nav-left">
+      <div class="pc-nav-item pc-has-drop">
+        <a href="/wiki" class="pc-nav-link">Wiki &#9662;</a>
+        <div class="pc-drop">
+          <% (locals.wikiCategories || []).forEach(function(c) { %>
+            <a href="/wiki/categorie/<%= c.key %>" class="pc-drop-link"><%= c.label %></a>
+          <% }) %>
+        </div>
+      </div>
+      <% if (currentUser) { %>
+        <a href="/galerie" class="pc-nav-link">Galerie</a>
+      <% } %>
+    </div>
+
+    <a href="/" class="pc-nav-brand-link"><%= config.title %></a>
+
+    <div class="pc-nav-right">
+      <% if (currentUser) { %>
+        <a href="/bd" class="pc-nav-link">BD</a>
+        <a href="/liens" class="pc-nav-link">Liens</a>
+        <div class="pc-nav-item pc-has-drop">
+          <a href="/" class="pc-nav-link">Quizz &#9662;</a>
+          <div class="pc-drop">
+            <% (config.sections || []).forEach(function(s, i) { %>
+              <a href="/section/<%= i %>" class="pc-drop-link">
+                <span class="pc-drop-dot" style="background:<%= s.color || 'var(--accent)' %>"></span>
+                <%= s.title %>
+              </a>
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+      <div class="pc-nav-actions">
+        <button type="button" class="pc-icon-btn" id="pc-search-btn" aria-label="Rechercher sur tout le site">&#128269;</button>
+        <a href="<%= currentUser ? (currentUser.isAdmin ? '/admin' : '/favoris') : '/admin/login?next=' + encodeURIComponent(locals.currentPath || '/') %>"
+           class="pc-icon-btn"
+           title="<%= currentUser ? currentUser.displayName : 'Connexion' %>">&#128273;</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<%# ─── Overlay de recherche globale ─────────────────────────────────────── %>
+<div class="pc-search-overlay" id="pc-search-overlay" hidden>
+  <div class="pc-search-box">
+    <div class="pc-search-bar">
+      <span class="pc-search-icon">&#128269;</span>
+      <input type="search" id="pc-search-input" class="pc-search-input"
+             placeholder="Rechercher partout&hellip;" autocomplete="off" />
+      <button type="button" id="pc-search-close" class="pc-search-close-btn">&#215;</button>
+    </div>
+    <div class="pc-search-results" id="pc-search-results"></div>
+  </div>
 </div>
 
 <div class="nav-backdrop" id="nav-backdrop"></div>

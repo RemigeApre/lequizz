@@ -545,4 +545,5 @@ function buildWikiRouter(config) {
   return router;
 }
 
+buildWikiRouter.CATEGORIES = CATEGORIES;
 module.exports = buildWikiRouter;
