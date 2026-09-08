@@ -1503,11 +1503,13 @@
             '<button class="wiki-lb-meta-cancel">Annuler</button>',
           '</div>',
         '</div>',
-        '<div class="wiki-lightbox-panel-title">Pages li&#233;es</div>',
-        '<ul class="wiki-lightbox-links"></ul>',
-        '<div class="wiki-lightbox-search">',
-          '<input type="text" class="wiki-lightbox-search-input" placeholder="Rechercher une page\u2026" autocomplete="off" />',
-          '<ul class="wiki-lightbox-results"></ul>',
+        '<div class="wiki-lb-pages-section">',
+          '<div class="wiki-lightbox-panel-title">Pages li&#233;es</div>',
+          '<ul class="wiki-lightbox-links"></ul>',
+          '<div class="wiki-lightbox-search">',
+            '<input type="text" class="wiki-lightbox-search-input" placeholder="Rechercher une page\u2026" autocomplete="off" />',
+            '<ul class="wiki-lightbox-results"></ul>',
+          '</div>',
         '</div>',
       '</div>',
     '</div>',
@@ -1517,6 +1519,7 @@
 
   var lbImg      = lightbox.querySelector(".wiki-lightbox-img");
   var lbPanel    = lightbox.querySelector(".wiki-lightbox-panel");
+  var lbPagesSection = lightbox.querySelector(".wiki-lb-pages-section");
   var lbLinks    = lightbox.querySelector(".wiki-lightbox-links");
   var lbSearch   = lightbox.querySelector(".wiki-lightbox-search-input");
   var lbResults  = lightbox.querySelector(".wiki-lightbox-results");
@@ -1575,12 +1578,10 @@
       .then(function (pages) {
         lbLinks.innerHTML = "";
         if (!pages.length) {
-          var li = document.createElement("li");
-          li.className = "wiki-lb-empty";
-          li.textContent = "Aucune page associ\u00e9e";
-          lbLinks.appendChild(li);
+          lbPagesSection.hidden = true;
           return;
         }
+        lbPagesSection.hidden = false;
         pages.forEach(function (page) {
           var li = document.createElement("li");
           li.className = "wiki-lb-link-item";
@@ -1715,6 +1716,7 @@
     lbImg.src = src;
     if (src.startsWith("/uploads/")) {
       lbPanel.hidden = false;
+      lbPagesSection.hidden = true;
       lbSearch.value = "";
       lbResults.innerHTML = "";
       loadMeta();

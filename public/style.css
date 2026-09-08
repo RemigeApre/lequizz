@@ -6935,8 +6935,8 @@ a.wiki-ql-label:hover .wiki-ql-text {
   font-size: 0.6rem; margin-left: 0.2rem;
   font-variant-numeric: tabular-nums; letter-spacing: 0;
 }
-.wiki-tag-xy-pages { color: #e05; }
-.wiki-tag-xy-imgs  { color: #3b9; }
+.wiki-tag-xy-pages { color: hsl(38,90%,72%); }
+.wiki-tag-xy-imgs  { color: hsl(195,70%,72%); }
 .wiki-derived-sep { color: rgba(255,255,255,0.3); }
 .wiki-derived-pill {
   font-size: 0.7rem; padding: 0.12rem 0.45rem;
