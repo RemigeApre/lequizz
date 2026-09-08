@@ -19,6 +19,7 @@ const {
   listConnectionLogs,
   getWikiKPIs,
   getGalleryKPIs,
+  getUserDetail,
 } = require("../db");
 const { verifyLogin, requireAdmin, tokenForUser } = require("../auth");
 const { hashPassword } = require("../passwords");
@@ -165,6 +166,16 @@ function buildAdminRouter(config) {
       deleteUser(id);
     }
     res.redirect("/admin#tab-utilisateurs");
+  });
+
+  router.get("/utilisateur/:id", requireAdmin, (req, res) => {
+    const id = Number(req.params.id);
+    const detail = Number.isInteger(id) ? getUserDetail(id) : null;
+    if (!detail) return res.redirect("/admin#tab-utilisateurs");
+    const attempt = getAttempt(tokenForUser(detail.user));
+    const liveScores = attempt ? computeScores(config, attempt.data) : null;
+    const matrixSections = config.sections.filter((s) => s.type === "matrix");
+    res.render("admin-user-detail", { config, detail, attempt, liveScores, matrixSections });
   });
 
   router.get("/:id", requireAdmin, (req, res) => {

@@ -184,8 +184,9 @@
 
       var okCategory = !activeCategory || card.dataset.category === activeCategory;
       var okSearch   = !q || norm(card.dataset.title).indexOf(q) !== -1 || cardTags.some(function(t){ return norm(t).indexOf(q) !== -1; });
-      var okUltra    = !hideUltra || card.dataset.ultra !== "1";
-      var okBd       = !hideIrrealiste || card.dataset.bd !== "1";
+      var okUltra       = !hideUltra || card.dataset.ultra !== "1";
+      var bdTypeSelected = typeState === 1 && typeValue === "bd";
+      var okBd          = bdTypeSelected || !hideIrrealiste || card.dataset.bd !== "1";
       var okRating   = !activeRating || Number(card.dataset.rating) >= activeRating;
 
       var okTag = true;
@@ -390,6 +391,46 @@
     });
   }
   syncIrrealisteBtn();
+
+  // Reset filters
+  var resetFiltersBtn = document.getElementById("gallery-reset-filters");
+  if (resetFiltersBtn) {
+    resetFiltersBtn.addEventListener("click", function() {
+      // Ultra: masqué (défaut), Irréaliste: affiché (défaut galerie)
+      hideUltra = true;
+      hideIrrealiste = false;
+      localStorage.setItem("gallery-hide-ultra", "1");
+      localStorage.setItem("gallery-hide-irrealiste", "0");
+      syncUltraBtn();
+      syncIrrealisteBtn();
+      // Effacer type
+      typeState = 0; typeValue = "";
+      if (typeFilter) {
+        typeFilter.querySelectorAll(".tag-chip").forEach(function(c) {
+          c.dataset.state = "0";
+          c.classList.remove("chip-include","chip-exclude");
+        });
+      }
+      // Effacer catégorie
+      activeCategory = "";
+      if (categoryFilter) {
+        categoryFilter.querySelectorAll(".tag-chip").forEach(function(c) { c.classList.remove("active"); });
+      }
+      // Effacer tags
+      tagStates = {};
+      if (tagFilter) {
+        tagFilter.querySelectorAll(".wiki-tag-chip").forEach(function(c) {
+          c.dataset.state = "0";
+          c.classList.remove("chip-include","chip-exclude");
+        });
+      }
+      // Effacer recherche
+      searchQ = "";
+      if (searchInput) { searchInput.value = ""; }
+      if (searchClear) searchClear.hidden = true;
+      applyFilters();
+    });
+  }
 
   // Sort
   var sortSelect = document.getElementById("gallery-sort-select");

@@ -71,6 +71,11 @@
         <button type="button" id="gallery-irrealiste-toggle" class="wiki-ultra-btn">Irr&eacute;aliste</button>
       </div>
 
+      <%# Réinitialiser %>
+      <div class="wiki-filter-section">
+        <button type="button" id="gallery-reset-filters" class="wiki-filter-reset-btn">R&eacute;initialiser les filtres</button>
+      </div>
+
       <%# Tri %>
       <div class="wiki-filter-section">
         <select id="gallery-sort-select" class="wiki-sort-select">
@@ -158,11 +163,7 @@
             <% if (item.flame) { %><span class="wiki-card-react-badge" title="J'adore">&#128293;</span><% } %>
             <% if (item.interested) { %><span class="wiki-card-react-badge" title="Ça m'intéresse">&#10024;</span><% } %>
           </span>
-          <div class="gallery-card-btns">
-            <% if (item.wikiPageId) { %>
-              <a href="/wiki/<%= item.wikiPageId %>" class="gallery-card-btn gallery-wiki-badge-btn" title="Page wiki associ&#233;e">W</a>
-            <% } %>
-          </div>
+          <div class="gallery-card-btns"></div>
         </div>
 
       </div>

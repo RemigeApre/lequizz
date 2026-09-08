@@ -48,9 +48,7 @@
           <% if (state.user.isAdmin) { %><span class="admin-badge-admin">Admin</span><% } %>
         </div>
         <div class="admin-user-actions">
-          <% if (state.attempt) { %>
-            <a href="/admin/live/<%= state.user.id %>" class="admin-btn-link">D&eacute;tail quizz</a>
-          <% } %>
+          <a href="/admin/utilisateur/<%= state.user.id %>" class="admin-btn-link">Voir le profil</a>
           <details class="admin-pwd-details">
             <summary class="admin-btn-link">R&eacute;init. MDP</summary>
             <form method="POST" action="/admin/profils/<%= state.user.id %>/password" class="admin-pwd-form">
@@ -250,7 +248,7 @@
     <% if (galleryKPIs.topImages.length) { %>
     <div class="admin-kpi-top-section">
       <div class="admin-kpi-top-header">
-        <span class="admin-kpi-top-title">Images les plus consult&eacute;es</span>
+        <span class="admin-kpi-top-title">Images les plus consult&eacute;es<% if (galleryKPIs.topImagesFallback) { %> <span class="admin-kpi-fallback-label">(par note — suivi pas encore actif)</span><% } %></span>
         <div class="admin-kpi-limit-toggle" id="gal-img-limit-toggle">
           <button class="active" data-limit="10">10</button>
           <button data-limit="20">20</button>
@@ -275,7 +273,7 @@
     <% if (galleryKPIs.topBd.length) { %>
     <div class="admin-kpi-top-section">
       <div class="admin-kpi-top-header">
-        <span class="admin-kpi-top-title">BD les plus consult&eacute;es</span>
+        <span class="admin-kpi-top-title">BD les plus consult&eacute;es<% if (galleryKPIs.topBdFallback) { %> <span class="admin-kpi-fallback-label">(par note — suivi pas encore actif)</span><% } %></span>
         <div class="admin-kpi-limit-toggle" id="gal-bd-limit-toggle">
           <button class="active" data-limit="10">10</button>
           <button data-limit="20">20</button>

@@ -279,9 +279,9 @@ body.nav-drawer-locked {
   align-items: center;
   padding: 0.75rem 0.6rem;
   color: var(--muted);
-  opacity: 0.55;
+  opacity: 0.45;
   font-size: 0.95rem;
-  cursor: default;
+  cursor: not-allowed;
   user-select: none;
 }
 
@@ -1783,6 +1783,63 @@ input[type="text"], input[type="password"] {
     color: #9090d0;
   }
 }
+
+/* ── Bouton réinitialiser filtres ───────────────────────────── */
+.wiki-filter-reset-btn {
+  width: 100%;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.wiki-filter-reset-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── Popup avertissement quizz ──────────────────────────────── */
+.quiz-warning-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.quiz-warning-overlay[hidden] { display: none !important; }
+.quiz-warning-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem 1.75rem;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.quiz-warning-text {
+  margin: 0 0 1.25rem;
+  line-height: 1.6;
+  color: var(--fg);
+}
+.quiz-warning-btn {
+  padding: 0.5rem 2rem;
+  border: none;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.quiz-warning-btn:hover { opacity: 0.85; }
 
 /* ── Recherche wiki ─────────────────────────────────────────── */
 .wiki-search-wrap {
@@ -4431,6 +4488,15 @@ a.wiki-ql-label:hover .wiki-ql-text {
 .admin-tab-btn:hover { color: #fff; }
 .admin-tab-btn.active { color: #fff; border-bottom-color: #f87171; }
 
+.admin-topbar-back {
+  color: rgba(252,165,165,0.8);
+  text-decoration: none;
+  font-size: 0.85rem;
+  margin-right: 0.5rem;
+  white-space: nowrap;
+}
+.admin-topbar-back:hover { color: #fff; }
+
 .admin-tab-home {
   display: flex;
   align-items: center;
@@ -4758,6 +4824,139 @@ a.wiki-ql-label:hover .wiki-ql-text {
 .admin-kpi-sub {
   font-size: 0.72rem;
   color: var(--muted);
+}
+
+/* Admin user detail page */
+.aud-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 0 1.25rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.aud-identity {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.aud-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.aud-username {
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.aud-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+}
+
+.aud-section {
+  margin-bottom: 2rem;
+}
+
+.aud-section-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 0 0 0.75rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.aud-fav-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 520px) {
+  .aud-fav-cols { grid-template-columns: 1fr; }
+}
+
+.aud-fav-type-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+}
+
+.aud-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.aud-list a {
+  font-size: 0.85rem;
+  color: var(--accent);
+  text-decoration: none;
+}
+.aud-list a:hover { text-decoration: underline; }
+
+.aud-notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.aud-note-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+}
+
+.aud-note-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.aud-note-page {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+.aud-note-page:hover { text-decoration: underline; }
+
+.aud-note-content {
+  font-size: 0.85rem;
+  color: var(--fg);
+  white-space: pre-wrap;
+  margin: 0;
+  opacity: 0.85;
+}
+
+.admin-kpi-fallback-label {
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--muted);
+  font-style: italic;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 /* KPI top table */
@@ -6479,6 +6678,14 @@ a.wiki-ql-label:hover .wiki-ql-text {
   .pc-nav-link:hover {
     background: var(--bg);
     color: var(--accent);
+  }
+  .pc-nav-link-disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .pc-nav-link-disabled:hover {
+    background: none;
+    color: var(--fg);
   }
 
   /* Conteneur d'un lien avec dropdown */

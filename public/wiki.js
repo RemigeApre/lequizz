@@ -1305,6 +1305,60 @@
   syncIrralisteBtn();
   applyChapterStripFilters();
 
+  // Reset filters
+  var resetFiltersBtn = document.getElementById("wiki-reset-filters");
+  if (resetFiltersBtn) {
+    resetFiltersBtn.addEventListener("click", function() {
+      // Ultra masqué, Irréaliste masqué (défauts wiki)
+      hideUltra = true;
+      hideIrrealiste = true;
+      localStorage.setItem("wiki-hide-ultra", "1");
+      localStorage.setItem("wiki-hide-irrealiste", "1");
+      syncUltraBtn();
+      syncIrralisteBtn();
+      // Catégorie : Tous
+      activeCategory = "";
+      localStorage.setItem("wiki-filter-cat", "");
+      if (categoryFilter) {
+        categoryFilter.querySelectorAll(".tag-chip").forEach(function(c) { c.classList.remove("active"); });
+        var allBtn = categoryFilter.querySelector("[data-category='']");
+        if (allBtn) allBtn.classList.add("active");
+      }
+      // Tags
+      includedTagsSet.clear();
+      excludedTagsSet.clear();
+      localStorage.setItem("wiki-filter-tags-inc", "[]");
+      localStorage.setItem("wiki-filter-tags-exc", "[]");
+      if (tagFilter) {
+        tagFilter.querySelectorAll(".wiki-tag-chip").forEach(function(c) {
+          c.dataset.state = "0";
+          c.classList.remove("chip-include","chip-exclude");
+        });
+      }
+      // Propriétés
+      for (var pk in propStates) { propStates[pk] = 0; localStorage.setItem("wiki-prop-" + pk, "0"); }
+      if (propGrid) {
+        propGrid.querySelectorAll(".wiki-prop-btn").forEach(function(b) {
+          b.dataset.state = "0";
+          b.classList.remove("active","chip-include","chip-exclude");
+        });
+      }
+      // Note minimale
+      advMinRating = 0;
+      localStorage.setItem("wiki-filter-rating", "0");
+      if (advStarsWrap) {
+        advStarsWrap.querySelectorAll(".wiki-adv-star").forEach(function(s) { s.classList.remove("active"); });
+      }
+      // Recherche
+      searchQuery = "";
+      localStorage.setItem("wiki-filter-search", "");
+      if (searchInput) { searchInput.value = ""; }
+      if (searchClear) searchClear.hidden = true;
+      applyFilters();
+      applyChapterStripFilters();
+    });
+  }
+
   // Restaure la barre de recherche
   if (searchInput && searchQuery) {
     searchInput.value = searchQuery;

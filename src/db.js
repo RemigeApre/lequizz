@@ -588,35 +588,34 @@ function getWikiKPIs() {
   const weekViews = db.prepare(
     "SELECT COUNT(*) AS v FROM wiki_page_views WHERE created_at >= datetime('now', '-7 days')"
   ).get().v;
-  // Top pages all-time (counter historique)
+  // Top pages all-time via compteur historique (toujours disponible)
   const topPages = db.prepare(
-    "SELECT id, title, category, views FROM wiki_pages WHERE views > 0 ORDER BY views DESC LIMIT 20"
+    "SELECT id, title, category, views FROM wiki_pages ORDER BY views DESC LIMIT 20"
   ).all();
-  // Per user (anonymous inclus)
-  const perUser = db.prepare(
-    `SELECT COALESCE(u.display_name, 'Anonyme') AS display_name, wpv.user_id,
-       COUNT(*) AS views
-     FROM wiki_page_views wpv LEFT JOIN users u ON u.id = wpv.user_id
-     GROUP BY wpv.user_id ORDER BY views DESC`
-  ).all();
+  // Top pages par utilisateur (depuis le suivi)
   const topRows = db.prepare(
-    `SELECT wpv.user_id, wp.title, wp.id AS page_id, COUNT(*) AS views
+    `SELECT wpv.user_id, wp.title, wp.id AS page_id, COUNT(*) AS cnt
      FROM wiki_page_views wpv JOIN wiki_pages wp ON wp.id = wpv.page_id
-     GROUP BY wpv.user_id, wpv.page_id
-     ORDER BY wpv.user_id, views DESC`
+     GROUP BY wpv.user_id, wpv.page_id ORDER BY cnt DESC`
   ).all();
   const topByUser = {};
   topRows.forEach(function(r) {
     const k = String(r.user_id);
     if (!topByUser[k]) topByUser[k] = [];
-    if (topByUser[k].length < 5) topByUser[k].push({ title: r.title, pageId: r.page_id, views: r.views });
+    if (topByUser[k].length < 5) topByUser[k].push({ title: r.title, pageId: r.page_id, views: r.cnt });
   });
-  return {
-    totalViews, monthViews, weekViews, topPages,
-    perUser: perUser.map(function(r) {
-      return { userId: r.user_id, displayName: r.display_name, views: r.views, topPages: topByUser[String(r.user_id)] || [] };
-    }),
-  };
+  // Tous les utilisateurs connus + vues depuis le suivi (LEFT JOIN = 0 si aucune vue)
+  const knownRows = db.prepare(
+    `SELECT u.id, u.display_name, COUNT(wpv.id) AS views
+     FROM users u LEFT JOIN wiki_page_views wpv ON wpv.user_id = u.id
+     GROUP BY u.id ORDER BY views DESC`
+  ).all();
+  const anonViews = db.prepare("SELECT COUNT(*) AS c FROM wiki_page_views WHERE user_id IS NULL").get().c;
+  const perUser = knownRows.map(function(r) {
+    return { userId: r.id, displayName: r.display_name, views: r.views, topPages: topByUser[String(r.id)] || [] };
+  });
+  if (anonViews > 0) perUser.push({ userId: null, displayName: "Anonyme", views: anonViews, topPages: topByUser["null"] || [] });
+  return { totalViews, monthViews, weekViews, topPages, perUser };
 }
 
 function getGalleryKPIs() {
@@ -627,7 +626,7 @@ function getGalleryKPIs() {
   const weekViews = db.prepare(
     "SELECT COUNT(*) AS v FROM gallery_views WHERE created_at >= datetime('now', '-7 days')"
   ).get().v;
-  // Top images et BD séparés
+  // Top images et BD séparés par consultation
   const topAllRows = db.prepare(
     `SELECT gi.id, gi.title, gi.content_type, COUNT(*) AS views
      FROM gallery_views gv JOIN gallery_images gi ON gi.id = gv.gallery_id
@@ -635,31 +634,86 @@ function getGalleryKPIs() {
   ).all();
   const topImages = topAllRows.filter(function(r) { return r.content_type !== "bd"; }).slice(0, 20);
   const topBd     = topAllRows.filter(function(r) { return r.content_type === "bd"; }).slice(0, 20);
-  // Per user (anonymous inclus)
-  const perUser = db.prepare(
-    `SELECT COALESCE(u.display_name, 'Anonyme') AS display_name, gv.user_id,
-       COUNT(*) AS views
-     FROM gallery_views gv LEFT JOIN users u ON u.id = gv.user_id
-     GROUP BY gv.user_id ORDER BY views DESC`
-  ).all();
+  // Si pas encore de consultations enregistrées, fallback par note
+  const topImagesFallback = topImages.length === 0
+    ? db.prepare("SELECT id, title, content_type, rating AS views FROM gallery_images WHERE content_type != 'bd' AND rating > 0 ORDER BY rating DESC LIMIT 20").all()
+    : null;
+  const topBdFallback = topBd.length === 0
+    ? db.prepare("SELECT id, title, content_type, rating AS views FROM gallery_images WHERE content_type = 'bd' AND rating > 0 ORDER BY rating DESC LIMIT 20").all()
+    : null;
+  // Top images par utilisateur
   const topRows = db.prepare(
-    `SELECT gv.user_id, gi.title, gi.id AS gallery_id, COUNT(*) AS views
+    `SELECT gv.user_id, gi.title, gi.id AS gallery_id, COUNT(*) AS cnt
      FROM gallery_views gv JOIN gallery_images gi ON gi.id = gv.gallery_id
-     GROUP BY gv.user_id, gv.gallery_id
-     ORDER BY gv.user_id, views DESC`
+     GROUP BY gv.user_id, gv.gallery_id ORDER BY cnt DESC`
   ).all();
   const topByUser = {};
   topRows.forEach(function(r) {
     const k = String(r.user_id);
     if (!topByUser[k]) topByUser[k] = [];
-    if (topByUser[k].length < 5) topByUser[k].push({ title: r.title, galleryId: r.gallery_id, views: r.views });
+    if (topByUser[k].length < 5) topByUser[k].push({ title: r.title, galleryId: r.gallery_id, views: r.cnt });
   });
+  // Tous les utilisateurs connus + consultations depuis le suivi
+  const knownRows = db.prepare(
+    `SELECT u.id, u.display_name, COUNT(gv.id) AS views
+     FROM users u LEFT JOIN gallery_views gv ON gv.user_id = u.id
+     GROUP BY u.id ORDER BY views DESC`
+  ).all();
+  const anonViews = db.prepare("SELECT COUNT(*) AS c FROM gallery_views WHERE user_id IS NULL").get().c;
+  const perUser = knownRows.map(function(r) {
+    return { userId: r.id, displayName: r.display_name, views: r.views, topImages: topByUser[String(r.id)] || [] };
+  });
+  if (anonViews > 0) perUser.push({ userId: null, displayName: "Anonyme", views: anonViews, topImages: topByUser["null"] || [] });
   return {
-    totalViews, monthViews, weekViews, topImages, topBd,
-    perUser: perUser.map(function(r) {
-      return { userId: r.user_id, displayName: r.display_name, views: r.views, topImages: topByUser[String(r.user_id)] || [] };
-    }),
+    totalViews, monthViews, weekViews,
+    topImages: topImages.length ? topImages : (topImagesFallback || []),
+    topBd:     topBd.length     ? topBd     : (topBdFallback     || []),
+    topImagesFallback: !!topImagesFallback,
+    topBdFallback:     !!topBdFallback,
+    perUser,
   };
+}
+
+function getUserDetail(id) {
+  const user = getUserById(id);
+  if (!user) return null;
+  const favorites = db.prepare(
+    `SELECT f.item_type, f.item_id, f.created_at,
+       COALESCE(wp.title, gi.title, '') AS title
+     FROM favorites f
+     LEFT JOIN wiki_pages wp ON f.item_type = 'wiki' AND f.item_id = wp.id
+     LEFT JOIN gallery_images gi ON f.item_type = 'gallery' AND f.item_id = gi.id
+     WHERE f.user_id = ? ORDER BY f.id DESC`
+  ).all(id).map(function(r) {
+    return { itemType: r.item_type, itemId: r.item_id, createdAt: r.created_at, title: r.title || "" };
+  });
+  const notes = db.prepare(
+    `SELECT wpun.page_id, wpun.content, wpun.updated_at, wp.title
+     FROM wiki_page_user_notes wpun JOIN wiki_pages wp ON wp.id = wpun.page_id
+     WHERE wpun.user_id = ? AND wpun.content != ''
+     ORDER BY wpun.updated_at DESC`
+  ).all(id).map(function(r) {
+    return { pageId: r.page_id, title: r.title, content: r.content, updatedAt: r.updated_at };
+  });
+  const recentWikiViews = db.prepare(
+    `SELECT wpv.created_at, wp.id AS page_id, wp.title
+     FROM wiki_page_views wpv JOIN wiki_pages wp ON wp.id = wpv.page_id
+     WHERE wpv.user_id = ? ORDER BY wpv.id DESC LIMIT 30`
+  ).all(id).map(function(r) {
+    return { createdAt: r.created_at, pageId: r.page_id, title: r.title };
+  });
+  const recentGalViews = db.prepare(
+    `SELECT gv.created_at, gi.id AS gallery_id, gi.title, gi.content_type
+     FROM gallery_views gv JOIN gallery_images gi ON gi.id = gv.gallery_id
+     WHERE gv.user_id = ? ORDER BY gv.id DESC LIMIT 30`
+  ).all(id).map(function(r) {
+    return { createdAt: r.created_at, galleryId: r.gallery_id, title: r.title, contentType: r.content_type };
+  });
+  // Ratings wiki
+  const wikiRatings = db.prepare(
+    "SELECT id, title, rating, flame, interested FROM wiki_pages WHERE rating > 0 OR flame = 1 OR interested = 1 ORDER BY rating DESC"
+  ).all(); // global ratings, not per-user (schema limitation)
+  return { user, favorites, notes, recentWikiViews, recentGalViews, wikiRatings };
 }
 
 function getImageLinks(src) {
@@ -979,4 +1033,5 @@ module.exports = {
   logGalleryView,
   getWikiKPIs,
   getGalleryKPIs,
+  getUserDetail,
 };
