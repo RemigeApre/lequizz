@@ -167,7 +167,7 @@
           <div class="links-filter" id="wiki-category-filter">
             <button type="button" class="tag-chip active" data-category="" data-label="Tous">Tous</button>
             <% categories.forEach(function (c) { %>
-              <button type="button" class="tag-chip" data-category="<%= c.key %>" data-label="<%= c.label %>"><%= c.label %></button>
+              <button type="button" class="tag-chip" data-category="<%= c.key %>" data-label="<%= c.label %>"<% if (c.desc) { %> data-desc="<%= c.desc %>"<% } %>><%= c.label %></button>
             <% }) %>
             <button type="button" class="tag-chip tag-chip-owned" data-category="__owned__" data-label="Nos objets">&#9733; Nos objets</button>
           </div>

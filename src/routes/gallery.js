@@ -19,14 +19,14 @@ const {
 const { requireUser } = require("../auth");
 
 const CATEGORIES = [
-  { key: "fantasmes",   label: "Fantasmes",   hue: 330 },
-  { key: "jeu_de_role", label: "Jeu de rôle", hue:  60 },
-  { key: "partenaires", label: "Partenaires", hue: 210 },
-  { key: "pratique",    label: "Pratique",    hue:   5 },
-  { key: "position",    label: "Position",    hue: 270 },
+  { key: "position",    label: "Positions",   hue: 270 },
+  { key: "pratique",    label: "Pratiques",   hue:   5 },
   { key: "lieux",       label: "Lieux",       hue: 140 },
-  { key: "objets",      label: "Objets",      hue:  28 },
+  { key: "partenaires", label: "Partenaires", hue: 210 },
+  { key: "jeu_de_role", label: "Scénarios",   hue:  60 },
   { key: "tenues",      label: "Tenues",      hue: 175 },
+  { key: "objets",      label: "Objets",      hue:  28 },
+  { key: "fantasmes",   label: "Fantasmes",   hue: 330 },
   { key: "autre",       label: "Autre",       hue: 220 },
 ];
 const CAT_MAP = {};

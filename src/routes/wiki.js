@@ -32,14 +32,14 @@ const {
 const { requireUser, requireUserJson } = require("../auth");
 
 const CATEGORIES = [
-  { key: "fantasmes",  label: "Fantasmes",   desc: "Fantasmes, désirs, tout le reste...", hue: 330 },
-  { key: "jeu_de_role",label: "Scénarios",   desc: "Scénarios joués, personnages...",     hue:  60 },
-  { key: "partenaires",label: "Partenaire",  desc: "Configurations, rôles...",            hue: 210 },
-  { key: "pratique",   label: "Pratique",    desc: "Actes et gestes sexuels...",          hue:   5 },
-  { key: "position",   label: "Position",    desc: "Kama-sutra, variantes...",            hue: 270 },
-  { key: "lieux",      label: "Lieux",       desc: "Endroits, contextes...",              hue: 140 },
-  { key: "objets",     label: "Objets",      desc: "Sex-toys, accessoires...",            hue:  28 },
-  { key: "tenues",     label: "Tenues",      desc: "Lingerie, costumes...",               hue: 175 },
+  { key: "position",   label: "Positions",   desc: "Postures, Kama-sutra et toutes leurs variantes.",                               hue: 270 },
+  { key: "pratique",   label: "Pratiques",   desc: "Domination, BDSM, Bondage et pratiques sexuelles.",                            hue:   5 },
+  { key: "lieux",      label: "Lieux",       desc: "Endroits, contextes et ambiances où se déroule l\u2019action.",                hue: 140 },
+  { key: "partenaires",label: "Partenaires", desc: "Nature et nombre de partenaires : solo, duo, trio\u2026",                     hue: 210 },
+  { key: "jeu_de_role",label: "Scénarios",   desc: "Jeux de rôle, scénarios joués, personnages et ambiances.",                    hue:  60 },
+  { key: "tenues",     label: "Tenues",      desc: "Lingerie, costumes et tout ce qui se porte.",                                  hue: 175 },
+  { key: "objets",     label: "Objets",      desc: "Sex-toys, godes, liens et accessoires hors tenues.",                          hue:  28 },
+  { key: "fantasmes",  label: "Fantasmes",   desc: "Tout ce qui ne trouve pas de cat\u00e9gorie sp\u00e9cifique — le reste.",     hue: 330 },
 ];
 
 // "Fantaisie" est un tag libre. "autre" a été fusionné dans "fantasmes" (migration DB).

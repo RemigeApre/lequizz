@@ -1441,11 +1441,40 @@ input[type="text"], input[type="password"] {
   padding: 0.4rem 0.9rem;
   font-size: 0.82rem;
   cursor: pointer;
+  position: relative;
 }
 
 .tag-chip:hover {
   border-color: var(--accent);
   color: var(--accent);
+}
+
+/* Tooltip sur les chips de catégorie avec data-desc */
+.tag-chip[data-desc]::after {
+  content: attr(data-desc);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: hsl(220, 12%, 18%);
+  color: rgba(255,255,255,0.88);
+  font-size: 0.72rem;
+  line-height: 1.4;
+  padding: 0.4rem 0.65rem;
+  border-radius: 6px;
+  white-space: nowrap;
+  max-width: 240px;
+  white-space: normal;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 50;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+.tag-chip[data-desc]:hover::after {
+  opacity: 1;
 }
 
 .tag-chip.active {
@@ -6290,6 +6319,7 @@ a.wiki-ql-label:hover .wiki-ql-text {
   color: #fff;
   font-size: 1.8rem; font-weight: 300; line-height: 1;
   display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem; line-height: 1; padding-bottom: 0.1em;
   text-decoration: none;
   box-shadow: 0 4px 16px rgba(0,0,0,0.28);
   transition: background 0.15s, transform 0.15s;
