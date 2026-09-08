@@ -38,7 +38,7 @@
 
   <article class="wiki-detail" style="--ch-hue: <%= cat ? cat.hue : 220 %>">
 
-    <%# ─ Bandeau : retour + titre ─ %>
+    <%# ─ Bandeau : retour + titre (mobile / fallback) ─ %>
     <div class="wiki-detail-banner">
       <a href="<%= backHref %>" class="wiki-detail-banner-back" title="<%= backLabel %>" aria-label="<%= backLabel %>">&#8592;</a>
       <h1 class="wiki-detail-banner-title"><%= page.title %></h1>
@@ -52,13 +52,13 @@
       <% } %>
     </div>
 
-    <%# ─ Navigation prev/next ─ %>
-    <nav class="wiki-page-nav" aria-label="Navigation entre pages">
-      <a href="<%= prevPage ? '/wiki/' + prevPage.id : '#' %>" class="wiki-page-nav-btn wiki-page-nav-prev<%= prevPage ? '' : ' wiki-page-nav-disabled' %>" id="wiki-nav-prev" title="<%= prevPage ? prevPage.title : '' %>">
+    <%# ─ Navigation prev/next (mobile — cachée sur PC, remplacée par celle du volet droit) ─ %>
+    <nav class="wiki-page-nav wiki-page-nav--mobile" aria-label="Navigation entre pages">
+      <a href="<%= prevPage ? '/wiki/' + prevPage.id : '#' %>" class="wiki-page-nav-btn wiki-page-nav-prev<%= prevPage ? '' : ' wiki-page-nav-disabled' %>" title="<%= prevPage ? prevPage.title : '' %>">
         <span class="wiki-page-nav-arrow">&#8592;</span>
         <span class="wiki-page-nav-label"><%= prevPage ? prevPage.title : '' %></span>
       </a>
-      <a href="<%= nextPage ? '/wiki/' + nextPage.id : '#' %>" class="wiki-page-nav-btn wiki-page-nav-next<%= nextPage ? '' : ' wiki-page-nav-disabled' %>" id="wiki-nav-next" title="<%= nextPage ? nextPage.title : '' %>">
+      <a href="<%= nextPage ? '/wiki/' + nextPage.id : '#' %>" class="wiki-page-nav-btn wiki-page-nav-next<%= nextPage ? '' : ' wiki-page-nav-disabled' %>" title="<%= nextPage ? nextPage.title : '' %>">
         <span class="wiki-page-nav-label"><%= nextPage ? nextPage.title : '' %></span>
         <span class="wiki-page-nav-arrow">&#8594;</span>
       </a>
@@ -200,18 +200,24 @@
       <%# ─ COLONNE DROITE : panneau info (PC) ─ %>
       <aside class="wiki-detail-right">
 
-        <%# a) Nom de la page ─ %>
-        <h2 class="wiki-right-title"><%= page.title %></h2>
+        <%# ─ Navigation PC : compacte, collée au-dessus de l'image ─ %>
+        <div class="wiki-right-nav">
+          <a href="<%= backHref %>" class="wiki-right-back" title="<%= backLabel %>">&#8592;</a>
+          <span class="wiki-right-nav-sep"></span>
+          <a href="<%= prevPage ? '/wiki/' + prevPage.id : '#' %>" class="wiki-right-nav-btn<%= prevPage ? '' : ' disabled' %>" title="<%= prevPage ? prevPage.title : '' %>">&#8592;</a>
+          <span class="wiki-right-nav-title"><%= page.title %></span>
+          <a href="<%= nextPage ? '/wiki/' + nextPage.id : '#' %>" class="wiki-right-nav-btn<%= nextPage ? '' : ' disabled' %>" title="<%= nextPage ? nextPage.title : '' %>">&#8594;</a>
+        </div>
 
         <%# b) Catégories ─ %>
         <div class="wiki-right-cats">
           <% if (cat) { %>
             <a href="/wiki/categorie/<%= page.category %>" class="wiki-category-badge wiki-right-cat-badge"
-               style="background: hsl(<%= cat.hue %>, 55%, 42%)"><%= cat.label %></a>
+               style="background: hsl(<%= cat.hue %>, 55%, 55%)"><%= cat.label %></a>
           <% } %>
           <% (page.extraCategories || []).forEach(function (eck) { var ecat = categories.find(function (c) { return c.key === eck; }); if (ecat) { %>
             <a href="/wiki/categorie/<%= eck %>" class="wiki-category-badge wiki-right-cat-badge"
-               style="background: hsl(<%= ecat.hue %>, 55%, 42%)"><%= ecat.label %></a>
+               style="background: hsl(<%= ecat.hue %>, 55%, 55%)"><%= ecat.label %></a>
           <% } }) %>
           <% if (page.owned) { %>
             <span class="wiki-right-owned">&#9733; Poss&eacute;d&eacute;</span>
@@ -224,7 +230,10 @@
             <img src="<%= page.imagePaths[0] %>" alt="" class="wiki-right-img" />
           </div>
         <% } %>
+        <%# a) Nom de la page (sous l'image) ─ %>
+        <h2 class="wiki-right-title"><%= page.title %></h2>
 
+        <div class="wiki-right-body">
         <%# d) Notation ─ %>
         <% if (currentUser) { %>
           <div class="wiki-detail-rating wiki-right-rating" data-id="<%= page.id %>" data-rating="<%= page.rating %>">
@@ -272,6 +281,8 @@
             <a href="/wiki/<%= page.id %>/edit" class="wiki-edit-icon-btn" title="Modifier" aria-label="Modifier">&#9998;</a>
           </div>
         <% } %>
+
+        </div><%# /wiki-right-body %>
 
       </aside><%# /wiki-detail-right %>
 

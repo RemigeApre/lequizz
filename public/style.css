@@ -6415,7 +6415,6 @@ a.wiki-ql-label:hover .wiki-ql-text {
 }
 .wiki-index-intro {
   margin-bottom: 1.75rem;
-  max-width: 74ch;
 }
 .wiki-index-intro p {
   color: var(--fg-muted, var(--muted));
@@ -6645,107 +6644,177 @@ a.wiki-ql-label:hover .wiki-ql-text {
 }
 
 /* ─────────────────────────────────────────────────────────
-   Wiki detail : mise en page 2 colonnes (PC seulement)
+   Wiki detail : volet droit fixe dans la gouttière (PC)
 ───────────────────────────────────────────────────────── */
 .wiki-detail-layout { display: block; }
 .wiki-detail-right  { display: none; }
 .wiki-detail-actions-mobile { display: flex; gap: 0.6rem; margin-top: 1.25rem; }
 
-@media (min-width: 800px) {
-  .wiki-detail-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 265px;
-    gap: 2rem;
-    align-items: start;
-    margin-top: 1rem;
-  }
+/* Mobile nav (affichée sur mobile, cachée sur PC) */
+.wiki-page-nav--mobile { display: flex; }
 
+@media (min-width: 800px) {
+  /* Le bandeau bleu central disparaît — le volet droit en tient lieu */
+  .wiki-detail-banner { display: none; }
+
+  /* La nav mobile se cache, le volet droit a sa propre nav */
+  .wiki-page-nav--mobile { display: none; }
+
+  /* Le layout n'est plus une grille : le volet est hors-flux (fixed) */
+  .wiki-detail-layout { display: block; margin-top: 0.5rem; }
+
+  /* Volet droit : même recette que la sidebar gauche des catégories,
+     mais à droite, avec le dégradé couleur du chapitre              */
   .wiki-detail-right {
+    position: fixed;
+    right: 0;
+    top: var(--topnav-height);
+    bottom: 0;
+    width: calc((100vw - 900px) / 2);
+    min-width: 240px;
+    max-width: 340px;
     display: flex;
     flex-direction: column;
-    gap: 0.9rem;
-    position: sticky;
-    top: calc(var(--topnav-height) + 1rem);
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.2rem;
-    max-height: calc(100vh - var(--topnav-height) - 2rem);
+    gap: 0;
+    background: linear-gradient(
+      180deg,
+      hsl(var(--ch-hue, 220), 52%, 20%) 0%,
+      hsl(var(--ch-hue, 220), 44%, 16%) 100%
+    );
+    color: #fff;
     overflow-y: auto;
     scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.2) transparent;
+    z-index: 5;
+    margin-top: 0;
   }
 
   .wiki-detail-actions-mobile { display: none; }
 }
 
-/* ── Panneau droit : titre ──────────────────────────── */
-.wiki-right-title {
-  font-size: 1.05rem;
-  font-weight: 700;
-  margin: 0;
-  line-height: 1.3;
-  color: var(--fg);
+/* ── Nav compacte dans le volet droit ───────────────── */
+.wiki-right-nav {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0.55rem 0.85rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+.wiki-right-back {
+  color: rgba(255,255,255,0.7); text-decoration: none;
+  font-size: 1.1rem; padding: 0.15rem 0.4rem;
+  border-radius: 6px; transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+.wiki-right-back:hover { color: #fff; background: rgba(255,255,255,0.1); }
+.wiki-right-nav-sep {
+  flex: 1;
+}
+.wiki-right-nav-btn {
+  color: rgba(255,255,255,0.75); text-decoration: none;
+  font-size: 1.1rem; padding: 0.2rem 0.5rem;
+  border-radius: 6px; transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+.wiki-right-nav-btn:hover { color: #fff; background: rgba(255,255,255,0.12); }
+.wiki-right-nav-btn.disabled { opacity: 0.25; pointer-events: none; }
+.wiki-right-nav-title {
+  font-size: 0.72rem; color: rgba(255,255,255,0.5);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 7rem; text-align: center; padding: 0 0.3rem;
 }
 
 /* ── Catégories + owned ─────────────────────────────── */
-.wiki-right-cats { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.wiki-right-cats {
+  display: flex; flex-wrap: wrap; gap: 0.4rem;
+  padding: 0.7rem 0.9rem 0;
+}
 .wiki-right-cat-badge {
-  font-size: 0.72rem; padding: 0.18rem 0.6rem;
+  font-size: 0.72rem; padding: 0.2rem 0.65rem;
   border-radius: 20px; color: #fff; text-decoration: none;
   font-weight: 600; transition: opacity 0.15s;
+  border: 1px solid rgba(255,255,255,0.2);
 }
 .wiki-right-cat-badge:hover { opacity: 0.82; }
 .wiki-right-owned {
-  font-size: 0.72rem; padding: 0.18rem 0.6rem;
-  border-radius: 20px; background: hsl(45, 65%, 25%);
-  color: hsl(45, 90%, 78%); font-weight: 600;
+  font-size: 0.72rem; padding: 0.2rem 0.65rem;
+  border-radius: 20px; background: rgba(255,220,80,0.18);
+  color: hsl(45, 90%, 80%); font-weight: 600;
+  border: 1px solid rgba(255,220,80,0.3);
 }
 
-/* ── Image principale ───────────────────────────────── */
-.wiki-right-img-wrap { border-radius: 9px; overflow: hidden; line-height: 0; }
+/* ── Image principale (agrandie, sans border-radius en haut) ── */
+.wiki-right-img-wrap { line-height: 0; flex-shrink: 0; margin-top: 0.7rem; }
 .wiki-right-img {
   width: 100%; display: block;
-  max-height: 240px; object-fit: cover;
+  max-height: min(55vh, 420px);
+  object-fit: cover;
+}
+
+/* ── Titre sous l'image ─────────────────────────────── */
+.wiki-right-title {
+  font-size: 1rem; font-weight: 700;
+  margin: 0; padding: 0.7rem 0.9rem 0;
+  line-height: 1.3; color: #fff;
+}
+
+/* ── Corps scrollable (tout ce qui est sous l'image) ── */
+.wiki-right-body {
+  display: flex; flex-direction: column;
+  gap: 0.75rem; padding: 0.7rem 0.9rem 1.2rem;
+  flex: 1;
 }
 
 /* ── Notation ───────────────────────────────────────── */
-.wiki-right-rating { display: flex; gap: 0.12rem; }
+.wiki-right-rating { display: flex; gap: 0.15rem; }
+.wiki-right-rating .wiki-star { color: rgba(255,255,255,0.45); }
+.wiki-right-rating .wiki-star:hover,
+.wiki-right-rating .wiki-star.filled { color: var(--wiki-gold); }
 
 /* ── Réactions côte à côte ──────────────────────────── */
 .wiki-right-reactions { display: flex; gap: 0.5rem; }
 .wiki-right-reactions .wiki-react-btn {
   flex: 1; justify-content: center;
   font-size: 0.78rem; padding: 0.38rem 0.4rem;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.8);
+  border-radius: 8px;
+}
+.wiki-right-reactions .wiki-react-btn.active {
+  background: rgba(255,255,255,0.22); color: #fff;
+}
+.wiki-right-reactions .wiki-react-btn:hover {
+  background: rgba(255,255,255,0.18);
 }
 
 /* ── Tags cliquables ────────────────────────────────── */
-.wiki-right-tags {
-  display: flex; flex-wrap: wrap;
-  gap: 0.35rem; align-items: center;
-}
+.wiki-right-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; }
 .wiki-right-tag-link {
-  font-size: 0.72rem; padding: 0.14rem 0.5rem;
+  font-size: 0.7rem; padding: 0.12rem 0.45rem;
   border-radius: 20px;
-  background: rgba(128,128,128,0.1);
-  color: var(--muted); text-decoration: none;
-  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.75);
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,0.15);
   transition: background 0.15s, color 0.15s;
 }
-.wiki-right-tag-link:hover {
-  background: rgba(128,128,128,0.2); color: var(--fg);
-}
-.wiki-derived-sep { color: var(--border); }
+.wiki-right-tag-link:hover { background: rgba(255,255,255,0.2); color: #fff; }
+.wiki-derived-sep { color: rgba(255,255,255,0.3); }
 .wiki-derived-pill {
-  font-size: 0.72rem; padding: 0.14rem 0.5rem;
-  border-radius: 20px; background: rgba(128,128,128,0.07);
-  color: var(--muted); font-style: italic;
+  font-size: 0.7rem; padding: 0.12rem 0.45rem;
+  border-radius: 20px; background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.5); font-style: italic;
 }
 
 /* ── Actions fav + édition ──────────────────────────── */
-.wiki-right-actions {
-  display: flex; gap: 0.5rem;
-  justify-content: flex-end; margin-top: 0.2rem;
+.wiki-right-actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
+.wiki-detail-right .wiki-edit-icon-btn {
+  border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.7);
 }
+.wiki-detail-right .wiki-edit-icon-btn:hover { color: #fff; border-color: #fff; }
+.wiki-detail-right .wiki-fav-icon-btn.active { color: var(--wiki-gold); border-color: var(--wiki-gold); }
 
 /* ─────────────────────────────────────────────────────────
    Images secondaires dans le corps de la page
