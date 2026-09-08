@@ -528,6 +528,25 @@
       if (wikiId) lbLink.href = "/wiki/" + wikiId;
     }
 
+    // Auteur / parodie
+    var author = card.dataset.author || "";
+    var parody = card.dataset.parody || "";
+    if (lbNotes) {
+      lbNotes.innerHTML = "";
+      if (author) {
+        var p = document.createElement("span");
+        p.className = "gallery-lb-meta-pill";
+        p.textContent = "Auteur : " + author;
+        lbNotes.appendChild(p);
+      }
+      if (parody) {
+        var q = document.createElement("span");
+        q.className = "gallery-lb-meta-pill";
+        q.textContent = "Parodie : " + parody;
+        lbNotes.appendChild(q);
+      }
+    }
+
     if (lbDots) {
       lbDots.innerHTML = "";
       lbDots.hidden = images.length <= 1;

@@ -702,6 +702,14 @@ function getUserDetail(id) {
   ).all(id).map(function(r) {
     return { createdAt: r.created_at, pageId: r.page_id, title: r.title };
   });
+  // Top wiki pages by view count for this user
+  const wikiViewCounts = db.prepare(
+    `SELECT wp.id AS page_id, wp.title, COUNT(*) AS view_count
+     FROM wiki_page_views wpv JOIN wiki_pages wp ON wp.id = wpv.page_id
+     WHERE wpv.user_id = ? GROUP BY wpv.page_id ORDER BY view_count DESC LIMIT 20`
+  ).all(id).map(function(r) {
+    return { pageId: r.page_id, title: r.title, viewCount: r.view_count };
+  });
   const recentGalViews = db.prepare(
     `SELECT gv.created_at, gi.id AS gallery_id, gi.title, gi.content_type
      FROM gallery_views gv JOIN gallery_images gi ON gi.id = gv.gallery_id
@@ -709,11 +717,15 @@ function getUserDetail(id) {
   ).all(id).map(function(r) {
     return { createdAt: r.created_at, galleryId: r.gallery_id, title: r.title, contentType: r.content_type };
   });
-  // Ratings wiki
-  const wikiRatings = db.prepare(
-    "SELECT id, title, rating, flame, interested FROM wiki_pages WHERE rating > 0 OR flame = 1 OR interested = 1 ORDER BY rating DESC"
-  ).all(); // global ratings, not per-user (schema limitation)
-  return { user, favorites, notes, recentWikiViews, recentGalViews, wikiRatings };
+  // Top gallery items by view count for this user
+  const galViewCounts = db.prepare(
+    `SELECT gi.id AS gallery_id, gi.title, gi.content_type, COUNT(*) AS view_count
+     FROM gallery_views gv JOIN gallery_images gi ON gi.id = gv.gallery_id
+     WHERE gv.user_id = ? GROUP BY gv.gallery_id ORDER BY view_count DESC LIMIT 20`
+  ).all(id).map(function(r) {
+    return { galleryId: r.gallery_id, title: r.title, contentType: r.content_type, viewCount: r.view_count };
+  });
+  return { user, favorites, notes, recentWikiViews, wikiViewCounts, recentGalViews, galViewCounts };
 }
 
 function getImageLinks(src) {

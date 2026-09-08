@@ -102,9 +102,50 @@
     <% } %>
   </div>
 
-  <%# ── Activité wiki ── %>
+  <%# ── Pages Wiki les plus vues ── %>
   <div class="aud-section">
-    <h2 class="aud-section-title">Activit&eacute; wiki r&eacute;cente</h2>
+    <h2 class="aud-section-title">Pages wiki les plus visit&eacute;es</h2>
+    <% if (detail.wikiViewCounts && detail.wikiViewCounts.length) { %>
+      <table class="admin-table">
+        <thead><tr><th>Page</th><th style="text-align:right">Visites</th></tr></thead>
+        <tbody>
+          <% detail.wikiViewCounts.forEach(function(v) { %>
+          <tr>
+            <td><a href="/wiki/<%= v.pageId %>"><%= v.title %></a></td>
+            <td style="text-align:right;font-weight:600;color:var(--accent)"><%= v.viewCount %></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } else { %>
+      <p class="admin-muted">Aucune visite wiki enregistr&eacute;e.</p>
+    <% } %>
+  </div>
+
+  <%# ── Galerie les plus vues ── %>
+  <div class="aud-section">
+    <h2 class="aud-section-title">Images galerie les plus visit&eacute;es</h2>
+    <% if (detail.galViewCounts && detail.galViewCounts.length) { %>
+      <table class="admin-table">
+        <thead><tr><th>Contenu</th><th>Type</th><th style="text-align:right">Visites</th></tr></thead>
+        <tbody>
+          <% detail.galViewCounts.forEach(function(v) { %>
+          <tr>
+            <td><a href="/galerie/<%= v.galleryId %>/edit"><%= v.title || '#' + v.galleryId %></a></td>
+            <td class="admin-muted" style="font-size:.78rem"><%= v.contentType === 'bd' ? 'BD' : 'Image' %></td>
+            <td style="text-align:right;font-weight:600;color:var(--accent)"><%= v.viewCount %></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } else { %>
+      <p class="admin-muted">Aucune visite galerie enregistr&eacute;e.</p>
+    <% } %>
+  </div>
+
+  <%# ── Activité wiki récente ── %>
+  <div class="aud-section">
+    <h2 class="aud-section-title">Activit&eacute; wiki r&eacute;cente (30 derni&egrave;res)</h2>
     <% if (detail.recentWikiViews.length) { %>
       <table class="admin-table">
         <thead><tr><th>Page</th><th style="text-align:right;white-space:nowrap">Date</th></tr></thead>
@@ -122,9 +163,9 @@
     <% } %>
   </div>
 
-  <%# ── Activité galerie ── %>
+  <%# ── Activité galerie récente ── %>
   <div class="aud-section">
-    <h2 class="aud-section-title">Activit&eacute; galerie r&eacute;cente</h2>
+    <h2 class="aud-section-title">Activit&eacute; galerie r&eacute;cente (30 derni&egrave;res)</h2>
     <% if (detail.recentGalViews.length) { %>
       <table class="admin-table">
         <thead><tr><th>Contenu</th><th>Type</th><th style="text-align:right;white-space:nowrap">Date</th></tr></thead>

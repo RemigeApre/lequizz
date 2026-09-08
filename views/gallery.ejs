@@ -26,14 +26,6 @@
       <details class="wiki-sidebar-filter-details">
       <summary class="wiki-sidebar-filter-summary">Filtres &#9662;</summary>
 
-      <%# Type Image / BD — toggle, pas de "Tout" %>
-      <div class="wiki-filter-section">
-        <div class="links-filter" id="gallery-type-filter">
-          <button type="button" class="tag-chip gallery-type-chip-image" data-type="image">Image</button>
-          <button type="button" class="tag-chip gallery-type-chip-bd" data-type="bd">BD</button>
-        </div>
-      </div>
-
       <%# Catégories dans un volet réduit %>
       <% if (categories.length) { %>
       <details class="gallery-cat-details">
@@ -142,7 +134,9 @@
         data-date="<%= item.date || '' %>"
         data-rating="<%= item.rating || 0 %>"
         data-fav="<%= favoriteGalleryIds.indexOf(item.id) !== -1 ? '1' : '0' %>"
-        data-processed="<%= (item.processed && item.type === 'gallery') ? '1' : '0' %>">
+        data-processed="<%= (item.processed && item.type === 'gallery') ? '1' : '0' %>"
+        data-author="<%= (item.author || '').replace(/"/g, '') %>"
+        data-parody="<%= (item.parody || '').replace(/"/g, '') %>">
 
         <% if (cat) { %><span class="wiki-card-accent" style="background: hsl(<%= cat.hue %>, 55%, 45%)"></span><% } %>
 

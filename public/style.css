@@ -5502,6 +5502,17 @@ a.wiki-ql-label:hover .wiki-ql-text {
 .gallery-lb-notes {
   font-size: 0.8rem;
   color: rgba(255,255,255,0.65);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.gallery-lb-meta-pill {
+  font-size: 0.76rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.8);
 }
 
 .gallery-lb-wiki-link { align-self: flex-start; }
@@ -8087,8 +8098,9 @@ a.wiki-ql-label:hover .wiki-ql-text {
 
 /* ── Notation ───────────────────────────────────────── */
 .wiki-right-rating { display: flex; gap: 0.15rem; }
-.wiki-right-rating .wiki-star { color: rgba(255,255,255,0.45); }
+.wiki-right-rating .wiki-star { color: rgba(255,255,255,0.35); }
 .wiki-right-rating .wiki-star:hover,
+.wiki-right-rating .wiki-star.active,
 .wiki-right-rating .wiki-star.filled { color: var(--wiki-gold); }
 
 /* ── Réactions côte à côte ──────────────────────────── */
@@ -8101,11 +8113,20 @@ a.wiki-ql-label:hover .wiki-ql-text {
   color: rgba(255,255,255,0.8);
   border-radius: 8px;
 }
-.wiki-right-reactions .wiki-react-btn.active {
-  background: rgba(255,255,255,0.22); color: #fff;
-}
 .wiki-right-reactions .wiki-react-btn:hover {
   background: rgba(255,255,255,0.18);
+}
+.wiki-right-reactions .wiki-react-flame.active {
+  background: rgba(240,100,30,0.35);
+  border-color: #e06020;
+  color: #ffb070;
+  font-weight: 600;
+}
+.wiki-right-reactions .wiki-react-interest.active {
+  background: rgba(130,80,220,0.35);
+  border-color: #9060d0;
+  color: #cc99ff;
+  font-weight: 600;
 }
 
 /* ── Tags cliquables ────────────────────────────────── */
