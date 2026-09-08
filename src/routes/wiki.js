@@ -207,9 +207,13 @@ const PRESET_TAGS = ["fantaisie", "irréaliste", "ultra"];
 const SPECIAL_TAGS = new Set(["ultra", "irréaliste"]);
 
 function getAllTags(pages) {
-  return Array.from(new Set([...PRESET_TAGS, ...pages.flatMap((p) => p.tags)])).sort((a, b) =>
-    a.localeCompare(b, "fr")
-  );
+  const counts = new Map();
+  pages.forEach((p) => p.tags.forEach((t) => counts.set(t, (counts.get(t) || 0) + 1)));
+  PRESET_TAGS.forEach((t) => { if (!counts.has(t)) counts.set(t, 0); });
+  return Array.from(counts.keys()).sort((a, b) => {
+    const diff = (counts.get(b) || 0) - (counts.get(a) || 0);
+    return diff !== 0 ? diff : a.localeCompare(b, "fr");
+  });
 }
 
 // Liste plate de toutes les questions du quiz (construite une seule fois)

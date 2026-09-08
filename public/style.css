@@ -2602,6 +2602,15 @@ input[type="text"], input[type="password"] {
   margin: 0.5rem 0;
 }
 
+/* ── Placeholder SVG pour cartes sans image ────────── */
+.wiki-card-placeholder-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 /* ── Bandeaux Ultra / Fantaisie / Irréaliste ─────── */
 .wiki-card { position: relative; }
 .wiki-card-banner {
@@ -5833,7 +5842,8 @@ a.wiki-ql-label:hover .wiki-ql-text {
     left: 0;
     top: var(--topnav-height);
     bottom: 0;
-    width: 300px;
+    width: calc((100vw - 900px) / 2);
+    min-width: 240px;
     display: flex;
     flex-direction: column;
     background: linear-gradient(
@@ -5962,17 +5972,24 @@ a.wiki-ql-label:hover .wiki-ql-text {
     border-color: rgba(255, 255, 255, 0.5);
     color: #fff;
   }
-  .wiki-cat-sidebar .wiki-ultra-btn {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.18);
-    color: rgba(255, 255, 255, 0.8);
+  .wiki-ultra-btn {
     font-size: 0.76rem;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    padding: 0.3rem 0.7rem;
+    cursor: pointer;
+    font-weight: 600;
+    background: #1a5c1a;
+    color: #e0ffe0;
+    border-color: #2a7a2a;
+    transition: background 0.15s;
   }
-  .wiki-cat-sidebar .wiki-ultra-btn:hover,
-  .wiki-cat-sidebar .wiki-ultra-btn.active {
-    background: rgba(255, 255, 255, 0.18);
-    color: #fff;
+  .wiki-ultra-btn.active {
+    background: #6a1515;
+    color: #ffe0e0;
+    border-color: #8a2020;
   }
+  .wiki-ultra-btn:hover { filter: brightness(1.2); }
   .wiki-cat-sidebar .wiki-sort-row {
     flex-direction: column;
     align-items: flex-start;

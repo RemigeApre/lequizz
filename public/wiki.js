@@ -528,7 +528,7 @@
   var tagFilter       = document.getElementById("wiki-tag-filter");
   var sortSelect      = document.getElementById("wiki-sort-select");
   var ultraToggle      = document.getElementById("wiki-ultra-toggle");
-  var fantaisieToggle  = document.getElementById("wiki-fantaisie-toggle");
+  var irrealisteToggle = document.getElementById("wiki-irrealiste-toggle");
   var wikiList        = document.getElementById("wiki-list");
   var searchInput     = document.getElementById("wiki-search-input");
   var searchClear     = document.getElementById("wiki-search-clear");
@@ -548,7 +548,7 @@
   var activeSort      = localStorage.getItem("wiki-filter-sort") || "alpha-asc";
   // Par défaut : ultra masqué. Seulement "0" explicite = affiché.
   var hideUltra       = localStorage.getItem("wiki-hide-ultra") !== "0";
-  var hideFantaisie   = localStorage.getItem("wiki-hide-fantaisie") !== "0";
+  var hideIrrealiste  = localStorage.getItem("wiki-hide-irrealiste") !== "0";
   var searchQuery     = localStorage.getItem("wiki-filter-search") || "";
   var advMinRating    = Number(localStorage.getItem("wiki-filter-rating")) || 0;
 
@@ -674,7 +674,7 @@
       var cardTags  = (card.dataset.tags || "").split("|");
       var okTag     = !activeTag || cardTags.indexOf(activeTag) !== -1;
       var okUltra      = !hideUltra    || card.dataset.ultra     !== "1";
-      var okFantaisie  = !hideFantaisie || card.dataset.fantaisie !== "1";
+      var okIrrealiste = !hideIrrealiste || card.dataset.irrealiste !== "1";
 
       // Recherche textuelle
       var sc = scoreCard(card, q);
@@ -693,7 +693,7 @@
       var okFlame      = !(advFlame && advFlame.checked) || card.dataset.flame === "1";
       var okInterested = !(advInterested && advInterested.checked) || card.dataset.interested === "1";
 
-      card.hidden = !(okCat && okTag && okUltra && okFantaisie && okSearch && okRating && okOwned && okFlame && okInterested);
+      card.hidden = !(okCat && okTag && okUltra && okIrrealiste && okSearch && okRating && okOwned && okFlame && okInterested);
     });
 
     // Tri
@@ -868,7 +868,7 @@
 
   function syncUltraBtn() {
     if (!ultraToggle) return;
-    ultraToggle.textContent = hideUltra ? "\uD83D\uDD13 Afficher Ultra" : "\uD83D\uDD12 Masquer Ultra";
+    ultraToggle.textContent = "Ultra";
     ultraToggle.classList.toggle("active", hideUltra);
   }
   if (ultraToggle) {
@@ -884,27 +884,27 @@
   // Filtre les cartes dans les strips du sommaire (wiki-index)
   function applyChapterStripFilters() {
     document.querySelectorAll(".wiki-chapter-strip .wiki-card").forEach(function (card) {
-      var isF = card.dataset.fantaisie === "1";
+      var isI = card.dataset.irrealiste === "1";
       var isU = card.dataset.ultra === "1";
-      card.hidden = (hideFantaisie && isF) || (hideUltra && isU);
+      card.hidden = (hideIrrealiste && isI) || (hideUltra && isU);
     });
   }
 
-  function syncFantaisieBtn() {
-    if (!fantaisieToggle) return;
-    fantaisieToggle.textContent = hideFantaisie ? "\u2728 Afficher Fantaisie" : "\u2728 Masquer Fantaisie";
-    fantaisieToggle.classList.toggle("active", hideFantaisie);
+  function syncIrralisteBtn() {
+    if (!irrealisteToggle) return;
+    irrealisteToggle.textContent = "Irr\u00e9aliste";
+    irrealisteToggle.classList.toggle("active", hideIrrealiste);
   }
-  if (fantaisieToggle) {
-    fantaisieToggle.addEventListener("click", function () {
-      hideFantaisie = !hideFantaisie;
-      localStorage.setItem("wiki-hide-fantaisie", hideFantaisie ? "1" : "0");
-      syncFantaisieBtn();
+  if (irrealisteToggle) {
+    irrealisteToggle.addEventListener("click", function () {
+      hideIrrealiste = !hideIrrealiste;
+      localStorage.setItem("wiki-hide-irrealiste", hideIrrealiste ? "1" : "0");
+      syncIrralisteBtn();
       applyFilters();
       applyChapterStripFilters();
     });
   }
-  syncFantaisieBtn();
+  syncIrralisteBtn();
   applyChapterStripFilters();
 
   // Restaure la barre de recherche
@@ -924,7 +924,7 @@
   }
 
   var filtersPanel = document.getElementById("wiki-filters-panel");
-  if (filtersPanel && (anyAdv || activeCategory || activeTag || activeSort !== "alpha-asc" || !hideUltra || !hideFantaisie)) {
+  if (filtersPanel && (anyAdv || activeCategory || activeTag || activeSort !== "alpha-asc" || !hideUltra || !hideIrrealiste)) {
     filtersPanel.open = true;
   }
 
@@ -1826,8 +1826,8 @@
     if (!form) return;
     var heroQ         = document.getElementById("wiki-hero-q");
     var heroSort      = document.getElementById("wiki-hero-sort");
-    var heroUltraBtn      = document.getElementById("wiki-hero-ultra-toggle");
-    var heroFantaisieBtn  = document.getElementById("wiki-hero-fantaisie-toggle");
+    var heroUltraBtn       = document.getElementById("wiki-hero-ultra-toggle");
+    var heroIrralisteBtn   = document.getElementById("wiki-hero-irrealiste-toggle");
     var rating        = document.getElementById("wiki-hero-rating");
     var owned         = document.getElementById("wiki-hero-owned");
     var flame         = document.getElementById("wiki-hero-flame");
@@ -1851,7 +1851,7 @@
     var heroHideUltra = localStorage.getItem("wiki-hide-ultra") !== "0";
     function syncHeroUltraBtn() {
       if (!heroUltraBtn) return;
-      heroUltraBtn.textContent = heroHideUltra ? "\uD83D\uDD12 Masquer Ultra" : "\uD83D\uDD13 Afficher Ultra";
+      heroUltraBtn.textContent = "Ultra";
       heroUltraBtn.classList.toggle("active", heroHideUltra);
     }
     if (heroUltraBtn) {
@@ -1863,19 +1863,19 @@
       });
     }
 
-    // Fantaisie toggle
-    var heroHideFantaisie = localStorage.getItem("wiki-hide-fantaisie") !== "0";
-    function syncHeroFantaisieBtn() {
-      if (!heroFantaisieBtn) return;
-      heroFantaisieBtn.textContent = heroHideFantaisie ? "\u2728 Afficher Fantaisie" : "\u2728 Masquer Fantaisie";
-      heroFantaisieBtn.classList.toggle("active", heroHideFantaisie);
+    // Irréaliste toggle
+    var heroHideIrrealiste = localStorage.getItem("wiki-hide-irrealiste") !== "0";
+    function syncHeroIrralisteBtn() {
+      if (!heroIrralisteBtn) return;
+      heroIrralisteBtn.textContent = "Irr\u00e9aliste";
+      heroIrralisteBtn.classList.toggle("active", heroHideIrrealiste);
     }
-    if (heroFantaisieBtn) {
-      syncHeroFantaisieBtn();
-      heroFantaisieBtn.addEventListener("click", function () {
-        heroHideFantaisie = !heroHideFantaisie;
-        localStorage.setItem("wiki-hide-fantaisie", heroHideFantaisie ? "1" : "0");
-        syncHeroFantaisieBtn();
+    if (heroIrralisteBtn) {
+      syncHeroIrralisteBtn();
+      heroIrralisteBtn.addEventListener("click", function () {
+        heroHideIrrealiste = !heroHideIrrealiste;
+        localStorage.setItem("wiki-hide-irrealiste", heroHideIrrealiste ? "1" : "0");
+        syncHeroIrralisteBtn();
       });
     }
 

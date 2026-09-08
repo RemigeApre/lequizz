@@ -61,7 +61,7 @@
   data-derived="<%= wcDerived.map(function (t) { return t.term; }).join('|').toLowerCase() %>"
   data-content="<%= (page.content || '').toLowerCase().replace(/"/g,'').replace(/\s+/g,' ').slice(0, 400) %>"
   data-variantes="<%= wcVariantes %>"
-  data-ultra="<%= (page.tags.indexOf('ultra') !== -1 || page.tags.indexOf('irréaliste') !== -1) ? '1' : '0' %>"
+  data-ultra="<%= page.tags.indexOf('ultra') !== -1 ? '1' : '0' %>"
   data-irrealiste="<%= page.tags.indexOf('irréaliste') !== -1 ? '1' : '0' %>"
   data-fantaisie="<%= page.tags.indexOf('fantaisie') !== -1 ? '1' : '0' %>"
   <%
@@ -103,11 +103,25 @@
     </div>
 
   <% } else { %>
-    <%# ── Carte SANS image ───────────────────────────────────────────── %>
-    <%# Le titre apparaît dans le header sur mobile, dans le body sur desktop. %>
-    <div class="wiki-card-header">
-      <p class="wiki-card-title wiki-card-title--mobile"><%= page.title %></p>
-      <div class="wiki-card-header-foot">
+    <%# ── Carte SANS image : placeholder géométrique ────────────────── %>
+    <% var ph = cat ? cat.hue : 220; %>
+    <div class="wiki-card-image">
+      <svg class="wiki-card-placeholder-svg" viewBox="0 0 160 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <radialGradient id="rg-<%= page.id %>" cx="50%" cy="50%" r="65%">
+            <stop offset="0%" stop-color="hsl(<%= ph %>,42%,26%)"/>
+            <stop offset="100%" stop-color="hsl(<%= ph %>,32%,11%)"/>
+          </radialGradient>
+        </defs>
+        <rect width="160" height="90" fill="url(#rg-<%= page.id %>)"/>
+        <circle cx="80" cy="45" r="28" fill="none" stroke="hsl(<%= ph %>,58%,54%)" stroke-width="1.2" opacity="0.45"/>
+        <circle cx="80" cy="45" r="16" fill="hsl(<%= ph %>,52%,34%)" opacity="0.35"/>
+        <polygon points="80,24 99,57 61,57" fill="none" stroke="hsl(<%= ph %>,62%,60%)" stroke-width="1" opacity="0.5"/>
+        <line x1="8" y1="45" x2="52" y2="45" stroke="hsl(<%= ph %>,38%,50%)" stroke-width="0.7" opacity="0.4"/>
+        <line x1="108" y1="45" x2="152" y2="45" stroke="hsl(<%= ph %>,38%,50%)" stroke-width="0.7" opacity="0.4"/>
+        <circle cx="80" cy="45" r="3" fill="hsl(<%= ph %>,70%,65%)" opacity="0.6"/>
+      </svg>
+      <div class="wiki-card-overlay">
         <% if (wcShowBadge) { %><span class="wiki-category-badge" style="background: hsl(<%= cat ? cat.hue : 220 %>, 55%, 45%)"><%= cat ? cat.label : page.category %></span><% } %>
         <% if (currentUser) { %><span class="wiki-card-badges">
           <% if (page.rating) { %><span class="wiki-card-mini-stars"><% for (var si2 = 1; si2 <= 5; si2++) { %><span class="wiki-card-star<%= si2 <= page.rating ? ' filled' : '' %>">&#9733;</span><% } %></span><% } %>
@@ -117,9 +131,8 @@
         </span><% } %>
       </div>
     </div>
-    <div class="wiki-card-body wiki-card-body--noimg">
-      <p class="wiki-card-title wiki-card-title--desktop"><%= page.title %></p>
-      <% if (wcExcerpt) { %><p class="wiki-card-excerpt"><%= wcExcerpt %></p><% } %>
+    <div class="wiki-card-body">
+      <p class="wiki-card-title"><%= page.title %></p>
     </div>
   <% } %>
 </a>
