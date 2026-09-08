@@ -3,11 +3,36 @@
   <%- include('partials/top-nav', { config: config }) %>
 
   <div class="admin-header">
-    <h1 class="section-title-h1">Mes favoris</h1>
+    <h1 class="section-title-h1">Mon profil</h1>
     <form method="POST" action="/admin/logout">
       <button type="submit" class="link-button">Se d&eacute;connecter</button>
     </form>
   </div>
+
+  <details class="user-settings-panel" id="user-settings-panel">
+    <summary class="user-settings-summary">Options</summary>
+    <div class="user-settings-body">
+      <div class="user-setting-group">
+        <span class="user-setting-label">Ouverture des tags</span>
+        <div class="user-setting-options" id="tag-nav-pref-options">
+          <label class="user-setting-radio" data-val="ask">
+            <input type="radio" name="tag-nav-pref" value="ask" />
+            Demander
+          </label>
+          <label class="user-setting-radio" data-val="wiki">
+            <input type="radio" name="tag-nav-pref" value="wiki" />
+            Wiki
+          </label>
+          <label class="user-setting-radio" data-val="gallery">
+            <input type="radio" name="tag-nav-pref" value="gallery" />
+            Galerie
+          </label>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <h2>Mes favoris</h2>
 
   <% if (!wikiPages.length && !galleryImages.length && !bdBooks.length) { %>
     <p class="intro">Aucun favori pour l&apos;instant. Utilise le bouton favori sur une page wiki, une image de la galerie ou une BD pour l&apos;ajouter ici.</p>
@@ -47,6 +72,28 @@
   <% } %>
 </main>
 <script>
+// ── Paramètre ouverture des tags ──────────────────────────────────────────
+(function() {
+  var pref = localStorage.getItem("tag-nav-pref") || "ask";
+  var labels = document.querySelectorAll(".user-setting-radio");
+  function syncLabels() {
+    labels.forEach(function(lbl) { lbl.classList.toggle("active", lbl.dataset.val === pref); });
+  }
+  syncLabels();
+  labels.forEach(function(lbl) {
+    var radio = lbl.querySelector("input");
+    if (radio.value === pref) radio.checked = true;
+    radio.addEventListener("change", function() {
+      if (radio.checked) {
+        pref = radio.value;
+        localStorage.setItem("tag-nav-pref", pref);
+        syncLabels();
+      }
+    });
+  });
+})();
+
+// ── Favoris ───────────────────────────────────────────────────────────────
 document.querySelectorAll("[data-fav-item] .wiki-pl-remove").forEach(function (btn) {
   btn.addEventListener("click", function () {
     var card = btn.closest("[data-fav-item]");

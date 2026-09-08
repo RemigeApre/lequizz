@@ -621,6 +621,18 @@
     sizeSelect.addEventListener("change", function() { applySize(sizeSelect.value); });
   }
 
+  // Support ?tag= URL param (navigation depuis un tag wiki)
+  var _urlGalleryTag = new URLSearchParams(window.location.search).get("tag");
+  if (_urlGalleryTag && tagFilter) {
+    var _gtBtn = tagFilter.querySelector('[data-tag="' + _urlGalleryTag.toLowerCase() + '"]');
+    if (_gtBtn) {
+      var _t = _urlGalleryTag.toLowerCase();
+      tagStates[_t] = 1;
+      _gtBtn.dataset.state = "1";
+      _gtBtn.classList.add("chip-include");
+    }
+  }
+
   applyFilters();
 
   // ══════════════════════════════════════════════════
