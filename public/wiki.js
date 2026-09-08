@@ -1832,16 +1832,15 @@
 
   // ══════════════════════════════════════════════════
   // 7. NAVIGATION CONTEXTUELLE PRÉCÉDENT / SUIVANT
-  // Les flèches de la page de lecture doivent suivre la position dans
-  // la liste qu'on parcourait (résultats de recherche, chapitre d'une
-  // catégorie…), pas toujours l'ordre alphabétique global. On mémorise
-  // donc, au clic sur une carte, la liste déjà filtrée/triée où elle
-  // se trouvait ; la page de lecture s'en sert si elle y retrouve son
-  // propre id, sinon elle garde le repli alphabétique du serveur.
+  // Priorité : contexte sessionStorage (liste visible au clic d'une carte)
+  // Repli : reconstruction depuis les métadonnées embarquées dans la page
+  // (catégorie, tri mémorisé dans localStorage, recherche en cours).
   // ══════════════════════════════════════════════════
   (function () {
-    var NAV_KEY = "wikiNavContext";
+    var NAV_KEY  = "wikiNavContext";
+    var BACK_KEY = "wikiNavBack";
 
+    // ── Capture du contexte au clic sur une carte ──────────────────────
     document.addEventListener("click", function (e) {
       var card = e.target.closest ? e.target.closest("a.wiki-card") : null;
       if (!card) return;
@@ -1857,14 +1856,15 @@
         return { id: Number(m[1]), title: titleEl ? titleEl.textContent : "" };
       }).filter(Boolean);
       try { sessionStorage.setItem(NAV_KEY, JSON.stringify(entries)); } catch (_) {}
-      // Mémorise l'origine (catégorie, recherche…) pour le bouton ← des pages de lecture
+      // Mémorise l'origine pour le bouton ←
       try {
         var headingEl = document.querySelector(".wiki-chapter-hero-title, .section-title-h1");
         var backLabel = headingEl ? headingEl.textContent.trim() : document.title;
-        sessionStorage.setItem("wikiNavBack", JSON.stringify({ href: location.href, label: backLabel }));
+        sessionStorage.setItem(BACK_KEY, JSON.stringify({ href: location.href, label: backLabel }));
       } catch (_) {}
     }, true);
 
+    // ── Sur la page de détail seulement ───────────────────────────────
     var prevBtn = document.getElementById("wiki-nav-prev");
     var nextBtn = document.getElementById("wiki-nav-next");
     if (!prevBtn || !nextBtn) return;
@@ -1873,13 +1873,75 @@
     if (!pageMatch) return;
     var currentId = Number(pageMatch[1]);
 
+    // Métadonnées de toutes les pages (embarquées dans le HTML)
+    var allPages = [];
+    try {
+      var pagesScript = document.getElementById("wiki-existing-pages");
+      if (pagesScript) allPages = JSON.parse(pagesScript.textContent || "[]");
+    } catch (_) {}
+
+    // ── Étape 1 : essayer le contexte sessionStorage ───────────────────
     var context = null;
-    try { context = JSON.parse(sessionStorage.getItem(NAV_KEY) || "null"); } catch (_) { context = null; }
-    if (!Array.isArray(context)) return;
+    try { context = JSON.parse(sessionStorage.getItem(NAV_KEY) || "null"); } catch (_) {}
 
     var idx = -1;
-    context.forEach(function (entry, i) { if (entry && entry.id === currentId) idx = i; });
-    if (idx === -1) return;
+    if (Array.isArray(context)) {
+      context.forEach(function (e, i) { if (e && e.id === currentId) idx = i; });
+    }
+
+    // ── Étape 2 : reconstruire le contexte depuis les métadonnées ─────
+    if (idx === -1 && allPages.length) {
+      var backInfo = null;
+      try { backInfo = JSON.parse(sessionStorage.getItem(BACK_KEY) || "null"); } catch (_) {}
+
+      var backHref = (backInfo && backInfo.href) || "";
+
+      // Détermine le filtre de catégorie depuis l'URL d'origine
+      var catFilter = "";
+      var catMatch = backHref.match(/\/wiki\/categorie\/([^/?#]+)/);
+      if (catMatch) catFilter = decodeURIComponent(catMatch[1]);
+
+      // Si pas d'origine catégorie, utilise la catégorie de la page courante
+      if (!catFilter) {
+        try {
+          var metaEl = document.getElementById("wiki-current-page-meta");
+          if (metaEl) {
+            var meta = JSON.parse(metaEl.textContent || "{}");
+            catFilter = meta.category || "";
+          }
+        } catch (_) {}
+      }
+
+      // Filtre par catégorie (inclut extraCats)
+      var filtered = catFilter
+        ? allPages.filter(function (p) {
+            return p.category === catFilter ||
+                   (Array.isArray(p.extraCats) && p.extraCats.indexOf(catFilter) !== -1);
+          })
+        : allPages.slice();
+
+      // Applique le même tri que la liste d'origine
+      var sortKey = localStorage.getItem("wiki-filter-sort") || "alpha-asc";
+      filtered.sort(function (a, b) {
+        switch (sortKey) {
+          case "alpha-desc":  return (b.title || "").localeCompare(a.title || "", "fr", { sensitivity: "base" });
+          case "date-desc":   return (b.date || 0) - (a.date || 0);
+          case "date-asc":    return (a.date || 0) - (b.date || 0);
+          case "rating-desc": return (b.rating || 0) - (a.rating || 0);
+          default:            return (a.title || "").localeCompare(b.title || "", "fr", { sensitivity: "base" });
+        }
+      });
+
+      context = filtered;
+      context.forEach(function (e, i) { if (e && e.id === currentId) idx = i; });
+
+      // Sauvegarde ce contexte reconstruit pour les navigations suivantes
+      if (idx !== -1) {
+        try { sessionStorage.setItem(NAV_KEY, JSON.stringify(context)); } catch (_) {}
+      }
+    }
+
+    if (idx === -1) return; // ni contexte ni métadonnées → on garde le serveur
 
     function applyBtn(btn, entry) {
       var label = btn.querySelector(".wiki-page-nav-label");
@@ -1899,16 +1961,15 @@
     applyBtn(prevBtn, context[idx - 1] || null);
     applyBtn(nextBtn, context[idx + 1] || null);
 
-    // Applique le contexte de retour mémorisé (catégorie, liste…) au bouton ←
+    // Applique le contexte de retour au bouton ←
     var backLink = document.querySelector(".wiki-detail-banner-back");
     if (backLink) {
       var storedBack = null;
-      try { storedBack = JSON.parse(sessionStorage.getItem("wikiNavBack") || "null"); } catch (_) {}
+      try { storedBack = JSON.parse(sessionStorage.getItem(BACK_KEY) || "null"); } catch (_) {}
       if (storedBack && storedBack.href) {
-        // Ne l'applique pas si l'origine stockée est elle-même une fiche wiki
-        var backPath = "";
-        try { backPath = new URL(storedBack.href, location.origin).pathname; } catch (_) {}
-        if (!/^\/wiki\/\d+$/.test(backPath)) {
+        var bp = "";
+        try { bp = new URL(storedBack.href, location.origin).pathname; } catch (_) {}
+        if (!/^\/wiki\/\d+$/.test(bp)) {
           backLink.href = storedBack.href;
           if (storedBack.label) {
             backLink.setAttribute("aria-label", storedBack.label);

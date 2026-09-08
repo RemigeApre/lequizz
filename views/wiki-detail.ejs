@@ -36,7 +36,8 @@
     var hasAnyTags = page.tags.length || derivedTerms.length;
   %>
 
-  <script id="wiki-existing-pages" type="application/json"><%- JSON.stringify(pages.map(function(p){ return { id: p.id, title: p.title }; })) %></script>
+  <script id="wiki-existing-pages" type="application/json"><%- JSON.stringify(pages.map(function(p){ return { id: p.id, title: p.title, category: p.category, extraCats: p.extraCategories || [], rating: p.rating || 0, date: new Date(p.updatedAt).getTime() }; })) %></script>
+  <script id="wiki-current-page-meta" type="application/json"><%- JSON.stringify({ id: page.id, category: page.category }) %></script>
 
   <article class="wiki-detail" style="--ch-hue: <%= cat ? cat.hue : 220 %>">
 
