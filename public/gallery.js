@@ -93,14 +93,6 @@
     if (uploadPanel) uploadPanel.hidden = false;
     if (fabMenu) fabMenu.hidden = true;
     if (fabMain) fabMain.textContent = "\u00d7";
-    // Pré-remplir la datalist des auteurs au premier ouverture
-    if (!openUploadAs._authorsLoaded) {
-      openUploadAs._authorsLoaded = true;
-      var dl = document.getElementById("guf-authors-list");
-      if (dl) fetch("/galerie/autocomplete/authors").then(function(r){ return r.json(); }).then(function(list){
-        (list || []).forEach(function(a){ var opt = document.createElement("option"); opt.value = a; dl.appendChild(opt); });
-      }).catch(function(){});
-    }
   }
 
   if (fabMain) {
@@ -177,6 +169,103 @@
         }
       });
     });
+    // ── Autocomplete auteur + parodies ──────────────────────
+    function makeAcDrop(anchor) {
+      var drop = document.createElement("ul");
+      drop.className = "guf-ac-drop";
+      drop.hidden = true;
+      anchor.appendChild(drop);
+      return drop;
+    }
+
+    function attachAc(input, fetchUrl, onSelect) {
+      var wrap = input.closest(".guf-ac-wrap");
+      if (!wrap) return;
+      var drop = makeAcDrop(wrap);
+      var timer = null;
+
+      function showDrop(list) {
+        drop.innerHTML = "";
+        if (!list || !list.length) { drop.hidden = true; return; }
+        list.slice(0, 8).forEach(function (item) {
+          var li = document.createElement("li");
+          li.className = "guf-ac-item";
+          li.textContent = item;
+          li.addEventListener("mousedown", function (e) {
+            e.preventDefault();
+            onSelect(item, input);
+            drop.hidden = true;
+          });
+          drop.appendChild(li);
+        });
+        drop.hidden = false;
+      }
+
+      function query(q) {
+        fetch(fetchUrl + "?q=" + encodeURIComponent(q))
+          .then(function (r) { return r.json(); })
+          .then(function (list) { showDrop(list); })
+          .catch(function () {});
+      }
+
+      input.addEventListener("input", function () {
+        clearTimeout(timer);
+        var q = input.value.trim();
+        if (!q) { drop.hidden = true; return; }
+        timer = setTimeout(function () { query(q); }, 180);
+      });
+
+      input.addEventListener("focus", function () {
+        var q = input.value.trim();
+        if (q) query(q);
+      });
+
+      input.addEventListener("blur", function () {
+        setTimeout(function () { drop.hidden = true; }, 180);
+      });
+
+      input.addEventListener("keydown", function (e) {
+        if (drop.hidden) return;
+        var items = drop.querySelectorAll(".guf-ac-item");
+        var sel = drop.querySelector(".guf-ac-item.selected");
+        var idx = Array.prototype.indexOf.call(items, sel);
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          idx = Math.min(idx + 1, items.length - 1);
+          items.forEach(function (li, i) { li.classList.toggle("selected", i === idx); });
+        } else if (e.key === "ArrowUp") {
+          e.preventDefault();
+          idx = Math.max(idx - 1, 0);
+          items.forEach(function (li, i) { li.classList.toggle("selected", i === idx); });
+        } else if (e.key === "Enter" && sel) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          onSelect(sel.textContent, input);
+          drop.hidden = true;
+        } else if (e.key === "Escape") {
+          drop.hidden = true;
+        }
+      }, true);
+    }
+
+    // Auteur : simple champ texte
+    var authorInput = panel.querySelector(".guf-author-input");
+    if (authorInput) {
+      attachAc(authorInput, "/galerie/autocomplete/authors", function (val, inp) {
+        inp.value = val;
+      });
+    }
+
+    // Parodies : tag widget → ajouter comme tag via typer + Enter
+    var parodyTyper = panel.querySelector(".guf-parody-widget .wiki-tags-typing");
+    if (parodyTyper) {
+      attachAc(parodyTyper, "/galerie/autocomplete/parodies", function (val, inp) {
+        inp.value = val;
+        inp.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+        inp.value = "";
+      });
+    }
+
     // Filtrer les suggestions top tags en temps réel
     panel.querySelectorAll(".wiki-tags-widget:not(.guf-parody-widget)").forEach(function (w) {
       var typer = w.querySelector(".wiki-tags-typing");

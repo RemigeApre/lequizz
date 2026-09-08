@@ -8724,7 +8724,20 @@ a.wiki-ql-label:hover .wiki-ql-text {
   width: 100%;
 }
 .guf-title-input:focus { outline: none; border-color: var(--accent); }
-.guf-cat-select { font-size: 0.78rem; padding: 0.45rem 0.4rem; }
+.guf-cat-select {
+  font-size: 0.78rem;
+  padding: 0.45rem 1.5rem 0.45rem 0.5rem;
+  background-color: var(--card);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.4rem center;
+  width: 100%;
+}
+.guf-cat-select option { background: #1c1c1c; color: #eee; }
 
 /* Auteur */
 .guf-author-input {
@@ -8825,3 +8838,34 @@ a.wiki-ql-label:hover .wiki-ql-text {
   box-shadow: 0 2px 10px rgba(0,0,0,0.25);
 }
 .guf-publish-btn:hover { opacity: 0.88; transform: scale(1.02); }
+
+/* ── Autocomplete dropdown (auteur / parodies modale) ── */
+.guf-ac-wrap { position: relative; }
+.guf-ac-drop {
+  position: absolute;
+  left: 0; right: 0;
+  top: calc(100% + 3px);
+  z-index: 400;
+  background: #262626;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  list-style: none;
+  margin: 0; padding: 0.25rem 0;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+  max-height: 220px;
+  overflow-y: auto;
+}
+.guf-ac-item {
+  padding: 0.45rem 0.85rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: var(--fg);
+  border-radius: 5px;
+  margin: 0 0.2rem;
+  transition: background 0.1s;
+}
+.guf-ac-item:hover,
+.guf-ac-item.selected {
+  background: rgba(91,79,207,0.22);
+  color: #fff;
+}

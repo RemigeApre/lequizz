@@ -200,15 +200,18 @@
         </div>
 
         <%# Auteur %>
-        <input type="text" name="author" class="guf-author-input" placeholder="Auteur&hellip;" autocomplete="off" list="guf-authors-list" />
-        <datalist id="guf-authors-list"></datalist>
+        <div class="guf-ac-wrap">
+          <input type="text" name="author" class="guf-author-input" placeholder="Auteur&hellip;" autocomplete="off" />
+        </div>
 
-        <%# Parodies (multiple, widget tag) %>
-        <div class="wiki-tags-widget guf-parody-widget">
-          <div class="wiki-tags-board">
-            <input type="text" class="wiki-tags-typing" placeholder="Parodie d&rsquo;une &oelig;uvre&hellip;" autocomplete="off" />
+        <%# Parodies (multiple, widget tag + autocomplete) %>
+        <div class="guf-ac-wrap">
+          <div class="wiki-tags-widget guf-parody-widget">
+            <div class="wiki-tags-board">
+              <input type="text" class="wiki-tags-typing" placeholder="Parodie d&rsquo;une &oelig;uvre&hellip;" autocomplete="off" />
+            </div>
+            <input type="hidden" name="parody" class="wiki-tags-hidden" value="" />
           </div>
-          <input type="hidden" name="parody" class="wiki-tags-hidden" value="" />
         </div>
 
         <%# Tags : ultra/irréaliste en haut, puis saisie + suggestions top tags %>
