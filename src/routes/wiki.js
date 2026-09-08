@@ -314,6 +314,16 @@ function buildWikiRouter(config) {
     return (page.tags || []).some((t) => SPECIAL_TAGS.has(String(t).toLowerCase()));
   }
 
+  // Valide qu'une URL de retour est interne (chemin relatif ou même origine).
+  function safeReturnTo(url, fallback) {
+    if (!url) return fallback;
+    try {
+      const parsed = new URL(url, "http://localhost");
+      if (parsed.pathname.startsWith("/")) return parsed.pathname + parsed.search;
+    } catch (_) {}
+    return fallback;
+  }
+
   // Le bouton "retour" d'une page doit ramener a l'endroit precis d'ou l'on
   // vient (sommaire, vue globale ou chapitre d'une categorie), pas toujours
   // au sommaire general.
@@ -399,7 +409,7 @@ function buildWikiRouter(config) {
 
     const newId = insertWikiPage({ title, category, content, tags: enrichedTags, imagePaths, owned, meta, extraCategories });
     if (imagePaths.length) syncGalleryRecord(newId, title, imagePaths, enrichedTags);
-    res.redirect("/wiki");
+    res.redirect(`/wiki/${newId}`);
   });
 
   // ── Associations image ─────────────────────────────
@@ -460,7 +470,8 @@ function buildWikiRouter(config) {
       extraCategories: [], rating: 0, flame: false, interested: false,
       updatedAt: new Date().toISOString()
     };
-    res.render("wiki-form", { config, page: blankPage, pages, allTags: getAllTags(pages), ...CTX });
+    const returnTo = safeReturnTo(req.get("referer"), "/wiki");
+    res.render("wiki-form", { config, page: blankPage, pages, allTags: getAllTags(pages), returnTo, ...CTX });
   });
 
   router.get("/:id", (req, res) => {
@@ -493,7 +504,8 @@ function buildWikiRouter(config) {
     if (!page) return res.redirect("/wiki");
     const pages = sortedPages();
     const allTags = getAllTags(pages);
-    res.render("wiki-form", { config, page, pages, allTags, ...CTX });
+    const returnTo = safeReturnTo(req.get("referer"), `/wiki/${id}`);
+    res.render("wiki-form", { config, page, pages, allTags, returnTo, ...CTX });
   });
 
   router.post("/:id", requireAdmin, upload.any(), (req, res) => {
@@ -532,7 +544,7 @@ function buildWikiRouter(config) {
     const enrichedTags = autoEnrichTags(tags, title, meta.termes_derives || []);
     updateWikiPage(id, { title, category, content, tags: enrichedTags, imagePaths, owned, meta, extraCategories });
     syncGalleryRecord(id, title, imagePaths, enrichedTags);
-    res.redirect(`/wiki/${id}`);
+    res.redirect(safeReturnTo(req.body._returnTo, `/wiki/${id}`));
   });
 
   // ── Liens entre pages wiki ─────────────────────────

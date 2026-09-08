@@ -206,6 +206,17 @@
       <%# ─ COLONNE DROITE : panneau info (PC) ─ %>
       <aside class="wiki-detail-right">
 
+        <%# ─ Carrousel mobile (toutes les images) — masqué sur PC ─ %>
+        <% if (hasImages && currentUser) { %>
+          <div class="wiki-mobile-carousel">
+            <% page.imagePaths.forEach(function (src, i) { %>
+              <div class="wiki-mobile-carousel-item">
+                <img src="<%= src %>" alt="" class="wiki-mobile-carousel-img" loading="<%= i === 0 ? 'eager' : 'lazy' %>" />
+              </div>
+            <% }) %>
+          </div>
+        <% } %>
+
         <%# ─ Header : retour + catégories ─ %>
         <div class="wiki-right-header">
           <a href="<%= backHref %>" class="wiki-right-back" title="<%= backLabel %>">&#8592;</a>

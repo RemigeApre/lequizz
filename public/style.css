@@ -7946,6 +7946,60 @@ a.wiki-ql-label:hover .wiki-ql-text {
 .wiki-detail-right  { display: none; }
 .wiki-detail-left   { display: none; }
 .wiki-detail-actions-mobile { display: flex; gap: 0.6rem; margin-top: 1.25rem; }
+.wiki-mobile-carousel { display: none; }
+
+/* ─────────────────────────────────────────────────────────
+   Wiki detail mobile : carousel + rating + réactions
+───────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .wiki-detail-right {
+    display: block;
+    margin-bottom: 0.75rem;
+  }
+  /* Éléments PC cachés sur mobile */
+  .wiki-detail-right .wiki-right-header,
+  .wiki-detail-right .wiki-right-nav,
+  .wiki-detail-right .wiki-right-img-wrap { display: none; }
+
+  /* Carrousel mobile */
+  .wiki-mobile-carousel {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    border-radius: 12px;
+    overflow-y: hidden;
+    gap: 0;
+  }
+  .wiki-mobile-carousel::-webkit-scrollbar { display: none; }
+  .wiki-mobile-carousel-item {
+    flex-shrink: 0;
+    width: 100%;
+    scroll-snap-align: center;
+  }
+  .wiki-mobile-carousel-img {
+    width: 100%;
+    max-height: 52vw;
+    object-fit: cover;
+    display: block;
+    border-radius: 12px;
+  }
+
+  /* Rating + réactions dans wiki-right-body sur mobile */
+  .wiki-detail-right .wiki-right-body {
+    padding: 0.5rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .wiki-detail-right .wiki-detail-rating { justify-content: center; }
+  .wiki-detail-right .wiki-right-reactions { justify-content: center; }
+  .wiki-detail-right .wiki-right-actions { display: none; } /* fav/edit déjà dans la barre mobile */
+  .wiki-detail-right .wiki-right-variants { display: none; } /* variants = surplus sur mobile */
+  /* Images secondaires dans le corps masquées (le carousel couvre tout) */
+  .wiki-secondary-imgs { display: none; }
+}
 
 /* Mobile nav (affichée sur mobile, cachée sur PC) */
 .wiki-page-nav--mobile { display: flex; }

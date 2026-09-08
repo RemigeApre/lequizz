@@ -8,6 +8,7 @@
   <script id="wiki-existing-pages" type="application/json"><%- JSON.stringify(pages.map(function(p){ return { id: p.id, title: p.title }; })) %></script>
 
   <form method="POST" action="<%= page.id ? '/wiki/' + page.id : '/wiki/' %>" enctype="multipart/form-data" class="wiki-form" id="wiki-edit-form">
+    <input type="hidden" name="_returnTo" value="<%= returnTo || '' %>" />
 
     <%# ─ Catégorie : sélecteur discret ─ %>
     <div class="wiki-form-top-row">

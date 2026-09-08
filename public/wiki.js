@@ -3086,4 +3086,11 @@
     syncPanelChips();
   })();
 
+  // Sur desktop, le volet filtre est ouvert par défaut
+  if (window.innerWidth >= 641) {
+    document.querySelectorAll(".wiki-sidebar-filter-details").forEach(function (el) {
+      el.setAttribute("open", "");
+    });
+  }
+
 })();
