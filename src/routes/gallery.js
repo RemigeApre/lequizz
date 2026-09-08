@@ -195,7 +195,8 @@ function buildGalleryRouter(config) {
     const favoriteGalleryIds = listFavoriteRows(req.user.id)
       .filter((r) => r.item_type === "gallery")
       .map((r) => r.item_id);
-    res.render("gallery", { config, items, allTags, categories: CATEGORIES, favoriteGalleryIds, tagImageCounts, tagBdCounts });
+    const topTags = allTags.slice(0, 20);
+    res.render("gallery", { config, items, allTags, topTags, categories: CATEGORIES, favoriteGalleryIds, tagImageCounts, tagBdCounts });
   });
 
   router.post("/", requireAdmin, upload.array("images", 30), (req, res) => {
@@ -205,9 +206,11 @@ function buildGalleryRouter(config) {
     const category = normalizeCategory(req.body.category);
     const tags = parseTags(req.body.tags);
     const notes = String(req.body.notes || "").trim();
+    const author = String(req.body.author || "").trim();
+    const parody = String(req.body.parody || "").trim();
     const contentType = req.body.content_type === "bd" ? "bd" : "image";
     const imagePaths = files.map((f) => `/uploads/gallery/${f.filename}`);
-    insertGalleryImage({ imagePaths, title, tags, notes, category, contentType });
+    insertGalleryImage({ imagePaths, title, tags, notes, category, author, parody, contentType });
     res.redirect("/galerie");
   });
 

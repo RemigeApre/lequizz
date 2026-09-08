@@ -182,45 +182,73 @@
   <div id="gallery-upload-panel" class="gallery-upload-modal" hidden>
     <div class="gallery-upload-modal-back" id="gallery-upload-back"></div>
     <div class="gallery-upload-modal-box">
-      <div class="gallery-upload-modal-header">
-        <span id="gallery-upload-type-label" class="gallery-upload-type-chip">Image</span>
-        <button type="button" id="gallery-upload-cancel" class="gallery-upload-modal-close" title="Fermer">&#215;</button>
-      </div>
-      <form method="POST" action="/galerie" enctype="multipart/form-data" class="gallery-upload-form">
+
+      <button type="button" id="gallery-upload-cancel" class="gallery-upload-modal-close" title="Fermer">&#215;</button>
+
+      <form method="POST" action="/galerie" enctype="multipart/form-data" class="gallery-upload-form" id="gallery-upload-form">
         <input type="hidden" name="content_type" id="gallery-upload-type" value="image" />
-        <input type="text" name="title" class="gallery-title-input" placeholder="Titre (optionnel)&hellip;" autocomplete="off" />
-        <div class="wiki-form-top-row">
-          <select name="category" class="wiki-cat-inline-select">
-            <option value="">Sans cat&eacute;gorie</option>
+
+        <%# Titre 3/4 + Catégorie 1/4 %>
+        <div class="guf-title-row">
+          <input type="text" name="title" class="guf-title-input" placeholder="Titre&hellip;" autocomplete="off" />
+          <select name="category" class="wiki-cat-inline-select guf-cat-select">
+            <option value="">Cat.</option>
             <% categories.forEach(function (c) { %>
               <option value="<%= c.key %>"><%= c.label %></option>
             <% }) %>
           </select>
         </div>
+
+        <%# Auteur %>
+        <input type="text" name="author" class="guf-author-input" placeholder="Auteur&hellip;" autocomplete="off" list="guf-authors-list" />
+        <datalist id="guf-authors-list"></datalist>
+
+        <%# Parodies (multiple, widget tag) %>
+        <div class="wiki-tags-widget guf-parody-widget">
+          <div class="wiki-tags-board">
+            <input type="text" class="wiki-tags-typing" placeholder="Parodie d&rsquo;une &oelig;uvre&hellip;" autocomplete="off" />
+          </div>
+          <input type="hidden" name="parody" class="wiki-tags-hidden" value="" />
+        </div>
+
+        <%# Tags : ultra/irréaliste en haut, puis saisie + suggestions top tags %>
+        <div class="guf-tags-special-row">
+          <button type="button" class="wiki-tag-suggest-chip wiki-tag-suggest-chip--special guf-tag-special" data-tag="ultra">ultra</button>
+          <button type="button" class="wiki-tag-suggest-chip wiki-tag-suggest-chip--special guf-tag-special" data-tag="irréaliste">irr&eacute;aliste</button>
+        </div>
         <div class="wiki-tags-widget">
           <div class="wiki-tags-board">
-            <input type="text" class="wiki-tags-typing" placeholder="Tags&hellip;" autocomplete="off" />
+            <input type="text" class="wiki-tags-typing" placeholder="Tag&hellip;" autocomplete="off" />
           </div>
           <input type="hidden" name="tags" class="wiki-tags-hidden" value="" />
-          <% if (allTags.length) { %>
-            <div class="wiki-tag-suggestions">
-              <% allTags.forEach(function(t) { %>
+          <% if (topTags && topTags.length) { %>
+            <div class="wiki-tag-suggestions guf-tag-suggestions">
+              <% topTags.forEach(function(t) { %>
                 <button type="button" class="wiki-tag-suggest-chip" data-tag="<%= t %>"><%= t %></button>
               <% }) %>
             </div>
           <% } %>
         </div>
-        <textarea name="notes" class="gallery-notes-input" rows="2" placeholder="Notes&hellip;"></textarea>
-        <div class="gallery-upload-file-row">
-          <label class="wiki-image-add-label gallery-file-label">
-            <span>Choisir des images</span>
+
+        <%# Zone de dépôt %>
+        <div class="guf-drop-zone" id="guf-drop-zone">
+          <span class="guf-drop-icon">&#8679;</span>
+          <span class="guf-drop-text">D&eacute;posez ici ou</span>
+          <label class="guf-browse-btn">
+            Parcourir
             <input type="file" name="images" accept="image/*" multiple class="gallery-file-input" required />
           </label>
-          <button type="submit" class="gallery-submit-btn">Ajouter</button>
         </div>
-        <p class="wiki-md-hint">Plusieurs images choisies ensemble forment un seul album.</p>
+
+        <%# Prévisualisations %>
         <div class="gallery-upload-previews" id="gallery-upload-previews"></div>
       </form>
+
+      <%# Bouton publier sticky %>
+      <div class="guf-sticky-footer">
+        <button type="submit" form="gallery-upload-form" class="guf-publish-btn">Publier</button>
+      </div>
+
     </div>
   </div>
   <% } %>

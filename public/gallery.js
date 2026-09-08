@@ -90,10 +90,17 @@
 
   function openUploadAs(type) {
     if (uploadType) uploadType.value = type;
-    if (uploadLabel) { uploadLabel.textContent = type === "bd" ? "BD" : "Image"; uploadLabel.className = "gallery-upload-type-chip gallery-upload-type-" + type; }
     if (uploadPanel) uploadPanel.hidden = false;
     if (fabMenu) fabMenu.hidden = true;
     if (fabMain) fabMain.textContent = "\u00d7";
+    // Pré-remplir la datalist des auteurs au premier ouverture
+    if (!openUploadAs._authorsLoaded) {
+      openUploadAs._authorsLoaded = true;
+      var dl = document.getElementById("guf-authors-list");
+      if (dl) fetch("/galerie/autocomplete/authors").then(function(r){ return r.json(); }).then(function(list){
+        (list || []).forEach(function(a){ var opt = document.createElement("option"); opt.value = a; dl.appendChild(opt); });
+      }).catch(function(){});
+    }
   }
 
   if (fabMain) {
@@ -109,21 +116,80 @@
     if (e.key === "Escape" && uploadPanel && !uploadPanel.hidden) closeUpload();
   });
 
-  if (fileInput && previewZone) {
-    fileInput.addEventListener("change", function () {
-      previewZone.innerHTML = "";
-      Array.from(fileInput.files || []).forEach(function (file) {
-        var wrap = document.createElement("div");
-        wrap.className = "gallery-preview-wrap";
-        var img = document.createElement("img");
-        img.src = URL.createObjectURL(file);
-        img.alt = "";
-        img.className = "gallery-preview-img";
-        wrap.appendChild(img);
-        previewZone.appendChild(wrap);
-      });
+  function renderUploadPreviews(files) {
+    if (!previewZone) return;
+    previewZone.innerHTML = "";
+    Array.from(files || []).forEach(function (file) {
+      var wrap = document.createElement("div");
+      wrap.className = "gallery-preview-wrap";
+      var img = document.createElement("img");
+      img.src = URL.createObjectURL(file);
+      img.alt = "";
+      img.className = "gallery-preview-img";
+      wrap.appendChild(img);
+      previewZone.appendChild(wrap);
     });
   }
+
+  if (fileInput) {
+    fileInput.addEventListener("change", function () { renderUploadPreviews(fileInput.files); });
+  }
+
+  // Zone de dépôt (drag & drop)
+  var dropZone = document.getElementById("guf-drop-zone");
+  if (dropZone && fileInput) {
+    dropZone.addEventListener("dragover", function (e) { e.preventDefault(); dropZone.classList.add("drag-over"); });
+    dropZone.addEventListener("dragleave", function () { dropZone.classList.remove("drag-over"); });
+    dropZone.addEventListener("drop", function (e) {
+      e.preventDefault();
+      dropZone.classList.remove("drag-over");
+      var files = e.dataTransfer.files;
+      if (!files.length) return;
+      // Transférer dans l'input file via DataTransfer
+      try {
+        var dt = new DataTransfer();
+        Array.from(files).forEach(function (f) { dt.items.add(f); });
+        fileInput.files = dt.files;
+      } catch (_) {}
+      renderUploadPreviews(files);
+    });
+  }
+
+  // Boutons spéciaux tags (ultra / irréaliste) dans la modale
+  (function () {
+    var panel = document.getElementById("gallery-upload-panel");
+    if (!panel) return;
+    panel.querySelectorAll(".guf-tag-special").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        // Trouver le widget tags principal (non parody)
+        var mainWidget = null;
+        panel.querySelectorAll(".wiki-tags-widget").forEach(function (w) {
+          if (!w.classList.contains("guf-parody-widget")) mainWidget = w;
+        });
+        if (!mainWidget) return;
+        var chip = mainWidget.querySelector('.wiki-tag-suggest-chip[data-tag="' + btn.dataset.tag + '"]');
+        if (chip) { chip.click(); return; }
+        var typer = mainWidget.querySelector(".wiki-tags-typing");
+        if (typer) {
+          typer.value = btn.dataset.tag;
+          typer.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+          typer.value = "";
+        }
+      });
+    });
+    // Filtrer les suggestions top tags en temps réel
+    panel.querySelectorAll(".wiki-tags-widget:not(.guf-parody-widget)").forEach(function (w) {
+      var typer = w.querySelector(".wiki-tags-typing");
+      var suggestions = w.querySelector(".guf-tag-suggestions");
+      if (!typer || !suggestions) return;
+      typer.addEventListener("input", function () {
+        var q = typer.value.trim().toLowerCase();
+        suggestions.querySelectorAll(".wiki-tag-suggest-chip").forEach(function (chip) {
+          chip.hidden = q.length > 0 && chip.dataset.tag.toLowerCase().indexOf(q) === -1;
+        });
+      });
+    });
+  })();
 
   // ══════════════════════════════════════════════════
   // 3. FILTRES
