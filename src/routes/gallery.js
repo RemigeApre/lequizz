@@ -15,6 +15,7 @@ const {
   listWikiPages,
   getWikiPage,
   listFavoriteRows,
+  logGalleryView,
 } = require("../db");
 const { requireUser } = require("../auth");
 
@@ -288,6 +289,14 @@ function buildGalleryRouter(config) {
     const { allTags } = getCtx();
     const linkedPage = image.wikiPageId ? getWikiPage(image.wikiPageId) : null;
     res.render("gallery-form", { config, image, allTags, categories: CATEGORIES, linkedPage });
+  });
+
+  router.post("/:id/view", (req, res) => {
+    const id = Number(req.params.id);
+    if (Number.isInteger(id) && id > 0) {
+      logGalleryView(id, req.user ? req.user.id : null);
+    }
+    res.json({ ok: true });
   });
 
   router.post("/:id/processed", express.json(), (req, res) => {

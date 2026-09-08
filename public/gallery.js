@@ -457,6 +457,8 @@
     return card ? (card.dataset.images || "").split("|").filter(Boolean) : [];
   }
 
+  var lastTrackedGalleryId = null;
+
   function renderLightbox() {
     var card = currentCard();
     if (!lightbox || !card) return;
@@ -500,6 +502,13 @@
     var atLast  = lbCardIndex === lbVisible.length - 1 && lbImgIndex === images.length - 1;
     if (lbPrev) lbPrev.hidden = atFirst;
     if (lbNext) lbNext.hidden = atLast;
+
+    // Track view pour les images de galerie (une fois par item par session lightbox)
+    var galleryIdStr = card.dataset.galleryId || "";
+    if (galleryIdStr && galleryIdStr !== lastTrackedGalleryId) {
+      lastTrackedGalleryId = galleryIdStr;
+      fetch("/galerie/" + galleryIdStr + "/view", { method: "POST" }).catch(function(){});
+    }
 
     // Actions : rating, fav, edit (uniquement pour les images de galerie avec ID)
     var galleryId = card ? Number(card.dataset.galleryId) : 0;
@@ -547,6 +556,7 @@
     if (!lightbox) return;
     lightbox.hidden = true;
     document.body.style.overflow = "";
+    lastTrackedGalleryId = null;
     if (lbImg) lbImg.src = "";
   }
 

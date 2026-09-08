@@ -467,7 +467,7 @@ function buildWikiRouter(config) {
     const id = Number(req.params.id);
     const page = Number.isInteger(id) ? getWikiPage(id) : null;
     if (!page) return res.redirect("/wiki");
-    incrementWikiViews(id);
+    incrementWikiViews(id, req.user ? req.user.id : null);
     const allPages = listWikiPages().sort((a, b) =>
       a.title.localeCompare(b.title, "fr", { sensitivity: "base" })
     );

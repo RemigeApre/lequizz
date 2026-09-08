@@ -17,6 +17,8 @@ const {
   getUserFavoritesWithDetails,
   logConnection,
   listConnectionLogs,
+  getWikiKPIs,
+  getGalleryKPIs,
 } = require("../db");
 const { verifyLogin, requireAdmin, tokenForUser } = require("../auth");
 const { hashPassword } = require("../passwords");
@@ -120,9 +122,12 @@ function buildAdminRouter(config) {
     const galleryImages = listGalleryImages().sort((a, b) => (b.rating - a.rating) || b.id - a.id);
     const connectionLogs = listConnectionLogs(200);
     const submissions = listSubmissions();
+    const wikiKPIs = getWikiKPIs();
+    const galleryKPIs = getGalleryKPIs();
     res.render("admin-dashboard", {
       config, userStates, matrixSections, submissions,
       wikiPages, allWikiPagesSorted, galleryImages, connectionLogs,
+      wikiKPIs, galleryKPIs,
       adminError: adminError || null,
     });
   }

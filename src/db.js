@@ -154,6 +154,24 @@ db.exec(`
 `);
 
 db.exec(`
+  CREATE TABLE IF NOT EXISTS wiki_page_views (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    page_id INTEGER NOT NULL,
+    user_id INTEGER,
+    created_at TEXT NOT NULL
+  )
+`);
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS gallery_views (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    gallery_id INTEGER NOT NULL,
+    user_id INTEGER,
+    created_at TEXT NOT NULL
+  )
+`);
+
+db.exec(`
   CREATE TABLE IF NOT EXISTS connection_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
@@ -553,8 +571,85 @@ function getLinkedQuestionIds(sectionKey) {
     .map((r) => r.question_id);
 }
 
-function incrementWikiViews(id) {
+function incrementWikiViews(id, userId) {
   db.prepare("UPDATE wiki_pages SET views = views + 1 WHERE id = ?").run(id);
+  db.prepare("INSERT INTO wiki_page_views (page_id, user_id, created_at) VALUES (?, ?, ?)").run(id, userId || null, new Date().toISOString());
+}
+
+function logGalleryView(galleryId, userId) {
+  db.prepare("INSERT INTO gallery_views (gallery_id, user_id, created_at) VALUES (?, ?, ?)").run(galleryId, userId || null, new Date().toISOString());
+}
+
+function getWikiKPIs() {
+  const totalViews = db.prepare("SELECT COALESCE(SUM(views), 0) AS v FROM wiki_pages").get().v;
+  const monthViews = db.prepare(
+    "SELECT COUNT(*) AS v FROM wiki_page_views WHERE created_at >= strftime('%Y-%m-01T00:00:00', 'now')"
+  ).get().v;
+  const weekViews = db.prepare(
+    "SELECT COUNT(*) AS v FROM wiki_page_views WHERE created_at >= datetime('now', '-7 days')"
+  ).get().v;
+  const perUser = db.prepare(
+    `SELECT u.id, u.display_name, COUNT(*) AS views
+     FROM wiki_page_views wpv JOIN users u ON u.id = wpv.user_id
+     WHERE wpv.user_id IS NOT NULL
+     GROUP BY wpv.user_id ORDER BY views DESC`
+  ).all();
+  const topRows = db.prepare(
+    `SELECT wpv.user_id, wp.title, wp.id AS page_id, COUNT(*) AS views
+     FROM wiki_page_views wpv JOIN wiki_pages wp ON wp.id = wpv.page_id
+     WHERE wpv.user_id IS NOT NULL
+     GROUP BY wpv.user_id, wpv.page_id
+     ORDER BY wpv.user_id, views DESC`
+  ).all();
+  const topByUser = {};
+  topRows.forEach(function(r) {
+    if (!topByUser[r.user_id]) topByUser[r.user_id] = [];
+    if (topByUser[r.user_id].length < 5) topByUser[r.user_id].push({ title: r.title, pageId: r.page_id, views: r.views });
+  });
+  return {
+    totalViews,
+    monthViews,
+    weekViews,
+    perUser: perUser.map(function(r) {
+      return { userId: r.id, displayName: r.display_name, views: r.views, topPages: topByUser[r.id] || [] };
+    }),
+  };
+}
+
+function getGalleryKPIs() {
+  const totalViews = db.prepare("SELECT COUNT(*) AS v FROM gallery_views").get().v;
+  const monthViews = db.prepare(
+    "SELECT COUNT(*) AS v FROM gallery_views WHERE created_at >= strftime('%Y-%m-01T00:00:00', 'now')"
+  ).get().v;
+  const weekViews = db.prepare(
+    "SELECT COUNT(*) AS v FROM gallery_views WHERE created_at >= datetime('now', '-7 days')"
+  ).get().v;
+  const perUser = db.prepare(
+    `SELECT u.id, u.display_name, COUNT(*) AS views
+     FROM gallery_views gv JOIN users u ON u.id = gv.user_id
+     WHERE gv.user_id IS NOT NULL
+     GROUP BY gv.user_id ORDER BY views DESC`
+  ).all();
+  const topRows = db.prepare(
+    `SELECT gv.user_id, gi.title, gi.id AS gallery_id, COUNT(*) AS views
+     FROM gallery_views gv JOIN gallery_images gi ON gi.id = gv.gallery_id
+     WHERE gv.user_id IS NOT NULL
+     GROUP BY gv.user_id, gv.gallery_id
+     ORDER BY gv.user_id, views DESC`
+  ).all();
+  const topByUser = {};
+  topRows.forEach(function(r) {
+    if (!topByUser[r.user_id]) topByUser[r.user_id] = [];
+    if (topByUser[r.user_id].length < 5) topByUser[r.user_id].push({ title: r.title, galleryId: r.gallery_id, views: r.views });
+  });
+  return {
+    totalViews,
+    monthViews,
+    weekViews,
+    perUser: perUser.map(function(r) {
+      return { userId: r.id, displayName: r.display_name, views: r.views, topImages: topByUser[r.id] || [] };
+    }),
+  };
 }
 
 function getImageLinks(src) {
@@ -871,4 +966,7 @@ module.exports = {
   logConnection,
   listConnectionLogs,
   setGalleryImageFeatured,
+  logGalleryView,
+  getWikiKPIs,
+  getGalleryKPIs,
 };
