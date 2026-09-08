@@ -2284,10 +2284,7 @@
     function renderCards(container, pages, removable) {
       container.innerHTML = "";
       if (!pages.length) {
-        var em = document.createElement("span");
-        em.className = "wiki-pl-empty";
-        em.textContent = removable ? "Aucune page li\u00e9e" : "";
-        container.appendChild(em);
+        container.innerHTML = "";
       } else {
         pages.forEach(function (p) { container.appendChild(makeCard(p, removable)); });
       }
@@ -2360,10 +2357,7 @@
         .then(function (links) {
           qlList.innerHTML = "";
           if (!links.length) {
-            var li = document.createElement("li");
-            li.className = "wiki-ql-empty";
-            li.textContent = "Aucune question associ\u00e9e";
-            qlList.appendChild(li);
+            qlList.innerHTML = "";
             return;
           }
           links.forEach(function (lk) {
