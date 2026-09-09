@@ -240,6 +240,31 @@ function parseMeta(category, body) {
 // Injecte les chemins d'images des variantes dans le JSON meta_variantes
 // avant de le passer à parseMeta. Les fichiers uploadés portent le fieldname
 // "variante_img_VARID" ou "variante_sub_img_VARID" (sous-variante).
+// Construit le tableau meta.positional_images depuis les champs du formulaire.
+// Existantes  : pos_existing_path[] + pos_existing_section[] (en parallèle)
+// Nouvelles   : fichiers fieldname "pos_images" + pos_new_section[] (en parallèle)
+function parsePositionalImages(body, files) {
+  const result = [];
+  const existPaths    = arr(body.pos_existing_path || []);
+  const existSections = arr(body.pos_existing_section || []);
+  existPaths.forEach((p, i) => {
+    if (p) result.push({ path: p, section: existSections[i] || "" });
+  });
+  const newFiles    = files.filter((f) => f.fieldname === "pos_images");
+  const newSections = arr(body.pos_new_section || []);
+  newFiles.forEach((f, i) => {
+    result.push({ path: `/uploads/wiki/${f.filename}`, section: newSections[i] || "" });
+  });
+  return result;
+}
+
+// Sélection des images secondaires affichées dans l'article (max 5, hors couverture).
+function parseSecondaryImages(body, imagePaths) {
+  const selected = arr(body.secondary_image || []);
+  const cover = imagePaths[0] || "";
+  return selected.filter((p) => imagePaths.includes(p) && p !== cover).slice(0, 5);
+}
+
 function injectVarianteImages(body, files) {
   if (!body.meta_variantes) return body;
   let variantes;
@@ -443,6 +468,8 @@ function buildWikiRouter(config) {
     const imagePaths = files.filter((f) => f.fieldname === "images").map((f) => `/uploads/wiki/${f.filename}`);
     const bodyWithVarianteImgs = injectVarianteImages(req.body, files);
     const meta = parseMeta(category, bodyWithVarianteImgs);
+    meta.positional_images = parsePositionalImages(req.body, files);
+    meta.secondary_image_paths = parseSecondaryImages(req.body, imagePaths);
     const enrichedTags = autoEnrichTags(tags, title, meta.termes_derives || []);
 
     const newId = insertWikiPage({ title, category, content, tags: enrichedTags, imagePaths, owned, meta, extraCategories });
@@ -560,6 +587,7 @@ function buildWikiRouter(config) {
     const files = req.files || [];
     const bodyWithVarianteImgs = injectVarianteImages(req.body, files);
     const meta = parseMeta(category, bodyWithVarianteImgs);
+    meta.positional_images = parsePositionalImages(req.body, files);
 
     // Images de page : on part des existantes, on retire celles cochées, on ajoute les nouvelles
     const toRemove  = [].concat(req.body.remove_image || []);
@@ -578,6 +606,7 @@ function buildWikiRouter(config) {
       imagePaths = [coverValue, ...imagePaths.filter((p) => p !== coverValue)];
     }
 
+    meta.secondary_image_paths = parseSecondaryImages(req.body, imagePaths);
     const extraCategories = arr(req.body.extra_categories).filter((k) => CATEGORY_KEYS.includes(k) && k !== category);
     const enrichedTags = autoEnrichTags(tags, title, meta.termes_derives || []);
     updateWikiPage(id, { title, category, content, tags: enrichedTags, imagePaths, owned, meta, extraCategories });

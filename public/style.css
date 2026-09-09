@@ -8865,17 +8865,73 @@ a.wiki-ql-label:hover .wiki-ql-text {
 /* ─────────────────────────────────────────────────────────
    Images secondaires dans le corps de la page (desktop uniquement)
 ───────────────────────────────────────────────────────── */
+/* ── Section images secondaires ─────────────────────────── */
+.wiki-secondary-section {
+  margin: 1.5rem 0;
+}
+.wiki-secondary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+.wiki-secondary-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.35);
+}
+.wiki-secondary-gallery-link {
+  font-size: 0.75rem;
+  color: var(--accent);
+  text-decoration: none;
+  opacity: 0.8;
+  transition: opacity 0.15s;
+}
+.wiki-secondary-gallery-link:hover { opacity: 1; }
+
 @media (min-width: 641px) {
   .wiki-secondary-imgs {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-    gap: 0.75rem; margin: 1.5rem 0;
+    grid-auto-rows: 150px;
+    gap: 0.75rem;
+    overflow: hidden;
+  }
+  .wiki-secondary-imgs--collapsible {
+    max-height: calc(2 * 150px + 0.75rem);
+    transition: max-height 0.3s ease;
+  }
+  .wiki-secondary-imgs--collapsible.wiki-secondary-imgs--expanded {
+    max-height: calc(3 * 150px + 2 * 0.75rem);
   }
 }
 .wiki-secondary-img {
   width: 100%; display: block;
   border-radius: 8px;
   height: 150px; object-fit: cover;
+}
+.wiki-secondary-expand-btn {
+  display: none;
+  margin-top: 0.5rem;
+  background: none;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  color: rgba(255,255,255,0.5);
+  font-size: 0.78rem;
+  padding: 0.3rem 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.wiki-secondary-expand-btn:hover { border-color: var(--accent); color: var(--accent); }
+@media (min-width: 641px) {
+  .wiki-secondary-imgs--collapsible ~ .wiki-secondary-expand-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .wiki-secondary-imgs--expanded ~ .wiki-secondary-expand-btn { display: none; }
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -9357,7 +9413,122 @@ a.wiki-ql-label:hover .wiki-ql-text {
   color: var(--accent);
   background: rgba(91,79,207,0.06);
 }
+/* ── Checkbox "secondaire" sur les images de la fiche ── */
+.wiki-sec-check-label {
+  position: absolute;
+  bottom: 0.3rem;
+  left: 0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.55);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.wiki-sec-check-label:hover { background: rgba(0,0,0,0.8); }
+.wiki-sec-check-label input { display: none; }
+.wiki-sec-check-icon {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.4);
+  transition: color 0.15s;
+}
+.wiki-sec-check-label:has(input:checked) { background: rgba(91,79,207,0.75); }
+.wiki-sec-check-label:has(input:checked) .wiki-sec-check-icon { color: #fff; }
+.wiki-sec-check-placeholder { display: block; width: 1.4rem; height: 1.4rem; }
 .wf-add-images-btn input { display: none; }
+
+/* ── Images positionnelles — form ──────────────────────── */
+.wf-section-hint {
+  font-weight: 400;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.35);
+  margin-left: 0.4rem;
+}
+.wf-pos-images {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.wf-pos-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.65rem;
+}
+.wf-pos-thumb {
+  width: 4rem;
+  height: 3rem;
+  object-fit: cover;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+.wf-pos-item-meta {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.wf-pos-section-sel {
+  flex: 1;
+  min-width: 0;
+}
+.wf-pos-remove {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.35);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0 0.25rem;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+.wf-pos-remove:hover { color: #e05c5c; }
+.wf-pos-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border: 1.5px dashed rgba(255,255,255,0.2);
+  border-radius: 7px;
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.45);
+  cursor: pointer;
+  align-self: flex-start;
+  transition: border-color 0.15s, color 0.15s;
+}
+.wf-pos-add-btn:hover { border-color: var(--accent); color: var(--accent); }
+.wf-pos-add-btn input { display: none; }
+
+/* ── Images positionnelles — affichage article ─────────── */
+.wiki-pos-figure {
+  float: right;
+  width: min(38%, 260px);
+  margin: 0 0 1rem 1.5rem;
+  border-radius: 8px;
+  overflow: hidden;
+  clear: right;
+}
+.wiki-pos-figure img {
+  width: 100%;
+  display: block;
+  border-radius: 8px;
+}
+@media (max-width: 640px) {
+  .wiki-pos-figure {
+    float: none;
+    width: 100%;
+    margin: 1rem 0 0;
+    clear: none;
+  }
+}
 
 /* ── Tags section layout ── */
 .wf-tags-unified { display: flex; flex-direction: column; gap: 0.5rem; }

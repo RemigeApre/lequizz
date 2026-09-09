@@ -215,6 +215,15 @@
                 <input type="radio" name="cover_image" value="<%= src %>" class="wiki-cover-radio" <%= idx === 0 ? 'checked' : '' %> />
                 <span class="wiki-cover-badge-icon">&#9733;</span>
               </label>
+              <% if (idx > 0) { %>
+                <label class="wiki-sec-check-label" title="Afficher dans les images secondaires">
+                  <input type="checkbox" name="secondary_image" value="<%= src %>"
+                         <%= (pm.secondary_image_paths && pm.secondary_image_paths.indexOf(src) !== -1) ? 'checked' : '' %> />
+                  <span class="wiki-sec-check-icon">&#9783;</span>
+                </label>
+              <% } else { %>
+                <span class="wiki-sec-check-placeholder"></span>
+              <% } %>
               <label class="wiki-img-remove-label">
                 <input type="checkbox" name="remove_image" value="<%= src %>" />
                 <span>&#215;</span>
@@ -228,6 +237,31 @@
         <input type="file" name="images" accept="image/*" multiple class="wiki-image-input" />
       </label>
       <div class="wiki-new-previews"></div>
+    </div>
+
+    <%# ── Images positionnelles (dans le texte) ── %>
+    <div class="wf-section-title">Images dans le texte <span class="wf-section-hint">flottent &agrave; droite d&rsquo;une section H2 ou H3</span></div>
+    <div class="wf-pos-images" id="wf-pos-images">
+      <%# Existantes ─ %>
+      <% (pm.positional_images || []).forEach(function(pi) { %>
+        <div class="wf-pos-item" data-path="<%= pi.path %>" data-section="<%= pi.section || '' %>">
+          <img src="<%= pi.path %>" class="wf-pos-thumb" alt="" />
+          <div class="wf-pos-item-meta">
+            <select name="pos_existing_section[]" class="wf-pos-section-sel wf-select">
+              <option value="<%= pi.section || '' %>"><%= pi.section || '— section —' %></option>
+            </select>
+            <input type="hidden" name="pos_existing_path[]" value="<%= pi.path %>" />
+            <button type="button" class="wf-pos-remove" title="Retirer">&#215;</button>
+          </div>
+        </div>
+      <% }) %>
+      <%# Nouvelles ajout&eacute;es par JS ─ %>
+      <div id="wf-pos-new"></div>
+      <%# Bouton ajouter ─ %>
+      <label class="wf-pos-add-btn" id="wf-pos-add-label">
+        <span>+ Image dans le texte</span>
+        <input type="file" id="wf-pos-picker" accept="image/*" multiple hidden />
+      </label>
     </div>
 
     <%# ── Paramètres partenaires (après images) ── %>

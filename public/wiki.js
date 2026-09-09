@@ -3770,7 +3770,211 @@
   })();
 
   // ══════════════════════════════════════════════════
-  // 20. NOTE ÉDITORIALE "!" — positionnement du panneau
+  // 20. IMAGES POSITIONNELLES — formulaire
+  // ══════════════════════════════════════════════════
+  (function () {
+    var container = document.getElementById("wf-pos-images");
+    if (!container) return;
+
+    var newContainer = document.getElementById("wf-pos-new");
+    var picker       = document.getElementById("wf-pos-picker");
+
+    // ── Récupère les titres H2/H3 depuis l'éditeur riche ──
+    function getHeadings() {
+      var editor = document.querySelector(".wiki-richtext");
+      if (!editor) return [];
+      var list = [];
+      editor.querySelectorAll("h2, h3").forEach(function (h) {
+        var txt = h.textContent.trim();
+        if (txt) list.push({ level: h.tagName.toLowerCase(), text: txt });
+      });
+      return list;
+    }
+
+    // ── Construit un <select> avec les titres disponibles ──
+    function buildSelect(name, selectedSection) {
+      var sel = document.createElement("select");
+      sel.name = name;
+      sel.className = "wf-pos-section-sel wf-select";
+      var blank = document.createElement("option");
+      blank.value = "";
+      blank.textContent = "— Choisir une section —";
+      sel.appendChild(blank);
+      getHeadings().forEach(function (h) {
+        var opt = document.createElement("option");
+        opt.value = h.text;
+        opt.textContent = (h.level === "h2" ? "▸ " : "  › ") + h.text;
+        if (h.text === selectedSection) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      return sel;
+    }
+
+    // ── Peuple les selects des images existantes ──
+    container.querySelectorAll(".wf-pos-item[data-path]").forEach(function (item) {
+      var section = item.dataset.section || "";
+      var oldSel  = item.querySelector("select.wf-pos-section-sel");
+      if (!oldSel) return;
+      var newSel = buildSelect("pos_existing_section[]", section);
+      oldSel.parentNode.replaceChild(newSel, oldSel);
+      // Bouton retirer : on cache le path caché pour ne pas le soumettre
+      item.querySelector(".wf-pos-remove").addEventListener("click", function () {
+        item.remove();
+      });
+    });
+
+    // ── Crée une carte pour une nouvelle image ──
+    function addNewCard(file) {
+      var item = document.createElement("div");
+      item.className = "wf-pos-item";
+
+      var thumb = document.createElement("img");
+      thumb.className = "wf-pos-thumb";
+      thumb.alt = "";
+      thumb.src = URL.createObjectURL(file);
+
+      // Input fichier caché (un par image)
+      var fileInput = document.createElement("input");
+      fileInput.type = "file";
+      fileInput.name = "pos_images";
+      fileInput.hidden = true;
+      try {
+        var dt = new DataTransfer();
+        dt.items.add(file);
+        fileInput.files = dt.files;
+      } catch (_) {}
+
+      var meta = document.createElement("div");
+      meta.className = "wf-pos-item-meta";
+
+      var sel = buildSelect("pos_new_section[]", "");
+
+      var removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.className = "wf-pos-remove";
+      removeBtn.title = "Retirer";
+      removeBtn.textContent = "\u00D7";
+      removeBtn.addEventListener("click", function () { item.remove(); });
+
+      meta.appendChild(sel);
+      meta.appendChild(removeBtn);
+      item.appendChild(thumb);
+      item.appendChild(fileInput);
+      item.appendChild(meta);
+      newContainer.appendChild(item);
+    }
+
+    picker.addEventListener("change", function () {
+      Array.from(picker.files).forEach(addNewCard);
+      picker.value = "";
+    });
+
+    // Recharge les options si l'éditeur change (H2/H3 ajoutés)
+    var editor = document.querySelector(".wiki-richtext");
+    if (editor) {
+      editor.addEventListener("input", function () {
+        // Met à jour uniquement les selects des nouvelles images (les existantes ont déjà leur valeur)
+        newContainer.querySelectorAll("select.wf-pos-section-sel").forEach(function (sel) {
+          var current = sel.value;
+          var newSel = buildSelect("pos_new_section[]", current);
+          sel.parentNode.replaceChild(newSel, sel);
+        });
+      });
+    }
+  })();
+
+  // ══════════════════════════════════════════════════
+  // 20b. IMAGES POSITIONNELLES — injection à l'affichage
+  // ══════════════════════════════════════════════════
+  (function () {
+    var dataEl = document.getElementById("wiki-pos-images-data");
+    if (!dataEl) return;
+    var posImages;
+    try { posImages = JSON.parse(dataEl.textContent); } catch (_) { return; }
+    if (!posImages || !posImages.length) return;
+
+    // Attend que le rendu wiki-md soit terminé (il est synchrone, donc on peut lancer directement)
+    var containers = document.querySelectorAll(".wiki-md, .wiki-section-body");
+    var isMobile = window.innerWidth <= 640;
+
+    posImages.forEach(function (pi) {
+      if (!pi.path || !pi.section) return;
+      var needle = pi.section.trim().toLowerCase();
+
+      // ── Cherche un H3 correspondant ──
+      var found = null, foundType = null;
+
+      document.querySelectorAll(".wiki-md h3, .wiki-section-body h3").forEach(function (h3) {
+        if (h3.textContent.trim().toLowerCase() === needle && !found) {
+          found = h3; foundType = "h3";
+        }
+      });
+
+      // ── Cherche un <details.wiki-section> dont la summary correspond ──
+      if (!found) {
+        document.querySelectorAll("details.wiki-section").forEach(function (det) {
+          var sum = det.querySelector(":scope > .wiki-section-summary");
+          if (sum && sum.textContent.trim().toLowerCase() === needle && !found) {
+            found = det; foundType = "h2";
+          }
+        });
+      }
+
+      if (!found) return;
+
+      // ── Crée la figure ──
+      var fig = document.createElement("figure");
+      fig.className = "wiki-pos-figure";
+      var img = document.createElement("img");
+      img.src = pi.path;
+      img.alt = "";
+      img.loading = "lazy";
+      fig.appendChild(img);
+
+      if (foundType === "h3") {
+        if (isMobile) {
+          // Fin de la section H3 : juste avant le prochain H3, H2 ou details
+          var sib = found.nextSibling;
+          var last = found;
+          while (sib) {
+            var nn = sib.nodeName;
+            if (nn === "H3" || nn === "H2" || (sib.classList && sib.classList.contains("wiki-section"))) break;
+            last = sib;
+            sib = sib.nextSibling;
+          }
+          last.parentNode.insertBefore(fig, last.nextSibling);
+        } else {
+          // Juste après le H3 → float droite, le texte suivant s'enroule
+          found.parentNode.insertBefore(fig, found.nextSibling);
+        }
+      } else {
+        // H2 section → dans le wiki-section-body
+        var body = found.querySelector(":scope > .wiki-section-body");
+        if (!body) return;
+        if (isMobile) {
+          body.appendChild(fig);
+        } else {
+          body.insertBefore(fig, body.firstChild);
+        }
+      }
+    });
+  })();
+
+  // ══════════════════════════════════════════════════
+  // 21. IMAGES SECONDAIRES — expand toggle
+  // ══════════════════════════════════════════════════
+  (function () {
+    var grid   = document.getElementById("wiki-secondary-grid");
+    var btn    = document.getElementById("wiki-secondary-expand");
+    if (!grid || !btn) return;
+    btn.addEventListener("click", function () {
+      grid.classList.add("wiki-secondary-imgs--expanded");
+      btn.hidden = true;
+    });
+  })();
+
+  // ══════════════════════════════════════════════════
+  // 22. NOTE ÉDITORIALE "!" — positionnement du panneau
   // ══════════════════════════════════════════════════
   (function () {
     var note = document.querySelector(".wiki-editorial-note");
@@ -3798,7 +4002,7 @@
   })();
 
   // ══════════════════════════════════════════════════
-  // 21. AGE GATE (non connectés)
+  // 23. AGE GATE (non connectés)
   // ══════════════════════════════════════════════════
   (function () {
     var gate = document.getElementById("age-gate");

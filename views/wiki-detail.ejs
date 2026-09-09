@@ -351,14 +351,37 @@
           </div>
         <% } %>
 
-        <%# Images secondaires (toutes sauf la première) — galerie dans le texte ─ %>
-        <% if (hasImages && page.imagePaths.length > 1 && currentUser) { %>
-          <div class="wiki-secondary-imgs">
-            <% page.imagePaths.slice(1).forEach(function (src) { %>
-              <div class="wiki-secondary-img-wrap">
-                <img src="<%= src %>" alt="" class="wiki-secondary-img" loading="lazy" />
-              </div>
-            <% }) %>
+        <%# Images secondaires — galerie dans le texte ─ %>
+        <%
+          var secImages = (pm.secondary_image_paths && pm.secondary_image_paths.length)
+            ? pm.secondary_image_paths
+            : page.imagePaths.slice(1);
+          var secDisplay = secImages.slice(0, 5);
+          var hasMoreSec = page.imagePaths.length > secDisplay.length + 1;
+          var galleryTag = encodeURIComponent(page.title.toLowerCase());
+        %>
+        <% if (hasImages && secDisplay.length && currentUser) { %>
+          <div class="wiki-secondary-section">
+            <div class="wiki-secondary-header">
+              <span class="wiki-secondary-title">Images</span>
+              <% if (hasMoreSec) { %>
+                <a href="/galerie?tag=<%= galleryTag %>" class="wiki-secondary-gallery-link">
+                  Voir toutes les images &#8594;
+                </a>
+              <% } %>
+            </div>
+            <div class="wiki-secondary-imgs<%= secDisplay.length > 4 ? ' wiki-secondary-imgs--collapsible' : '' %>"
+                 id="wiki-secondary-grid">
+              <% secDisplay.forEach(function(src) { %>
+                <div class="wiki-secondary-img-wrap">
+                  <img src="<%= src %>" alt="" class="wiki-secondary-img" loading="lazy" />
+                </div>
+              <% }) %>
+            </div>
+            <% if (secDisplay.length > 4) { %>
+              <button type="button" class="wiki-secondary-expand-btn" id="wiki-secondary-expand"
+                      aria-expanded="false">Voir plus &#8964;</button>
+            <% } %>
           </div>
         <% } %>
 
@@ -590,5 +613,6 @@
 </div>
 <% } %>
 <script>window.GALLERY_CAN_EDIT = <%= (currentUser && currentUser.isAdmin) ? 'true' : 'false' %>;</script>
+<script id="wiki-pos-images-data" type="application/json"><%- JSON.stringify(pm.positional_images || []) %></script>
 <script src="/wiki.js?v=<%= assetVersion %>"></script>
 <%- include('partials/foot') %>
