@@ -3175,13 +3175,53 @@ input[type="text"], input[type="password"] {
 /* Lien [[Titre]] vers une autre page : discret, s'intègre dans une
    phrase (pas de couleur criarde ni de soulignement plein). */
 .wiki-inline-link {
-  color: var(--wiki-gold);
+  color: #e05c5c;
   text-decoration: none;
-  border-bottom: 1px dotted var(--wiki-gold);
-  transition: border-bottom-style 0.15s;
+  border-bottom: 1px dotted #e05c5c;
+  transition: border-bottom-style 0.15s, color 0.15s;
 }
 .wiki-inline-link:hover {
+  color: #f07070;
   border-bottom-style: solid;
+}
+
+/* Dropdown autocomplete [[lien vers page]] */
+.wikilink-suggest {
+  position: fixed;
+  z-index: 3000;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+  max-height: 220px;
+  overflow-y: auto;
+  min-width: 200px;
+  max-width: 340px;
+}
+.wikilink-suggest-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.45rem 0.8rem;
+  border: none;
+  background: transparent;
+  color: var(--fg);
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wikilink-suggest-item:hover,
+.wikilink-suggest-item.active {
+  background: rgba(224, 92, 92, 0.18);
+  color: #e05c5c;
+}
+.wikilink-suggest-empty {
+  padding: 0.5rem 0.8rem;
+  font-size: 0.8rem;
+  opacity: 0.5;
+  font-style: italic;
 }
 
 .wiki-md hr {

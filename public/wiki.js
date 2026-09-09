@@ -2170,7 +2170,190 @@
   });
 
   // ══════════════════════════════════════════════════
-  // 10. SOUMISSION
+  // 10. AUTOCOMPLETE [[lien vers page wiki]]
+  // ══════════════════════════════════════════════════
+  (function () {
+    // Crée (ou réutilise) le dropdown singleton
+    var drop = document.createElement("div");
+    drop.className = "wikilink-suggest";
+    drop.hidden = true;
+    document.body.appendChild(drop);
+
+    var activeTA = null;    // textarea courante
+    var activeIdx = -1;     // item survolé clavier
+    var pages = [];         // liste de pages disponibles (titre + id)
+
+    // Charge la liste une seule fois depuis la balise script JSON
+    function getPages() {
+      if (pages.length) return pages;
+      var el = document.getElementById("wiki-existing-pages");
+      if (!el) return [];
+      try {
+        pages = JSON.parse(el.textContent || el.innerText).map(function (p) {
+          return { id: p.id, title: p.title };
+        });
+      } catch (_) {}
+      return pages;
+    }
+
+    // Calcule la position pixel du curseur dans une textarea via un miroir
+    function caretPixelPos(ta) {
+      var mirror = document.createElement("div");
+      var style  = getComputedStyle(ta);
+      ["fontFamily","fontSize","fontWeight","lineHeight","letterSpacing",
+       "padding","paddingTop","paddingRight","paddingBottom","paddingLeft",
+       "borderTopWidth","borderRightWidth","borderBottomWidth","borderLeftWidth",
+       "boxSizing","wordWrap","whiteSpace","overflowX","overflowY","width"]
+        .forEach(function (p) { mirror.style[p] = style[p]; });
+      mirror.style.position  = "absolute";
+      mirror.style.top       = "-9999px";
+      mirror.style.left      = "-9999px";
+      mirror.style.visibility = "hidden";
+      mirror.style.overflow  = "hidden";
+      mirror.style.height    = "auto";
+
+      var pos = ta.selectionStart;
+      var before = ta.value.slice(0, pos);
+      var span = document.createElement("span");
+      mirror.textContent = before;
+      mirror.appendChild(span);
+      document.body.appendChild(mirror);
+
+      var taRect = ta.getBoundingClientRect();
+      var spanRect = span.getBoundingClientRect();
+      var mirrorRect = mirror.getBoundingClientRect();
+      var relLeft = spanRect.left - mirrorRect.left;
+      var relTop  = spanRect.top  - mirrorRect.top;
+      document.body.removeChild(mirror);
+
+      // Tient compte du scroll de la textarea
+      var absLeft = taRect.left + relLeft - ta.scrollLeft;
+      var absTop  = taRect.top  + relTop  - ta.scrollTop;
+      return { left: absLeft, top: absTop + parseInt(style.lineHeight || 18) + 2 };
+    }
+
+    // Ouvre le dropdown avec les résultats filtrés
+    function openDrop(ta, query) {
+      activeTA  = ta;
+      activeIdx = -1;
+      var all  = getPages();
+      var q    = query.toLowerCase();
+      var hits = all.filter(function (p) {
+        return p.title.toLowerCase().indexOf(q) !== -1;
+      }).slice(0, 10);
+
+      drop.innerHTML = "";
+      if (!hits.length) {
+        var empty = document.createElement("div");
+        empty.className = "wikilink-suggest-empty";
+        empty.textContent = "Aucune page trouvée";
+        drop.appendChild(empty);
+      } else {
+        hits.forEach(function (p, i) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "wikilink-suggest-item";
+          btn.textContent = p.title;
+          btn.dataset.title = p.title;
+          btn.addEventListener("mousedown", function (e) {
+            e.preventDefault(); // évite que la textarea perde le focus
+            pickItem(p.title);
+          });
+          drop.appendChild(btn);
+        });
+      }
+
+      // Positionne le dropdown
+      var pos = caretPixelPos(ta);
+      var dropW = 280;
+      var left = Math.min(pos.left, window.innerWidth - dropW - 8);
+      if (left < 8) left = 8;
+      var top = pos.top;
+      if (top + 220 > window.innerHeight - 8) {
+        top = pos.top - parseInt(getComputedStyle(ta).lineHeight || 18) - 2 - 220;
+      }
+      drop.style.left = left + "px";
+      drop.style.top  = top  + "px";
+      drop.hidden = false;
+    }
+
+    function closeDrop() {
+      drop.hidden = true;
+      activeTA  = null;
+      activeIdx = -1;
+    }
+
+    // Insère la sélection dans la textarea
+    function pickItem(title) {
+      if (!activeTA) return;
+      var ta  = activeTA;
+      var pos = ta.selectionStart;
+      var val = ta.value;
+      // Remonte à l'ouverture [[
+      var openAt = val.lastIndexOf("[[", pos);
+      if (openAt === -1) { closeDrop(); return; }
+      ta.value = val.slice(0, openAt) + "[[" + title + "]]" + val.slice(pos);
+      var newPos = openAt + title.length + 4;
+      ta.selectionStart = ta.selectionEnd = newPos;
+      autoResize(ta);
+      ta.focus();
+      closeDrop();
+    }
+
+    // Navigation clavier dans le dropdown
+    function highlightItem(idx) {
+      var items = drop.querySelectorAll(".wikilink-suggest-item");
+      items.forEach(function (it, i) { it.classList.toggle("active", i === idx); });
+      if (items[idx]) items[idx].scrollIntoView({ block: "nearest" });
+    }
+
+    // Attach sur toutes les .wiki-textarea du formulaire
+    document.querySelectorAll(".wiki-form .wiki-textarea").forEach(function (ta) {
+      ta.addEventListener("input", function () {
+        var pos = ta.selectionStart;
+        var before = ta.value.slice(0, pos);
+        var openAt = before.lastIndexOf("[[");
+        if (openAt === -1) { closeDrop(); return; }
+        // Vérifie qu'il n'y a pas de ]] entre l'ouverture et le curseur
+        var fragment = before.slice(openAt + 2);
+        if (fragment.indexOf("]]") !== -1) { closeDrop(); return; }
+        openDrop(ta, fragment);
+      });
+
+      ta.addEventListener("keydown", function (e) {
+        if (drop.hidden) return;
+        var items = drop.querySelectorAll(".wikilink-suggest-item");
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          activeIdx = Math.min(activeIdx + 1, items.length - 1);
+          highlightItem(activeIdx);
+        } else if (e.key === "ArrowUp") {
+          e.preventDefault();
+          activeIdx = Math.max(activeIdx - 1, 0);
+          highlightItem(activeIdx);
+        } else if (e.key === "Enter" && activeIdx >= 0) {
+          e.preventDefault();
+          var it = items[activeIdx];
+          if (it) pickItem(it.dataset.title);
+        } else if (e.key === "Escape") {
+          closeDrop();
+        }
+      });
+
+      ta.addEventListener("blur", function () {
+        // Délai pour laisser le mousedown du dropdown se déclencher d'abord
+        setTimeout(closeDrop, 150);
+      });
+    });
+
+    // Ferme le dropdown si on clique ailleurs
+    document.addEventListener("mousedown", function (e) {
+      if (!drop.contains(e.target)) closeDrop();
+    });
+  })();
+
+  // ══════════════════════════════════════════════════
+  // 11. SOUMISSION
   // ══════════════════════════════════════════════════
   document.querySelectorAll(".wiki-form").forEach(function (form) {
     form.addEventListener("submit", function () {
