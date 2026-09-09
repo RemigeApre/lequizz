@@ -8357,6 +8357,46 @@ a.wiki-ql-label:hover .wiki-ql-text {
   font-size: 0.75rem; color: rgba(255,255,255,0.78); margin: 0; line-height: 1.3;
 }
 
+/* ── Note éditoriale (monstre / animal) ─────────────── */
+.wiki-editorial-note {
+  margin-top: 1rem;
+}
+.wiki-editorial-note > summary {
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.35);
+  color: rgba(255,255,255,0.5);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.15s, color 0.15s;
+}
+.wiki-editorial-note > summary:hover,
+.wiki-editorial-note[open] > summary {
+  border-color: rgba(255,255,255,0.75);
+  color: rgba(255,255,255,0.85);
+}
+.wiki-editorial-body {
+  margin-top: 0.6rem;
+  padding: 0.65rem 0.75rem;
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.wiki-editorial-body p {
+  margin: 0;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.5;
+}
+.wiki-editorial-body p + p { margin-top: 0.5rem; }
+
 /* ── Header : retour (icône seule) + catégories ─────── */
 .wiki-right-header {
   display: flex; align-items: center;
@@ -8478,7 +8518,7 @@ a.wiki-ql-label:hover .wiki-ql-text {
   flex-wrap: wrap;
   gap: 0.3rem;
   overflow: hidden;
-  max-height: 1.85rem; /* ~1 ligne de pills */
+  max-height: 3.7rem; /* ~2 lignes de pills */
   position: relative;
 }
 .wiki-right-tags.tags-expanded { max-height: none; }

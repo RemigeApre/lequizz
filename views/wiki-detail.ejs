@@ -109,6 +109,18 @@
             <% } %>
           </dl>
         <% } %>
+        <%# ─ Note éditoriale monstre / animal ─ %>
+        <% if (page.category === 'partenaires' && (pm.sous_cat === 'monstre' || pm.sous_cat === 'animaux')) { %>
+          <details class="wiki-editorial-note">
+            <summary class="wiki-editorial-icon" title="Note &eacute;ditoriale">?</summary>
+            <div class="wiki-editorial-body">
+              <p>La zoophilie comme fantasme n&rsquo;est trait&eacute;e que sur l&rsquo;id&eacute;e femme&ndash;animal, idem pour les monstres, femme&ndash;monstre, sauf cas particulier. C&rsquo;est un choix &eacute;ditorial, et une volont&eacute;.</p>
+              <% if (currentUser) { %>
+                <p>Le rapport femme&ndash;autre esp&egrave;ce part du postulat o&ugrave; l&rsquo;animal est consentant, ce que le rapport homme&ndash;animal ne permet pas du tout. De plus, c&rsquo;est aussi un choix esth&eacute;tique&nbsp;: le site et sa ligne &eacute;ditoriale ont go&ucirc;t de l&rsquo;&eacute;l&eacute;gance, que ne poss&egrave;derait en rien l&rsquo;homme en ce contexte de fantasme.</p>
+              <% } %>
+            </div>
+          </details>
+        <% } %>
       </aside>
 
       <%# ─ COLONNE GAUCHE : contenu texte ─ %>

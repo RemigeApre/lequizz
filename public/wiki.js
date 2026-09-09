@@ -162,16 +162,19 @@
     var expanded = false;
 
     function update() {
-      // Vérifie si les tags débordent (hauteur réelle > hauteur max 1 ligne)
-      var overflows = tagsEl.scrollHeight > tagsEl.clientHeight + 2;
-      if (!overflows && !expanded) { toggle.style.display = "none"; return; }
-      toggle.style.display = "block";
       if (expanded) {
-        toggle.textContent = "Réduire ▲";
         tagsEl.classList.add("tags-expanded");
+        toggle.textContent = "Réduire ▲";
+        toggle.style.display = "block";
       } else {
-        toggle.textContent = "Voir tout ▼";
         tagsEl.classList.remove("tags-expanded");
+        var overflows = tagsEl.scrollHeight > tagsEl.clientHeight + 2;
+        if (overflows) {
+          toggle.textContent = "Voir tout ▼";
+          toggle.style.display = "block";
+        } else {
+          toggle.style.display = "none";
+        }
       }
     }
 
