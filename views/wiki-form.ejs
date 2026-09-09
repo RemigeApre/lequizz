@@ -76,23 +76,31 @@
 
     <%# ── Description ── %>
     <div class="wf-section-title">Description</div>
-    <div class="wiki-editor">
+    <div class="wiki-editor" data-rich>
       <div class="md-toolbar">
-        <button type="button" class="md-btn" data-md="bold" title="Gras (Ctrl+B)"><strong>B</strong></button>
-        <button type="button" class="md-btn md-btn-italic" data-md="italic" title="Italique (Ctrl+I)"><em>I</em></button>
+        <button type="button" class="md-btn" data-cmd="bold" title="Gras (Ctrl+B)"><strong>B</strong></button>
+        <button type="button" class="md-btn md-btn-italic" data-cmd="italic" title="Italique (Ctrl+I)"><em>I</em></button>
         <span class="md-sep"></span>
-        <button type="button" class="md-btn" data-md="h2">H2</button>
-        <button type="button" class="md-btn" data-md="h3">H3</button>
+        <button type="button" class="md-btn" data-cmd="h2">H2</button>
+        <button type="button" class="md-btn" data-cmd="h3">H3</button>
         <span class="md-sep"></span>
-        <button type="button" class="md-btn" data-md="list">&#8226;&nbsp;Liste</button>
-        <button type="button" class="md-btn" data-md="hr">&mdash;</button>
+        <button type="button" class="md-btn" data-cmd="list">&#8226;&nbsp;Liste</button>
+        <button type="button" class="md-btn" data-cmd="hr">&mdash;</button>
         <span class="md-sep"></span>
-        <button type="button" class="md-btn" data-md="link" title="Lien">&#128279;</button>
-        <div class="md-toolbar-spacer"></div>
-        <button type="button" class="md-btn md-preview-btn">Aper&ccedil;u</button>
+        <span class="md-colors">
+          <button type="button" class="md-color-btn" data-cmd="color" data-val="#e05c5c" style="background:#e05c5c" title="Rouge"></button>
+          <button type="button" class="md-color-btn" data-cmd="color" data-val="#5cb8e0" style="background:#5cb8e0" title="Bleu"></button>
+          <button type="button" class="md-color-btn" data-cmd="color" data-val="#6dd68a" style="background:#6dd68a" title="Vert"></button>
+          <button type="button" class="md-color-btn" data-cmd="color" data-val="#e0b85c" style="background:#e0b85c" title="Or"></button>
+          <button type="button" class="md-color-btn" data-cmd="color" data-val="#c45ce0" style="background:#c45ce0" title="Violet"></button>
+          <button type="button" class="md-color-btn md-color-clear" data-cmd="color" data-val="" title="Effacer couleur">&#215;</button>
+        </span>
+        <span class="md-sep"></span>
+        <button type="button" class="md-btn" data-cmd="wikilink" title="Lier une page wiki">&#9679;&nbsp;Wiki</button>
+        <button type="button" class="md-btn" data-cmd="extlink" title="Lien externe">&#128279;</button>
       </div>
-      <textarea name="content" class="wiki-textarea" rows="10" placeholder="Description, notes\u2026 (Markdown support\u00e9)"><%= page.content %></textarea>
-      <div class="wiki-md-preview wiki-md" hidden></div>
+      <div class="wiki-richtext" contenteditable="true" spellcheck="true"></div>
+      <input type="hidden" name="content" class="wiki-richtext-hidden" value="" />
     </div>
 
     <%# ── Scénario (partenaires seulement) ── %>
@@ -385,5 +393,6 @@
   </div>
   <% } %>
 </main>
+<script>window._wikiEditContent = <%- JSON.stringify(page.content || '') %>;</script>
 <script src="/wiki.js?v=<%= assetVersion %>"></script>
 <%- include('partials/foot') %>
