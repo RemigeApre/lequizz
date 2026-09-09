@@ -21,10 +21,29 @@
       <input type="hidden" name="tags" class="wiki-tags-hidden" value="<%= book ? book.tags.join(', ') : '' %>" />
     </div>
 
-    <label class="chip-option wiki-owned-chip">
-      <input type="checkbox" name="ultra" <%= (book && book.tags.some(function(t){ return t.toLowerCase() === 'ultra'; })) ? 'checked' : '' %> />
-      <span>&#128274;&nbsp;Marquer Ultra</span>
-    </label>
+    <%# Langue %>
+    <div class="bd-form-chips">
+      <span class="wiki-meta-label">Langue</span>
+      <% var bdLangs = [['francais','🇫🇷 Français'],['anglais','🇬🇧 Anglais'],['japonais','🇯🇵 Japonais'],['autre','Autre']]; %>
+      <% bdLangs.forEach(function(l) { %>
+        <label class="chip-option">
+          <input type="radio" name="langue" value="<%= l[0] %>" <%= (book && book.langue === l[0]) ? 'checked' : '' %> />
+          <span><%= l[1] %></span>
+        </label>
+      <% }) %>
+    </div>
+
+    <%# Flags spéciaux %>
+    <div class="bd-form-chips">
+      <label class="chip-option wiki-owned-chip">
+        <input type="checkbox" name="ultra" <%= (book && book.tags.some(function(t){ return t.toLowerCase() === 'ultra'; })) ? 'checked' : '' %> />
+        <span>&#128274;&nbsp;Marquer Ultra</span>
+      </label>
+      <label class="chip-option">
+        <input type="checkbox" name="couleur" <%= (book && book.tags.some(function(t){ return t.toLowerCase() === 'en couleur'; })) ? 'checked' : '' %> />
+        <span>&#127775;&nbsp;En couleur</span>
+      </label>
+    </div>
 
     <%# Tri + images existantes %>
     <% if (book && book.imagePaths && book.imagePaths.length) { %>

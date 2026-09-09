@@ -6053,6 +6053,42 @@ a.wiki-ql-label:hover .wiki-ql-text {
   padding: 0.1rem 0.35rem;
 }
 
+.bd-card-badge {
+  position: absolute;
+  top: 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 0.1rem 0.3rem;
+  line-height: 1;
+}
+.bd-card-badge--couleur {
+  left: 0.35rem;
+  background: rgba(255,200,0,.85);
+  color: #222;
+}
+.bd-card-badge--langue {
+  right: 0.35rem;
+  background: rgba(0,0,0,.6);
+  color: #fff;
+}
+.bd-lang-francais { background: rgba(0,85,164,.75) !important; }
+.bd-lang-anglais  { background: rgba(180,0,0,.75) !important; }
+.bd-lang-japonais { background: rgba(188,0,45,.75) !important; }
+
+.bd-form-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.bd-langue-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.3rem;
+}
+
 .bd-card-body {
   padding: 0.55rem 0.7rem 0.6rem;
 }

@@ -8,14 +8,20 @@
   var searchClear = document.getElementById("bd-search-clear");
   var tagFilter   = document.getElementById("bd-tag-filter");
 
-  var activeTags = [];
-  var searchQ    = "";
-  var showUltra  = true; // géré par bouton existant
+  var activeTags   = [];
+  var searchQ      = "";
+  var showUltra    = true;
+  var activeLangue = "";
+  var showCouleurOnly = false;
+
+  function hasActiveFilter() {
+    return activeTags.length > 0 || searchQ || activeLangue || showCouleurOnly;
+  }
 
   function updateCount(visible) {
     if (countEl) countEl.textContent = visible;
     if (resultEl) {
-      if (activeTags.length || searchQ) {
+      if (hasActiveFilter()) {
         resultEl.textContent = visible + " résultat" + (visible !== 1 ? "s" : "");
         resultEl.hidden = false;
       } else {
@@ -27,16 +33,20 @@
   function applyFilters() {
     var visible = 0;
     cards.forEach(function(card) {
-      var tags  = (card.dataset.tags || "").split(",").filter(Boolean);
-      var title = (card.dataset.title || "");
-      var ultra = card.dataset.ultra === "1";
+      var tags    = (card.dataset.tags || "").split(",").filter(Boolean);
+      var title   = card.dataset.title || "";
+      var ultra   = card.dataset.ultra === "1";
+      var langue  = card.dataset.langue || "";
+      var couleur = card.dataset.couleur === "1";
 
-      var okTags   = activeTags.length === 0 || activeTags.every(function(t) { return tags.includes(t); });
-      var okSearch = !searchQ || title.includes(searchQ);
-      var okUltra  = showUltra || !ultra;
+      var okTags    = activeTags.length === 0 || activeTags.every(function(t) { return tags.indexOf(t) !== -1; });
+      var okSearch  = !searchQ || title.indexOf(searchQ) !== -1;
+      var okUltra   = showUltra || !ultra;
+      var okLangue  = !activeLangue || langue === activeLangue;
+      var okCouleur = !showCouleurOnly || couleur;
 
-      if (okTags && okSearch && okUltra) { card.style.display = ""; visible++; }
-      else                               { card.style.display = "none"; }
+      if (okTags && okSearch && okUltra && okLangue && okCouleur) { card.style.display = ""; visible++; }
+      else                                                         { card.style.display = "none"; }
     });
     updateCount(visible);
   }
@@ -71,7 +81,36 @@
     }
   }
 
-  // Ultra toggle (réutilise l'existant)
+  // Langue
+  var langueFilter = document.getElementById("bd-langue-filter");
+  if (langueFilter) {
+    langueFilter.addEventListener("click", function(e) {
+      var chip = e.target.closest(".bd-langue-chip");
+      if (!chip) return;
+      var lng = chip.dataset.langue;
+      if (activeLangue === lng) {
+        activeLangue = "";
+        langueFilter.querySelectorAll(".bd-langue-chip").forEach(function(c) { c.classList.remove("active"); });
+      } else {
+        activeLangue = lng;
+        langueFilter.querySelectorAll(".bd-langue-chip").forEach(function(c) { c.classList.remove("active"); });
+        chip.classList.add("active");
+      }
+      applyFilters();
+    });
+  }
+
+  // Couleur toggle
+  var couleurBtn = document.getElementById("bd-couleur-toggle");
+  if (couleurBtn) {
+    couleurBtn.addEventListener("click", function() {
+      showCouleurOnly = !showCouleurOnly;
+      couleurBtn.classList.toggle("active", showCouleurOnly);
+      applyFilters();
+    });
+  }
+
+  // Ultra toggle
   var ultraBtn = document.getElementById("bd-ultra-toggle");
   if (ultraBtn) {
     ultraBtn.addEventListener("click", function() {

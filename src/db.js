@@ -107,6 +107,7 @@ db.exec(`
 try { db.exec("ALTER TABLE bd_books ADD COLUMN rating INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
 try { db.exec("ALTER TABLE bd_books ADD COLUMN flame INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
 try { db.exec("ALTER TABLE bd_books ADD COLUMN interested INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
+try { db.exec("ALTER TABLE bd_books ADD COLUMN langue TEXT NOT NULL DEFAULT ''"); } catch (_) {}
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS wiki_page_links (
@@ -817,6 +818,7 @@ function rowToBdBook(row) {
     rating: row.rating || 0,
     flame: !!row.flame,
     interested: !!row.interested,
+    langue: row.langue || "",
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -831,18 +833,18 @@ function getBdBook(id) {
   return row ? rowToBdBook(row) : null;
 }
 
-function insertBdBook({ title, description, tags, imagePaths }) {
+function insertBdBook({ title, description, tags, imagePaths, langue }) {
   const now = new Date().toISOString();
   const info = db.prepare(
-    `INSERT INTO bd_books (title, description, tags, image_paths, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`
-  ).run(title, description, JSON.stringify(tags || []), JSON.stringify(imagePaths || []), now, now);
+    `INSERT INTO bd_books (title, description, tags, image_paths, langue, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
+  ).run(title, description, JSON.stringify(tags || []), JSON.stringify(imagePaths || []), langue || "", now, now);
   return info.lastInsertRowid;
 }
 
-function updateBdBook(id, { title, description, tags, imagePaths }) {
+function updateBdBook(id, { title, description, tags, imagePaths, langue }) {
   db.prepare(
-    `UPDATE bd_books SET title = ?, description = ?, tags = ?, image_paths = ?, updated_at = ? WHERE id = ?`
-  ).run(title, description, JSON.stringify(tags || []), JSON.stringify(imagePaths || []), new Date().toISOString(), id);
+    `UPDATE bd_books SET title = ?, description = ?, tags = ?, image_paths = ?, langue = ?, updated_at = ? WHERE id = ?`
+  ).run(title, description, JSON.stringify(tags || []), JSON.stringify(imagePaths || []), langue || "", new Date().toISOString(), id);
 }
 
 function deleteBdBook(id) {

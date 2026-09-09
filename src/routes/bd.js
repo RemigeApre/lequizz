@@ -28,13 +28,16 @@ function parseTags(raw) {
   return String(raw || "").split(/[,;]+/).map((t) => t.trim()).filter(Boolean);
 }
 
-// Fusionne la case a cocher "Marquer Ultra" du formulaire avec les tags
-// tapes a la main, sans jamais faire de doublon.
-function applyUltraCheckbox(tags, checked) {
-  const has = tags.some((t) => t.toLowerCase() === "ultra");
-  if (checked && !has) return [...tags, "ultra"];
-  if (!checked && has) return tags.filter((t) => t.toLowerCase() !== "ultra");
+// Fusionne une case à cocher tag avec les tags libres, sans doublon.
+function applyTagCheckbox(tags, tagName, checked) {
+  const has = tags.some((t) => t.toLowerCase() === tagName);
+  if (checked && !has) return [...tags, tagName];
+  if (!checked && has) return tags.filter((t) => t.toLowerCase() !== tagName);
   return tags;
+}
+
+function applyUltraCheckbox(tags, checked) {
+  return applyTagCheckbox(tags, "ultra", checked);
 }
 
 function applyImageOrder(existing, newFiles, orderRaw) {
@@ -75,10 +78,12 @@ function buildBdRouter(config) {
     const title = String(req.body.title || "").trim();
     if (!title) return res.redirect("/bd/new");
     const description = String(req.body.description || "").trim();
-    const tags = applyUltraCheckbox(parseTags(req.body.tags), req.body.ultra === "on");
+    let tags = applyUltraCheckbox(parseTags(req.body.tags), req.body.ultra === "on");
+    tags = applyTagCheckbox(tags, "en couleur", req.body.couleur === "on");
+    const langue = ["francais", "anglais", "japonais", "autre"].includes(req.body.langue) ? req.body.langue : "";
     const newFiles = (req.files || []).map((f) => `/uploads/bd/${f.filename}`);
     const imagePaths = applyImageOrder([], newFiles, req.body.image_order);
-    const id = insertBdBook({ title, description, tags, imagePaths });
+    const id = insertBdBook({ title, description, tags, imagePaths, langue });
     res.redirect(`/bd/${id}`);
   });
 
@@ -107,7 +112,9 @@ function buildBdRouter(config) {
 
     const title = String(req.body.title || "").trim() || book.title;
     const description = String(req.body.description || "").trim();
-    const tags = applyUltraCheckbox(parseTags(req.body.tags), req.body.ultra === "on");
+    let tags = applyUltraCheckbox(parseTags(req.body.tags), req.body.ultra === "on");
+    tags = applyTagCheckbox(tags, "en couleur", req.body.couleur === "on");
+    const langue = ["francais", "anglais", "japonais", "autre"].includes(req.body.langue) ? req.body.langue : "";
 
     const toRemove = new Set([].concat(req.body.remove_image || []));
     for (const src of toRemove) {
@@ -118,7 +125,7 @@ function buildBdRouter(config) {
     const newFiles = (req.files || []).map((f) => `/uploads/bd/${f.filename}`);
     const imagePaths = applyImageOrder(existing, newFiles, req.body.image_order);
 
-    updateBdBook(id, { title, description, tags, imagePaths });
+    updateBdBook(id, { title, description, tags, imagePaths, langue });
     res.redirect(`/bd/${id}`);
   });
 
