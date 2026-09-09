@@ -329,10 +329,10 @@
 
         <%# Scénario (partenaires) ─ %>
         <% if (page.category === 'partenaires' && pm.scenario) { %>
-          <div class="wiki-pos-section wiki-pos-nouvelles">
-            <h3 class="wiki-pos-section-heading">Sc&eacute;nario</h3>
+          <details class="wiki-pos-section wiki-pos-nouvelles wiki-scenario-details">
+            <summary class="wiki-pos-section-heading wiki-scenario-summary">Sc&eacute;nario</summary>
             <div class="wiki-pos-nouvelles-text"><%= pm.scenario %></div>
-          </div>
+          </details>
         <% } %>
 
         <%# Informations utiles (positions) ─ %>
@@ -577,6 +577,18 @@
 
   </article>
 </main>
+<% if (!currentUser) { %>
+<div class="age-gate" id="age-gate">
+  <div class="age-gate-card">
+    <p class="age-gate-title">Contenu pour adultes</p>
+    <p class="age-gate-msg">Cette page contient du contenu pornographique. Souhaitez-vous continuer&nbsp;?</p>
+    <div class="age-gate-actions">
+      <button type="button" class="age-gate-yes" id="age-gate-yes">Oui, j&rsquo;ai plus de 18&nbsp;ans</button>
+      <a href="/wiki" class="age-gate-no">Non</a>
+    </div>
+  </div>
+</div>
+<% } %>
 <script>window.GALLERY_CAN_EDIT = <%= (currentUser && currentUser.isAdmin) ? 'true' : 'false' %>;</script>
 <script src="/wiki.js?v=<%= assetVersion %>"></script>
 <%- include('partials/foot') %>

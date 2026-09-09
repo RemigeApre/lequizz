@@ -2534,8 +2534,16 @@
           switch (cmd) {
             case "bold":   document.execCommand("bold");   break;
             case "italic": document.execCommand("italic"); break;
-            case "h2":     document.execCommand("formatBlock", false, "h2"); break;
-            case "h3":     document.execCommand("formatBlock", false, "h3"); break;
+            case "h2": {
+              var curH2 = (document.queryCommandValue("formatBlock") || "").toLowerCase();
+              document.execCommand("formatBlock", false, curH2 === "h2" ? "p" : "h2");
+              break;
+            }
+            case "h3": {
+              var curH3 = (document.queryCommandValue("formatBlock") || "").toLowerCase();
+              document.execCommand("formatBlock", false, curH3 === "h3" ? "p" : "h3");
+              break;
+            }
             case "list":   document.execCommand("insertUnorderedList"); break;
             case "hr":     document.execCommand("insertHorizontalRule"); break;
             case "color":
@@ -3710,6 +3718,25 @@
           }, link);
         } catch (_) {}
       });
+    });
+  })();
+
+  // ══════════════════════════════════════════════════
+  // 20. AGE GATE (non connectés)
+  // ══════════════════════════════════════════════════
+  (function () {
+    var gate = document.getElementById("age-gate");
+    if (!gate) return; // utilisateur connecté ou page sans gate
+
+    var AGE_KEY = "age_confirmed";
+    if (sessionStorage.getItem(AGE_KEY)) {
+      gate.hidden = true;
+      return;
+    }
+
+    document.getElementById("age-gate-yes").addEventListener("click", function () {
+      sessionStorage.setItem(AGE_KEY, "1");
+      gate.hidden = true;
     });
   })();
 

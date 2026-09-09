@@ -3184,6 +3184,8 @@ input[type="text"], input[type="password"] {
   font-weight: 700;
   margin: 1.1rem 0 0.3rem;
   color: var(--fg);
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--accent);
 }
 
 .wiki-md p {
@@ -3446,6 +3448,9 @@ input[type="text"], input[type="password"] {
   font-weight: 600;
   margin: 0.75rem 0 0.25rem;
   color: var(--fg);
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--accent);
+  opacity: 0.9;
 }
 .wiki-richtext p { margin: 0 0 0.5em; }
 .wiki-richtext ul { padding-left: 1.4rem; margin: 0.3rem 0 0.5rem; }
@@ -6705,6 +6710,92 @@ a.wiki-ql-label:hover .wiki-ql-text {
   color: var(--text);
   opacity: 0.88;
 }
+
+/* ── Scénario : accordéon fermé par défaut ─────────────── */
+.wiki-scenario-details { border: none; }
+.wiki-scenario-details > .wiki-scenario-summary {
+  list-style: none;
+  cursor: pointer;
+  text-align: center;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.wiki-scenario-details > .wiki-scenario-summary::-webkit-details-marker { display: none; }
+.wiki-scenario-details > .wiki-scenario-summary::after {
+  content: "\25B8";
+  font-size: 0.7em;
+  opacity: 0.5;
+  transition: transform 0.2s;
+}
+.wiki-scenario-details[open] > .wiki-scenario-summary::after {
+  transform: rotate(90deg);
+}
+.wiki-scenario-details > .wiki-pos-nouvelles-text {
+  margin-top: 1rem;
+}
+
+/* ── Age gate overlay ───────────────────────────────────── */
+.age-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.age-gate[hidden] { display: none !important; }
+.age-gate-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 2rem 2.25rem;
+  max-width: 360px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+}
+.age-gate-title {
+  margin: 0 0 0.6rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--fg);
+}
+.age-gate-msg {
+  margin: 0 0 1.5rem;
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.5;
+}
+.age-gate-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.age-gate-yes {
+  padding: 0.7rem 1.25rem;
+  border-radius: 8px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.age-gate-yes:hover { opacity: 0.85; }
+.age-gate-no {
+  padding: 0.55rem;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.4);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.age-gate-no:hover { color: rgba(255,255,255,0.7); }
 
 /* Textarea position */
 .wiki-pos-textarea {
