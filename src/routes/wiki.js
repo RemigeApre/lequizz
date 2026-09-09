@@ -180,14 +180,48 @@ function parseMeta(category, body) {
     const validSubs = FANTASMES_SUBCATS.map((s) => s.key);
     specific = { sous_cat: validSubs.includes(sub) ? sub : "" };
   } else if (category === "partenaires") {
-    const nb = (v) => ["0","1","2","3","4","nombreux","variable"].includes(String(v)) ? String(v) : "";
-    const validTypes = ["nombre", "fetichisme", "monstre", "animaux", "autre"];
+    const oneof  = (v, list) => list.includes(String(v || "")) ? String(v) : "";
+    const manyof = (v, list) => arr(v).filter(x => list.includes(x));
+    const str    = (v, max)  => String(v || "").slice(0, max).trim();
+    const num    = (v)       => { const n = parseFloat(v); return (isNaN(n) || n < 0) ? "" : String(n); };
     specific = {
-      nb_total:    nb(body.meta_nb_total),
-      nb_feminin:  nb(body.meta_nb_feminin),
-      nb_masculin: nb(body.meta_nb_masculin),
-      types:       arr(body.meta_types).filter(x => validTypes.includes(x)),
-      scenario:    String(body.meta_scenario || "").slice(0, 5000),
+      sous_cat:            oneof(body.meta_sous_cat, ["nombre","monstre","animaux","fetichisme","autre"]),
+      // Communs à tous les types
+      nature_acte:         oneof(body.meta_nature_acte,     ["possible","improbable","impossible","fictif","inconnu"]),
+      cadre_legal:         oneof(body.meta_cadre_legal,     ["legal","flou","illegal","inconnu"]),
+      risque_physique:     oneof(body.meta_risque_physique, ["inconnu","nul","faible","modere","eleve","extreme"]),
+      risque_mst:          oneof(body.meta_risque_mst,      ["inconnu","nul","faible","modere","eleve","extreme"]),
+      accessibilite:       oneof(body.meta_accessibilite,   ["tres_rare","rare","occasionnel","frequent","inconnu"]),
+      scenario:            str(body.meta_scenario, 5000),
+      // Nombre
+      nb_total:            oneof(body.meta_nb_total,   ["2","3","4","5plus"]),
+      nb_feminin:          oneof(body.meta_nb_feminin,  ["0","1","2","3plus"]),
+      nb_masculin:         oneof(body.meta_nb_masculin, ["0","1","2","3plus"]),
+      // Monstre
+      type_creature:        oneof(body.meta_type_creature,        ["machine","sang_froid","mammifere","insectoide","amorphe","elementaire","autre"]),
+      type_acte_sexuel:     manyof(body.meta_type_acte_sexuel,    ["penetration","absorption","constriction","pondaison","investation","possession","fusion","parasitage","transformation","insemination","aucun_variable","autre"]),
+      niveau_intelligence:  oneof(body.meta_niveau_intelligence,  ["bestiale","faible","correcte","forte","inconnu"]),
+      capacite_parole:      oneof(body.meta_capacite_parole,      ["impossible","possible","oui","frequente","inconnu"]),
+      compat_anatomique:    oneof(body.meta_compat_anatomique,    ["oui","non","partielle","inconnu"]),
+      origine_conceptuelle: oneof(body.meta_origine_conceptuelle, ["fantaisie","science_fiction","imaginaire","autre"]),
+      // Animal
+      famille_zoologique: oneof(body.meta_famille_zoologique, ["canide","equide","felin","bovin","reptile","aviaire","cetace","autre"]),
+      taille_animal:      oneof(body.meta_taille_animal,      ["petit","egal","grand","tres_grand"]),
+      // Communs Monstre + Animal
+      nature_espece:     oneof(body.meta_nature_espece,      ["domestique","sauvage","inconnu"]),
+      taille_penis_min:  num(body.meta_taille_penis_min),
+      taille_penis_max:  num(body.meta_taille_penis_max),
+      circ_penis_min:    num(body.meta_circ_penis_min),
+      circ_penis_max:    num(body.meta_circ_penis_max),
+      vol_ejac_min:      num(body.meta_vol_ejac_min),
+      vol_ejac_max:      num(body.meta_vol_ejac_max),
+      sperme_texture:    str(body.meta_sperme_texture, 200),
+      sperme_odeur:      str(body.meta_sperme_odeur,   200),
+      sperme_gout:       str(body.meta_sperme_gout,    200),
+      type_verrouillage: oneof(body.meta_type_verrouillage, ["aucun","noeud","epines","ventouses","partiel","autre","inconnu"]),
+      sensations:        manyof(body.meta_sensations, ["pression","remplissage","frottement","elongation","vibration","chaleur","secousse","autre"]),
+      milieu_vie:        oneof(body.meta_milieu_vie,       ["terrestre","aerien","aquatique_mer","dulcaquicole","semi_aquatique","souterrain","inconnu"]),
+      structure_sociale: oneof(body.meta_structure_sociale,["monogame","polygame","polyandrie","promiscuite","sans_lien","harem","coloniale","saisonniere","variable","inconnu"]),
     };
   } else if (category === "lieux") {
     const t = body.meta_type_lieu;

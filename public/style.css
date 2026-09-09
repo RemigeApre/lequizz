@@ -8674,6 +8674,47 @@ a.wiki-ql-label:hover .wiki-ql-text {
   background: var(--border);
 }
 
+/* Sous-titre partenaires (moins d'espace que les titres de section principaux) */
+.wf-partenaires-title { margin-top: 0.5rem; }
+
+/* Champs plage numérique (taille, circonférence, volume) */
+.wf-range-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.35rem;
+}
+.wf-range-input {
+  width: 5rem;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 0.85rem;
+  text-align: right;
+}
+.wf-range-unit { font-size: 0.8rem; opacity: 0.55; }
+
+/* Champs texte sperme */
+.wf-sperme-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+}
+.wf-sperme-fields label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; }
+.wf-text-sm {
+  flex: 1;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 0.82rem;
+}
+
 /* Espacement global du formulaire wiki */
 .wiki-form > * + * { margin-top: 0; }
 .wiki-form { display: flex; flex-direction: column; gap: 0.5rem; }
