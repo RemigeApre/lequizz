@@ -8473,7 +8473,29 @@ a.wiki-ql-label:hover .wiki-ql-text {
 }
 
 /* ── Tags cliquables ────────────────────────────────── */
-.wiki-right-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.wiki-right-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  overflow: hidden;
+  max-height: 1.85rem; /* ~1 ligne de pills */
+  position: relative;
+}
+.wiki-right-tags.tags-expanded { max-height: none; }
+.wiki-tags-toggle {
+  display: none; /* affiché par JS uniquement si débordement */
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.7rem;
+  opacity: 0.5;
+  text-align: left;
+  padding: 0.15rem 0;
+  color: var(--fg);
+  transition: opacity 0.15s;
+}
+.wiki-tags-toggle:hover { opacity: 1; }
 .wiki-right-tag-link {
   font-size: 0.82rem; padding: 0.15rem 0.55rem;
   border-radius: 20px;

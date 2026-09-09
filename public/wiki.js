@@ -77,12 +77,13 @@
     }).join("\n");
   }
 
-  // Convertit les <h2> du contenu HTML riche en sections accordéon
+  // Convertit les <h2> du contenu HTML riche en sections accordéon (toutes fermées)
   function processH2Accordions(container) {
     var h2s = Array.prototype.slice.call(container.querySelectorAll("h2"));
     h2s.forEach(function (h2) {
       var details = document.createElement("details");
       details.className = "wiki-section";
+      details.open = false;
       var summary = document.createElement("summary");
       summary.className = "wiki-section-summary";
       summary.innerHTML = h2.innerHTML;
@@ -111,6 +112,8 @@
     } else {
       el.innerHTML = renderMarkdown(content);
     }
+    // S'assure que tous les accordéons h2 sont fermés au chargement
+    el.querySelectorAll("details.wiki-section").forEach(function (d) { d.open = false; });
   });
 
   // Mobile : place l'image principale avant la première section ## du contenu
@@ -145,6 +148,40 @@
     });
   }
   applyTagColors();
+
+  // Tags de la fiche détail : limiter à 1 ligne avec bouton étendre/réduire
+  (function () {
+    var tagsEl = document.querySelector(".wiki-right-tags");
+    if (!tagsEl) return;
+
+    var toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "wiki-tags-toggle";
+    tagsEl.after(toggle);
+
+    var expanded = false;
+
+    function update() {
+      // Vérifie si les tags débordent (hauteur réelle > hauteur max 1 ligne)
+      var overflows = tagsEl.scrollHeight > tagsEl.clientHeight + 2;
+      if (!overflows && !expanded) { toggle.style.display = "none"; return; }
+      toggle.style.display = "block";
+      if (expanded) {
+        toggle.textContent = "Réduire ▲";
+        tagsEl.classList.add("tags-expanded");
+      } else {
+        toggle.textContent = "Voir tout ▼";
+        tagsEl.classList.remove("tags-expanded");
+      }
+    }
+
+    toggle.addEventListener("click", function () {
+      expanded = !expanded;
+      update();
+    });
+
+    update();
+  })();
 
   // ══════════════════════════════════════════════════
   // 3. WIDGET TAGS VISUELS
