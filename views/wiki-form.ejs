@@ -179,6 +179,11 @@
         <textarea name="meta_scenario" class="wiki-textarea wiki-pos-textarea" rows="6" placeholder="Une courte histoire, un contexte&hellip;"><%= pm.scenario || '' %></textarea>
         <div class="wiki-md-preview wiki-md" hidden></div>
       </div>
+      <label class="wf-scenario-human-label">
+        <input type="checkbox" name="meta_scenario_human" value="on" <%= pm.scenario_human ? 'checked' : '' %> />
+        <span class="wf-scenario-human-check">&#9998;</span>
+        Sc&eacute;nario 100&nbsp;% humain <span class="wf-scenario-human-hint">(aucune IA impliqu&eacute;e)</span>
+      </label>
 
       <%# ── Image d'illustration du scénario ── %>
       <div class="wf-scenario-img-section">

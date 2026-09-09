@@ -196,6 +196,7 @@ function parseMeta(category, body) {
       accessibilite:       oneof(body.meta_accessibilite,   ["tres_rare","rare","occasionnel","frequent","inconnu"]),
       scenario:            str(body.meta_scenario, 5000),
       scenario_image:      String(body.meta_scenario_image || "").startsWith("/uploads/") ? String(body.meta_scenario_image).slice(0, 500) : "",
+      scenario_human:      body.meta_scenario_human === "on",
       // Nombre
       nb_total:            oneof(body.meta_nb_total,   ["2","3","4","5plus"]),
       nb_feminin:          oneof(body.meta_nb_feminin,  ["0","1","2","3plus"]),

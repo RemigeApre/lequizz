@@ -6788,6 +6788,75 @@ a.wiki-ql-label:hover .wiki-ql-text {
 }
 .wiki-scenario-info:hover::after { display: block; }
 
+/* ── Badge "100% humain" (viewer) ─────────────────────── */
+.wiki-scenario-human-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 9px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #2a4a1a, #3d6e25);
+  border: 1px solid #5a9e3a88;
+  color: #a8e07a;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: help;
+  flex-shrink: 0;
+  vertical-align: middle;
+  margin-left: 0.4em;
+  transition: background 0.15s, color 0.15s;
+}
+.wiki-scenario-human-badge:hover {
+  background: linear-gradient(135deg, #335a1f, #4d8030);
+  color: #c4f09a;
+}
+.wiki-scenario-human-badge::after {
+  content: attr(data-tooltip);
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(8, 20, 8, 0.96);
+  color: #c4f09a;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 400;
+  white-space: pre-wrap;
+  width: 240px;
+  z-index: 200;
+  pointer-events: none;
+  line-height: 1.55;
+  border: 1px solid #5a9e3a44;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.wiki-scenario-human-badge:hover::after { display: block; }
+
+/* ── Checkbox "100% humain" (formulaire) ──────────────── */
+.wf-scenario-human-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid #5a9e3a44;
+  background: #162310;
+  color: #a8e07a;
+  font-size: 0.85rem;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s, border-color 0.15s;
+}
+.wf-scenario-human-label:hover { background: #1d2e14; border-color: #5a9e3a88; }
+.wf-scenario-human-label input[type="checkbox"] { accent-color: #5a9e3a; width: 16px; height: 16px; cursor: pointer; }
+.wf-scenario-human-check { font-size: 1.1em; }
+.wf-scenario-human-hint { color: #5a9e3a99; font-size: 0.78rem; }
+
 /* ── Image d'illustration du scénario (viewer) ────────── */
 .wiki-scenario-img {
   display: block;
