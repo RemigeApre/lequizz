@@ -697,13 +697,24 @@ function getUserDetail(id) {
   if (!user) return null;
   const favorites = db.prepare(
     `SELECT f.item_type, f.item_id, f.created_at,
-       COALESCE(wp.title, gi.title, '') AS title
+       COALESCE(wp.title, gi.title, '') AS title,
+       wp.image_paths AS wiki_img, wp.category AS wiki_category,
+       gi.image_paths AS gal_img
      FROM favorites f
      LEFT JOIN wiki_pages wp ON f.item_type = 'wiki' AND f.item_id = wp.id
      LEFT JOIN gallery_images gi ON f.item_type = 'gallery' AND f.item_id = gi.id
      WHERE f.user_id = ? ORDER BY f.id DESC`
   ).all(id).map(function(r) {
-    return { itemType: r.item_type, itemId: r.item_id, createdAt: r.created_at, title: r.title || "" };
+    const wikiImgs  = r.wiki_img  ? (function(){ try { return JSON.parse(r.wiki_img);  } catch(_){ return []; } })() : [];
+    const galImgs   = r.gal_img   ? (function(){ try { return JSON.parse(r.gal_img);   } catch(_){ return []; } })() : [];
+    return {
+      itemType: r.item_type,
+      itemId:   r.item_id,
+      createdAt: r.created_at,
+      title:    r.title || "",
+      coverImg: (r.item_type === "wiki" ? wikiImgs[0] : galImgs[0]) || null,
+      category: r.wiki_category || null,
+    };
   });
   const notes = db.prepare(
     `SELECT wpun.page_id, wpun.content, wpun.updated_at, wp.title

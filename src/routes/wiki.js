@@ -23,6 +23,8 @@ const {
   addImageLink,
   removeImageLink,
   isFavorite,
+  addFavorite,
+  removeFavorite,
   getUserNote,
   setUserNote,
   createStandaloneTag,
@@ -708,6 +710,11 @@ function buildWikiRouter(config) {
     if (!Number.isInteger(id)) return res.status(400).json({ ok: false });
     const { rating, flame, interested } = req.body;
     reactWikiPage(id, { rating, flame, interested });
+    // J'adore = favori : synchro avec la table favorites
+    if (req.user) {
+      if (flame) addFavorite(req.user.id, "wiki", id);
+      else removeFavorite(req.user.id, "wiki", id);
+    }
     res.json({ ok: true });
   });
 
