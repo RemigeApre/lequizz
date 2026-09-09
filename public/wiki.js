@@ -103,17 +103,19 @@
 
   // Rendu du contenu dans la page détail (HTML riche ou markdown hérité)
   document.querySelectorAll(".wiki-md").forEach(function (el) {
-    var raw = el.querySelector(".wiki-md-raw");
-    if (!raw) return;
-    var content = raw.textContent || raw.innerText;
-    if (/^\s*<[a-zA-Z]/.test(content)) {
-      el.innerHTML = content;
-      processH2Accordions(el);
-    } else {
-      el.innerHTML = renderMarkdown(content);
-    }
-    // S'assure que tous les accordéons h2 sont fermés au chargement
-    el.querySelectorAll("details.wiki-section").forEach(function (d) { d.open = false; });
+    try {
+      var raw = el.querySelector(".wiki-md-raw");
+      if (!raw) return;
+      var content = raw.textContent || raw.innerText;
+      if (/^\s*<[a-zA-Z]/.test(content)) {
+        el.innerHTML = content;
+        processH2Accordions(el);
+      } else {
+        el.innerHTML = renderMarkdown(content);
+      }
+      // S'assure que tous les accordéons h2 sont fermés au chargement
+      el.querySelectorAll("details.wiki-section").forEach(function (d) { d.open = false; });
+    } catch (e) { console.error("[wiki-md] erreur de rendu :", e); }
   });
 
   // Mobile : place l'image principale avant la première section ## du contenu

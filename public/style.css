@@ -8674,6 +8674,7 @@ a.wiki-ql-label:hover .wiki-ql-text {
   color: rgba(255,255,255,0.85);
 }
 .wiki-editorial-body {
+  display: none;
   position: fixed;
   z-index: 500;
   width: min(18rem, calc(100vw - 2rem));
@@ -8682,6 +8683,9 @@ a.wiki-ql-label:hover .wiki-ql-text {
   border-radius: 8px;
   border: 1px solid rgba(255,255,255,0.15);
   box-shadow: 0 6px 24px rgba(0,0,0,0.45);
+}
+.wiki-editorial-note[open] > .wiki-editorial-body {
+  display: block;
 }
 .wiki-editorial-body p {
   margin: 0;
