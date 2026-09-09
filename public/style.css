@@ -10071,3 +10071,178 @@ a.wiki-ql-label:hover .wiki-ql-text {
     padding: 0 0.5rem;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ZONE D'IMAGES UNIFIÉE — éditeur wiki
+═══════════════════════════════════════════════════════════════════════════ */
+.wf-img-zone {
+  margin: 0.5rem 0 1rem;
+  overflow: hidden;
+}
+
+/* Carousel horizontal */
+.wf-img-carousel {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.5rem 0.25rem 0.75rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.wf-img-carousel::-webkit-scrollbar {
+  height: 4px;
+}
+.wf-img-carousel::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+/* Carte image */
+.wf-img-card {
+  flex: 0 0 160px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  overflow: hidden;
+  background: var(--card);
+  transition: border-color 0.15s;
+}
+.wf-img-card:hover {
+  border-color: #555;
+}
+.wf-img-card[data-removed="1"] {
+  display: none;
+}
+
+/* Zone photo */
+.wf-img-card-photo {
+  position: relative;
+  width: 160px;
+  height: 150px;
+  overflow: hidden;
+  background: #111;
+}
+.wf-img-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Bouton de suppression */
+.wf-img-rm {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,0.65);
+  color: #fff;
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+  padding: 0;
+}
+.wf-img-card-photo:hover .wf-img-rm,
+.wf-img-card-photo:focus-within .wf-img-rm {
+  opacity: 1;
+}
+
+/* Barre de contrôles */
+.wf-img-card-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0.4rem;
+  background: rgba(0,0,0,0.25);
+  min-height: 2rem;
+}
+
+/* Boutons étoile / cœur */
+.wf-img-ctrl {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--muted);
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+.wf-img-ctrl:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+/* Étoile (cover) */
+.wf-img-ctrl--star.on {
+  color: #f5c518;
+}
+
+/* Cœur (secondary) */
+.wf-img-ctrl--heart.on {
+  color: #e05c5c;
+}
+
+/* Select de section */
+.wf-img-ctrl--section {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.72rem;
+  background: rgba(255,255,255,0.07);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 4px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.wf-img-ctrl--section.on {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.wf-img-ctrl--section option {
+  background: var(--card);
+  color: var(--fg);
+}
+
+/* Carte d'ajout */
+.wf-img-add-card {
+  flex: 0 0 100px;
+  scroll-snap-align: start;
+  height: 182px; /* photo(150) + controls(2rem≈32) */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--border);
+  border-radius: 0.6rem;
+  cursor: pointer;
+  color: var(--muted);
+  transition: border-color 0.15s, color 0.15s;
+}
+.wf-img-add-card:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.wf-img-add-icon {
+  font-size: 2rem;
+  line-height: 1;
+  pointer-events: none;
+}

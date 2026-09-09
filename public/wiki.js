@@ -4002,9 +4002,298 @@
   })();
 
   // ══════════════════════════════════════════════════
-  // 23. AGE GATE (non connectés)
+  // 23. CAROUSEL D'IMAGES — zone unifiée (éditeur)
   // ══════════════════════════════════════════════════
   (function () {
+    var carousel = document.getElementById("wf-img-carousel");
+    var metaInput = document.getElementById("wf-images-meta");
+    if (!carousel || !metaInput) return;
+
+    // ── État ────────────────────────────────────────
+    // cover   : chemin (string) ou token "__new__:N"
+    // secondary : { path/token: true }
+    // sections  : { path/token: sectionTitle }
+    // remove    : { path: true }
+    // newFiles  : { N: File }  (index → File, pour DataTransfer)
+    var state = {
+      cover: null,
+      secondary: {},
+      sections: {},
+      remove: {},
+      newFiles: {},
+      newIdx: 0
+    };
+
+    // ── Init depuis les data-* des cartes existantes ─
+    var initCards = carousel.querySelectorAll(".wf-img-card");
+    var firstCard = true;
+    initCards.forEach(function (card) {
+      var path = card.dataset.path;
+      if (!path) return;
+      if (card.dataset.cover === "1" || firstCard) {
+        state.cover = path;
+        firstCard = false;
+      }
+      if (card.dataset.secondary === "1") state.secondary[path] = true;
+      if (card.dataset.section) state.sections[path] = card.dataset.section;
+    });
+
+    // ── Sérialise l'état dans le champ caché ────────
+    function syncMeta() {
+      var meta = {
+        cover: state.cover || "",
+        secondary: Object.keys(state.secondary),
+        sections: state.sections,
+        remove: Object.keys(state.remove)
+      };
+      metaInput.value = JSON.stringify(meta);
+    }
+
+    // ── Récupère les H2/H3 de l'éditeur riche ───────
+    function getHeadings() {
+      var editor = document.querySelector(".wiki-richtext");
+      if (!editor) return [];
+      var headings = [];
+      editor.querySelectorAll("h2, h3").forEach(function (h) {
+        var t = h.textContent.trim();
+        if (t) headings.push(t);
+      });
+      return headings;
+    }
+
+    // ── Met à jour les <select> de section ──────────
+    function refreshSectionSelects() {
+      var headings = getHeadings();
+      carousel.querySelectorAll(".wf-img-ctrl--section").forEach(function (sel) {
+        var card = sel.closest(".wf-img-card");
+        var key  = card ? (card.dataset.token || card.dataset.path) : null;
+        var current = (key && state.sections[key]) || "";
+        // Reconstruit les options
+        sel.innerHTML = '<option value="">\u25b7\u00a0Section</option>';
+        headings.forEach(function (h) {
+          var opt = document.createElement("option");
+          opt.value = h;
+          opt.textContent = h.length > 20 ? h.slice(0, 18) + "\u2026" : h;
+          if (h === current) opt.selected = true;
+          sel.appendChild(opt);
+        });
+        sel.classList.toggle("on", !!current);
+      });
+    }
+
+    // ── Crée une carte pour un fichier uploadé ──────
+    function createNewCard(file, idx) {
+      var token = "__new__:" + idx;
+      var url   = URL.createObjectURL(file);
+
+      var card = document.createElement("div");
+      card.className = "wf-img-card";
+      card.dataset.token = token;
+
+      var photo = document.createElement("div");
+      photo.className = "wf-img-card-photo";
+
+      var img = document.createElement("img");
+      img.src = url;
+      img.className = "wf-img-thumb";
+      img.alt = "";
+
+      var rmBtn = document.createElement("button");
+      rmBtn.type = "button";
+      rmBtn.className = "wf-img-rm";
+      rmBtn.title = "Supprimer";
+      rmBtn.textContent = "\u00d7";
+
+      photo.appendChild(img);
+      photo.appendChild(rmBtn);
+
+      var controls = document.createElement("div");
+      controls.className = "wf-img-card-controls";
+
+      var starBtn = document.createElement("button");
+      starBtn.type = "button";
+      starBtn.className = "wf-img-ctrl wf-img-ctrl--star";
+      starBtn.dataset.action = "cover";
+      starBtn.title = "Image principale";
+      starBtn.textContent = "\u2605";
+
+      var heartBtn = document.createElement("button");
+      heartBtn.type = "button";
+      heartBtn.className = "wf-img-ctrl wf-img-ctrl--heart";
+      heartBtn.dataset.action = "secondary";
+      heartBtn.title = "Image secondaire";
+      heartBtn.textContent = "\u2764";
+
+      var secSel = document.createElement("select");
+      secSel.className = "wf-img-ctrl wf-img-ctrl--section";
+      secSel.dataset.action = "section";
+      secSel.title = "Intégrer dans une section";
+      secSel.innerHTML = '<option value="">\u25b7\u00a0Section</option>';
+      getHeadings().forEach(function (h) {
+        var opt = document.createElement("option");
+        opt.value = h;
+        opt.textContent = h.length > 20 ? h.slice(0, 18) + "\u2026" : h;
+        secSel.appendChild(opt);
+      });
+
+      // Input fichier caché individuel (pour multer)
+      var fileInput = document.createElement("input");
+      fileInput.type = "file";
+      fileInput.name = "images";
+      fileInput.accept = "image/*";
+      fileInput.hidden = true;
+
+      // Assign le fichier via DataTransfer
+      try {
+        var dt = new DataTransfer();
+        dt.items.add(file);
+        fileInput.files = dt.files;
+      } catch (e) { /* Safari < 14 fallback — multer recevra un champ vide */ }
+
+      controls.appendChild(starBtn);
+      controls.appendChild(heartBtn);
+      controls.appendChild(secSel);
+      card.appendChild(photo);
+      card.appendChild(controls);
+      card.appendChild(fileInput);
+
+      attachCardListeners(card);
+      return card;
+    }
+
+    // ── Attache les listeners sur une carte ─────────
+    function attachCardListeners(card) {
+      var key = function () { return card.dataset.token || card.dataset.path; };
+
+      // Suppression
+      var rmBtn = card.querySelector(".wf-img-rm");
+      if (rmBtn) {
+        rmBtn.addEventListener("click", function () {
+          var k = key();
+          if (card.dataset.path) state.remove[k] = true;
+          // Nettoie les autres rôles
+          delete state.secondary[k];
+          delete state.sections[k];
+          if (state.cover === k) state.cover = null;
+          card.dataset.removed = "1";
+          syncMeta();
+          // Si c'était le cover, passe au suivant visible
+          if (!state.cover) {
+            var next = carousel.querySelector(".wf-img-card:not([data-removed='1'])");
+            if (next) {
+              var nk = next.dataset.token || next.dataset.path;
+              state.cover = nk;
+              next.querySelector(".wf-img-ctrl--star").classList.add("on");
+            }
+          }
+          syncMeta();
+        });
+      }
+
+      // Étoile (cover)
+      var star = card.querySelector(".wf-img-ctrl--star");
+      if (star) {
+        star.addEventListener("click", function () {
+          // Retire l'ancien cover
+          carousel.querySelectorAll(".wf-img-ctrl--star.on").forEach(function (s) {
+            s.classList.remove("on");
+          });
+          var k = key();
+          state.cover = k;
+          star.classList.add("on");
+          syncMeta();
+        });
+      }
+
+      // Cœur (secondary)
+      var heart = card.querySelector(".wf-img-ctrl--heart");
+      if (heart) {
+        heart.addEventListener("click", function () {
+          var k = key();
+          if (state.secondary[k]) {
+            delete state.secondary[k];
+            heart.classList.remove("on");
+          } else {
+            state.secondary[k] = true;
+            heart.classList.add("on");
+          }
+          syncMeta();
+        });
+      }
+
+      // Select de section
+      var secSel = card.querySelector(".wf-img-ctrl--section");
+      if (secSel) {
+        secSel.addEventListener("change", function () {
+          var k = key();
+          if (secSel.value) {
+            state.sections[k] = secSel.value;
+            secSel.classList.add("on");
+          } else {
+            delete state.sections[k];
+            secSel.classList.remove("on");
+          }
+          syncMeta();
+        });
+      }
+    }
+
+    // ── Attache les listeners sur les cartes existantes ─
+    initCards.forEach(function (card) {
+      attachCardListeners(card);
+      // Sync état initial dans les contrôles
+      var key = card.dataset.path;
+      var star  = card.querySelector(".wf-img-ctrl--star");
+      var heart = card.querySelector(".wf-img-ctrl--heart");
+      if (star)  star.classList.toggle("on", state.cover === key);
+      if (heart) heart.classList.toggle("on", !!state.secondary[key]);
+    });
+
+    // ── Gestion de l'input "+" (ajout de nouveaux fichiers) ─
+    var addCard = carousel.querySelector(".wf-img-add-card");
+    var addInput = addCard ? addCard.querySelector("input[type=file]") : null;
+    if (addInput) {
+      addInput.addEventListener("change", function () {
+        Array.from(addInput.files).forEach(function (file) {
+          var idx  = state.newIdx++;
+          state.newFiles[idx] = file;
+          var card = createNewCard(file, idx);
+          // Insère avant la carte "+"
+          carousel.insertBefore(card, addCard);
+          // Auto-scroll vers la nouvelle carte
+          card.scrollIntoView({ behavior: "smooth", inline: "nearest" });
+        });
+        // Réinitialise l'input pour permettre d'ajouter les mêmes fichiers
+        addInput.value = "";
+        syncMeta();
+      });
+    }
+
+    // ── Rafraîchit les selects quand l'éditeur change ─
+    var richEditor = document.querySelector(".wiki-richtext");
+    if (richEditor) {
+      richEditor.addEventListener("input", function () {
+        refreshSectionSelects();
+      });
+    }
+
+    // ── Initialisation ─
+    refreshSectionSelects();
+    syncMeta();
+
+    // ── Sync avant soumission ─
+    var form = document.getElementById("wiki-edit-form");
+    if (form) {
+      form.addEventListener("submit", function () {
+        syncMeta();
+      });
+    }
+  })();
+
+  // ══════════════════════════════════════════════════
+  // 24. AGE GATE (non connectés)
+  // ══════════════════════════════════════════════════
+  (function() {
     var gate = document.getElementById("age-gate");
     if (!gate) return; // utilisateur connecté ou page sans gate
 

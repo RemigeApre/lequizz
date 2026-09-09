@@ -203,66 +203,48 @@
       </div>
     </div>
 
-    <%# ── Images ── %>
+    <%# ── Images (zone unifiée) ── %>
     <div class="wf-section-title">Images</div>
-    <div class="wiki-image-field wf-image-field-centered">
-      <% if (page.imagePaths && page.imagePaths.length) { %>
-        <div class="wiki-images-existing">
-          <% page.imagePaths.forEach(function(src, idx) { %>
-            <div class="wiki-existing-img-wrap">
-              <img src="<%= src %>" alt="" class="wiki-form-existing-image" />
-              <label class="wiki-cover-radio-label" title="D&eacute;finir comme couverture">
-                <input type="radio" name="cover_image" value="<%= src %>" class="wiki-cover-radio" <%= idx === 0 ? 'checked' : '' %> />
-                <span class="wiki-cover-badge-icon">&#9733;</span>
-              </label>
-              <% if (idx > 0) { %>
-                <label class="wiki-sec-check-label" title="Afficher dans les images secondaires">
-                  <input type="checkbox" name="secondary_image" value="<%= src %>"
-                         <%= (pm.secondary_image_paths && pm.secondary_image_paths.indexOf(src) !== -1) ? 'checked' : '' %> />
-                  <span class="wiki-sec-check-icon">&#9783;</span>
-                </label>
-              <% } else { %>
-                <span class="wiki-sec-check-placeholder"></span>
-              <% } %>
-              <label class="wiki-img-remove-label">
-                <input type="checkbox" name="remove_image" value="<%= src %>" />
-                <span>&#215;</span>
-              </label>
-            </div>
-          <% }) %>
-        </div>
-      <% } %>
-      <label class="wf-add-images-btn">
-        <span>+ Ajouter des images</span>
-        <input type="file" name="images" accept="image/*" multiple class="wiki-image-input" />
-      </label>
-      <div class="wiki-new-previews"></div>
-    </div>
+    <div class="wf-img-zone">
+      <div class="wf-img-carousel" id="wf-img-carousel">
 
-    <%# ── Images positionnelles (dans le texte) ── %>
-    <div class="wf-section-title">Images dans le texte <span class="wf-section-hint">flottent &agrave; droite d&rsquo;une section H2 ou H3</span></div>
-    <div class="wf-pos-images" id="wf-pos-images">
-      <%# Existantes ─ %>
-      <% (pm.positional_images || []).forEach(function(pi) { %>
-        <div class="wf-pos-item" data-path="<%= pi.path %>" data-section="<%= pi.section || '' %>">
-          <img src="<%= pi.path %>" class="wf-pos-thumb" alt="" />
-          <div class="wf-pos-item-meta">
-            <select name="pos_existing_section[]" class="wf-pos-section-sel wf-select">
-              <option value="<%= pi.section || '' %>"><%= pi.section || '— section —' %></option>
-            </select>
-            <input type="hidden" name="pos_existing_path[]" value="<%= pi.path %>" />
-            <button type="button" class="wf-pos-remove" title="Retirer">&#215;</button>
+        <%# Cartes existantes ─ %>
+        <% page.imagePaths.forEach(function(src, idx) {
+          var isCover     = idx === 0;
+          var isSecondary = !!(pm.secondary_image_paths && pm.secondary_image_paths.indexOf(src) !== -1);
+          var posEntry    = (pm.positional_images || []).filter(function(pi) { return pi.path === src; })[0];
+          var section     = posEntry ? (posEntry.section || '') : '';
+        %>
+          <div class="wf-img-card"
+               data-path="<%= src %>"
+               data-cover="<%= isCover ? '1' : '0' %>"
+               data-secondary="<%= isSecondary ? '1' : '0' %>"
+               data-section="<%= section %>">
+            <div class="wf-img-card-photo">
+              <img src="<%= src %>" class="wf-img-thumb" alt="" loading="lazy" />
+              <button type="button" class="wf-img-rm" title="Supprimer">&#215;</button>
+            </div>
+            <div class="wf-img-card-controls">
+              <button type="button" class="wf-img-ctrl wf-img-ctrl--star<%= isCover ? ' on' : '' %>" data-action="cover" title="Image principale (couverture)">&#9733;</button>
+              <button type="button" class="wf-img-ctrl wf-img-ctrl--heart<%= isSecondary ? ' on' : '' %>" data-action="secondary" title="Afficher dans les images secondaires">&#10084;</button>
+              <select class="wf-img-ctrl wf-img-ctrl--section<%= section ? ' on' : '' %>" data-action="section" title="Int&eacute;grer dans une section du texte">
+                <option value="">&#9657;&nbsp;Section</option>
+                <% if (section) { %><option value="<%= section %>" selected><%= section.length > 16 ? section.slice(0,14)+'\u2026' : section %></option><% } %>
+              </select>
+            </div>
           </div>
-        </div>
-      <% }) %>
-      <%# Nouvelles ajout&eacute;es par JS ─ %>
-      <div id="wf-pos-new"></div>
-      <%# Bouton ajouter ─ %>
-      <label class="wf-pos-add-btn" id="wf-pos-add-label">
-        <span>+ Image dans le texte</span>
-        <input type="file" id="wf-pos-picker" accept="image/*" multiple hidden />
-      </label>
+        <% }) %>
+
+        <%# Carte &laquo;+&raquo; ─ %>
+        <label class="wf-img-add-card">
+          <span class="wf-img-add-icon">+</span>
+          <input type="file" name="images" accept="image/*" multiple hidden class="wiki-image-input" />
+        </label>
+
+      </div>
     </div>
+    <%# Champ s&eacute;rialis&eacute; envoy&eacute; au serveur ─ %>
+    <input type="hidden" name="images_meta" id="wf-images-meta" value="{}" />
 
     <%# ── Paramètres partenaires (après images) ── %>
     <div id="wf-partenaires-params" <%= page.category === 'partenaires' ? '' : 'hidden' %>>
