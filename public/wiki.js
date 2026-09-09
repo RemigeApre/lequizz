@@ -2278,6 +2278,47 @@
   // 10. ÉDITEUR RICHE (description wiki)
   // ══════════════════════════════════════════════════
   (function () {
+    // ── Rendu markdown plat pour l'éditeur (pas de <details>) ──
+    // Contrairement à renderMarkdown (qui crée des accordéons),
+    // cette version garde ## en <h2> afin que l'éditeur puisse
+    // correctement imbriquer les éléments suivants.
+    function markdownToEditorHTML(text) {
+      if (!text) return "";
+      var out = [], inList = false;
+      function closeList() { if (inList) { out.push("</ul>"); inList = false; } }
+      text.split("\n").forEach(function (raw) {
+        var line = esc(raw);
+        if (/^## /.test(line))       { closeList(); out.push("<h2>" + inline(line.slice(3)) + "</h2>"); }
+        else if (/^### /.test(line)) { closeList(); out.push("<h3>" + inline(line.slice(4)) + "</h3>"); }
+        else if (/^---+\s*$/.test(line)) { closeList(); out.push("<hr>"); }
+        else if (/^- /.test(line))   { if (!inList) { out.push("<ul>"); inList = true; } out.push("<li>" + inline(line.slice(2)) + "</li>"); }
+        else if (line.trim() === "") { closeList(); out.push("<p><br></p>"); }
+        else                         { closeList(); out.push("<p>" + inline(line) + "</p>"); }
+      });
+      closeList();
+      return out.join("\n");
+    }
+
+    // ── Déplie les <details.wiki-section> sauvegardés en <h2> plats ──
+    // Nécessaire pour le contenu HTML qui a été sauvegardé alors que
+    // l'éditeur utilisait encore renderMarkdown (avec accordéons).
+    function unwrapAccordions(html) {
+      var tmp = document.createElement("div");
+      tmp.innerHTML = html;
+      tmp.querySelectorAll("details.wiki-section").forEach(function (det) {
+        var sum  = det.querySelector(":scope > summary");
+        var body = det.querySelector(":scope > .wiki-section-body");
+        var h2   = document.createElement("h2");
+        if (sum) h2.innerHTML = sum.innerHTML;
+        det.parentNode.insertBefore(h2, det);
+        if (body) {
+          while (body.firstChild) det.parentNode.insertBefore(body.firstChild, det);
+        }
+        det.parentNode.removeChild(det);
+      });
+      return tmp.innerHTML;
+    }
+
     // ── Pages disponibles (index titre → id) ──────
     var _pages = null;
     function getWikiPages() {
@@ -2477,7 +2518,14 @@
       // Charge le contenu existant
       var raw = (typeof window._wikiEditContent !== "undefined") ? window._wikiEditContent : "";
       if (raw) {
-        editor.innerHTML = /^\s*<[a-zA-Z]/.test(raw) ? raw : renderMarkdown(raw);
+        if (/^\s*<[a-zA-Z]/.test(raw)) {
+          // HTML : déplie les éventuels accordéons pour que l'éditeur
+          // ait des <h2> plats et puisse correctement insérer des H3 dedans.
+          editor.innerHTML = unwrapAccordions(raw);
+        } else {
+          // Markdown : rendu plat (H2 → <h2>, pas de <details>)
+          editor.innerHTML = markdownToEditorHTML(raw);
+        }
       }
       hidden.value = editor.innerHTML;
 
@@ -3722,7 +3770,35 @@
   })();
 
   // ══════════════════════════════════════════════════
-  // 20. AGE GATE (non connectés)
+  // 20. NOTE ÉDITORIALE "!" — positionnement du panneau
+  // ══════════════════════════════════════════════════
+  (function () {
+    var note = document.querySelector(".wiki-editorial-note");
+    if (!note) return;
+    var body = note.querySelector(".wiki-editorial-body");
+    if (!body) return;
+
+    note.addEventListener("toggle", function () {
+      if (!note.open) return;
+      var btnRect = note.querySelector("summary").getBoundingClientRect();
+      var panelW  = body.offsetWidth || 288; // 18rem fallback
+      var margin  = 8;
+
+      // Vertical : juste en dessous du bouton
+      var top = btnRect.bottom + margin;
+      // Horizontal : aligné à droite du bouton, mais contraint dans la fenêtre
+      var right = window.innerWidth - btnRect.right;
+      var left  = btnRect.right - panelW;
+      if (left < margin) left = margin;
+      if (left + panelW > window.innerWidth - margin) left = window.innerWidth - panelW - margin;
+
+      body.style.top  = top  + "px";
+      body.style.left = left + "px";
+    });
+  })();
+
+  // ══════════════════════════════════════════════════
+  // 21. AGE GATE (non connectés)
   // ══════════════════════════════════════════════════
   (function () {
     var gate = document.getElementById("age-gate");

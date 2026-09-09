@@ -8674,11 +8674,9 @@ a.wiki-ql-label:hover .wiki-ql-text {
   color: rgba(255,255,255,0.85);
 }
 .wiki-editorial-body {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 0.4rem);
-  width: 18rem;
-  z-index: 200;
+  position: fixed;
+  z-index: 500;
+  width: min(18rem, calc(100vw - 2rem));
   padding: 0.65rem 0.75rem;
   background: #1e1e2e;
   border-radius: 8px;
