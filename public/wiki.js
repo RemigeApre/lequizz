@@ -3958,9 +3958,6 @@
           // Juste après le H3 → float droite, le texte suivant s'enroule
           found.parentNode.insertBefore(fig, found.nextSibling);
         }
-        // Si le H3 est dans une section H2 fermée, l'ouvrir
-        var parentSection = found.closest("details.wiki-section");
-        if (parentSection) parentSection.open = true;
       } else {
         // H2 section → dans le wiki-section-body
         var body = found.querySelector(":scope > .wiki-section-body");
@@ -3970,8 +3967,6 @@
         } else {
           body.insertBefore(fig, body.firstChild);
         }
-        // Ouvre la section pour que l'image soit immédiatement visible
-        found.open = true;
       }
     });
   })();

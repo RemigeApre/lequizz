@@ -8951,8 +8951,10 @@ a.wiki-ql-label:hover .wiki-ql-text {
 }
 .wiki-editorial-body {
   display: none;
-  position: fixed;
-  z-index: 500;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 200;
   width: min(18rem, calc(100vw - 2rem));
   padding: 0.65rem 0.75rem;
   background: #1e1e2e;
