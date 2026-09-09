@@ -103,8 +103,9 @@
           <% } %>
           <% if (page.category === 'partenaires' && (pm.sous_cat === 'monstre' || pm.sous_cat === 'animaux')) { %>
             <details class="wiki-editorial-note">
-              <summary class="wiki-editorial-icon" title="Note &eacute;ditoriale">?</summary>
+              <summary class="wiki-editorial-icon" title="Note &eacute;ditoriale">!</summary>
               <div class="wiki-editorial-body">
+                <p class="wiki-editorial-body-title">Note &eacute;ditoriale</p>
                 <p>La zoophilie comme fantasme n&rsquo;est trait&eacute;e que sur l&rsquo;id&eacute;e femme&ndash;animal, idem pour les monstres, femme&ndash;monstre, sauf cas particulier. C&rsquo;est un choix &eacute;ditorial, et une volont&eacute;.</p>
                 <% if (currentUser) { %>
                   <p>Le rapport femme&ndash;autre esp&egrave;ce part du postulat o&ugrave; l&rsquo;animal est consentant, ce que le rapport homme&ndash;animal ne permet pas du tout. De plus, c&rsquo;est aussi un choix esth&eacute;tique&nbsp;: le site et sa ligne &eacute;ditoriale ont go&ucirc;t de l&rsquo;&eacute;l&eacute;gance, que ne poss&egrave;derait en rien l&rsquo;homme en ce contexte de fantasme.</p>
@@ -120,59 +121,71 @@
 
         <%# ─ Partenaires : affichage riche complet ─ %>
         <% if (page.category === 'partenaires') { %>
-          <div class="wiki-left-part">
+          <%
+            var hasCommuns  = pm.nature_acte || pm.cadre_legal || pm.risque_physique || pm.risque_mst || pm.accessibilite;
+            var hasMonstre  = pm.type_creature || (pm.type_acte_sexuel && pm.type_acte_sexuel.length) || pm.niveau_intelligence || pm.capacite_parole || pm.compat_anatomique || pm.origine_conceptuelle;
+            var tailleStr   = pm.taille_penis_qual ? (QUAL_LBL[pm.taille_penis_qual] || pm.taille_penis_qual) : ((pm.taille_penis_min || pm.taille_penis_max) ? (pm.taille_penis_min||'?')+'\u2013'+(pm.taille_penis_max||'?')+'\u00a0cm' : '');
+            var circStr     = pm.circ_penis_qual   ? (QUAL_LBL[pm.circ_penis_qual]   || pm.circ_penis_qual)   : ((pm.circ_penis_min   || pm.circ_penis_max)   ? (pm.circ_penis_min||'?')+'\u2013'+(pm.circ_penis_max||'?')+'\u00a0cm' : '');
+            var ejacStr     = pm.vol_ejac_qual     ? (QUAL_LBL[pm.vol_ejac_qual]     || pm.vol_ejac_qual)     : ((pm.vol_ejac_min     || pm.vol_ejac_max)     ? (pm.vol_ejac_min||'?')+'\u2013'+(pm.vol_ejac_max||'?')+'\u00a0ml' : '');
+            var hasSperme   = pm.sperme_texture || pm.sperme_odeur || pm.sperme_gout;
+            var hasBioData  = pm.nature_espece || tailleStr || circStr || ejacStr || hasSperme || pm.type_verrouillage || (pm.sensations && pm.sensations.length) || pm.milieu_vie || pm.structure_sociale;
+          %>
+          <div class="wiki-left-part wiki-left-part--<%= pm.sous_cat || 'autre' %>">
 
-            <%# Sous-catégorie badge %>
+            <%# Badge type %>
             <% if (pm.sous_cat && SOUS_CAT_PART[pm.sous_cat]) { %>
-              <div class="wiki-lp-subcat">
-                <span class="wiki-lp-subcat-badge"><%= SOUS_CAT_PART[pm.sous_cat] %></span>
-              </div>
+              <div class="wiki-lp-type-badge"><%= SOUS_CAT_PART[pm.sous_cat] %></div>
             <% } %>
 
-            <%# Communs %>
-            <% var hasCommuns = pm.nature_acte || pm.cadre_legal || pm.risque_physique || pm.risque_mst || pm.accessibilite; %>
+            <%# Général %>
             <% if (hasCommuns) { %>
-              <dl class="wiki-lp-section">
-                <% if (pm.nature_acte && NATURE_ACTE_LBL[pm.nature_acte]) { %>
-                  <div class="wiki-lp-row"><dt>Nature</dt><dd><%= NATURE_ACTE_LBL[pm.nature_acte] %></dd></div>
-                <% } %>
-                <% if (pm.cadre_legal && CADRE_LEGAL_LBL[pm.cadre_legal]) { %>
-                  <div class="wiki-lp-row"><dt>L&eacute;galit&eacute;</dt><dd class="wiki-lp-legal wiki-lp-legal--<%= pm.cadre_legal %>"><%= CADRE_LEGAL_LBL[pm.cadre_legal] %></dd></div>
-                <% } %>
-                <% if (pm.risque_physique && RISQUE_LBL[pm.risque_physique]) { %>
-                  <div class="wiki-lp-row"><dt>Risque physique</dt><dd class="wiki-lp-risk wiki-lp-risk--<%= pm.risque_physique %>"><%= RISQUE_LBL[pm.risque_physique] %></dd></div>
-                <% } %>
-                <% if (pm.risque_mst && RISQUE_LBL[pm.risque_mst]) { %>
-                  <div class="wiki-lp-row"><dt>Risque MST</dt><dd class="wiki-lp-risk wiki-lp-risk--<%= pm.risque_mst %>"><%= RISQUE_LBL[pm.risque_mst] %></dd></div>
-                <% } %>
-                <% if (pm.accessibilite && ACCES_LBL[pm.accessibilite]) { %>
-                  <div class="wiki-lp-row"><dt>Accessibilit&eacute;</dt><dd><%= ACCES_LBL[pm.accessibilite] %></dd></div>
-                <% } %>
-              </dl>
+              <div class="wiki-lp-group">
+                <p class="wiki-lp-group-title">G&eacute;n&eacute;ral</p>
+                <dl class="wiki-lp-dl">
+                  <% if (pm.nature_acte && NATURE_ACTE_LBL[pm.nature_acte]) { %>
+                    <div class="wiki-lp-row"><dt>Nature</dt><dd><%= NATURE_ACTE_LBL[pm.nature_acte] %></dd></div>
+                  <% } %>
+                  <% if (pm.cadre_legal && CADRE_LEGAL_LBL[pm.cadre_legal]) { %>
+                    <div class="wiki-lp-row"><dt>L&eacute;galit&eacute;</dt><dd class="wiki-lp-legal wiki-lp-legal--<%= pm.cadre_legal %>"><%= CADRE_LEGAL_LBL[pm.cadre_legal] %></dd></div>
+                  <% } %>
+                  <% if (pm.risque_physique && RISQUE_LBL[pm.risque_physique]) { %>
+                    <div class="wiki-lp-row"><dt>Risque phys.</dt><dd><span class="wiki-lp-risk wiki-lp-risk--<%= pm.risque_physique %>"><%= RISQUE_LBL[pm.risque_physique] %></span></dd></div>
+                  <% } %>
+                  <% if (pm.risque_mst && RISQUE_LBL[pm.risque_mst]) { %>
+                    <div class="wiki-lp-row"><dt>Risque MST</dt><dd><span class="wiki-lp-risk wiki-lp-risk--<%= pm.risque_mst %>"><%= RISQUE_LBL[pm.risque_mst] %></span></dd></div>
+                  <% } %>
+                  <% if (pm.accessibilite && ACCES_LBL[pm.accessibilite]) { %>
+                    <div class="wiki-lp-row"><dt>Acc&egrave;s</dt><dd><%= ACCES_LBL[pm.accessibilite] %></dd></div>
+                  <% } %>
+                </dl>
+              </div>
             <% } %>
 
             <%# Nombre %>
             <% if (pm.sous_cat === 'nombre' && (pm.nb_total || pm.nb_feminin || pm.nb_masculin)) { %>
-              <dl class="wiki-lp-section">
-                <% if (pm.nb_total)    { %><div class="wiki-lp-row"><dt>Total</dt><dd><%= pm.nb_total    === '5plus' ? '5+' : pm.nb_total    %></dd></div><% } %>
-                <% if (pm.nb_feminin)  { %><div class="wiki-lp-row"><dt>F&eacute;minin</dt><dd><%= pm.nb_feminin  === '3plus' ? '3+' : pm.nb_feminin  %></dd></div><% } %>
-                <% if (pm.nb_masculin) { %><div class="wiki-lp-row"><dt>Masculin</dt><dd><%= pm.nb_masculin === '3plus' ? '3+' : pm.nb_masculin %></dd></div><% } %>
-              </dl>
+              <div class="wiki-lp-group">
+                <p class="wiki-lp-group-title">Composition</p>
+                <dl class="wiki-lp-dl">
+                  <% if (pm.nb_total)    { %><div class="wiki-lp-row"><dt>Total</dt><dd><%= pm.nb_total    === '5plus' ? '5+' : pm.nb_total    %></dd></div><% } %>
+                  <% if (pm.nb_feminin)  { %><div class="wiki-lp-row"><dt>F&eacute;minin</dt><dd><%= pm.nb_feminin  === '3plus' ? '3+' : pm.nb_feminin  %></dd></div><% } %>
+                  <% if (pm.nb_masculin) { %><div class="wiki-lp-row"><dt>Masculin</dt><dd><%= pm.nb_masculin === '3plus' ? '3+' : pm.nb_masculin %></dd></div><% } %>
+                </dl>
+              </div>
             <% } %>
 
             <%# Monstre %>
-            <% if (pm.sous_cat === 'monstre') { %>
-              <%
-                var hasMonstre = pm.type_creature || (pm.type_acte_sexuel && pm.type_acte_sexuel.length)
-                  || pm.niveau_intelligence || pm.capacite_parole || pm.compat_anatomique || pm.origine_conceptuelle;
-              %>
-              <% if (hasMonstre) { %>
-                <dl class="wiki-lp-section">
+            <% if (pm.sous_cat === 'monstre' && hasMonstre) { %>
+              <div class="wiki-lp-group">
+                <p class="wiki-lp-group-title">Caract&eacute;ristiques</p>
+                <dl class="wiki-lp-dl">
                   <% if (pm.type_creature && TYPE_CREATURE_LBL[pm.type_creature]) { %>
                     <div class="wiki-lp-row"><dt>Cr&eacute;ature</dt><dd><%= TYPE_CREATURE_LBL[pm.type_creature] %></dd></div>
                   <% } %>
                   <% if (pm.type_acte_sexuel && pm.type_acte_sexuel.length) { %>
-                    <div class="wiki-lp-row"><dt>Acte(s)</dt><dd><%= pm.type_acte_sexuel.map(function(v){ return TYPE_ACTE_LBL[v] || v; }).join(' \u00b7 ') %></dd></div>
+                    <div class="wiki-lp-row wiki-lp-row--chips">
+                      <dt>Acte(s)</dt>
+                      <dd><div class="wiki-lp-chips"><% pm.type_acte_sexuel.forEach(function(v){ %><span class="wiki-lp-chip"><%= TYPE_ACTE_LBL[v] || v %></span><% }) %></div></dd>
+                    </div>
                   <% } %>
                   <% if (pm.niveau_intelligence && INTEL_LBL[pm.niveau_intelligence]) { %>
                     <div class="wiki-lp-row"><dt>Intelligence</dt><dd><%= INTEL_LBL[pm.niveau_intelligence] %></dd></div>
@@ -187,40 +200,35 @@
                     <div class="wiki-lp-row"><dt>Origine</dt><dd><%= ORIGINE_LBL[pm.origine_conceptuelle] %></dd></div>
                   <% } %>
                 </dl>
-              <% } %>
+              </div>
             <% } %>
 
             <%# Animal %>
             <% if (pm.sous_cat === 'animaux' && (pm.famille_zoologique || pm.taille_animal)) { %>
-              <dl class="wiki-lp-section">
-                <% if (pm.famille_zoologique && FAMILLE_ZOO_LBL[pm.famille_zoologique]) { %>
-                  <div class="wiki-lp-row"><dt>Famille</dt><dd><%= FAMILLE_ZOO_LBL[pm.famille_zoologique] %></dd></div>
-                <% } %>
-                <% if (pm.taille_animal && TAILLE_ANIM_LBL[pm.taille_animal]) { %>
-                  <div class="wiki-lp-row"><dt>Taille</dt><dd><%= TAILLE_ANIM_LBL[pm.taille_animal] %></dd></div>
-                <% } %>
-              </dl>
+              <div class="wiki-lp-group">
+                <p class="wiki-lp-group-title">Zoologie</p>
+                <dl class="wiki-lp-dl">
+                  <% if (pm.famille_zoologique && FAMILLE_ZOO_LBL[pm.famille_zoologique]) { %>
+                    <div class="wiki-lp-row"><dt>Famille</dt><dd><%= FAMILLE_ZOO_LBL[pm.famille_zoologique] %></dd></div>
+                  <% } %>
+                  <% if (pm.taille_animal && TAILLE_ANIM_LBL[pm.taille_animal]) { %>
+                    <div class="wiki-lp-row"><dt>Taille</dt><dd><%= TAILLE_ANIM_LBL[pm.taille_animal] %></dd></div>
+                  <% } %>
+                </dl>
+              </div>
             <% } %>
 
-            <%# Biologie (Monstre + Animal) %>
-            <% if (pm.sous_cat === 'monstre' || pm.sous_cat === 'animaux') { %>
-              <%
-                var tailleStr = pm.taille_penis_qual ? (QUAL_LBL[pm.taille_penis_qual] || pm.taille_penis_qual) : ((pm.taille_penis_min || pm.taille_penis_max) ? (pm.taille_penis_min || '?') + '\u2013' + (pm.taille_penis_max || '?') + '\u00a0cm' : '');
-                var circStr   = pm.circ_penis_qual   ? (QUAL_LBL[pm.circ_penis_qual]   || pm.circ_penis_qual)   : ((pm.circ_penis_min   || pm.circ_penis_max)   ? (pm.circ_penis_min   || '?') + '\u2013' + (pm.circ_penis_max   || '?') + '\u00a0cm' : '');
-                var ejacStr   = pm.vol_ejac_qual     ? (QUAL_LBL[pm.vol_ejac_qual]     || pm.vol_ejac_qual)     : ((pm.vol_ejac_min     || pm.vol_ejac_max)     ? (pm.vol_ejac_min     || '?') + '\u2013' + (pm.vol_ejac_max     || '?') + '\u00a0ml' : '');
-                var hasSperme = pm.sperme_texture || pm.sperme_odeur || pm.sperme_gout;
-                var hasBioData = pm.nature_espece || tailleStr || circStr || ejacStr || hasSperme
-                  || pm.type_verrouillage || (pm.sensations && pm.sensations.length)
-                  || pm.milieu_vie || pm.structure_sociale;
-              %>
-              <% if (hasBioData) { %>
-                <dl class="wiki-lp-section">
+            <%# Biologie %>
+            <% if ((pm.sous_cat === 'monstre' || pm.sous_cat === 'animaux') && hasBioData) { %>
+              <div class="wiki-lp-group">
+                <p class="wiki-lp-group-title">Biologie</p>
+                <dl class="wiki-lp-dl">
                   <% if (pm.nature_espece && NATURE_ESP_LBL[pm.nature_espece]) { %>
                     <div class="wiki-lp-row"><dt>Esp&egrave;ce</dt><dd><%= NATURE_ESP_LBL[pm.nature_espece] %></dd></div>
                   <% } %>
                   <% if (tailleStr) { %><div class="wiki-lp-row"><dt>P&eacute;nis</dt><dd><%= tailleStr %></dd></div><% } %>
                   <% if (circStr)   { %><div class="wiki-lp-row"><dt>Circonf.</dt><dd><%= circStr %></dd></div><% } %>
-                  <% if (ejacStr)   { %><div class="wiki-lp-row"><dt>&Eacute;jaculation</dt><dd><%= ejacStr %></dd></div><% } %>
+                  <% if (ejacStr)   { %><div class="wiki-lp-row"><dt>&Eacute;jac.</dt><dd><%= ejacStr %></dd></div><% } %>
                   <% if (hasSperme) { %>
                     <div class="wiki-lp-row"><dt>Sperme</dt><dd><%= [pm.sperme_texture, pm.sperme_odeur, pm.sperme_gout].filter(Boolean).join(' \u00b7 ') %></dd></div>
                   <% } %>
@@ -228,7 +236,10 @@
                     <div class="wiki-lp-row"><dt>Verr.</dt><dd><%= VERR_LBL[pm.type_verrouillage] %></dd></div>
                   <% } %>
                   <% if (pm.sensations && pm.sensations.length) { %>
-                    <div class="wiki-lp-row"><dt>Sensations</dt><dd><%= pm.sensations.map(function(v){ return SENS_LBL[v] || v; }).join(' \u00b7 ') %></dd></div>
+                    <div class="wiki-lp-row wiki-lp-row--chips">
+                      <dt>Sensations</dt>
+                      <dd><div class="wiki-lp-chips"><% pm.sensations.forEach(function(v){ %><span class="wiki-lp-chip"><%= SENS_LBL[v] || v %></span><% }) %></div></dd>
+                    </div>
                   <% } %>
                   <% if (pm.milieu_vie && MILIEU_LBL[pm.milieu_vie]) { %>
                     <div class="wiki-lp-row"><dt>Milieu</dt><dd><%= MILIEU_LBL[pm.milieu_vie] %></dd></div>
@@ -237,7 +248,7 @@
                     <div class="wiki-lp-row"><dt>Structure</dt><dd><%= STRUCT_LBL[pm.structure_sociale] %></dd></div>
                   <% } %>
                 </dl>
-              <% } %>
+              </div>
             <% } %>
 
           </div><%# /wiki-left-part %>

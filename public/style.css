@@ -8450,25 +8450,47 @@ a.wiki-ql-label:hover .wiki-ql-text {
 .wiki-left-top-row .wiki-editorial-note { margin-top: 0; flex-shrink: 0; }
 
 /* ── Partenaires : affichage riche ─────────────────────── */
-.wiki-left-part { margin-top: 0.4rem; }
+.wiki-left-part { margin-top: 0.4rem; display: flex; flex-direction: column; gap: 0; }
 
-.wiki-lp-subcat { margin: 0.15rem 0 0.1rem; }
-.wiki-lp-subcat-badge {
+/* Badge type en haut */
+.wiki-lp-type-badge {
   display: inline-block;
-  font-size: 0.67rem; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.06em;
-  padding: 0.18rem 0.55rem;
+  font-size: 0.62rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  padding: 0.22rem 0.7rem;
   border-radius: 20px;
+  margin-bottom: 0.5rem;
+  align-self: flex-start;
   background: rgba(255,255,255,0.1);
-  color: rgba(255,255,255,0.65);
+  color: rgba(255,255,255,0.6);
+  border: 1px solid rgba(255,255,255,0.12);
 }
 
-.wiki-lp-section {
-  margin: 0.45rem 0 0;
-  padding: 0.45rem 0 0;
+/* Couleurs par type */
+.wiki-left-part--nombre  .wiki-lp-type-badge { background: rgba(92,184,224,0.18); color: #5cb8e0; border-color: rgba(92,184,224,0.3); }
+.wiki-left-part--monstre .wiki-lp-type-badge { background: rgba(196,92,224,0.18); color: #c45ce0; border-color: rgba(196,92,224,0.3); }
+.wiki-left-part--animaux .wiki-lp-type-badge { background: rgba(109,214,138,0.18); color: #6dd68a; border-color: rgba(109,214,138,0.3); }
+.wiki-left-part--fetichisme .wiki-lp-type-badge { background: rgba(224,184,92,0.18); color: #e0b85c; border-color: rgba(224,184,92,0.3); }
+.wiki-left-part--autre   .wiki-lp-type-badge { background: rgba(224,92,92,0.18); color: #e05c5c; border-color: rgba(224,92,92,0.3); }
+
+/* Groupes thématiques */
+.wiki-lp-group {
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
   border-top: 1px solid rgba(255,255,255,0.07);
-  display: flex; flex-direction: column; gap: 0.2rem;
 }
+.wiki-lp-group:first-of-type { border-top: none; margin-top: 0; padding-top: 0; }
+.wiki-lp-group-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.3);
+}
+
+/* dl rows */
+.wiki-lp-dl { margin: 0; display: flex; flex-direction: column; gap: 0.22rem; }
 .wiki-lp-row {
   display: flex; gap: 0.35rem; align-items: baseline; flex-wrap: wrap;
 }
@@ -8479,6 +8501,41 @@ a.wiki-ql-label:hover .wiki-ql-text {
 }
 .wiki-lp-row dd {
   font-size: 0.73rem; color: rgba(255,255,255,0.75); margin: 0; line-height: 1.3;
+}
+
+/* Chips multi-valeurs */
+.wiki-lp-row--chips { align-items: flex-start; }
+.wiki-lp-chips { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+.wiki-lp-chip {
+  font-size: 0.65rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.1);
+  white-space: nowrap;
+}
+
+/* Couleurs accent chips par type */
+.wiki-left-part--monstre .wiki-lp-chip { background: rgba(196,92,224,0.12); color: #c45ce0; border-color: rgba(196,92,224,0.2); }
+.wiki-left-part--animaux .wiki-lp-chip { background: rgba(109,214,138,0.12); color: #6dd68a; border-color: rgba(109,214,138,0.2); }
+
+/* Legacy (conservé pour compatibilité) */
+.wiki-lp-subcat { margin: 0.15rem 0 0.1rem; }
+.wiki-lp-subcat-badge {
+  display: inline-block;
+  font-size: 0.67rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 0.18rem 0.55rem;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.65);
+}
+.wiki-lp-section {
+  margin: 0.45rem 0 0;
+  padding: 0.45rem 0 0;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  display: flex; flex-direction: column; gap: 0.2rem;
 }
 
 /* Badges risque colorés */
@@ -8501,7 +8558,8 @@ a.wiki-ql-label:hover .wiki-ql-text {
 
 /* ── Note éditoriale (monstre / animal) ─────────────── */
 .wiki-editorial-note {
-  margin-top: 1rem;
+  margin-top: 0;
+  position: relative;
 }
 .wiki-editorial-note > summary {
   list-style: none;
@@ -8525,11 +8583,16 @@ a.wiki-ql-label:hover .wiki-ql-text {
   color: rgba(255,255,255,0.85);
 }
 .wiki-editorial-body {
-  margin-top: 0.6rem;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.4rem);
+  width: 18rem;
+  z-index: 200;
   padding: 0.65rem 0.75rem;
-  background: rgba(255,255,255,0.05);
-  border-radius: 6px;
-  border: 1px solid rgba(255,255,255,0.1);
+  background: #1e1e2e;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.45);
 }
 .wiki-editorial-body p {
   margin: 0;
