@@ -1,6 +1,6 @@
 <%- include('partials/head', { title: page.title }) %>
 <main class="container wide">
-  <%- include('partials/top-nav', { config: config, navTitle: 'Wiki', navBack: '/wiki' }) %>
+  <%- include('partials/top-nav', { config: config, navTitle: 'Wiki', navBack: '/wiki/categorie/' + page.category }) %>
 
   <% var cat = categories.find(function (c) { return c.key === page.category; }); %>
   <%
