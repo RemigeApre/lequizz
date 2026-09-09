@@ -1,0 +1,171 @@
+<%- include('partials/head', { title: 'Images notées — ' + config.title }) %>
+<main class="container wide gallery-has-sidebar">
+  <%- include('partials/top-nav', { config: config, navTitle: 'Images notées', navBack: '/favoris' }) %>
+
+  <%# ─── SIDEBAR GAUCHE ──────────────────────────────────────────────── %>
+  <aside class="wiki-cat-sidebar gallery-sidebar">
+    <div class="wiki-chapter-hero" style="--ch-hue: 220">
+      <div class="wiki-chapter-hero-top">
+        <span></span>
+        <h1 class="wiki-chapter-hero-title">Images not&eacute;es</h1>
+        <span class="wiki-chapter-hero-count" id="notes-count-hero"><%= items.length %></span>
+      </div>
+    </div>
+
+    <div class="wiki-sidebar-body">
+
+      <div class="wiki-search-wrap">
+        <div class="wiki-search-bar">
+          <span class="wiki-search-icon">&#128269;</span>
+          <input type="search" id="notes-search" class="wiki-search-input" placeholder="Rechercher&hellip;" autocomplete="off" />
+        </div>
+      </div>
+
+      <%# Filtre type %>
+      <div class="wiki-filter-section">
+        <div class="links-filter" id="notes-ctype-filter">
+          <button type="button" class="tag-chip" data-ctype="image">Images</button>
+          <button type="button" class="tag-chip" data-ctype="bd">BD</button>
+        </div>
+      </div>
+
+      <%# Tags %>
+      <% if (allTags.length) { %>
+      <div class="wiki-filter-section">
+        <div class="wiki-tag-cloud" id="notes-tag-filter">
+          <% allTags.forEach(function(t) { %>
+            <button type="button" class="wiki-tag-chip" data-tag="<%= t %>" data-state="0">
+              <span class="wtc-label"><%= t %></span>
+            </button>
+          <% }) %>
+        </div>
+      </div>
+      <% } %>
+
+      <div class="wiki-filter-section">
+        <button type="button" id="notes-reset-filters" class="wiki-filter-reset-btn">R&eacute;initialiser</button>
+      </div>
+
+    </div>
+  </aside>
+
+  <%# ─── GRILLE ───────────────────────────────────────────────────────── %>
+  <div class="gallery-grid" id="notes-grid">
+    <% if (!items.length) { %>
+      <p class="intro">Aucune image not&eacute;e pour l&apos;instant.</p>
+    <% } %>
+    <% items.forEach(function(item) { %>
+      <% var ctype = item.contentType || (item.type === 'bd' ? 'bd' : 'image'); %>
+      <div class="gallery-card"
+        data-item
+        data-tags="<%= (item.tags || []).join(',').toLowerCase() %>"
+        data-ctype="<%= ctype %>"
+        data-title="<%= (item.title || '').toLowerCase().replace(/"/g, '') %>"
+        data-rating="<%= item.rating || 0 %>">
+
+        <% if (item.imagePaths && item.imagePaths[0]) { %>
+          <a href="/galerie/<%= item.id %>/edit">
+            <img src="<%= item.imagePaths[0] %>" alt="<%= item.title || '' %>" class="gallery-img" loading="lazy" />
+          </a>
+        <% } else if (item.filename) { %>
+          <a href="/galerie/<%= item.id %>/edit">
+            <img src="<%= item.filename %>" alt="<%= item.title || '' %>" class="gallery-img" loading="lazy" />
+          </a>
+        <% } %>
+
+        <% if (ctype === 'bd' && item.title) { %>
+          <div class="gallery-bd-title"><%= item.title %></div>
+        <% } %>
+
+        <div class="gallery-card-overlay">
+          <span class="wiki-card-badges">
+            <% if (item.flame) { %><span class="wiki-card-react-badge" title="J'adore">&#128293;</span><% } %>
+            <% if (item.rating > 0) { %>
+              <span class="wiki-card-react-badge" title="Note : <%= item.rating %>/5">
+                <% for (var si = 1; si <= item.rating; si++) { %>&#9733;<% } %>
+              </span>
+            <% } %>
+          </span>
+        </div>
+
+      </div>
+    <% }) %>
+  </div>
+
+</main>
+<script>
+(function() {
+  var items = document.querySelectorAll('[data-item]');
+  var activeTags = [];
+  var activeCtype = '';
+  var search = '';
+
+  function show(el) { el.style.display = ''; }
+  function hide(el) { el.style.display = 'none'; }
+
+  function applyFilters() {
+    var visible = 0;
+    items.forEach(function(el) {
+      var tags = (el.dataset.tags || '').split(',').filter(Boolean);
+      var title = (el.dataset.title || '');
+      var ctype = (el.dataset.ctype || '');
+      var matchesTags = activeTags.length === 0 || activeTags.every(function(t) { return tags.includes(t); });
+      var matchesSearch = !search || title.includes(search);
+      var matchesCtype = !activeCtype || ctype === activeCtype;
+      if (matchesTags && matchesSearch && matchesCtype) { show(el); visible++; }
+      else { hide(el); }
+    });
+    var counter = document.getElementById('notes-count-hero');
+    if (counter) counter.textContent = visible;
+  }
+
+  document.querySelectorAll('#notes-tag-filter .wiki-tag-chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      var tag = chip.dataset.tag;
+      var idx = activeTags.indexOf(tag);
+      if (idx === -1) { activeTags.push(tag); chip.classList.add('active'); chip.dataset.state = '1'; }
+      else { activeTags.splice(idx, 1); chip.classList.remove('active'); chip.dataset.state = '0'; }
+      applyFilters();
+    });
+  });
+
+  document.querySelectorAll('#notes-ctype-filter .tag-chip').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var ctype = btn.dataset.ctype;
+      if (activeCtype === ctype) {
+        activeCtype = '';
+        btn.classList.remove('active');
+      } else {
+        activeCtype = ctype;
+        document.querySelectorAll('#notes-ctype-filter .tag-chip').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+      }
+      applyFilters();
+    });
+  });
+
+  var searchInput = document.getElementById('notes-search');
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      search = this.value.toLowerCase().trim();
+      applyFilters();
+    });
+  }
+
+  var resetBtn = document.getElementById('notes-reset-filters');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', function() {
+      activeTags = [];
+      activeCtype = '';
+      search = '';
+      if (searchInput) searchInput.value = '';
+      document.querySelectorAll('#notes-tag-filter .wiki-tag-chip').forEach(function(c) {
+        c.classList.remove('active'); c.dataset.state = '0';
+      });
+      document.querySelectorAll('#notes-ctype-filter .tag-chip').forEach(function(b) { b.classList.remove('active'); });
+      applyFilters();
+    });
+  }
+})();
+</script>
+<%- include('partials/foot') %>

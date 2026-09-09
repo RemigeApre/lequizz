@@ -1,0 +1,146 @@
+<%- include('partials/head', { title: 'Pages wiki notées — ' + config.title }) %>
+<main class="container wide gallery-has-sidebar">
+  <%- include('partials/top-nav', { config: config, navTitle: 'Wiki noté', navBack: '/favoris' }) %>
+
+  <%# ─── SIDEBAR GAUCHE ──────────────────────────────────────────────── %>
+  <aside class="wiki-cat-sidebar gallery-sidebar">
+    <div class="wiki-chapter-hero" style="--ch-hue: 330">
+      <div class="wiki-chapter-hero-top">
+        <span></span>
+        <h1 class="wiki-chapter-hero-title">Pages wiki not&eacute;es</h1>
+        <span class="wiki-chapter-hero-count" id="noteswiki-count-hero"><%= pages.length %></span>
+      </div>
+    </div>
+
+    <div class="wiki-sidebar-body">
+
+      <div class="wiki-search-wrap">
+        <div class="wiki-search-bar">
+          <span class="wiki-search-icon">&#128269;</span>
+          <input type="search" id="noteswiki-search" class="wiki-search-input" placeholder="Rechercher&hellip;" autocomplete="off" />
+        </div>
+      </div>
+
+      <%# Filtre catégorie %>
+      <% if (categories && categories.length) { %>
+      <div class="wiki-filter-section">
+        <div class="links-filter" id="noteswiki-cat-filter">
+          <% categories.forEach(function(c) { %>
+            <button type="button" class="tag-chip" data-cat="<%= c.key %>"><%= c.label %></button>
+          <% }) %>
+        </div>
+      </div>
+      <% } %>
+
+      <%# Tags %>
+      <% if (allTags.length) { %>
+      <div class="wiki-filter-section">
+        <div class="wiki-tag-cloud" id="noteswiki-tag-filter">
+          <% allTags.forEach(function(t) { %>
+            <button type="button" class="wiki-tag-chip" data-tag="<%= t %>" data-state="0">
+              <span class="wtc-label"><%= t %></span>
+            </button>
+          <% }) %>
+        </div>
+      </div>
+      <% } %>
+
+      <div class="wiki-filter-section">
+        <button type="button" id="noteswiki-reset-filters" class="wiki-filter-reset-btn">R&eacute;initialiser</button>
+      </div>
+
+    </div>
+  </aside>
+
+  <%# ─── GRILLE ───────────────────────────────────────────────────────── %>
+  <div class="wiki-grid" id="noteswiki-grid">
+    <% if (!pages.length) { %>
+      <p class="intro">Aucune page wiki not&eacute;e pour l&apos;instant.</p>
+    <% } %>
+    <% pages.forEach(function(page) { %>
+      <div data-item
+        data-tags="<%= (page.tags || []).join(',').toLowerCase() %>"
+        data-cat="<%= page.category || '' %>"
+        data-title="<%= (page.title || '').toLowerCase().replace(/"/g, '') %>">
+        <%- include('partials/wiki-card', { page: page, categories: categories, showCategoryBadge: true }) %>
+      </div>
+    <% }) %>
+  </div>
+
+</main>
+<script>
+(function() {
+  var items = document.querySelectorAll('[data-item]');
+  var activeTags = [];
+  var activeCat = '';
+  var search = '';
+
+  function show(el) { el.style.display = ''; }
+  function hide(el) { el.style.display = 'none'; }
+
+  function applyFilters() {
+    var visible = 0;
+    items.forEach(function(el) {
+      var tags = (el.dataset.tags || '').split(',').filter(Boolean);
+      var title = (el.dataset.title || '');
+      var cat = (el.dataset.cat || '');
+      var matchesTags = activeTags.length === 0 || activeTags.every(function(t) { return tags.includes(t); });
+      var matchesSearch = !search || title.includes(search);
+      var matchesCat = !activeCat || cat === activeCat;
+      if (matchesTags && matchesSearch && matchesCat) { show(el); visible++; }
+      else { hide(el); }
+    });
+    var counter = document.getElementById('noteswiki-count-hero');
+    if (counter) counter.textContent = visible;
+  }
+
+  document.querySelectorAll('#noteswiki-tag-filter .wiki-tag-chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      var tag = chip.dataset.tag;
+      var idx = activeTags.indexOf(tag);
+      if (idx === -1) { activeTags.push(tag); chip.classList.add('active'); chip.dataset.state = '1'; }
+      else { activeTags.splice(idx, 1); chip.classList.remove('active'); chip.dataset.state = '0'; }
+      applyFilters();
+    });
+  });
+
+  document.querySelectorAll('#noteswiki-cat-filter .tag-chip').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var cat = btn.dataset.cat;
+      if (activeCat === cat) {
+        activeCat = '';
+        btn.classList.remove('active');
+      } else {
+        activeCat = cat;
+        document.querySelectorAll('#noteswiki-cat-filter .tag-chip').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+      }
+      applyFilters();
+    });
+  });
+
+  var searchInput = document.getElementById('noteswiki-search');
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      search = this.value.toLowerCase().trim();
+      applyFilters();
+    });
+  }
+
+  var resetBtn = document.getElementById('noteswiki-reset-filters');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', function() {
+      activeTags = [];
+      activeCat = '';
+      search = '';
+      if (searchInput) searchInput.value = '';
+      document.querySelectorAll('#noteswiki-tag-filter .wiki-tag-chip').forEach(function(c) {
+        c.classList.remove('active'); c.dataset.state = '0';
+      });
+      document.querySelectorAll('#noteswiki-cat-filter .tag-chip').forEach(function(b) { b.classList.remove('active'); });
+      applyFilters();
+    });
+  }
+})();
+</script>
+<%- include('partials/foot') %>

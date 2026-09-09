@@ -70,7 +70,7 @@
                 <a href="/admin" class="pc-drop-link">Admin</a>
               <% } %>
               <form method="POST" action="/admin/logout" style="margin:0">
-                <button type="submit" class="pc-drop-link pc-drop-link-btn">D&eacute;connexion</button>
+                <button type="submit" class="pc-drop-link pc-drop-link-btn pc-drop-link--danger">D&eacute;connexion</button>
               </form>
             </div>
           </div>
@@ -141,7 +141,7 @@
         <a href="/admin" class="nav-drawer-link">Admin</a>
       <% } %>
       <form method="POST" action="/admin/logout" style="margin:0">
-        <button type="submit" class="nav-drawer-link nav-drawer-link-btn">D&eacute;connexion</button>
+        <button type="submit" class="nav-drawer-link nav-drawer-link-btn nav-drawer-link--danger">D&eacute;connexion</button>
       </form>
     <% } else { %>
       <a href="/admin/login?next=<%= encodeURIComponent(locals.currentPath || '/') %>"

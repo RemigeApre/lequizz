@@ -1,45 +1,36 @@
-<%- include('partials/head', { title: 'Mes favoris — ' + config.title }) %>
+<%- include('partials/head', { title: 'Mon profil — ' + config.title }) %>
 <main class="container wide">
   <%- include('partials/top-nav', { config: config }) %>
 
-  <div class="admin-header">
-    <h1 class="section-title-h1">Mon profil</h1>
-    <form method="POST" action="/admin/logout">
-      <button type="submit" class="link-button">Se d&eacute;connecter</button>
-    </form>
-  </div>
-
-  <details class="user-settings-panel" id="user-settings-panel">
-    <summary class="user-settings-summary">Options</summary>
-    <div class="user-settings-body">
-      <div class="user-setting-group">
-        <span class="user-setting-label">Ouverture des tags</span>
-        <div class="user-setting-options" id="tag-nav-pref-options">
-          <label class="user-setting-radio" data-val="ask">
-            <input type="radio" name="tag-nav-pref" value="ask" />
-            Demander
-          </label>
-          <label class="user-setting-radio" data-val="wiki">
-            <input type="radio" name="tag-nav-pref" value="wiki" />
-            Wiki
-          </label>
-          <label class="user-setting-radio" data-val="gallery">
-            <input type="radio" name="tag-nav-pref" value="gallery" />
-            Galerie
-          </label>
-        </div>
+  <!-- Volet droit fixe -->
+  <aside class="profil-right">
+    <div class="profil-right-name"><%= currentUser.displayName %></div>
+    <div class="profil-right-settings">
+      <div class="profil-right-settings-title">Ouverture des tags</div>
+      <div class="user-setting-options" id="tag-nav-pref-options">
+        <label class="user-setting-radio" data-val="ask">
+          <input type="radio" name="tag-nav-pref" value="ask" />
+          Demander
+        </label>
+        <label class="user-setting-radio" data-val="wiki">
+          <input type="radio" name="tag-nav-pref" value="wiki" />
+          Wiki
+        </label>
+        <label class="user-setting-radio" data-val="gallery">
+          <input type="radio" name="tag-nav-pref" value="gallery" />
+          Galerie
+        </label>
       </div>
     </div>
-  </details>
-
-  <h2>Mes favoris</h2>
+  </aside>
 
   <% if (!wikiPages.length && !galleryImages.length && !bdBooks.length) { %>
     <p class="intro">Aucun favori pour l&apos;instant. Utilise le bouton favori sur une page wiki, une image de la galerie ou une BD pour l&apos;ajouter ici.</p>
   <% } %>
 
+  <!-- Section pages wiki favorites -->
   <% if (wikiPages.length) { %>
-    <h2>Pages wiki (<%= wikiPages.length %>)</h2>
+    <h2 class="profil-section-title">Pages favorites (<%= wikiPages.length %>)</h2>
     <div class="wiki-grid">
       <% wikiPages.forEach(function (page) { %>
         <%- include('partials/wiki-card', { page: page, categories: categories, showCategoryBadge: true }) %>
@@ -47,29 +38,54 @@
     </div>
   <% } %>
 
+  <!-- Section images favorites -->
   <% if (galleryImages.length) { %>
-    <h2>Galerie (<%= galleryImages.length %>)</h2>
-    <div class="favoris-chip-list">
+    <h2 class="profil-section-title">Images favorites (<%= galleryImages.length %>)</h2>
+    <div class="profil-fav-grid">
       <% galleryImages.forEach(function (img) { %>
-        <span class="wiki-pl-card" data-fav-item data-item-type="gallery" data-item-id="<%= img.id %>">
-          <a href="/galerie/<%= img.id %>/edit" class="wiki-pl-title"><%= img.title || "Sans titre" %></a>
+        <a href="/galerie/<%= img.id %>/edit"
+           class="profil-fav-card"
+           data-fav-item data-item-type="gallery" data-item-id="<%= img.id %>">
+          <% if (img.imagePaths && img.imagePaths[0]) { %>
+            <img src="<%= img.imagePaths[0] %>" alt="<%= img.title || 'Sans titre' %>" class="profil-fav-card-img" loading="lazy" />
+          <% } else { %>
+            <div class="profil-fav-card-placeholder">&#128247;</div>
+          <% } %>
+          <span class="profil-fav-card-title"><%= img.title || 'Sans titre' %></span>
           <button type="button" class="wiki-pl-remove" title="Retirer des favoris">&#215;</button>
-        </span>
+        </a>
       <% }) %>
     </div>
   <% } %>
 
+  <!-- Section BD favorites -->
   <% if (bdBooks.length) { %>
-    <h2>BD (<%= bdBooks.length %>)</h2>
-    <div class="favoris-chip-list">
+    <h2 class="profil-section-title">BD favorites (<%= bdBooks.length %>)</h2>
+    <div class="profil-fav-grid">
       <% bdBooks.forEach(function (book) { %>
-        <span class="wiki-pl-card" data-fav-item data-item-type="bd" data-item-id="<%= book.id %>">
-          <a href="/bd/<%= book.id %>" class="wiki-pl-title"><%= book.title %></a>
+        <a href="/bd/<%= book.id %>"
+           class="profil-fav-card"
+           data-fav-item data-item-type="bd" data-item-id="<%= book.id %>">
+          <% if (book.imagePaths && book.imagePaths[0]) { %>
+            <img src="<%= book.imagePaths[0] %>" alt="<%= book.title %>" class="profil-fav-card-img" loading="lazy" />
+          <% } else if (book.filename) { %>
+            <img src="<%= book.filename %>" alt="<%= book.title %>" class="profil-fav-card-img" loading="lazy" />
+          <% } else { %>
+            <div class="profil-fav-card-placeholder">&#128218;</div>
+          <% } %>
+          <span class="profil-fav-card-title"><%= book.title %></span>
           <button type="button" class="wiki-pl-remove" title="Retirer des favoris">&#215;</button>
-        </span>
+        </a>
       <% }) %>
     </div>
   <% } %>
+
+  <!-- Boutons CTA -->
+  <div class="profil-notes-btns">
+    <a href="/favoris/notes/images" class="profil-notes-btn">Images not&eacute;es</a>
+    <a href="/favoris/notes/wiki" class="profil-notes-btn">Pages wiki not&eacute;es</a>
+  </div>
+
 </main>
 <script>
 // ── Paramètre ouverture des tags ──────────────────────────────────────────
@@ -95,7 +111,8 @@
 
 // ── Favoris ───────────────────────────────────────────────────────────────
 document.querySelectorAll("[data-fav-item] .wiki-pl-remove").forEach(function (btn) {
-  btn.addEventListener("click", function () {
+  btn.addEventListener("click", function (e) {
+    e.preventDefault();
     var card = btn.closest("[data-fav-item]");
     fetch("/favoris/toggle", {
       method: "POST",
