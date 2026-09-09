@@ -642,5 +642,16 @@
 <% } %>
 <script>window.GALLERY_CAN_EDIT = <%= (currentUser && currentUser.isAdmin) ? 'true' : 'false' %>;</script>
 <script id="wiki-pos-images-data" type="application/json"><%- JSON.stringify(pm.positional_images || []) %></script>
+<script>
+(function () {
+  try {
+    var backInfo = JSON.parse(sessionStorage.getItem("wikiNavBack") || "null");
+    if (backInfo && backInfo.href) {
+      var btn = document.querySelector(".nav-back-btn");
+      if (btn) btn.href = backInfo.href;
+    }
+  } catch (_) {}
+})();
+</script>
 <script src="/wiki.js?v=<%= assetVersion %>"></script>
 <%- include('partials/foot') %>

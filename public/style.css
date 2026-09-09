@@ -1909,6 +1909,16 @@ input[type="text"], input[type="password"] {
   border-color: var(--accent);
   color: var(--accent);
 }
+.wiki-filter-reset-btn--danger {
+  margin-top: auto;
+  border-color: #c0392b44;
+  color: #c0392b;
+}
+.wiki-filter-reset-btn--danger:hover {
+  border-color: #c0392b;
+  background: #c0392b12;
+  color: #c0392b;
+}
 
 /* ── Popup avertissement quizz ──────────────────────────────── */
 .quiz-warning-overlay {
