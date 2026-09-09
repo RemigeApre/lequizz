@@ -69,179 +69,12 @@
       function pval(field) { return pmP[field] || ''; }
     %>
     <div id="wf-partenaires-sous-cat" <%= page.category === 'partenaires' ? '' : 'hidden' %>>
-      <%# Type principal %>
-      <div class="wf-section-title wf-partenaires-title">Type de partenaire</div>
-      <div class="wiki-meta-group">
-        <div class="wiki-meta-options">
-          <label class="chip-option"><input type="radio" name="meta_sous_cat" value="nombre"    <%= psel('sous_cat','nombre')    %>><span>Nombre</span></label>
-          <label class="chip-option"><input type="radio" name="meta_sous_cat" value="monstre"   <%= psel('sous_cat','monstre')   %>><span>Monstre</span></label>
-          <label class="chip-option"><input type="radio" name="meta_sous_cat" value="animaux"   <%= psel('sous_cat','animaux')   %>><span>Animal</span></label>
-          <label class="chip-option"><input type="radio" name="meta_sous_cat" value="fetichisme"<%= psel('sous_cat','fetichisme')%>><span>Fétichisme</span></label>
-          <label class="chip-option"><input type="radio" name="meta_sous_cat" value="autre"     <%= psel('sous_cat','autre')     %>><span>Autre</span></label>
-        </div>
-      </div>
-
-      <%# ── Communs à tous ── %>
-      <div class="wf-section-title wf-partenaires-title">Paramètres communs</div>
-      <div class="wiki-meta-group"><p class="wiki-meta-label">Nature de l'acte</p><div class="wiki-meta-options">
-        <label class="chip-option"><input type="radio" name="meta_nature_acte" value="possible"   <%= psel('nature_acte','possible')   %>><span>Possible</span></label>
-        <label class="chip-option"><input type="radio" name="meta_nature_acte" value="improbable" <%= psel('nature_acte','improbable') %>><span>Improbable</span></label>
-        <label class="chip-option"><input type="radio" name="meta_nature_acte" value="impossible" <%= psel('nature_acte','impossible') %>><span>Impossible</span></label>
-        <label class="chip-option"><input type="radio" name="meta_nature_acte" value="fictif"     <%= psel('nature_acte','fictif')     %>><span>Fictif / Fantastique</span></label>
-        <label class="chip-option"><input type="radio" name="meta_nature_acte" value="inconnu"    <%= psel('nature_acte','inconnu')    %>><span>Inconnu</span></label>
-      </div></div>
-      <div class="wiki-meta-group"><p class="wiki-meta-label">Cadre légal</p><div class="wiki-meta-options">
-        <label class="chip-option"><input type="radio" name="meta_cadre_legal" value="legal"   <%= psel('cadre_legal','legal')   %>><span>Légal</span></label>
-        <label class="chip-option"><input type="radio" name="meta_cadre_legal" value="flou"    <%= psel('cadre_legal','flou')    %>><span>Flou</span></label>
-        <label class="chip-option"><input type="radio" name="meta_cadre_legal" value="illegal" <%= psel('cadre_legal','illegal') %>><span>Illégal</span></label>
-        <label class="chip-option"><input type="radio" name="meta_cadre_legal" value="inconnu" <%= psel('cadre_legal','inconnu') %>><span>Inconnu</span></label>
-      </div></div>
-      <div class="wiki-meta-group"><p class="wiki-meta-label">Risque physique</p><div class="wiki-meta-options">
-        <% ['inconnu','nul','faible','modere','eleve','extreme'].forEach(function(v) { var lbl = {inconnu:'Inconnu',nul:'Nul',faible:'Faible',modere:'Modéré',eleve:'Élevé',extreme:'Extrême'}[v]; %>
-          <label class="chip-option"><input type="radio" name="meta_risque_physique" value="<%= v %>" <%= psel('risque_physique',v) %>><span><%= lbl %></span></label>
-        <% }) %>
-      </div></div>
-      <div class="wiki-meta-group"><p class="wiki-meta-label">Risque MST / IST / Zoonose</p><div class="wiki-meta-options">
-        <% ['inconnu','nul','faible','modere','eleve','extreme'].forEach(function(v) { var lbl = {inconnu:'Inconnu',nul:'Nul',faible:'Faible',modere:'Modéré',eleve:'Élevé',extreme:'Extrême'}[v]; %>
-          <label class="chip-option"><input type="radio" name="meta_risque_mst" value="<%= v %>" <%= psel('risque_mst',v) %>><span><%= lbl %></span></label>
-        <% }) %>
-      </div></div>
-      <div class="wiki-meta-group"><p class="wiki-meta-label">Accessibilité</p><div class="wiki-meta-options">
-        <label class="chip-option"><input type="radio" name="meta_accessibilite" value="tres_rare"   <%= psel('accessibilite','tres_rare')   %>><span>Très rare</span></label>
-        <label class="chip-option"><input type="radio" name="meta_accessibilite" value="rare"        <%= psel('accessibilite','rare')        %>><span>Rare</span></label>
-        <label class="chip-option"><input type="radio" name="meta_accessibilite" value="occasionnel" <%= psel('accessibilite','occasionnel') %>><span>Occasionnel</span></label>
-        <label class="chip-option"><input type="radio" name="meta_accessibilite" value="frequent"    <%= psel('accessibilite','frequent')    %>><span>Fréquent</span></label>
-        <label class="chip-option"><input type="radio" name="meta_accessibilite" value="inconnu"     <%= psel('accessibilite','inconnu')     %>><span>Inconnu</span></label>
-      </div></div>
-
-      <%# ── Nombre ── %>
-      <div class="wf-part-sub wf-part-sub--nombre" hidden>
-        <div class="wf-section-title wf-partenaires-title">Détails — Nombre</div>
-        <div class="wiki-meta-group"><p class="wiki-meta-label">Nombre total</p><div class="wiki-meta-options">
-          <% ['2','3','4','5plus'].forEach(function(v) { %>
-            <label class="chip-option"><input type="radio" name="meta_nb_total" value="<%= v %>" <%= psel('nb_total',v) %>><span><%= v==='5plus'?'5+':v %></span></label>
-          <% }) %>
-        </div></div>
-        <div class="wiki-meta-group"><p class="wiki-meta-label">Nombre de femmes</p><div class="wiki-meta-options">
-          <% ['0','1','2','3plus'].forEach(function(v) { %>
-            <label class="chip-option"><input type="radio" name="meta_nb_feminin" value="<%= v %>" <%= psel('nb_feminin',v) %>><span><%= v==='3plus'?'3+':v %></span></label>
-          <% }) %>
-        </div></div>
-        <div class="wiki-meta-group"><p class="wiki-meta-label">Nombre d'hommes</p><div class="wiki-meta-options">
-          <% ['0','1','2','3plus'].forEach(function(v) { %>
-            <label class="chip-option"><input type="radio" name="meta_nb_masculin" value="<%= v %>" <%= psel('nb_masculin',v) %>><span><%= v==='3plus'?'3+':v %></span></label>
-          <% }) %>
-        </div></div>
-      </div>
-
-      <%# ── Monstre ── %>
-      <div class="wf-part-sub wf-part-sub--monstre" hidden>
-        <div class="wf-section-title wf-partenaires-title">Détails — Monstre</div>
-        <div class="wiki-meta-group"><p class="wiki-meta-label">Type de créature</p><div class="wiki-meta-options">
-          <% [['machine','Machine'],['sang_froid','Sang froid'],['mammifere','Mammifère'],['insectoide','Insectoïde'],['amorphe','Amorphe'],['elementaire','Élémentaire'],['autre','Autre']].forEach(function(o) { %>
-            <label class="chip-option"><input type="radio" name="meta_type_creature" value="<%= o[0] %>" <%= psel('type_creature',o[0]) %>><span><%= o[1] %></span></label>
-          <% }) %>
-        </div></div>
-        <div class="wiki-meta-group"><p class="wiki-meta-label">Type(s) d'acte(s) sexuel(s)</p><div class="wiki-meta-options">
-          <% [['penetration','Pénétration'],['absorption','Absorption'],['constriction','Constriction'],['pondaison','Pondaison'],['investation','Investation'],['possession','Possession'],['fusion','Fusion'],['parasitage','Parasitage'],['transformation','Transformation'],['insemination','Insémination / reproduction'],['aucun_variable','Aucun / variable'],['autre','Autre']].forEach(function(o) { %>
-            <label class="chip-option"><input type="checkbox" name="meta_type_acte_sexuel" value="<%= o[0] %>" <%= pmany('type_acte_sexuel',o[0]) %>><span><%= o[1] %></span></label>
-          <% }) %>
-        </div></div>
-        <div class="wiki-meta-group"><p class="wiki-meta-label">Intelligence</p><div class="wiki-meta-options">
-          <% [['bestiale','Bestiale'],['faible','Faible'],['correcte','Correcte'],['forte','Forte'],['inconnu','Inconnu']].forEach(function(o) { %>
-            <label class="chip-option"><input type="radio" name="meta_niveau_intelligence" value="<%= o[0] %>" <%= psel('niveau_intelligence',o[0]) %>><span><%= o[1] %></span></label>
-          <% }) %>
-        </div></div>
-        <div class="wiki-meta-group"><p class="wiki-meta-label">Capacité de parole</p><div class="wiki-meta-options">
-          <% [['impossible','Impossible'],['possible','Possible'],['oui','Oui'],['frequente','Fréquente']].forEach(function(o) { %>
-            <label class="chip-option"><input type="radio" name="meta_capacite_parole" value="<%= o[0] %>" <%= psel('capacite_parole',o[0]) %>><span><%= o[1] %></span></label>
-          <% }) %>
-        </div></div>
-        <div class="wiki-meta-group"><p class="wiki-meta-label">Compatibilité anatomique</p><div class="wiki-meta-options">
-          <label class="chip-option"><input type="radio" name="meta_compat_anatomique" value="oui"      <%= psel('compat_anatomique','oui') %>><span>Oui</span></label>
-          <label class="chip-option"><input type="radio" name="meta_compat_anatomique" value="non"      <%= psel('compat_anatomique','non') %>><span>Non</span></label>
-          <label class="chip-option"><input type="radio" name="meta_compat_anatomique" value="partielle"<%= psel('compat_anatomique','partielle') %>><span>Partielle</span></label>
-          <label class="chip-option"><input type="radio" name="meta_compat_anatomique" value="inconnu"  <%= psel('compat_anatomique','inconnu') %>><span>Inconnu</span></label>
-        </div></div>
-        <div class="wiki-meta-group"><p class="wiki-meta-label">Origine conceptuelle</p><div class="wiki-meta-options">
-          <label class="chip-option"><input type="radio" name="meta_origine_conceptuelle" value="fantaisie"        <%= psel('origine_conceptuelle','fantaisie') %>><span>Fantaisie</span></label>
-          <label class="chip-option"><input type="radio" name="meta_origine_conceptuelle" value="science_fiction"  <%= psel('origine_conceptuelle','science_fiction') %>><span>Science-fiction</span></label>
-          <label class="chip-option"><input type="radio" name="meta_origine_conceptuelle" value="imaginaire"       <%= psel('origine_conceptuelle','imaginaire') %>><span>Imaginaire</span></label>
-          <label class="chip-option"><input type="radio" name="meta_origine_conceptuelle" value="autre"            <%= psel('origine_conceptuelle','autre') %>><span>Autre</span></label>
-        </div></div>
-      </div>
-
-      <%# ── Animal ── %>
-      <div class="wf-part-sub wf-part-sub--animaux" hidden>
-        <div class="wf-section-title wf-partenaires-title">Détails — Animal</div>
-        <div class="wiki-meta-group"><p class="wiki-meta-label">Famille zoologique</p><div class="wiki-meta-options">
-          <% [['canide','Canidé'],['equide','Équidé'],['felin','Félin'],['bovin','Bovin'],['reptile','Reptile'],['aviaire','Aviaire'],['cetace','Cétacé'],['autre','Autre']].forEach(function(o) { %>
-            <label class="chip-option"><input type="radio" name="meta_famille_zoologique" value="<%= o[0] %>" <%= psel('famille_zoologique',o[0]) %>><span><%= o[1] %></span></label>
-          <% }) %>
-        </div></div>
-        <div class="wiki-meta-group"><p class="wiki-meta-label">Taille par rapport à une femme</p><div class="wiki-meta-options">
-          <% [['petit','Petit'],['egal','Égal'],['grand','Grand'],['tres_grand','Très grand']].forEach(function(o) { %>
-            <label class="chip-option"><input type="radio" name="meta_taille_animal" value="<%= o[0] %>" <%= psel('taille_animal',o[0]) %>><span><%= o[1] %></span></label>
-          <% }) %>
-        </div></div>
-      </div>
-
-      <%# ── Communs Monstre + Animal ── %>
-      <div class="wf-part-sub wf-part-sub--biodetail" hidden>
-        <div class="wf-section-title wf-partenaires-title">Biologie</div>
-        <div class="wiki-meta-group"><p class="wiki-meta-label">Nature de l'espèce</p><div class="wiki-meta-options">
-          <label class="chip-option"><input type="radio" name="meta_nature_espece" value="domestique" <%= psel('nature_espece','domestique') %>><span>Domestique</span></label>
-          <label class="chip-option"><input type="radio" name="meta_nature_espece" value="sauvage"    <%= psel('nature_espece','sauvage') %>><span>Sauvage</span></label>
-          <label class="chip-option"><input type="radio" name="meta_nature_espece" value="inconnu"    <%= psel('nature_espece','inconnu') %>><span>Inconnu</span></label>
-        </div></div>
-        <div class="wiki-meta-group"><p class="wiki-meta-label">Taille du pénis (cm)</p>
-          <div class="wf-range-row">
-            <label>De&nbsp;<input type="number" name="meta_taille_penis_min" class="wf-range-input" min="0" step="0.1" value="<%= pval('taille_penis_min') %>" placeholder="0" /></label>
-            <label>À&nbsp;<input type="number" name="meta_taille_penis_max" class="wf-range-input" min="0" step="0.1" value="<%= pval('taille_penis_max') %>" placeholder="0" /></label>
-            <span class="wf-range-unit">cm</span>
-          </div>
-        </div>
-        <div class="wiki-meta-group"><p class="wiki-meta-label">Circonférence du pénis (cm)</p>
-          <div class="wf-range-row">
-            <label>De&nbsp;<input type="number" name="meta_circ_penis_min" class="wf-range-input" min="0" step="0.1" value="<%= pval('circ_penis_min') %>" placeholder="0" /></label>
-            <label>À&nbsp;<input type="number" name="meta_circ_penis_max" class="wf-range-input" min="0" step="0.1" value="<%= pval('circ_penis_max') %>" placeholder="0" /></label>
-            <span class="wf-range-unit">cm</span>
-          </div>
-        </div>
-        <div class="wiki-meta-group"><p class="wiki-meta-label">Volume d'éjaculation (ml)</p>
-          <div class="wf-range-row">
-            <label>De&nbsp;<input type="number" name="meta_vol_ejac_min" class="wf-range-input" min="0" step="1" value="<%= pval('vol_ejac_min') %>" placeholder="0" /></label>
-            <label>À&nbsp;<input type="number" name="meta_vol_ejac_max" class="wf-range-input" min="0" step="1" value="<%= pval('vol_ejac_max') %>" placeholder="0" /></label>
-            <span class="wf-range-unit">ml</span>
-          </div>
-        </div>
-        <div class="wiki-meta-group"><p class="wiki-meta-label">Caractéristiques du sperme</p>
-          <div class="wf-sperme-fields">
-            <label>Texture&nbsp;<input type="text" name="meta_sperme_texture" class="wf-text-sm" value="<%= pval('sperme_texture') %>" placeholder="Ex: Aqueux, Épais…" /></label>
-            <label>Odeur&nbsp;<input type="text" name="meta_sperme_odeur"   class="wf-text-sm" value="<%= pval('sperme_odeur') %>"   placeholder="Ex: Nulle, Métallique…" /></label>
-            <label>Goût&nbsp;<input type="text" name="meta_sperme_gout"    class="wf-text-sm" value="<%= pval('sperme_gout') %>"    placeholder="Ex: Salé, Amer…" /></label>
-          </div>
-        </div>
-        <div class="wiki-meta-group"><p class="wiki-meta-label">Verrouillage copulatoire</p><div class="wiki-meta-options">
-          <% [['aucun','Aucun'],['noeud','Nœud'],['epines','Épines'],['ventouses','Ventouses'],['partiel','Partiel'],['autre','Autre'],['inconnu','Inconnu']].forEach(function(o) { %>
-            <label class="chip-option"><input type="radio" name="meta_type_verrouillage" value="<%= o[0] %>" <%= psel('type_verrouillage',o[0]) %>><span><%= o[1] %></span></label>
-          <% }) %>
-        </div></div>
-        <div class="wiki-meta-group"><p class="wiki-meta-label">Sensations principales</p><div class="wiki-meta-options">
-          <% [['pression','Pression'],['remplissage','Remplissage'],['frottement','Frottement'],['elongation','Élongation'],['vibration','Vibration'],['chaleur','Chaleur'],['secousse','Secousse'],['autre','Autre']].forEach(function(o) { %>
-            <label class="chip-option"><input type="checkbox" name="meta_sensations" value="<%= o[0] %>" <%= pmany('sensations',o[0]) %>><span><%= o[1] %></span></label>
-          <% }) %>
-        </div></div>
-        <div class="wiki-meta-group"><p class="wiki-meta-label">Milieu de vie</p><div class="wiki-meta-options">
-          <% [['terrestre','Terrestre'],['aerien','Aérien'],['aquatique_mer','Aquatique (mer)'],['dulcaquicole','Dulçaquicole'],['semi_aquatique','Semi-aquatique'],['souterrain','Souterrain'],['inconnu','Inconnu']].forEach(function(o) { %>
-            <label class="chip-option"><input type="radio" name="meta_milieu_vie" value="<%= o[0] %>" <%= psel('milieu_vie',o[0]) %>><span><%= o[1] %></span></label>
-          <% }) %>
-        </div></div>
-        <div class="wiki-meta-group"><p class="wiki-meta-label">Structure sociale</p><div class="wiki-meta-options">
-          <% [['monogame','Monogame'],['polygame','Polygame'],['polyandrie','Polyandrie'],['promiscuite','Promiscuité'],['sans_lien','Sans lien'],['harem','Harem'],['coloniale','Coloniale'],['saisonniere','Saisonnière'],['variable','Variable'],['inconnu','Inconnu']].forEach(function(o) { %>
-            <label class="chip-option"><input type="radio" name="meta_structure_sociale" value="<%= o[0] %>" <%= psel('structure_sociale',o[0]) %>><span><%= o[1] %></span></label>
-          <% }) %>
-        </div></div>
+      <div class="wf-partenaires-type-chips">
+        <label class="chip-option chip-opt--nombre"><input type="radio" name="meta_sous_cat" value="nombre"    <%= psel('sous_cat','nombre')    %>><span>Nombre</span></label>
+        <label class="chip-option chip-opt--monstre"><input type="radio" name="meta_sous_cat" value="monstre"   <%= psel('sous_cat','monstre')   %>><span>Monstre</span></label>
+        <label class="chip-option chip-opt--animaux"><input type="radio" name="meta_sous_cat" value="animaux"   <%= psel('sous_cat','animaux')   %>><span>Animal</span></label>
+        <label class="chip-option chip-opt--fetichisme"><input type="radio" name="meta_sous_cat" value="fetichisme"<%= psel('sous_cat','fetichisme')%>><span>Fétichisme</span></label>
+        <label class="chip-option chip-opt--autre"><input type="radio" name="meta_sous_cat" value="autre"     <%= psel('sous_cat','autre')     %>><span>Autre</span></label>
       </div>
     </div>
 
@@ -358,6 +191,186 @@
         <input type="file" name="images" accept="image/*" multiple class="wiki-image-input" />
       </label>
       <div class="wiki-new-previews"></div>
+    </div>
+
+    <%# ── Paramètres partenaires (après images) ── %>
+    <div id="wf-partenaires-params" <%= page.category === 'partenaires' ? '' : 'hidden' %>>
+
+      <%# Communs à tous %>
+      <details class="wf-part-details" open>
+        <summary>Param&egrave;tres communs</summary>
+        <div class="wf-part-details-body">
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Nature de l'acte</p><div class="wiki-meta-options">
+            <label class="chip-option"><input type="radio" name="meta_nature_acte" value="possible"   <%= psel('nature_acte','possible')   %>><span>Possible</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nature_acte" value="improbable" <%= psel('nature_acte','improbable') %>><span>Improbable</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nature_acte" value="impossible" <%= psel('nature_acte','impossible') %>><span>Impossible</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nature_acte" value="fictif"     <%= psel('nature_acte','fictif')     %>><span>Fictif / Fantastique</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nature_acte" value="inconnu"    <%= psel('nature_acte','inconnu')    %>><span>Inconnu</span></label>
+          </div></div>
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Cadre l&eacute;gal</p><div class="wiki-meta-options">
+            <label class="chip-option"><input type="radio" name="meta_cadre_legal" value="legal"   <%= psel('cadre_legal','legal')   %>><span>L&eacute;gal</span></label>
+            <label class="chip-option"><input type="radio" name="meta_cadre_legal" value="flou"    <%= psel('cadre_legal','flou')    %>><span>Flou</span></label>
+            <label class="chip-option"><input type="radio" name="meta_cadre_legal" value="illegal" <%= psel('cadre_legal','illegal') %>><span>Ill&eacute;gal</span></label>
+            <label class="chip-option"><input type="radio" name="meta_cadre_legal" value="inconnu" <%= psel('cadre_legal','inconnu') %>><span>Inconnu</span></label>
+          </div></div>
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Risque physique</p><div class="wiki-meta-options">
+            <% ['inconnu','nul','faible','modere','eleve','extreme'].forEach(function(v) { var lbl = {inconnu:'Inconnu',nul:'Nul',faible:'Faible',modere:'Mod\u00e9r\u00e9',eleve:'\u00c9lev\u00e9',extreme:'Extr\u00eame'}[v]; %>
+              <label class="chip-option"><input type="radio" name="meta_risque_physique" value="<%= v %>" <%= psel('risque_physique',v) %>><span><%= lbl %></span></label>
+            <% }) %>
+          </div></div>
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Risque MST / IST / Zoonose</p><div class="wiki-meta-options">
+            <% ['inconnu','nul','faible','modere','eleve','extreme'].forEach(function(v) { var lbl = {inconnu:'Inconnu',nul:'Nul',faible:'Faible',modere:'Mod\u00e9r\u00e9',eleve:'\u00c9lev\u00e9',extreme:'Extr\u00eame'}[v]; %>
+              <label class="chip-option"><input type="radio" name="meta_risque_mst" value="<%= v %>" <%= psel('risque_mst',v) %>><span><%= lbl %></span></label>
+            <% }) %>
+          </div></div>
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Accessibilit&eacute;</p><div class="wiki-meta-options">
+            <label class="chip-option"><input type="radio" name="meta_accessibilite" value="tres_rare"   <%= psel('accessibilite','tres_rare')   %>><span>Tr&egrave;s rare</span></label>
+            <label class="chip-option"><input type="radio" name="meta_accessibilite" value="rare"        <%= psel('accessibilite','rare')        %>><span>Rare</span></label>
+            <label class="chip-option"><input type="radio" name="meta_accessibilite" value="occasionnel" <%= psel('accessibilite','occasionnel') %>><span>Occasionnel</span></label>
+            <label class="chip-option"><input type="radio" name="meta_accessibilite" value="frequent"    <%= psel('accessibilite','frequent')    %>><span>Fr&eacute;quent</span></label>
+            <label class="chip-option"><input type="radio" name="meta_accessibilite" value="inconnu"     <%= psel('accessibilite','inconnu')     %>><span>Inconnu</span></label>
+          </div></div>
+        </div>
+      </details>
+
+      <%# Nombre %>
+      <details class="wf-part-details wf-part-sub wf-part-sub--nombre" hidden>
+        <summary>Nombre</summary>
+        <div class="wf-part-details-body">
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Nombre total</p><div class="wiki-meta-options">
+            <% ['2','3','4','5plus'].forEach(function(v) { %>
+              <label class="chip-option"><input type="radio" name="meta_nb_total" value="<%= v %>" <%= psel('nb_total',v) %>><span><%= v==='5plus'?'5+':v %></span></label>
+            <% }) %>
+          </div></div>
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Nombre de femmes</p><div class="wiki-meta-options">
+            <% ['0','1','2','3plus'].forEach(function(v) { %>
+              <label class="chip-option"><input type="radio" name="meta_nb_feminin" value="<%= v %>" <%= psel('nb_feminin',v) %>><span><%= v==='3plus'?'3+':v %></span></label>
+            <% }) %>
+          </div></div>
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Nombre d'hommes</p><div class="wiki-meta-options">
+            <% ['0','1','2','3plus'].forEach(function(v) { %>
+              <label class="chip-option"><input type="radio" name="meta_nb_masculin" value="<%= v %>" <%= psel('nb_masculin',v) %>><span><%= v==='3plus'?'3+':v %></span></label>
+            <% }) %>
+          </div></div>
+        </div>
+      </details>
+
+      <%# Monstre %>
+      <details class="wf-part-details wf-part-sub wf-part-sub--monstre" hidden>
+        <summary>Monstre</summary>
+        <div class="wf-part-details-body">
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Type de cr&eacute;ature</p><div class="wiki-meta-options">
+            <% [['machine','Machine'],['sang_froid','Sang froid'],['mammifere','Mammif\u00e8re'],['insectoide','Insecto\u00efde'],['amorphe','Amorphe'],['elementaire','\u00c9l\u00e9mentaire'],['autre','Autre']].forEach(function(o) { %>
+              <label class="chip-option"><input type="radio" name="meta_type_creature" value="<%= o[0] %>" <%= psel('type_creature',o[0]) %>><span><%= o[1] %></span></label>
+            <% }) %>
+          </div></div>
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Type(s) d'acte(s) sexuel(s)</p><div class="wiki-meta-options">
+            <% [['penetration','P\u00e9n\u00e9tration'],['absorption','Absorption'],['constriction','Constriction'],['pondaison','Pondaison'],['investation','Investation'],['possession','Possession'],['fusion','Fusion'],['parasitage','Parasitage'],['transformation','Transformation'],['insemination','Ins\u00e9mination / reproduction'],['aucun_variable','Aucun / variable'],['autre','Autre']].forEach(function(o) { %>
+              <label class="chip-option"><input type="checkbox" name="meta_type_acte_sexuel" value="<%= o[0] %>" <%= pmany('type_acte_sexuel',o[0]) %>><span><%= o[1] %></span></label>
+            <% }) %>
+          </div></div>
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Intelligence</p><div class="wiki-meta-options">
+            <% [['bestiale','Bestiale'],['faible','Faible'],['correcte','Correcte'],['forte','Forte'],['inconnu','Inconnu']].forEach(function(o) { %>
+              <label class="chip-option"><input type="radio" name="meta_niveau_intelligence" value="<%= o[0] %>" <%= psel('niveau_intelligence',o[0]) %>><span><%= o[1] %></span></label>
+            <% }) %>
+          </div></div>
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Capacit&eacute; de parole</p><div class="wiki-meta-options">
+            <% [['impossible','Impossible'],['possible','Possible'],['oui','Oui'],['frequente','Fr\u00e9quente']].forEach(function(o) { %>
+              <label class="chip-option"><input type="radio" name="meta_capacite_parole" value="<%= o[0] %>" <%= psel('capacite_parole',o[0]) %>><span><%= o[1] %></span></label>
+            <% }) %>
+          </div></div>
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Compatibilit&eacute; anatomique</p><div class="wiki-meta-options">
+            <label class="chip-option"><input type="radio" name="meta_compat_anatomique" value="oui"      <%= psel('compat_anatomique','oui') %>><span>Oui</span></label>
+            <label class="chip-option"><input type="radio" name="meta_compat_anatomique" value="non"      <%= psel('compat_anatomique','non') %>><span>Non</span></label>
+            <label class="chip-option"><input type="radio" name="meta_compat_anatomique" value="partielle"<%= psel('compat_anatomique','partielle') %>><span>Partielle</span></label>
+            <label class="chip-option"><input type="radio" name="meta_compat_anatomique" value="inconnu"  <%= psel('compat_anatomique','inconnu') %>><span>Inconnu</span></label>
+          </div></div>
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Origine conceptuelle</p><div class="wiki-meta-options">
+            <label class="chip-option"><input type="radio" name="meta_origine_conceptuelle" value="fantaisie"       <%= psel('origine_conceptuelle','fantaisie') %>><span>Fantaisie</span></label>
+            <label class="chip-option"><input type="radio" name="meta_origine_conceptuelle" value="science_fiction" <%= psel('origine_conceptuelle','science_fiction') %>><span>Science-fiction</span></label>
+            <label class="chip-option"><input type="radio" name="meta_origine_conceptuelle" value="imaginaire"      <%= psel('origine_conceptuelle','imaginaire') %>><span>Imaginaire</span></label>
+            <label class="chip-option"><input type="radio" name="meta_origine_conceptuelle" value="autre"           <%= psel('origine_conceptuelle','autre') %>><span>Autre</span></label>
+          </div></div>
+        </div>
+      </details>
+
+      <%# Animal %>
+      <details class="wf-part-details wf-part-sub wf-part-sub--animaux" hidden>
+        <summary>Animal</summary>
+        <div class="wf-part-details-body">
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Famille zoologique</p><div class="wiki-meta-options">
+            <% [['canide','Canid\u00e9'],['equide','\u00c9quid\u00e9'],['felin','F\u00e9lin'],['bovin','Bovin'],['reptile','Reptile'],['aviaire','Aviaire'],['cetace','C\u00e9tac\u00e9'],['autre','Autre']].forEach(function(o) { %>
+              <label class="chip-option"><input type="radio" name="meta_famille_zoologique" value="<%= o[0] %>" <%= psel('famille_zoologique',o[0]) %>><span><%= o[1] %></span></label>
+            <% }) %>
+          </div></div>
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Taille par rapport &agrave; une femme</p><div class="wiki-meta-options">
+            <% [['petit','Petit'],['egal','\u00c9gal'],['grand','Grand'],['tres_grand','Tr\u00e8s grand']].forEach(function(o) { %>
+              <label class="chip-option"><input type="radio" name="meta_taille_animal" value="<%= o[0] %>" <%= psel('taille_animal',o[0]) %>><span><%= o[1] %></span></label>
+            <% }) %>
+          </div></div>
+        </div>
+      </details>
+
+      <%# Biologie (Monstre + Animal) %>
+      <details class="wf-part-details wf-part-sub wf-part-sub--biodetail" hidden>
+        <summary>Biologie</summary>
+        <div class="wf-part-details-body">
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Nature de l'esp&egrave;ce</p><div class="wiki-meta-options">
+            <label class="chip-option"><input type="radio" name="meta_nature_espece" value="domestique" <%= psel('nature_espece','domestique') %>><span>Domestique</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nature_espece" value="sauvage"    <%= psel('nature_espece','sauvage') %>><span>Sauvage</span></label>
+            <label class="chip-option"><input type="radio" name="meta_nature_espece" value="inconnu"    <%= psel('nature_espece','inconnu') %>><span>Inconnu</span></label>
+          </div></div>
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Taille du p&eacute;nis (cm)</p>
+            <div class="wf-range-row">
+              <label>De&nbsp;<input type="number" name="meta_taille_penis_min" class="wf-range-input" min="0" step="0.1" value="<%= pval('taille_penis_min') %>" placeholder="0" /></label>
+              <label>&Agrave;&nbsp;<input type="number" name="meta_taille_penis_max" class="wf-range-input" min="0" step="0.1" value="<%= pval('taille_penis_max') %>" placeholder="0" /></label>
+              <span class="wf-range-unit">cm</span>
+            </div>
+          </div>
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Circonf&eacute;rence du p&eacute;nis (cm)</p>
+            <div class="wf-range-row">
+              <label>De&nbsp;<input type="number" name="meta_circ_penis_min" class="wf-range-input" min="0" step="0.1" value="<%= pval('circ_penis_min') %>" placeholder="0" /></label>
+              <label>&Agrave;&nbsp;<input type="number" name="meta_circ_penis_max" class="wf-range-input" min="0" step="0.1" value="<%= pval('circ_penis_max') %>" placeholder="0" /></label>
+              <span class="wf-range-unit">cm</span>
+            </div>
+          </div>
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Volume d'&eacute;jaculation (ml)</p>
+            <div class="wf-range-row">
+              <label>De&nbsp;<input type="number" name="meta_vol_ejac_min" class="wf-range-input" min="0" step="1" value="<%= pval('vol_ejac_min') %>" placeholder="0" /></label>
+              <label>&Agrave;&nbsp;<input type="number" name="meta_vol_ejac_max" class="wf-range-input" min="0" step="1" value="<%= pval('vol_ejac_max') %>" placeholder="0" /></label>
+              <span class="wf-range-unit">ml</span>
+            </div>
+          </div>
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Caract&eacute;ristiques du sperme</p>
+            <div class="wf-sperme-fields">
+              <label>Texture&nbsp;<input type="text" name="meta_sperme_texture" class="wf-text-sm" value="<%= pval('sperme_texture') %>" placeholder="Ex: Aqueux, &Eacute;pais&hellip;" /></label>
+              <label>Odeur&nbsp;<input type="text" name="meta_sperme_odeur"   class="wf-text-sm" value="<%= pval('sperme_odeur') %>"   placeholder="Ex: Nulle, M&eacute;tallique&hellip;" /></label>
+              <label>Go&ucirc;t&nbsp;<input type="text" name="meta_sperme_gout"    class="wf-text-sm" value="<%= pval('sperme_gout') %>"    placeholder="Ex: Sal&eacute;, Amer&hellip;" /></label>
+            </div>
+          </div>
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Verrouillage copulatoire</p><div class="wiki-meta-options">
+            <% [['aucun','Aucun'],['noeud','N\u0153ud'],['epines','\u00c9pines'],['ventouses','Ventouses'],['partiel','Partiel'],['autre','Autre'],['inconnu','Inconnu']].forEach(function(o) { %>
+              <label class="chip-option"><input type="radio" name="meta_type_verrouillage" value="<%= o[0] %>" <%= psel('type_verrouillage',o[0]) %>><span><%= o[1] %></span></label>
+            <% }) %>
+          </div></div>
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Sensations principales</p><div class="wiki-meta-options">
+            <% [['pression','Pression'],['remplissage','Remplissage'],['frottement','Frottement'],['elongation','\u00c9longation'],['vibration','Vibration'],['chaleur','Chaleur'],['secousse','Secousse'],['autre','Autre']].forEach(function(o) { %>
+              <label class="chip-option"><input type="checkbox" name="meta_sensations" value="<%= o[0] %>" <%= pmany('sensations',o[0]) %>><span><%= o[1] %></span></label>
+            <% }) %>
+          </div></div>
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Milieu de vie</p><div class="wiki-meta-options">
+            <% [['terrestre','Terrestre'],['aerien','A\u00e9rien'],['aquatique_mer','Aquatique (mer)'],['dulcaquicole','Dulçaquicole'],['semi_aquatique','Semi-aquatique'],['souterrain','Souterrain'],['inconnu','Inconnu']].forEach(function(o) { %>
+              <label class="chip-option"><input type="radio" name="meta_milieu_vie" value="<%= o[0] %>" <%= psel('milieu_vie',o[0]) %>><span><%= o[1] %></span></label>
+            <% }) %>
+          </div></div>
+          <div class="wiki-meta-group"><p class="wiki-meta-label">Structure sociale</p><div class="wiki-meta-options">
+            <% [['monogame','Monogame'],['polygame','Polygame'],['polyandrie','Polyandrie'],['promiscuite','Promiscuit\u00e9'],['sans_lien','Sans lien'],['harem','Harem'],['coloniale','Coloniale'],['saisonniere','Saisonni\u00e8re'],['variable','Variable'],['inconnu','Inconnu']].forEach(function(o) { %>
+              <label class="chip-option"><input type="radio" name="meta_structure_sociale" value="<%= o[0] %>" <%= psel('structure_sociale',o[0]) %>><span><%= o[1] %></span></label>
+            <% }) %>
+          </div></div>
+        </div>
+      </details>
+
     </div>
 
     <%# ── Paramètres spécifiques à la catégorie ── %>

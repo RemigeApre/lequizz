@@ -8696,8 +8696,51 @@ a.wiki-ql-label:hover .wiki-ql-text {
   background: var(--border);
 }
 
-/* Sous-titre partenaires (moins d'espace que les titres de section principaux) */
-.wf-partenaires-title { margin-top: 0.5rem; }
+/* Chips de sous-catégorie partenaires — centrées, sans titre */
+.wf-partenaires-type-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0 0.25rem;
+}
+
+/* Couleurs par type quand sélectionné */
+.chip-opt--nombre:has(input:checked)    { background: #5cb8e0; border-color: #5cb8e0; color: #fff; }
+.chip-opt--monstre:has(input:checked)   { background: #c45ce0; border-color: #c45ce0; color: #fff; }
+.chip-opt--animaux:has(input:checked)   { background: #6dd68a; border-color: #6dd68a; color: #1a2a1a; }
+.chip-opt--fetichisme:has(input:checked){ background: #e0b85c; border-color: #e0b85c; color: #2a1e00; }
+.chip-opt--autre:has(input:checked)     { background: #e05c5c; border-color: #e05c5c; color: #fff; }
+
+/* Volets <details> paramètres partenaires */
+.wf-part-details {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.wf-part-details > summary {
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  list-style: none;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.wf-part-details > summary::before {
+  content: '▶';
+  font-size: 0.65em;
+  opacity: 0.5;
+  transition: transform 0.15s;
+  display: inline-block;
+}
+.wf-part-details[open] > summary::before { transform: rotate(90deg); }
+.wf-part-details-body {
+  padding: 0.25rem 0.75rem 0.75rem;
+  border-top: 1px solid var(--border);
+}
 
 /* Champs plage numérique (taille, circonférence, volume) */
 .wf-range-row {

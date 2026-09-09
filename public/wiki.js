@@ -576,20 +576,25 @@
   var editPosMeta        = document.querySelector("#wiki-edit-form .wiki-position-meta");
   var editFantasMeta     = document.querySelector("#wiki-edit-form .wiki-fantasmes-meta");
   var editPartSousCat    = document.getElementById("wf-partenaires-sous-cat");
+  var editPartParams     = document.getElementById("wf-partenaires-params");
   var editLieuxMeta      = document.querySelector("#wiki-edit-form .wiki-lieux-meta");
   var editObjetsMeta     = document.querySelector("#wiki-edit-form .wiki-objets-meta");
   var editScenarioField  = document.getElementById("wf-scenario-field");
 
   // Sous-panneaux partenaires selon le type sélectionné
   function syncPartSubs() {
-    if (!editPartSousCat) return;
-    var radios = editPartSousCat.querySelectorAll("input[name='meta_sous_cat']");
+    if (!editPartParams) return;
+    var radios = document.querySelectorAll("input[name='meta_sous_cat']");
     var val = "";
     radios.forEach(function (r) { if (r.checked) val = r.value; });
-    editPartSousCat.querySelector(".wf-part-sub--nombre").hidden   = val !== "nombre";
-    editPartSousCat.querySelector(".wf-part-sub--monstre").hidden  = val !== "monstre";
-    editPartSousCat.querySelector(".wf-part-sub--animaux").hidden  = val !== "animaux";
-    editPartSousCat.querySelector(".wf-part-sub--biodetail").hidden = (val !== "monstre" && val !== "animaux");
+    var elNombre   = editPartParams.querySelector(".wf-part-sub--nombre");
+    var elMonstre  = editPartParams.querySelector(".wf-part-sub--monstre");
+    var elAnimaux  = editPartParams.querySelector(".wf-part-sub--animaux");
+    var elBio      = editPartParams.querySelector(".wf-part-sub--biodetail");
+    if (elNombre)  { elNombre.hidden  = val !== "nombre";  if (!elNombre.hidden)  elNombre.open  = true; }
+    if (elMonstre) { elMonstre.hidden = val !== "monstre"; if (!elMonstre.hidden) elMonstre.open = true; }
+    if (elAnimaux) { elAnimaux.hidden = val !== "animaux"; if (!elAnimaux.hidden) elAnimaux.open = true; }
+    if (elBio)     { elBio.hidden     = (val !== "monstre" && val !== "animaux"); if (!elBio.hidden) elBio.open = true; }
   }
   if (editPartSousCat) {
     editPartSousCat.querySelectorAll("input[name='meta_sous_cat']").forEach(function (r) {
@@ -604,6 +609,7 @@
     if (editOwned)         editOwned.hidden         = cat !== "objets" && cat !== "tenues";
     if (editFantasMeta)    editFantasMeta.hidden     = cat !== "fantasmes";
     if (editPartSousCat)   editPartSousCat.hidden    = cat !== "partenaires";
+    if (editPartParams)    editPartParams.hidden     = cat !== "partenaires";
     if (editLieuxMeta)     editLieuxMeta.hidden      = cat !== "lieux";
     if (editPosMeta)       editPosMeta.hidden        = cat !== "position";
     if (editObjetsMeta)    editObjetsMeta.hidden     = cat !== "objets";
