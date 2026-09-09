@@ -14,7 +14,7 @@
     var TYPES_PART = { nombre: 'Nombre', fetichisme: 'Fétichisme', monstre: 'Monstre', animaux: 'Animaux', autre: 'Autre' };
     var hasPartMeta = page.category === 'partenaires' && (nbTotal || nbFem || nbMasc || pmTypes.length);
     var LIEU = { prive: 'Privé', public: 'Public', cache: 'Caché' };
-    var GODE = { animal: 'Animal', monstre: 'Monstre', fantaisiste: 'Fantaisiste', ethnique: 'Ethnique', autre: 'Autre' };
+    var OBJETS_SOUS = { substance: 'Substance', gode: 'Gode', bdsm: 'BDSM', fantaisie: 'Fantaisie', autre: 'Autre' };
     var QUI    = { femme: 'Femme', homme: 'Homme', variable: 'Variable', aucun: 'Debout / aucun' };
     var CAN    = { vagin: 'Vagin', anus: 'Anus', bouche: 'Bouche', mains: 'Mains', autre: 'Autre' };
     var ORI    = { face_a_face: 'Face à face', face_contre_dos: 'Face contre dos', cote_a_cote: 'Côte à côte', acrobatique: 'Acrobatique', autre: 'Autre' };
@@ -88,7 +88,7 @@
     <div class="wiki-detail-layout">
       <%
         var hasMetaRows = hasPartMeta || hasPosMeta
-          || (page.category === 'objets' && pm.type_gode && GODE[pm.type_gode])
+          || (page.category === 'objets' && pm.sous_cat && OBJETS_SOUS[pm.sous_cat])
           || (page.category === 'lieux'  && pm.type_lieu  && LIEU[pm.type_lieu])
           || (page.category === 'fantasmes' && pm.sous_cat && FSUBS[pm.sous_cat]);
       %>
@@ -259,8 +259,8 @@
             <% if (page.category === 'fantasmes' && pm.sous_cat && FSUBS[pm.sous_cat]) { %>
               <div class="wiki-left-meta-row"><dt>Sous-cat&eacute;gorie</dt><dd><%= FSUBS[pm.sous_cat] %></dd></div>
             <% } %>
-            <% if (page.category === 'objets' && pm.type_gode && GODE[pm.type_gode]) { %>
-              <div class="wiki-left-meta-row"><dt>Type</dt><dd><%= GODE[pm.type_gode] %></dd></div>
+            <% if (page.category === 'objets' && pm.sous_cat && OBJETS_SOUS[pm.sous_cat]) { %>
+              <div class="wiki-left-meta-row"><dt>Cat&eacute;gorie</dt><dd><%= OBJETS_SOUS[pm.sous_cat] %></dd></div>
             <% } %>
             <% if (page.category === 'lieux' && pm.type_lieu && LIEU[pm.type_lieu]) { %>
               <div class="wiki-left-meta-row"><dt>Type de lieu</dt><dd><%= LIEU[pm.type_lieu] %></dd></div>

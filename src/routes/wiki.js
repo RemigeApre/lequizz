@@ -52,6 +52,13 @@ const FANTASMES_SUBCATS = [
   { key: "bdsm",       label: "BDSM" },
   { key: "classique",  label: "Classique" },
 ];
+const OBJETS_SUBCATS = [
+  { key: "substance", label: "Substance" },
+  { key: "gode",      label: "Gode" },
+  { key: "bdsm",      label: "BDSM" },
+  { key: "fantaisie", label: "Fantaisie" },
+  { key: "autre",     label: "Autre" },
+];
 const CATEGORY_KEYS = CATEGORIES.map((c) => c.key);
 const OWNED_CATEGORIES = ["objets", "tenues"];
 
@@ -256,8 +263,9 @@ function parseMeta(category, body) {
     const t = body.meta_type_lieu;
     specific = { type_lieu: ["prive","public","cache"].includes(t) ? t : "" };
   } else if (category === "objets") {
-    const t = body.meta_type_gode;
-    specific = { type_gode: ["animal","monstre","fantaisiste","ethnique","autre"].includes(t) ? t : "" };
+    const validSubs = OBJETS_SUBCATS.map((s) => s.key);
+    const sub = body.meta_sous_cat;
+    specific = { sous_cat: validSubs.includes(sub) ? sub : "" };
   }
 
   return { ...base, ...specific };
@@ -409,7 +417,7 @@ function buildWikiRouter(config) {
   const router = express.Router();
   const ALL_QUESTIONS = buildQuestionIndex(config);
 
-  const CTX = { categories: CATEGORIES, fantasmesSubs: FANTASMES_SUBCATS };
+  const CTX = { categories: CATEGORIES, fantasmesSubs: FANTASMES_SUBCATS, objetsSubs: OBJETS_SUBCATS };
 
   function sortedPages() {
     return listWikiPages().sort((a, b) => a.title.localeCompare(b.title, "fr", { sensitivity: "base" }));
