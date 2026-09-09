@@ -6739,6 +6739,7 @@ a.wiki-ql-label:hover .wiki-ql-text {
 
 /* ── Badge info "!" scénario ──────────────────────────── */
 .wiki-scenario-info {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -6762,15 +6763,39 @@ a.wiki-ql-label:hover .wiki-ql-text {
   background: rgba(255,255,255,0.25);
   color: #fff;
 }
+.wiki-scenario-info::after {
+  content: attr(data-tooltip);
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(8, 8, 20, 0.96);
+  color: #ddd;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 400;
+  font-style: normal;
+  white-space: pre-wrap;
+  width: 300px;
+  z-index: 200;
+  pointer-events: none;
+  line-height: 1.55;
+  border: 1px solid rgba(255,255,255,0.12);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.wiki-scenario-info:hover::after { display: block; }
 
 /* ── Image d'illustration du scénario (viewer) ────────── */
 .wiki-scenario-img {
   display: block;
   width: 100%;
-  max-height: 360px;
-  object-fit: cover;
+  height: auto;
   border-radius: 8px;
   margin: 0.75rem 0;
+  cursor: zoom-in;
 }
 
 /* ── Section upload image scénario (formulaire) ───────── */

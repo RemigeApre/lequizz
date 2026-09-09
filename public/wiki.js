@@ -1781,7 +1781,7 @@
 
   function rebuildSrcList() {
     lbSrcs = [];
-    document.querySelectorAll(".wiki-infobox-img, .wiki-gallery-img, .wiki-form-existing-image, .wiki-card-img, .wiki-var-img, .wiki-right-img, .wiki-secondary-img").forEach(function (img) {
+    document.querySelectorAll(".wiki-infobox-img, .wiki-gallery-img, .wiki-form-existing-image, .wiki-card-img, .wiki-var-img, .wiki-right-img, .wiki-secondary-img, .wiki-scenario-img").forEach(function (img) {
       var src = lbGetSrc(img);
       if (src) lbSrcs.push(src);
     });
@@ -2133,7 +2133,7 @@
 
   // Rend cliquables toutes les images de la galerie, des formulaires et des variantes
   function attachLightboxToImages() {
-    document.querySelectorAll(".wiki-infobox-img, .wiki-gallery-img, .wiki-form-existing-image, .wiki-card-img, .wiki-var-img, .wiki-right-img, .wiki-secondary-img").forEach(function (img) {
+    document.querySelectorAll(".wiki-infobox-img, .wiki-gallery-img, .wiki-form-existing-image, .wiki-card-img, .wiki-var-img, .wiki-right-img, .wiki-secondary-img, .wiki-scenario-img").forEach(function (img) {
       if (img.dataset.lbBound) return;
       // Les images dans les cartes de liste naviguent vers la page wiki — pas de lightbox
       if (img.closest(".wiki-card")) return;
