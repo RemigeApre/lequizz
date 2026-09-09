@@ -3956,6 +3956,9 @@
           // Juste après le H3 → float droite, le texte suivant s'enroule
           found.parentNode.insertBefore(fig, found.nextSibling);
         }
+        // Si le H3 est dans une section H2 fermée, l'ouvrir
+        var parentSection = found.closest("details.wiki-section");
+        if (parentSection) parentSection.open = true;
       } else {
         // H2 section → dans le wiki-section-body
         var body = found.querySelector(":scope > .wiki-section-body");
@@ -3965,6 +3968,8 @@
         } else {
           body.insertBefore(fig, body.firstChild);
         }
+        // Ouvre la section pour que l'image soit immédiatement visible
+        found.open = true;
       }
     });
   })();
@@ -4083,10 +4088,11 @@
           var opt = document.createElement("option");
           opt.value = h;
           opt.textContent = h.length > 20 ? h.slice(0, 18) + "\u2026" : h;
-          if (h === current) opt.selected = true;
           sel.appendChild(opt);
         });
-        sel.classList.toggle("on", !!current);
+        // Forcer la valeur APRÈS la construction des options (plus fiable que opt.selected)
+        sel.value = current;
+        sel.classList.toggle("on", !!current && sel.value === current);
       });
     }
 
@@ -4252,10 +4258,15 @@
       attachCardListeners(card);
       // Sync état initial dans les contrôles
       var key = card.dataset.path;
-      var star  = card.querySelector(".wf-img-ctrl--star");
-      var heart = card.querySelector(".wf-img-ctrl--heart");
-      if (star)  star.classList.toggle("on", state.cover === key);
-      if (heart) heart.classList.toggle("on", !!state.secondary[key]);
+      var star   = card.querySelector(".wf-img-ctrl--star");
+      var heart  = card.querySelector(".wf-img-ctrl--heart");
+      var secSel = card.querySelector(".wf-img-ctrl--section");
+      if (star)   star.classList.toggle("on", state.cover === key);
+      if (heart)  heart.classList.toggle("on", !!state.secondary[key]);
+      // Section : sync visuel explicite (refreshSectionSelects reconstruira les options ensuite)
+      if (secSel && state.sections[key]) {
+        secSel.classList.add("on");
+      }
     });
 
     // ── Gestion de l'input "+" (ajout de nouveaux fichiers) ─
@@ -4411,6 +4422,10 @@
     if (form) {
       form.addEventListener("submit", function () {
         syncMeta();
+        try {
+          var dbg = JSON.parse(metaInput.value);
+          console.info("[images_meta] soumis :", JSON.stringify(dbg, null, 2));
+        } catch (_) {}
       });
     }
   })();
