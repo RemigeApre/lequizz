@@ -53,9 +53,10 @@
   <%
     var favWiki    = detail.favorites.filter(function(f){ return f.itemType === 'wiki'; });
     var favGallery = detail.favorites.filter(function(f){ return f.itemType === 'gallery'; });
+    var favBd      = detail.favorites.filter(function(f){ return f.itemType === 'bd'; });
   %>
   <div class="aud-section">
-    <h2 class="aud-section-title">&#128293;&nbsp;Wiki J&rsquo;adore (<%= favWiki.length %>)</h2>
+    <h2 class="aud-section-title">&#128293;&nbsp;Wiki favoris (<%= favWiki.length %>)</h2>
     <% if (favWiki.length) { %>
     <div class="aud-fav-rail">
       <% favWiki.forEach(function(f) { %>
@@ -75,7 +76,7 @@
   </div>
 
   <div class="aud-section">
-    <h2 class="aud-section-title">&#128293;&nbsp;Images J&rsquo;adore (<%= favGallery.length %>)</h2>
+    <h2 class="aud-section-title">&#128293;&nbsp;Images favorites (<%= favGallery.length %>)</h2>
     <% if (favGallery.length) { %>
     <div class="aud-fav-rail">
       <% favGallery.forEach(function(f) { %>
@@ -90,7 +91,27 @@
       <% }) %>
     </div>
     <% } else { %>
-      <p class="admin-muted">Aucun favori galerie.</p>
+      <p class="admin-muted">Aucune image favorite.</p>
+    <% } %>
+  </div>
+
+  <div class="aud-section">
+    <h2 class="aud-section-title">&#128293;&nbsp;BD favorites (<%= favBd.length %>)</h2>
+    <% if (favBd.length) { %>
+    <div class="aud-fav-rail">
+      <% favBd.forEach(function(f) { %>
+      <a href="/bd/<%= f.itemId %>" class="aud-fav-card aud-fav-card--img">
+        <% if (f.coverImg) { %>
+          <img src="<%= f.coverImg %>" alt="" class="aud-fav-card-img" loading="lazy" />
+        <% } else { %>
+          <div class="aud-fav-card-placeholder">&#128214;</div>
+        <% } %>
+        <% if (f.title) { %><span class="aud-fav-card-title"><%= f.title %></span><% } %>
+      </a>
+      <% }) %>
+    </div>
+    <% } else { %>
+      <p class="admin-muted">Aucune BD favorite.</p>
     <% } %>
   </div>
 
@@ -193,6 +214,46 @@
       </table>
     <% } else { %>
       <p class="admin-muted">Aucune activit&eacute; galerie enregistr&eacute;e.</p>
+    <% } %>
+  </div>
+
+  <%# ── BD les plus vues ── %>
+  <div class="aud-section">
+    <h2 class="aud-section-title">BD les plus visit&eacute;es</h2>
+    <% if (detail.bdViewCounts && detail.bdViewCounts.length) { %>
+      <table class="admin-table">
+        <thead><tr><th>BD</th><th style="text-align:right">Visites</th></tr></thead>
+        <tbody>
+          <% detail.bdViewCounts.forEach(function(v) { %>
+          <tr>
+            <td><a href="/bd/<%= v.bookId %>"><%= v.title || '#' + v.bookId %></a></td>
+            <td style="text-align:right;font-weight:600;color:var(--accent)"><%= v.viewCount %></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } else { %>
+      <p class="admin-muted">Aucune visite BD enregistr&eacute;e.</p>
+    <% } %>
+  </div>
+
+  <%# ── Activité BD récente ── %>
+  <div class="aud-section">
+    <h2 class="aud-section-title">Activit&eacute; BD r&eacute;cente (30 derni&egrave;res)</h2>
+    <% if (detail.recentBdViews && detail.recentBdViews.length) { %>
+      <table class="admin-table">
+        <thead><tr><th>BD</th><th style="text-align:right;white-space:nowrap">Date</th></tr></thead>
+        <tbody>
+          <% detail.recentBdViews.forEach(function(v) { %>
+          <tr>
+            <td><a href="/bd/<%= v.bookId %>"><%= v.title || '#' + v.bookId %></a></td>
+            <td style="text-align:right;font-size:.78rem;color:var(--muted);white-space:nowrap"><%= new Date(v.createdAt).toLocaleString('fr-FR') %></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } else { %>
+      <p class="admin-muted">Aucune activit&eacute; BD enregistr&eacute;e.</p>
     <% } %>
   </div>
 

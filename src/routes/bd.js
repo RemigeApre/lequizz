@@ -2,7 +2,7 @@ const path = require("path");
 const fs = require("fs");
 const express = require("express");
 const multer = require("multer");
-const { listBdBooks, getBdBook, insertBdBook, updateBdBook, deleteBdBook, reactBdBook, isFavorite, addFavorite, removeFavorite } = require("../db");
+const { listBdBooks, getBdBook, insertBdBook, updateBdBook, deleteBdBook, reactBdBook, isFavorite, addFavorite, removeFavorite, logBdView } = require("../db");
 const { requireUser, requireUserJson, requireAdmin } = require("../auth");
 
 const uploadsDir = path.join(__dirname, "..", "..", "data", "uploads", "bd");
@@ -146,6 +146,7 @@ function buildBdRouter(config) {
   router.get("/:id", (req, res) => {
     const book = getBdBook(Number(req.params.id));
     if (!book) return res.redirect("/bd");
+    logBdView(book.id, req.user ? req.user.id : null);
     const allBooks = listBdBooks();
     const idx = allBooks.findIndex((b) => b.id === book.id);
     const prevBook = idx < allBooks.length - 1 ? allBooks[idx + 1] : null;

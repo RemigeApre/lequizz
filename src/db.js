@@ -177,6 +177,15 @@ db.exec(`
 `);
 
 db.exec(`
+  CREATE TABLE IF NOT EXISTS bd_views (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    book_id INTEGER NOT NULL,
+    user_id INTEGER,
+    created_at TEXT NOT NULL
+  )
+`);
+
+db.exec(`
   CREATE TABLE IF NOT EXISTS connection_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
@@ -601,6 +610,10 @@ function logGalleryView(galleryId, userId) {
   db.prepare("INSERT INTO gallery_views (gallery_id, user_id, created_at) VALUES (?, ?, ?)").run(galleryId, userId || null, new Date().toISOString());
 }
 
+function logBdView(bookId, userId) {
+  db.prepare("INSERT INTO bd_views (book_id, user_id, created_at) VALUES (?, ?, ?)").run(bookId, userId || null, new Date().toISOString());
+}
+
 function getWikiKPIs() {
   const totalViews = db.prepare("SELECT COALESCE(SUM(views), 0) AS v FROM wiki_pages").get().v;
   const monthViews = db.prepare(
@@ -700,22 +713,26 @@ function getUserDetail(id) {
   if (!user) return null;
   const favorites = db.prepare(
     `SELECT f.item_type, f.item_id, f.created_at,
-       COALESCE(wp.title, gi.title, '') AS title,
+       COALESCE(wp.title, gi.title, bb.title, '') AS title,
        wp.image_paths AS wiki_img, wp.category AS wiki_category,
-       gi.image_paths AS gal_img
+       gi.image_paths AS gal_img,
+       bb.image_paths AS bd_img
      FROM favorites f
      LEFT JOIN wiki_pages wp ON f.item_type = 'wiki' AND f.item_id = wp.id
      LEFT JOIN gallery_images gi ON f.item_type = 'gallery' AND f.item_id = gi.id
+     LEFT JOIN bd_books bb ON f.item_type = 'bd' AND f.item_id = bb.id
      WHERE f.user_id = ? ORDER BY f.id DESC`
   ).all(id).map(function(r) {
-    const wikiImgs  = r.wiki_img  ? (function(){ try { return JSON.parse(r.wiki_img);  } catch(_){ return []; } })() : [];
-    const galImgs   = r.gal_img   ? (function(){ try { return JSON.parse(r.gal_img);   } catch(_){ return []; } })() : [];
+    const wikiImgs = r.wiki_img ? (function(){ try { return JSON.parse(r.wiki_img); } catch(_){ return []; } })() : [];
+    const galImgs  = r.gal_img  ? (function(){ try { return JSON.parse(r.gal_img);  } catch(_){ return []; } })() : [];
+    const bdImgs   = r.bd_img   ? (function(){ try { return JSON.parse(r.bd_img);   } catch(_){ return []; } })() : [];
+    const coverImg = r.item_type === "wiki" ? wikiImgs[0] : r.item_type === "gallery" ? galImgs[0] : bdImgs[0];
     return {
       itemType: r.item_type,
       itemId:   r.item_id,
       createdAt: r.created_at,
       title:    r.title || "",
-      coverImg: (r.item_type === "wiki" ? wikiImgs[0] : galImgs[0]) || null,
+      coverImg: coverImg || null,
       category: r.wiki_category || null,
     };
   });
@@ -757,7 +774,21 @@ function getUserDetail(id) {
   ).all(id).map(function(r) {
     return { galleryId: r.gallery_id, title: r.title, contentType: r.content_type, viewCount: r.view_count };
   });
-  return { user, favorites, notes, recentWikiViews, wikiViewCounts, recentGalViews, galViewCounts };
+  const recentBdViews = db.prepare(
+    `SELECT bv.created_at, bb.id AS book_id, bb.title
+     FROM bd_views bv JOIN bd_books bb ON bb.id = bv.book_id
+     WHERE bv.user_id = ? ORDER BY bv.id DESC LIMIT 30`
+  ).all(id).map(function(r) {
+    return { createdAt: r.created_at, bookId: r.book_id, title: r.title };
+  });
+  const bdViewCounts = db.prepare(
+    `SELECT bb.id AS book_id, bb.title, COUNT(*) AS view_count
+     FROM bd_views bv JOIN bd_books bb ON bb.id = bv.book_id
+     WHERE bv.user_id = ? GROUP BY bv.book_id ORDER BY view_count DESC LIMIT 20`
+  ).all(id).map(function(r) {
+    return { bookId: r.book_id, title: r.title, viewCount: r.view_count };
+  });
+  return { user, favorites, notes, recentWikiViews, wikiViewCounts, recentGalViews, galViewCounts, recentBdViews, bdViewCounts };
 }
 
 function getImageLinks(src) {
@@ -1097,6 +1128,7 @@ module.exports = {
   listConnectionLogs,
   setGalleryImageFeatured,
   logGalleryView,
+  logBdView,
   getWikiKPIs,
   getGalleryKPIs,
   getUserDetail,
