@@ -1,3 +1,222 @@
+// ── Filtrage BD (sidebar) ─────────────────────────────────────────────────
+(function() {
+  var grid     = document.getElementById("bd-grid");
+  var cards    = grid ? Array.from(grid.querySelectorAll(".bd-card")) : [];
+  var countEl  = document.getElementById("bd-count-hero");
+  var resultEl = document.getElementById("bd-result-count");
+  var searchInput = document.getElementById("bd-search");
+  var searchClear = document.getElementById("bd-search-clear");
+  var tagFilter   = document.getElementById("bd-tag-filter");
+
+  var activeTags = [];
+  var searchQ    = "";
+  var showUltra  = true; // géré par bouton existant
+
+  function updateCount(visible) {
+    if (countEl) countEl.textContent = visible;
+    if (resultEl) {
+      if (activeTags.length || searchQ) {
+        resultEl.textContent = visible + " résultat" + (visible !== 1 ? "s" : "");
+        resultEl.hidden = false;
+      } else {
+        resultEl.hidden = true;
+      }
+    }
+  }
+
+  function applyFilters() {
+    var visible = 0;
+    cards.forEach(function(card) {
+      var tags  = (card.dataset.tags || "").split(",").filter(Boolean);
+      var title = (card.dataset.title || "");
+      var ultra = card.dataset.ultra === "1";
+
+      var okTags   = activeTags.length === 0 || activeTags.every(function(t) { return tags.includes(t); });
+      var okSearch = !searchQ || title.includes(searchQ);
+      var okUltra  = showUltra || !ultra;
+
+      if (okTags && okSearch && okUltra) { card.style.display = ""; visible++; }
+      else                               { card.style.display = "none"; }
+    });
+    updateCount(visible);
+  }
+
+  // Tags
+  if (tagFilter) {
+    tagFilter.addEventListener("click", function(e) {
+      var chip = e.target.closest(".wiki-tag-chip");
+      if (!chip) return;
+      var tag = chip.dataset.tag;
+      var idx = activeTags.indexOf(tag);
+      if (idx === -1) { activeTags.push(tag); chip.dataset.state = "1"; chip.classList.add("active"); }
+      else            { activeTags.splice(idx, 1); chip.dataset.state = "0"; chip.classList.remove("active"); }
+      applyFilters();
+    });
+  }
+
+  // Search
+  if (searchInput) {
+    searchInput.addEventListener("input", function() {
+      searchQ = searchInput.value.toLowerCase().trim();
+      if (searchClear) searchClear.hidden = !searchQ;
+      applyFilters();
+    });
+    if (searchClear) {
+      searchClear.addEventListener("click", function() {
+        searchInput.value = "";
+        searchQ = "";
+        searchClear.hidden = true;
+        applyFilters();
+      });
+    }
+  }
+
+  // Ultra toggle (réutilise l'existant)
+  var ultraBtn = document.getElementById("bd-ultra-toggle");
+  if (ultraBtn) {
+    ultraBtn.addEventListener("click", function() {
+      showUltra = !showUltra;
+      ultraBtn.textContent = showUltra ? "\uD83D\uDD12 Masquer Ultra" : "\uD83D\uDD13 Afficher Ultra";
+      applyFilters();
+    });
+  }
+
+  applyFilters();
+})();
+
+// ── Modal BD ──────────────────────────────────────────────────────────────────
+(function() {
+  var dataEl = document.getElementById("bd-data-json");
+  if (!dataEl) return;
+
+  var bdMap = {};
+  try {
+    JSON.parse(dataEl.textContent).forEach(function(b) { bdMap[b.id] = b; });
+  } catch(_) { return; }
+
+  var overlay  = document.getElementById("bd-modal");
+  var closeBtn = document.getElementById("bd-modal-close");
+  var coverImg = document.getElementById("bd-modal-cover");
+  var titleEl  = document.getElementById("bd-modal-title");
+  var descEl   = document.getElementById("bd-modal-desc");
+  var tagsEl   = document.getElementById("bd-modal-tags");
+  var reactEl  = document.getElementById("bd-modal-reactions");
+  var previewEl= document.getElementById("bd-modal-preview");
+  var previewWrap = document.getElementById("bd-modal-preview-wrap");
+  var readBtn  = document.getElementById("bd-modal-read-btn");
+
+  if (!overlay) return;
+
+  function openModal(book) {
+    // Cover
+    if (book.imagePaths && book.imagePaths[0]) {
+      coverImg.src = book.imagePaths[0];
+      coverImg.style.display = "";
+    } else {
+      coverImg.style.display = "none";
+    }
+
+    // Infos
+    titleEl.textContent = book.title;
+    descEl.textContent  = book.description || "";
+    descEl.style.display = book.description ? "" : "none";
+
+    // Tags
+    tagsEl.innerHTML = "";
+    (book.tags || []).forEach(function(t) {
+      var span = document.createElement("span");
+      span.className = "link-tag-pill";
+      span.textContent = t;
+      tagsEl.appendChild(span);
+    });
+
+    // Réactions
+    reactEl.textContent = "";
+    function makeReactBadge(emoji, label) {
+      var sp = document.createElement("span");
+      sp.className = "bd-card-react-badge";
+      sp.title = label;
+      sp.textContent = emoji;
+      return sp;
+    }
+    if (book.flame)      reactEl.appendChild(makeReactBadge("\uD83D\uDD25", "J\u2019adore"));
+    if (book.interested) reactEl.appendChild(makeReactBadge("\u2728", "\u00C7a m\u2019int\u00E9resse"));
+    if (book.rating > 0) {
+      var ratingSpan = document.createElement("span");
+      ratingSpan.className = "bd-modal-rating";
+      var starsStr = "";
+      for (var i = 1; i <= 5; i++) starsStr += (i <= book.rating ? "\u2605" : "\u2606");
+      ratingSpan.textContent = starsStr;
+      reactEl.appendChild(ratingSpan);
+    }
+
+    // Prévisualisation (max 10 images, sans la couverture)
+    previewEl.innerHTML = "";
+    var previews = book.imagePaths.slice(0, 10);
+    previews.forEach(function(src, idx) {
+      var thumb = document.createElement("button");
+      thumb.type = "button";
+      thumb.className = "bd-modal-thumb" + (idx === 0 ? " bd-modal-thumb--cover" : "");
+      thumb.title = "Page " + (idx + 1);
+      var img = document.createElement("img");
+      img.src = src;
+      img.alt = "Page " + (idx + 1);
+      img.loading = "lazy";
+      var num = document.createElement("span");
+      num.className = "bd-modal-thumb-num";
+      num.textContent = idx + 1;
+      thumb.appendChild(img);
+      thumb.appendChild(num);
+      thumb.addEventListener("click", function() {
+        window.location.href = "/bd/" + book.id + "?start=" + idx;
+      });
+      previewEl.appendChild(thumb);
+    });
+
+    // "+N pages" si plus de 10
+    if (book.totalPages > 10) {
+      var more = document.createElement("span");
+      more.className = "bd-modal-thumb-more";
+      more.textContent = "+" + (book.totalPages - 10);
+      previewEl.appendChild(more);
+    }
+
+    previewWrap.style.display = previews.length > 0 ? "" : "none";
+
+    // Bouton lire
+    readBtn.href = "/bd/" + book.id;
+
+    // Ouvrir
+    overlay.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeModal() {
+    overlay.hidden = true;
+    document.body.style.overflow = "";
+  }
+
+  // Interception des clics sur les cartes
+  var grid = document.getElementById("bd-grid");
+  if (grid) {
+    grid.addEventListener("click", function(e) {
+      var card = e.target.closest(".bd-card[data-bd-id]");
+      if (!card) return;
+      e.preventDefault();
+      var book = bdMap[Number(card.dataset.bdId)];
+      if (book) openModal(book);
+    });
+  }
+
+  if (closeBtn) closeBtn.addEventListener("click", closeModal);
+  overlay.addEventListener("click", function(e) {
+    if (e.target === overlay) closeModal();
+  });
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape" && !overlay.hidden) closeModal();
+  });
+})();
+
 (function () {
   "use strict";
 
@@ -244,37 +463,5 @@
       buildPreviews(Array.from(fileInput.files || []));
     });
   }
-
-  // ══════════════════════════════════════════════════
-  // FILTRE ULTRA (liste BD)
-  // ══════════════════════════════════════════════════
-  var bdGrid       = document.getElementById("bd-grid");
-  var bdUltraToggle = document.getElementById("bd-ultra-toggle");
-  var hideUltra    = localStorage.getItem("bd-hide-ultra") !== "0";
-
-  function syncUltraBtn() {
-    if (!bdUltraToggle) return;
-    bdUltraToggle.textContent = hideUltra ? "\uD83D\uDD12 Masquer Ultra" : "\uD83D\uDD13 Afficher Ultra";
-    bdUltraToggle.classList.toggle("active", hideUltra);
-  }
-
-  function applyUltra() {
-    if (!bdGrid) return;
-    bdGrid.querySelectorAll(".bd-card").forEach(function(card) {
-      card.hidden = hideUltra && card.dataset.ultra === "1";
-    });
-  }
-
-  if (bdUltraToggle) {
-    bdUltraToggle.addEventListener("click", function() {
-      hideUltra = !hideUltra;
-      localStorage.setItem("bd-hide-ultra", hideUltra ? "1" : "0");
-      syncUltraBtn();
-      applyUltra();
-    });
-  }
-
-  syncUltraBtn();
-  applyUltra();
 
 })();

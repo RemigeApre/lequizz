@@ -1,0 +1,119 @@
+<%- include('partials/head', { title: 'BD not\u00e9es \u2014 ' + config.title }) %>
+<main class="container wide gallery-has-sidebar">
+  <%- include('partials/top-nav', { config: config, navTitle: 'BD not\u00e9es', navBack: '/favoris' }) %>
+
+  <aside class="wiki-cat-sidebar gallery-sidebar">
+    <div class="wiki-chapter-hero" style="--ch-hue: 28">
+      <div class="wiki-chapter-hero-top">
+        <span></span>
+        <h1 class="wiki-chapter-hero-title">BD not&eacute;es</h1>
+        <span class="wiki-chapter-hero-count" id="bd-notes-count"><%= books.length %></span>
+      </div>
+    </div>
+    <div class="wiki-sidebar-body">
+      <div class="wiki-search-wrap">
+        <div class="wiki-search-bar">
+          <span class="wiki-search-icon">&#128269;</span>
+          <input type="search" id="bd-notes-search" class="wiki-search-input" placeholder="Rechercher&hellip;" autocomplete="off" />
+          <button type="button" id="bd-notes-search-clear" class="wiki-search-clear" hidden>&#215;</button>
+        </div>
+      </div>
+      <% if (allTags.length) { %>
+      <details class="wiki-sidebar-filter-details">
+        <summary class="wiki-sidebar-filter-summary">Tags</summary>
+        <div class="wiki-tag-cloud" id="bd-notes-tags">
+          <% allTags.forEach(function(t) { %>
+            <button type="button" class="wiki-tag-chip" data-tag="<%= t %>" data-state="0">
+              <span class="wtc-label"><%= t %></span>
+            </button>
+          <% }) %>
+        </div>
+      </details>
+      <% } %>
+    </div>
+  </aside>
+
+  <% if (!books.length) { %>
+    <p class="intro">Aucune BD not&eacute;e pour l&apos;instant.</p>
+  <% } else { %>
+    <div class="bd-grid" id="bd-notes-grid">
+      <% books.forEach(function(book) { %>
+        <a href="/bd/<%= book.id %>" class="bd-card"
+           data-tags="<%= book.tags.join(',') %>"
+           data-title="<%= book.title.toLowerCase() %>">
+          <% if (book.imagePaths && book.imagePaths.length) { %>
+            <div class="bd-card-cover">
+              <img src="<%= book.imagePaths[0] %>" alt="" class="bd-card-img" loading="lazy" />
+              <span class="bd-page-count"><%= book.imagePaths.length %>&nbsp;p.</span>
+            </div>
+          <% } else { %>
+            <div class="bd-card-cover bd-card-cover-empty">
+              <span class="bd-card-empty-icon">&#128214;</span>
+            </div>
+          <% } %>
+          <div class="bd-card-body">
+            <p class="bd-card-title"><%= book.title %></p>
+            <div class="bd-card-reactions">
+              <% if (book.flame) { %><span class="bd-card-react-badge">&#128293;</span><% } %>
+              <% if (book.interested) { %><span class="bd-card-react-badge">&#10024;</span><% } %>
+              <% if (book.rating > 0) { %>
+                <span class="bd-card-rating"><%= book.rating %><span class="bd-card-star">&#9733;</span></span>
+              <% } %>
+            </div>
+          </div>
+        </a>
+      <% }) %>
+    </div>
+  <% } %>
+</main>
+
+<script>
+(function() {
+  var grid  = document.getElementById("bd-notes-grid");
+  var cards = grid ? Array.from(grid.querySelectorAll(".bd-card")) : [];
+  var countEl = document.getElementById("bd-notes-count");
+  var searchInput = document.getElementById("bd-notes-search");
+  var searchClear = document.getElementById("bd-notes-search-clear");
+  var tagCloud = document.getElementById("bd-notes-tags");
+  var activeTags = [], searchQ = "";
+
+  function applyFilters() {
+    var vis = 0;
+    cards.forEach(function(c) {
+      var tags  = (c.dataset.tags || "").split(",").filter(Boolean);
+      var title = c.dataset.title || "";
+      var ok = (activeTags.length === 0 || activeTags.every(function(t) { return tags.includes(t); }))
+            && (!searchQ || title.includes(searchQ));
+      c.style.display = ok ? "" : "none";
+      if (ok) vis++;
+    });
+    if (countEl) countEl.textContent = vis;
+  }
+
+  if (tagCloud) {
+    tagCloud.addEventListener("click", function(e) {
+      var chip = e.target.closest(".wiki-tag-chip");
+      if (!chip) return;
+      var tag = chip.dataset.tag;
+      var idx = activeTags.indexOf(tag);
+      if (idx === -1) { activeTags.push(tag); chip.classList.add("active"); chip.dataset.state = "1"; }
+      else            { activeTags.splice(idx, 1); chip.classList.remove("active"); chip.dataset.state = "0"; }
+      applyFilters();
+    });
+  }
+  if (searchInput) {
+    searchInput.addEventListener("input", function() {
+      searchQ = searchInput.value.toLowerCase().trim();
+      if (searchClear) searchClear.hidden = !searchQ;
+      applyFilters();
+    });
+    if (searchClear) {
+      searchClear.addEventListener("click", function() {
+        searchInput.value = ""; searchQ = ""; searchClear.hidden = true; applyFilters();
+      });
+    }
+  }
+  applyFilters();
+})();
+</script>
+<%- include('partials/foot') %>

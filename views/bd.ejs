@@ -1,18 +1,50 @@
 <%- include('partials/head', { title: 'BD — ' + config.title }) %>
-<main class="container wide">
+<main class="container wide gallery-has-sidebar">
   <%- include('partials/top-nav', { config: config, navTitle: 'BD', navBack: '/' }) %>
-  <div class="bd-list-header">
-    <h1 class="section-title-h1">BD</h1>
-  </div>
+
+  <%# ── SIDEBAR GAUCHE ──────────────────────────────────────────────── %>
+  <aside class="wiki-cat-sidebar gallery-sidebar">
+    <div class="wiki-chapter-hero" style="--ch-hue: 28">
+      <div class="wiki-chapter-hero-top">
+        <span></span>
+        <h1 class="wiki-chapter-hero-title">BD</h1>
+        <span class="wiki-chapter-hero-count" id="bd-count-hero"><%= books.length %></span>
+      </div>
+    </div>
+
+    <div class="wiki-sidebar-body">
+      <div class="wiki-search-wrap">
+        <div class="wiki-search-bar">
+          <span class="wiki-search-icon">&#128269;</span>
+          <input type="search" id="bd-search" class="wiki-search-input" placeholder="Rechercher&hellip;" autocomplete="off" />
+          <button type="button" id="bd-search-clear" class="wiki-search-clear" hidden>&#215;</button>
+        </div>
+        <span id="bd-result-count" class="wiki-result-count" hidden></span>
+      </div>
+
+      <details class="wiki-sidebar-filter-details">
+        <summary class="wiki-sidebar-filter-summary">Filtres</summary>
+
+        <% if (allTags.length) { %>
+        <div class="wiki-filter-section">
+          <div class="wiki-tag-cloud" id="bd-tag-filter">
+            <% allTags.forEach(function(t) { %>
+              <button type="button" class="wiki-tag-chip" data-tag="<%= t %>" data-state="0">
+                <span class="wtc-label"><%= t %></span>
+              </button>
+            <% }) %>
+          </div>
+        </div>
+        <% } %>
+      </details>
+
+      <button type="button" id="bd-ultra-toggle" class="tag-chip gallery-ultra-toggle" style="margin-top:.5rem">&#128274; Masquer Ultra</button>
+    </div>
+  </aside>
+
   <% if (currentUser && currentUser.isAdmin) { %>
   <div class="gallery-fab-wrap">
     <a href="/bd/new" class="wiki-fab-add" title="Nouvelle BD">+</a>
-  </div>
-  <% } %>
-
-  <% if (books.length) { %>
-  <div class="bd-controls">
-    <button type="button" id="bd-ultra-toggle" class="tag-chip gallery-ultra-toggle">&#128274; Masquer Ultra</button>
   </div>
   <% } %>
 
@@ -22,7 +54,10 @@
     <div class="bd-grid" id="bd-grid">
       <% books.forEach(function(book) { %>
         <a href="/bd/<%= book.id %>" class="bd-card"
-          data-ultra="<%= book.tags.indexOf('ultra') !== -1 ? '1' : '0' %>">
+          data-bd-id="<%= book.id %>"
+          data-ultra="<%= book.tags.indexOf('ultra') !== -1 ? '1' : '0' %>"
+          data-tags="<%= book.tags.join(',') %>"
+          data-title="<%= book.title.toLowerCase() %>">
           <% if (book.imagePaths && book.imagePaths.length) { %>
             <div class="bd-card-cover">
               <img src="<%= book.imagePaths[0] %>" alt="" class="bd-card-img" loading="lazy" />
@@ -35,16 +70,54 @@
           <% } %>
           <div class="bd-card-body">
             <p class="bd-card-title"><%= book.title %></p>
-            <% if (book.tags.length) { %>
-              <div class="bd-card-tags">
-                <% book.tags.slice(0,3).forEach(function(t) { %><span class="link-tag-pill"><%= t %></span><% }) %>
-              </div>
-            <% } %>
+            <div class="bd-card-reactions">
+              <% if (book.flame) { %><span class="bd-card-react-badge" title="J&rsquo;adore">&#128293;</span><% } %>
+              <% if (book.interested) { %><span class="bd-card-react-badge" title="Ça m&rsquo;int&eacute;resse">&#10024;</span><% } %>
+              <% if (book.rating > 0) { %>
+                <span class="bd-card-rating"><%= book.rating %><span class="bd-card-star">&#9733;</span></span>
+              <% } %>
+            </div>
           </div>
         </a>
       <% }) %>
     </div>
   <% } %>
 </main>
+
+<%# ── Données BD pour le modal (JSON embarqué) ── %>
+<script type="application/json" id="bd-data-json"><%- JSON.stringify(books.map(function(b) {
+  return { id: b.id, title: b.title, description: b.description, tags: b.tags,
+           imagePaths: b.imagePaths.slice(0, 11), totalPages: b.imagePaths.length,
+           flame: b.flame, interested: b.interested, rating: b.rating };
+})) %></script>
+
+<%# ── Modal BD ── %>
+<div class="bd-modal-overlay" id="bd-modal" hidden aria-modal="true" role="dialog">
+  <div class="bd-modal">
+    <button type="button" class="bd-modal-close" id="bd-modal-close" aria-label="Fermer">&#215;</button>
+
+    <div class="bd-modal-top">
+      <div class="bd-modal-cover-wrap">
+        <img id="bd-modal-cover" src="" alt="" class="bd-modal-cover-img" />
+      </div>
+      <div class="bd-modal-info">
+        <h2 class="bd-modal-title" id="bd-modal-title"></h2>
+        <p class="bd-modal-desc" id="bd-modal-desc"></p>
+        <div class="bd-modal-tags" id="bd-modal-tags"></div>
+        <div class="bd-modal-reactions" id="bd-modal-reactions"></div>
+      </div>
+    </div>
+
+    <div class="bd-modal-preview-wrap" id="bd-modal-preview-wrap">
+      <p class="bd-modal-preview-label">Aper&ccedil;u</p>
+      <div class="bd-modal-preview" id="bd-modal-preview"></div>
+    </div>
+
+    <div class="bd-modal-footer">
+      <a href="#" id="bd-modal-read-btn" class="bd-modal-read-btn">Lire depuis le d&eacute;but &rarr;</a>
+    </div>
+  </div>
+</div>
+
 <script src="/bd.js?v=<%= assetVersion %>"></script>
 <%- include('partials/foot') %>

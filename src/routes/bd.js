@@ -2,8 +2,8 @@ const path = require("path");
 const fs = require("fs");
 const express = require("express");
 const multer = require("multer");
-const { listBdBooks, getBdBook, insertBdBook, updateBdBook, deleteBdBook, isFavorite } = require("../db");
-const { requireUser, requireAdmin } = require("../auth");
+const { listBdBooks, getBdBook, insertBdBook, updateBdBook, deleteBdBook, reactBdBook, isFavorite, addFavorite, removeFavorite } = require("../db");
+const { requireUser, requireUserJson, requireAdmin } = require("../auth");
 
 const uploadsDir = path.join(__dirname, "..", "..", "data", "uploads", "bd");
 fs.mkdirSync(uploadsDir, { recursive: true });
@@ -61,7 +61,10 @@ function buildBdRouter(config) {
 
   router.get("/", (req, res) => {
     const books = listBdBooks();
-    res.render("bd", { config, books });
+    const tagSet = new Set();
+    books.forEach((b) => b.tags.forEach((t) => tagSet.add(t)));
+    const allTags = [...tagSet].sort((a, b) => a.localeCompare(b, "fr", { sensitivity: "base" }));
+    res.render("bd", { config, books, allTags });
   });
 
   router.get("/new", requireAdmin, (req, res) => {
@@ -119,6 +122,27 @@ function buildBdRouter(config) {
     res.redirect(`/bd/${id}`);
   });
 
+  router.post("/:id/react", requireUserJson, express.json(), (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.json({ ok: false });
+    const book = getBdBook(id);
+    if (!book) return res.json({ ok: false });
+
+    const rating = req.body.rating !== undefined ? Math.max(0, Math.min(5, Number(req.body.rating) || 0)) : book.rating;
+    const flame = req.body.flame !== undefined ? !!req.body.flame : book.flame;
+    const interested = req.body.interested !== undefined ? !!req.body.interested : book.interested;
+
+    reactBdBook(id, { rating, flame, interested });
+
+    // Sync flame → favorites
+    if (req.user) {
+      if (flame) addFavorite(req.user.id, "bd", id);
+      else removeFavorite(req.user.id, "bd", id);
+    }
+
+    res.json({ ok: true, rating, flame, interested });
+  });
+
   router.get("/:id", (req, res) => {
     const book = getBdBook(Number(req.params.id));
     if (!book) return res.redirect("/bd");
@@ -126,7 +150,10 @@ function buildBdRouter(config) {
     const idx = allBooks.findIndex((b) => b.id === book.id);
     const prevBook = idx < allBooks.length - 1 ? allBooks[idx + 1] : null;
     const nextBook = idx > 0 ? allBooks[idx - 1] : null;
-    res.render("bd-detail", { config, book, prevBook, nextBook, isFavorite: isFavorite(req.user.id, "bd", book.id) });
+    res.render("bd-detail", {
+      config, book, prevBook, nextBook,
+      isFavorite: isFavorite(req.user.id, "bd", book.id),
+    });
   });
 
   router.use((err, req, res, next) => {

@@ -4,8 +4,21 @@
     <a href="/bd" class="bd-reader-back link-button">&larr; BD</a>
     <span class="bd-reader-title"><%= book.title %></span>
     <span class="bd-reader-counter" id="bd-counter">1 / <%= book.imagePaths.length %></span>
-    <button type="button" class="bd-reader-fav link-button<%= isFavorite ? ' active' : '' %>" id="bd-fav-btn" data-item-id="<%= book.id %>" title="Favori">&#128278;</button>
-    <% if (currentUser && currentUser.isAdmin) { %><a href="/bd/<%= book.id %>/edit" class="bd-reader-edit link-button">Modifier</a><% } %>
+    <div class="bd-reader-actions">
+      <%# Favori %>
+      <button type="button" class="bd-reader-fav link-button<%= isFavorite ? ' active' : '' %>" id="bd-fav-btn" data-item-id="<%= book.id %>" title="Favori">&#128278;</button>
+      <%# J'adore %>
+      <button type="button" class="bd-react-btn<%= book.flame ? ' active' : '' %>" id="bd-flame-btn" data-id="<%= book.id %>" title="J&rsquo;adore">&#128293;</button>
+      <%# Intéressé %>
+      <button type="button" class="bd-react-btn<%= book.interested ? ' active' : '' %>" id="bd-interested-btn" data-id="<%= book.id %>" title="Ça m&rsquo;int&eacute;resse">&#10024;</button>
+      <%# Note %>
+      <span class="bd-rating-stars" id="bd-rating" data-id="<%= book.id %>" data-rating="<%= book.rating %>">
+        <% for (var i = 1; i <= 5; i++) { %>
+          <button type="button" class="bd-star<%= book.rating >= i ? ' filled' : '' %>" data-val="<%= i %>">&#9733;</button>
+        <% } %>
+      </span>
+      <% if (currentUser && currentUser.isAdmin) { %><a href="/bd/<%= book.id %>/edit" class="bd-reader-edit link-button">Modifier</a><% } %>
+    </div>
   </div>
 
   <% if (!book.imagePaths.length) { %>
@@ -31,8 +44,15 @@
   var counter = document.getElementById("bd-counter");
   var prev = document.getElementById("bd-prev");
   var next = document.getElementById("bd-next");
-  var current = 0;
+  var startParam = parseInt(new URLSearchParams(window.location.search).get("start")) || 0;
+  var current = Math.max(0, Math.min(pages.length - 1, startParam));
   var total = pages.length;
+
+  // Initialiser à la bonne page si ?start=N
+  if (current > 0) {
+    pages[0].hidden = true;
+    pages[current].hidden = false;
+  }
 
   function go(n) {
     n = Math.max(0, Math.min(total - 1, n));
@@ -73,27 +93,77 @@
     if (Math.abs(dx) > 50) go(current + (dx < 0 ? 1 : -1));
   });
 
-  // Init prev/next visibility
-  if (prev) prev.hidden = true;
-  if (next) next.hidden = total <= 1;
+  // Init compteur + prev/next
+  if (counter) counter.textContent = (current + 1) + " / " + total;
+  if (prev) prev.hidden = current === 0;
+  if (next) next.hidden = current === total - 1 || total <= 1;
 })();
 </script>
 <% } %>
 <script>
 (function () {
-  var btn = document.getElementById("bd-fav-btn");
-  if (!btn) return;
-  btn.addEventListener("click", function () {
-    fetch("/favoris/toggle", {
+  var bookId = <%= book.id %>;
+
+  // ── Favori ──────────────────────────────────────
+  var favBtn = document.getElementById("bd-fav-btn");
+  if (favBtn) {
+    favBtn.addEventListener("click", function () {
+      fetch("/favoris/toggle", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ itemType: "bd", itemId: bookId }),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (d) { if (d.ok) favBtn.classList.toggle("active", d.active); });
+    });
+  }
+
+  // ── Réactions (flame / interested / rating) ──────
+  function sendReact(payload) {
+    return fetch("/bd/" + bookId + "/react", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ itemType: "bd", itemId: Number(btn.dataset.itemId) }),
-    })
-      .then(function (r) { return r.json(); })
-      .then(function (d) {
-        if (d.ok) btn.classList.toggle("active", d.active);
+      body: JSON.stringify(payload),
+    }).then(function (r) { return r.json(); });
+  }
+
+  var flameBtn = document.getElementById("bd-flame-btn");
+  if (flameBtn) {
+    flameBtn.addEventListener("click", function () {
+      var next = !flameBtn.classList.contains("active");
+      sendReact({ flame: next }).then(function (d) {
+        if (d.ok) flameBtn.classList.toggle("active", d.flame);
       });
-  });
+    });
+  }
+
+  var intBtn = document.getElementById("bd-interested-btn");
+  if (intBtn) {
+    intBtn.addEventListener("click", function () {
+      var next = !intBtn.classList.contains("active");
+      sendReact({ interested: next }).then(function (d) {
+        if (d.ok) intBtn.classList.toggle("active", d.interested);
+      });
+    });
+  }
+
+  var ratingWrap = document.getElementById("bd-rating");
+  if (ratingWrap) {
+    var stars = ratingWrap.querySelectorAll(".bd-star");
+    var currentRating = Number(ratingWrap.dataset.rating) || 0;
+    function renderStars(n) {
+      stars.forEach(function (s, i) { s.classList.toggle("filled", i < n); });
+    }
+    stars.forEach(function (star) {
+      star.addEventListener("click", function () {
+        var val = Number(star.dataset.val);
+        var newRating = currentRating === val ? 0 : val;
+        sendReact({ rating: newRating }).then(function (d) {
+          if (d.ok) { currentRating = d.rating; renderStars(currentRating); }
+        });
+      });
+    });
+  }
 })();
 </script>
 <%- include('partials/foot') %>

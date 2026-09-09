@@ -8,6 +8,7 @@ const {
   getBdBook,
   listGalleryImages,
   listWikiPages,
+  listBdBooks,
 } = require("../db");
 const { requireUser, requireUserJson } = require("../auth");
 
@@ -65,6 +66,14 @@ function buildFavoritesRouter(config) {
     all.forEach((p) => (p.tags || []).forEach((t) => tagSet.add(t)));
     const allTags = [...tagSet].sort();
     res.render("profil-notes-wiki", { config, pages: all, allTags, categories: WIKI_CATEGORIES });
+  });
+
+  router.get("/notes/bd", requireUser, (req, res) => {
+    const all = listBdBooks().filter((b) => b.rating > 0 || b.flame);
+    const tagSet = new Set();
+    all.forEach((b) => (b.tags || []).forEach((t) => tagSet.add(t)));
+    const allTags = [...tagSet].sort();
+    res.render("profil-notes-bd", { config, books: all, allTags });
   });
 
   router.post("/toggle", requireUserJson, (req, res) => {

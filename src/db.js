@@ -104,6 +104,9 @@ db.exec(`
     updated_at TEXT NOT NULL
   )
 `);
+try { db.exec("ALTER TABLE bd_books ADD COLUMN rating INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
+try { db.exec("ALTER TABLE bd_books ADD COLUMN flame INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
+try { db.exec("ALTER TABLE bd_books ADD COLUMN interested INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS wiki_page_links (
@@ -780,6 +783,9 @@ function rowToBdBook(row) {
     description: row.description || "",
     tags: JSON.parse(row.tags || "[]"),
     imagePaths: JSON.parse(row.image_paths || "[]"),
+    rating: row.rating || 0,
+    flame: !!row.flame,
+    interested: !!row.interested,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -810,6 +816,12 @@ function updateBdBook(id, { title, description, tags, imagePaths }) {
 
 function deleteBdBook(id) {
   db.prepare("DELETE FROM bd_books WHERE id = ?").run(id);
+}
+
+function reactBdBook(id, { rating, flame, interested }) {
+  const r = Math.max(0, Math.min(5, Number(rating) || 0));
+  db.prepare("UPDATE bd_books SET rating = ?, flame = ?, interested = ? WHERE id = ?")
+    .run(r, flame ? 1 : 0, interested ? 1 : 0, id);
 }
 
 function rowToGalleryImage(row) {
@@ -1060,6 +1072,7 @@ module.exports = {
   insertBdBook,
   updateBdBook,
   deleteBdBook,
+  reactBdBook,
   getUserByUsername,
   getUserCredentials,
   getUserById,
