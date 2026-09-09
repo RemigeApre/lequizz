@@ -2486,10 +2486,27 @@
         if (e.target.closest("a")) e.preventDefault();
       });
 
-      // Sync à chaque frappe
+      // Garde le curseur visible dans l'éditeur scrollable
+      function scrollCursorIntoView() {
+        var sel = window.getSelection();
+        if (!sel || !sel.rangeCount) return;
+        var rect = sel.getRangeAt(0).getBoundingClientRect();
+        if (!rect || rect.height === 0) return;
+        var er = editor.getBoundingClientRect();
+        var pad = 36;
+        if (rect.bottom > er.bottom - pad) {
+          editor.scrollTop += rect.bottom - er.bottom + pad;
+        } else if (rect.top < er.top + pad) {
+          editor.scrollTop -= er.top - rect.top + pad;
+        }
+      }
+
+      // Sync à chaque frappe + suivi curseur
       editor.addEventListener("input", function () {
         hidden.value = editor.innerHTML;
+        scrollCursorIntoView();
       });
+      editor.addEventListener("keyup", scrollCursorIntoView);
 
       // Raccourcis clavier
       editor.addEventListener("keydown", function (e) {
