@@ -8894,17 +8894,19 @@ a.wiki-ql-label:hover .wiki-ql-text {
 @media (min-width: 641px) {
   .wiki-secondary-imgs {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
     grid-auto-rows: 150px;
     gap: 0.75rem;
     overflow: hidden;
   }
+  /* Réduit : 2 rangées (≈8 images sur 4 colonnes) */
   .wiki-secondary-imgs--collapsible {
     max-height: calc(2 * 150px + 0.75rem);
-    transition: max-height 0.3s ease;
+    transition: max-height 0.35s ease;
   }
+  /* Étendu : 4 rangées (≈16 images) */
   .wiki-secondary-imgs--collapsible.wiki-secondary-imgs--expanded {
-    max-height: calc(3 * 150px + 2 * 0.75rem);
+    max-height: calc(4 * 150px + 3 * 0.75rem);
   }
 }
 .wiki-secondary-img {
@@ -10101,7 +10103,7 @@ a.wiki-ql-label:hover .wiki-ql-text {
 
 /* Carte image */
 .wf-img-card {
-  flex: 0 0 160px;
+  flex: 0 0 200px;
   scroll-snap-align: start;
   display: flex;
   flex-direction: column;
@@ -10121,10 +10123,11 @@ a.wiki-ql-label:hover .wiki-ql-text {
 /* Zone photo */
 .wf-img-card-photo {
   position: relative;
-  width: 160px;
-  height: 150px;
+  width: 200px;
+  height: 190px;
   overflow: hidden;
   background: #111;
+  cursor: zoom-in;
 }
 .wf-img-thumb {
   width: 100%;
@@ -10226,7 +10229,7 @@ a.wiki-ql-label:hover .wiki-ql-text {
 .wf-img-add-card {
   flex: 0 0 100px;
   scroll-snap-align: start;
-  height: 182px; /* photo(150) + controls(2rem≈32) */
+  height: 226px; /* photo(190) + controls(2rem≈36) */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -10245,4 +10248,130 @@ a.wiki-ql-label:hover .wiki-ql-text {
   font-size: 2rem;
   line-height: 1;
   pointer-events: none;
+}
+
+/* ─── Lightbox éditeur ─────────────────────────────── */
+.wf-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 9100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.wf-lightbox[hidden] { display: none !important; }
+
+.wf-lb-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.88);
+}
+
+.wf-lb-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+.wf-lb-img {
+  max-width: min(80vw, 700px);
+  max-height: 68vh;
+  object-fit: contain;
+  border-radius: 8px;
+  display: block;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+}
+
+.wf-lb-close {
+  position: absolute;
+  top: -2.75rem;
+  right: 0;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.6);
+  font-size: 1.6rem;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  transition: color 0.15s;
+}
+.wf-lb-close:hover { color: #fff; }
+
+.wf-lb-prev,
+.wf-lb-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.55);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 50%;
+  color: #fff;
+  font-size: 1.6rem;
+  width: 2.6rem;
+  height: 2.6rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  padding: 0;
+}
+.wf-lb-prev { left: calc(-2.6rem - 0.75rem); }
+.wf-lb-next { right: calc(-2.6rem - 0.75rem); }
+.wf-lb-prev:hover,
+.wf-lb-next:hover { background: rgba(0,0,0,0.85); }
+.wf-lb-prev:disabled,
+.wf-lb-next:disabled { opacity: 0.25; cursor: default; pointer-events: none; }
+
+.wf-lb-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0,0,0,0.55);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 0.45rem 0.9rem;
+}
+
+.wf-lb-star,
+.wf-lb-heart {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  transition: color 0.12s;
+  flex-shrink: 0;
+}
+.wf-lb-star:hover  { color: #f5c518; }
+.wf-lb-heart:hover { color: #e05c5c; }
+.wf-lb-star.on     { color: #f5c518; }
+.wf-lb-heart.on    { color: #e05c5c; }
+
+.wf-lb-section {
+  font-size: 0.82rem;
+  background: rgba(255,255,255,0.07);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  min-width: 130px;
+}
+.wf-lb-section.on  { border-color: var(--accent); color: var(--accent); }
+.wf-lb-section option { background: #1c1c1c; color: var(--fg); }
+
+.wf-lb-counter {
+  position: absolute;
+  top: -2.75rem;
+  left: 0;
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.4);
+  user-select: none;
 }

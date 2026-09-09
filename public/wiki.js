@@ -4277,6 +4277,122 @@
       });
     }
 
+    // ── LIGHTBOX ─────────────────────────────────────
+    var lb = document.createElement("div");
+    lb.className = "wf-lightbox";
+    lb.setAttribute("hidden", "");
+    lb.innerHTML =
+      '<div class="wf-lb-backdrop"></div>' +
+      '<div class="wf-lb-inner">' +
+        '<span class="wf-lb-counter"></span>' +
+        '<button type="button" class="wf-lb-close">&#215;</button>' +
+        '<button type="button" class="wf-lb-prev">&#8249;</button>' +
+        '<img class="wf-lb-img" src="" alt="" />' +
+        '<button type="button" class="wf-lb-next">&#8250;</button>' +
+        '<div class="wf-lb-controls">' +
+          '<button type="button" class="wf-lb-star">&#9733;</button>' +
+          '<button type="button" class="wf-lb-heart">&#10084;</button>' +
+          '<select class="wf-lb-section"><option value="">&#9657;\u00a0Section</option></select>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(lb);
+
+    var lbImg     = lb.querySelector(".wf-lb-img");
+    var lbCounter = lb.querySelector(".wf-lb-counter");
+    var lbStar    = lb.querySelector(".wf-lb-star");
+    var lbHeart   = lb.querySelector(".wf-lb-heart");
+    var lbSel     = lb.querySelector(".wf-lb-section");
+    var lbPrev    = lb.querySelector(".wf-lb-prev");
+    var lbNext    = lb.querySelector(".wf-lb-next");
+    var lbIdx     = 0;
+
+    function getVisibleCards() {
+      return Array.from(carousel.querySelectorAll(".wf-img-card:not([data-removed='1'])"));
+    }
+
+    function syncLbCard(cards) {
+      var card = cards[lbIdx];
+      if (!card) return;
+      var thumb   = card.querySelector(".wf-img-thumb");
+      var cStar   = card.querySelector(".wf-img-ctrl--star");
+      var cHeart  = card.querySelector(".wf-img-ctrl--heart");
+      var cSec    = card.querySelector(".wf-img-ctrl--section");
+
+      lbImg.src = thumb ? thumb.src : "";
+      lbCounter.textContent = (lbIdx + 1) + " / " + cards.length;
+      lbStar.classList.toggle("on",  cStar  && cStar.classList.contains("on"));
+      lbHeart.classList.toggle("on", cHeart && cHeart.classList.contains("on"));
+      lbSel.innerHTML = cSec ? cSec.innerHTML : '<option value="">&#9657;\u00a0Section</option>';
+      lbSel.value = cSec ? cSec.value : "";
+      lbSel.classList.toggle("on", !!lbSel.value);
+      lbPrev.disabled = lbIdx <= 0;
+      lbNext.disabled = lbIdx >= cards.length - 1;
+    }
+
+    function openLightbox(card) {
+      var cards = getVisibleCards();
+      lbIdx = cards.indexOf(card);
+      if (lbIdx < 0) lbIdx = 0;
+      syncLbCard(cards);
+      lb.removeAttribute("hidden");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeLightbox() {
+      lb.setAttribute("hidden", "");
+      document.body.style.overflow = "";
+    }
+
+    lbPrev.addEventListener("click", function () {
+      var cards = getVisibleCards();
+      if (lbIdx > 0) { lbIdx--; syncLbCard(cards); }
+    });
+    lbNext.addEventListener("click", function () {
+      var cards = getVisibleCards();
+      if (lbIdx < cards.length - 1) { lbIdx++; syncLbCard(cards); }
+    });
+    lb.querySelector(".wf-lb-close").addEventListener("click", closeLightbox);
+    lb.querySelector(".wf-lb-backdrop").addEventListener("click", closeLightbox);
+
+    // Contrôles lightbox → délèguent au card réel
+    lbStar.addEventListener("click", function () {
+      var card = getVisibleCards()[lbIdx];
+      if (!card) return;
+      card.querySelector(".wf-img-ctrl--star").click();
+      syncLbCard(getVisibleCards());
+    });
+    lbHeart.addEventListener("click", function () {
+      var card = getVisibleCards()[lbIdx];
+      if (!card) return;
+      card.querySelector(".wf-img-ctrl--heart").click();
+      syncLbCard(getVisibleCards());
+    });
+    lbSel.addEventListener("change", function () {
+      var card = getVisibleCards()[lbIdx];
+      if (!card) return;
+      var cSec = card.querySelector(".wf-img-ctrl--section");
+      cSec.value = lbSel.value;
+      cSec.dispatchEvent(new Event("change"));
+      lbSel.classList.toggle("on", !!lbSel.value);
+    });
+
+    // Clavier
+    document.addEventListener("keydown", function (e) {
+      if (lb.hasAttribute("hidden")) return;
+      if (e.key === "Escape")      closeLightbox();
+      if (e.key === "ArrowLeft")   lbPrev.click();
+      if (e.key === "ArrowRight")  lbNext.click();
+    });
+
+    // Clic sur la photo pour ouvrir (délégation sur le carousel)
+    carousel.addEventListener("click", function (e) {
+      if (e.target.closest(".wf-img-rm") || e.target.closest(".wf-img-card-controls") ||
+          e.target.closest(".wf-img-add-card")) return;
+      var card = e.target.closest(".wf-img-card");
+      if (!card) return;
+      openLightbox(card);
+    });
+
     // ── Initialisation ─
     refreshSectionSelects();
     syncMeta();

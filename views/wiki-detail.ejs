@@ -356,8 +356,9 @@
           var secImages = (pm.secondary_image_paths && pm.secondary_image_paths.length)
             ? pm.secondary_image_paths
             : page.imagePaths.slice(1);
-          var secDisplay = secImages.slice(0, 5);
-          var hasMoreSec = page.imagePaths.length > secDisplay.length + 1;
+          var secDisplay = secImages.slice(0, 16);   // affiche jusqu'à 16
+          var isCollapsible = secImages.length > 8;  // collapse si > 8
+          var hasMoreSec = secImages.length > 16;    // galerie si > 16
           var galleryTag = encodeURIComponent(page.title.toLowerCase());
         %>
         <% if (hasImages && secDisplay.length && currentUser) { %>
@@ -370,7 +371,7 @@
                 </a>
               <% } %>
             </div>
-            <div class="wiki-secondary-imgs<%= secDisplay.length > 4 ? ' wiki-secondary-imgs--collapsible' : '' %>"
+            <div class="wiki-secondary-imgs<%= isCollapsible ? ' wiki-secondary-imgs--collapsible' : '' %>"
                  id="wiki-secondary-grid">
               <% secDisplay.forEach(function(src) { %>
                 <div class="wiki-secondary-img-wrap">
@@ -378,7 +379,7 @@
                 </div>
               <% }) %>
             </div>
-            <% if (secDisplay.length > 4) { %>
+            <% if (isCollapsible) { %>
               <button type="button" class="wiki-secondary-expand-btn" id="wiki-secondary-expand"
                       aria-expanded="false">Voir plus &#8964;</button>
             <% } %>
