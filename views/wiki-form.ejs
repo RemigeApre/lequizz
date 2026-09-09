@@ -78,7 +78,44 @@
       </div>
     </div>
 
-    <%# ── Aussi dans (sans titre, directement sous les synonymes) ── %>
+    <%# ── Sous-catégories : fantasmes / objets / lieux ── %>
+    <div class="wiki-fantasmes-meta" <%= page.category === 'fantasmes' ? '' : 'hidden' %>>
+      <div class="wf-section-title">Cat&eacute;gorie</div>
+      <div class="wiki-meta-group">
+        <div class="wiki-meta-options">
+          <% fantasmesSubs.forEach(function(s) { %>
+            <label class="chip-option"><input type="radio" name="meta_sous_cat" value="<%= s.key %>" <%= pm.sous_cat === s.key ? 'checked' : '' %>><span><%= s.label %></span></label>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+
+    <div class="wiki-objets-meta" <%= page.category === 'objets' ? '' : 'hidden' %>>
+      <div class="wf-section-title">Type</div>
+      <div class="wiki-meta-group">
+        <div class="wiki-meta-options">
+          <% [['animal','Animal'],['monstre','Monstre'],['fantaisiste','Fantaisiste'],['ethnique','Ethnique'],['autre','Autre']].forEach(function(o) { %>
+            <label class="chip-option"><input type="radio" name="meta_type_gode" value="<%= o[0] %>" <%= pm.type_gode === o[0] ? 'checked' : '' %>><span><%= o[1] %></span></label>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+
+    <div class="wiki-lieux-meta" <%= page.category === 'lieux' ? '' : 'hidden' %>>
+      <div class="wf-section-title">Type de lieu</div>
+      <div class="wiki-meta-group">
+        <div class="wiki-meta-options">
+          <label class="chip-option"><input type="radio" name="meta_type_lieu" value="prive"  <%= pm.type_lieu === 'prive'  ? 'checked' : '' %>><span>Priv&eacute;</span></label>
+          <label class="chip-option"><input type="radio" name="meta_type_lieu" value="public" <%= pm.type_lieu === 'public' ? 'checked' : '' %>><span>Public</span></label>
+          <label class="chip-option"><input type="radio" name="meta_type_lieu" value="cache"  <%= pm.type_lieu === 'cache'  ? 'checked' : '' %>><span>Cach&eacute;</span></label>
+        </div>
+      </div>
+    </div>
+
+    <%# ── Séparateur sous-catégories / catégories ── %>
+    <div class="wf-subcats-separator"></div>
+
+    <%# ── Aussi dans ── %>
     <div class="wiki-extra-cats-field" id="wiki-edit-extra-cats">
       <div class="wiki-meta-options">
         <% categories.forEach(function(c) { %>
@@ -320,25 +357,64 @@
             <label class="chip-option"><input type="radio" name="meta_nature_espece" value="sauvage"    <%= psel('nature_espece','sauvage') %>><span>Sauvage</span></label>
             <label class="chip-option"><input type="radio" name="meta_nature_espece" value="inconnu"    <%= psel('nature_espece','inconnu') %>><span>Inconnu</span></label>
           </div></div>
-          <div class="wiki-meta-group"><p class="wiki-meta-label">Taille du p&eacute;nis (cm)</p>
-            <div class="wf-range-row">
-              <label>De&nbsp;<input type="number" name="meta_taille_penis_min" class="wf-range-input" min="0" step="0.1" value="<%= pval('taille_penis_min') %>" placeholder="0" /></label>
-              <label>&Agrave;&nbsp;<input type="number" name="meta_taille_penis_max" class="wf-range-input" min="0" step="0.1" value="<%= pval('taille_penis_max') %>" placeholder="0" /></label>
-              <span class="wf-range-unit">cm</span>
+          <div class="wiki-meta-group wf-measure-group">
+            <div class="wf-measure-header">
+              <p class="wiki-meta-label">Taille du p&eacute;nis</p>
+              <button type="button" class="wf-measure-toggle" data-target="taille-penis">
+                <%= pval('taille_penis_qual') ? 'Valeurs exactes' : 'Qualitatif' %>
+              </button>
+            </div>
+            <div class="wf-measure-field" id="wf-taille-penis-field" data-mode="<%= pval('taille_penis_qual') ? 'qual' : 'exact' %>">
+              <div class="wf-measure-exact wf-range-row">
+                <label>De&nbsp;<input type="number" name="meta_taille_penis_min" class="wf-range-input" min="0" step="0.1" value="<%= pval('taille_penis_min') %>" placeholder="0" /></label>
+                <label>&Agrave;&nbsp;<input type="number" name="meta_taille_penis_max" class="wf-range-input" min="0" step="0.1" value="<%= pval('taille_penis_max') %>" placeholder="0" /></label>
+                <span class="wf-range-unit">cm</span>
+              </div>
+              <div class="wf-measure-qual wiki-meta-options">
+                <% [['faible','Faible'],['modere','Mod\u00e9r\u00e9'],['grand','Grand'],['tres_grand','Tr\u00e8s grand']].forEach(function(o){ %>
+                  <label class="chip-option"><input type="radio" name="meta_taille_penis_qual" value="<%= o[0] %>" <%= pval('taille_penis_qual') === o[0] ? 'checked' : '' %>><span><%= o[1] %></span></label>
+                <% }) %>
+              </div>
             </div>
           </div>
-          <div class="wiki-meta-group"><p class="wiki-meta-label">Circonf&eacute;rence du p&eacute;nis (cm)</p>
-            <div class="wf-range-row">
-              <label>De&nbsp;<input type="number" name="meta_circ_penis_min" class="wf-range-input" min="0" step="0.1" value="<%= pval('circ_penis_min') %>" placeholder="0" /></label>
-              <label>&Agrave;&nbsp;<input type="number" name="meta_circ_penis_max" class="wf-range-input" min="0" step="0.1" value="<%= pval('circ_penis_max') %>" placeholder="0" /></label>
-              <span class="wf-range-unit">cm</span>
+          <div class="wiki-meta-group wf-measure-group">
+            <div class="wf-measure-header">
+              <p class="wiki-meta-label">Circonf&eacute;rence du p&eacute;nis</p>
+              <button type="button" class="wf-measure-toggle" data-target="circ-penis">
+                <%= pval('circ_penis_qual') ? 'Valeurs exactes' : 'Qualitatif' %>
+              </button>
+            </div>
+            <div class="wf-measure-field" id="wf-circ-penis-field" data-mode="<%= pval('circ_penis_qual') ? 'qual' : 'exact' %>">
+              <div class="wf-measure-exact wf-range-row">
+                <label>De&nbsp;<input type="number" name="meta_circ_penis_min" class="wf-range-input" min="0" step="0.1" value="<%= pval('circ_penis_min') %>" placeholder="0" /></label>
+                <label>&Agrave;&nbsp;<input type="number" name="meta_circ_penis_max" class="wf-range-input" min="0" step="0.1" value="<%= pval('circ_penis_max') %>" placeholder="0" /></label>
+                <span class="wf-range-unit">cm</span>
+              </div>
+              <div class="wf-measure-qual wiki-meta-options">
+                <% [['faible','Faible'],['modere','Mod\u00e9r\u00e9(e)'],['grand','Grand(e)'],['tres_grand','Tr\u00e8s grand(e)']].forEach(function(o){ %>
+                  <label class="chip-option"><input type="radio" name="meta_circ_penis_qual" value="<%= o[0] %>" <%= pval('circ_penis_qual') === o[0] ? 'checked' : '' %>><span><%= o[1] %></span></label>
+                <% }) %>
+              </div>
             </div>
           </div>
-          <div class="wiki-meta-group"><p class="wiki-meta-label">Volume d'&eacute;jaculation (ml)</p>
-            <div class="wf-range-row">
-              <label>De&nbsp;<input type="number" name="meta_vol_ejac_min" class="wf-range-input" min="0" step="1" value="<%= pval('vol_ejac_min') %>" placeholder="0" /></label>
-              <label>&Agrave;&nbsp;<input type="number" name="meta_vol_ejac_max" class="wf-range-input" min="0" step="1" value="<%= pval('vol_ejac_max') %>" placeholder="0" /></label>
-              <span class="wf-range-unit">ml</span>
+          <div class="wiki-meta-group wf-measure-group">
+            <div class="wf-measure-header">
+              <p class="wiki-meta-label">Volume d'&eacute;jaculation</p>
+              <button type="button" class="wf-measure-toggle" data-target="vol-ejac">
+                <%= pval('vol_ejac_qual') ? 'Valeurs exactes' : 'Qualitatif' %>
+              </button>
+            </div>
+            <div class="wf-measure-field" id="wf-vol-ejac-field" data-mode="<%= pval('vol_ejac_qual') ? 'qual' : 'exact' %>">
+              <div class="wf-measure-exact wf-range-row">
+                <label>De&nbsp;<input type="number" name="meta_vol_ejac_min" class="wf-range-input" min="0" step="1" value="<%= pval('vol_ejac_min') %>" placeholder="0" /></label>
+                <label>&Agrave;&nbsp;<input type="number" name="meta_vol_ejac_max" class="wf-range-input" min="0" step="1" value="<%= pval('vol_ejac_max') %>" placeholder="0" /></label>
+                <span class="wf-range-unit">ml</span>
+              </div>
+              <div class="wf-measure-qual wiki-meta-options">
+                <% [['faible','Faible'],['modere','Mod\u00e9r\u00e9'],['grand','Important'],['tres_grand','Tr\u00e8s important']].forEach(function(o){ %>
+                  <label class="chip-option"><input type="radio" name="meta_vol_ejac_qual" value="<%= o[0] %>" <%= pval('vol_ejac_qual') === o[0] ? 'checked' : '' %>><span><%= o[1] %></span></label>
+                <% }) %>
+              </div>
             </div>
           </div>
           <div class="wiki-meta-group"><p class="wiki-meta-label">Caract&eacute;ristiques du sperme</p>
@@ -371,44 +447,6 @@
         </div>
       </details>
 
-    </div>
-
-    <%# ── Paramètres spécifiques à la catégorie ── %>
-
-    <%# Fantasmes %>
-    <div class="wiki-fantasmes-meta" <%= page.category === 'fantasmes' ? '' : 'hidden' %>>
-      <div class="wf-section-title">Cat&eacute;gorie</div>
-      <div class="wiki-meta-group">
-        <div class="wiki-meta-options">
-          <% fantasmesSubs.forEach(function(s) { %>
-            <label class="chip-option"><input type="radio" name="meta_sous_cat" value="<%= s.key %>" <%= pm.sous_cat === s.key ? 'checked' : '' %>><span><%= s.label %></span></label>
-          <% }) %>
-        </div>
-      </div>
-    </div>
-
-    <%# Objets %>
-    <div class="wiki-objets-meta" <%= page.category === 'objets' ? '' : 'hidden' %>>
-      <div class="wf-section-title">Type</div>
-      <div class="wiki-meta-group">
-        <div class="wiki-meta-options">
-          <% [['animal','Animal'],['monstre','Monstre'],['fantaisiste','Fantaisiste'],['ethnique','Ethnique'],['autre','Autre']].forEach(function(o) { %>
-            <label class="chip-option"><input type="radio" name="meta_type_gode" value="<%= o[0] %>" <%= pm.type_gode === o[0] ? 'checked' : '' %>><span><%= o[1] %></span></label>
-          <% }) %>
-        </div>
-      </div>
-    </div>
-
-    <%# Lieux %>
-    <div class="wiki-lieux-meta" <%= page.category === 'lieux' ? '' : 'hidden' %>>
-      <div class="wf-section-title">Type de lieu</div>
-      <div class="wiki-meta-group">
-        <div class="wiki-meta-options">
-          <label class="chip-option"><input type="radio" name="meta_type_lieu" value="prive"  <%= pm.type_lieu === 'prive'  ? 'checked' : '' %>><span>Priv&eacute;</span></label>
-          <label class="chip-option"><input type="radio" name="meta_type_lieu" value="public" <%= pm.type_lieu === 'public' ? 'checked' : '' %>><span>Public</span></label>
-          <label class="chip-option"><input type="radio" name="meta_type_lieu" value="cache"  <%= pm.type_lieu === 'cache'  ? 'checked' : '' %>><span>Cach&eacute;</span></label>
-        </div>
-      </div>
     </div>
 
     <%# Position %>

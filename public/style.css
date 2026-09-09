@@ -301,6 +301,13 @@ body.nav-drawer-locked {
   line-height: 1.55;
   color: var(--fg-muted, rgba(255,255,255,0.55));
 }
+.nav-consent-body p + p {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.72rem;
+  opacity: 0.7;
+}
 
 .nav-drawer-footer {
   display: flex;
@@ -7259,6 +7266,14 @@ a.wiki-ql-label:hover .wiki-ql-text {
   line-height: 1.6;
   color: var(--fg);
 }
+.pc-consent-panel p + p { margin-top: 0.6rem; }
+.pc-consent-legal {
+  font-size: 0.75rem !important;
+  opacity: 0.6;
+  border-top: 1px solid var(--border);
+  padding-top: 0.6rem;
+  margin-top: 0.6rem !important;
+}
 
 /* ── Overlay de recherche globale ────────────────────────────────────────── */
 .pc-search-overlay {
@@ -8422,6 +8437,65 @@ a.wiki-ql-label:hover .wiki-ql-text {
   font-size: 0.75rem; color: rgba(255,255,255,0.78); margin: 0; line-height: 1.3;
 }
 
+/* ── Ligne du haut sidebar gauche : catégorie + icône ─── */
+.wiki-left-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.wiki-left-top-row .wiki-editorial-note { margin-top: 0; flex-shrink: 0; }
+
+/* ── Partenaires : affichage riche ─────────────────────── */
+.wiki-left-part { margin-top: 0.4rem; }
+
+.wiki-lp-subcat { margin: 0.15rem 0 0.1rem; }
+.wiki-lp-subcat-badge {
+  display: inline-block;
+  font-size: 0.67rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 0.18rem 0.55rem;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.65);
+}
+
+.wiki-lp-section {
+  margin: 0.45rem 0 0;
+  padding: 0.45rem 0 0;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  display: flex; flex-direction: column; gap: 0.2rem;
+}
+.wiki-lp-row {
+  display: flex; gap: 0.35rem; align-items: baseline; flex-wrap: wrap;
+}
+.wiki-lp-row dt {
+  font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.04em;
+  color: rgba(255,255,255,0.28); font-weight: 600; flex-shrink: 0;
+  min-width: 5.5rem;
+}
+.wiki-lp-row dd {
+  font-size: 0.73rem; color: rgba(255,255,255,0.75); margin: 0; line-height: 1.3;
+}
+
+/* Badges risque colorés */
+.wiki-lp-risk {
+  font-size: 0.66rem; font-weight: 600;
+  padding: 0.08rem 0.38rem; border-radius: 10px;
+}
+.wiki-lp-risk--nul     { background: rgba(109,214,138,0.18); color: #6dd68a; }
+.wiki-lp-risk--faible  { background: rgba(160,214,138,0.15); color: #a0d68a; }
+.wiki-lp-risk--modere  { background: rgba(224,184,92,0.18);  color: #e0b85c; }
+.wiki-lp-risk--eleve   { background: rgba(224,138,92,0.18);  color: #e08a5c; }
+.wiki-lp-risk--extreme { background: rgba(224,92,92,0.2);    color: #e05c5c; }
+.wiki-lp-risk--inconnu { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.35); }
+
+/* Légalité */
+.wiki-lp-legal--legal   { color: #6dd68a; }
+.wiki-lp-legal--flou    { color: #e0b85c; }
+.wiki-lp-legal--illegal { color: #e05c5c; }
+.wiki-lp-legal--inconnu { color: rgba(255,255,255,0.35); }
+
 /* ── Note éditoriale (monstre / animal) ─────────────── */
 .wiki-editorial-note {
   margin-top: 1rem;
@@ -8801,6 +8875,13 @@ a.wiki-ql-label:hover .wiki-ql-text {
   background: var(--border);
 }
 
+/* Séparateur entre sous-catégories et catégories (Aussi dans) */
+.wf-subcats-separator {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border) 20%, var(--border) 80%, transparent);
+  margin: 0.25rem 0;
+}
+
 /* Chips de sous-catégorie partenaires — centrées, sans titre */
 .wf-partenaires-type-chips {
   display: flex;
@@ -8866,6 +8947,26 @@ a.wiki-ql-label:hover .wiki-ql-text {
   text-align: right;
 }
 .wf-range-unit { font-size: 0.8rem; opacity: 0.55; }
+
+/* Toggle qualitatif / exact */
+.wf-measure-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.wf-measure-header .wiki-meta-label { margin: 0; }
+.wf-measure-toggle {
+  font-size: 0.68rem; padding: 0.12rem 0.5rem;
+  border: 1px solid var(--border); border-radius: 20px;
+  background: none; color: var(--fg); cursor: pointer; opacity: 0.55;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+.wf-measure-toggle:hover { opacity: 1; }
+.wf-measure-field[data-mode="exact"] .wf-measure-qual { display: none; }
+.wf-measure-field[data-mode="qual"]  .wf-measure-exact { display: none; }
+.wf-measure-field { margin-top: 0.35rem; }
 
 /* Champs texte sperme */
 .wf-sperme-fields {

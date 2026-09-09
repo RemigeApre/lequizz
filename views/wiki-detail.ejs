@@ -31,6 +31,26 @@
       return typeof t === 'string' ? { term: t, en: false } : t;
     });
     var hasAnyTags = page.tags.length || derivedTerms.length;
+    // ── Maps de labels partenaires ──
+    var SOUS_CAT_PART    = { nombre: 'Nombre', monstre: 'Monstre', animaux: 'Animal', fetichisme: 'Fétichisme', autre: 'Autre' };
+    var NATURE_ACTE_LBL  = { possible: 'Possible', improbable: 'Improbable', impossible: 'Impossible', fictif: 'Fictif\u00a0/\u00a0Fantastique', inconnu: 'Inconnu' };
+    var CADRE_LEGAL_LBL  = { legal: 'L\u00e9gal', flou: 'Flou', illegal: 'Ill\u00e9gal', inconnu: 'Inconnu' };
+    var RISQUE_LBL       = { inconnu: 'Inconnu', nul: 'Nul', faible: 'Faible', modere: 'Mod\u00e9r\u00e9', eleve: '\u00c9lev\u00e9', extreme: 'Extr\u00eame' };
+    var ACCES_LBL        = { tres_rare: 'Tr\u00e8s rare', rare: 'Rare', occasionnel: 'Occasionnel', frequent: 'Fr\u00e9quent', inconnu: 'Inconnu' };
+    var TYPE_CREATURE_LBL= { machine: 'Machine', sang_froid: 'Sang froid', mammifere: 'Mammif\u00e8re', insectoide: 'Insecto\u00efde', amorphe: 'Amorphe', elementaire: '\u00c9l\u00e9mentaire', autre: 'Autre' };
+    var TYPE_ACTE_LBL    = { penetration: 'P\u00e9n\u00e9tration', absorption: 'Absorption', constriction: 'Constriction', pondaison: 'Pondaison', investation: 'Investation', possession: 'Possession', fusion: 'Fusion', parasitage: 'Parasitage', transformation: 'Transformation', insemination: 'Ins\u00e9mination', aucun_variable: 'Aucun\u00a0/\u00a0variable', autre: 'Autre' };
+    var INTEL_LBL        = { bestiale: 'Bestiale', faible: 'Faible', correcte: 'Correcte', forte: 'Forte', inconnu: 'Inconnu' };
+    var PAROLE_LBL       = { impossible: 'Impossible', possible: 'Possible', oui: 'Oui', frequente: 'Fr\u00e9quente', inconnu: 'Inconnu' };
+    var COMPAT_LBL       = { oui: 'Oui', non: 'Non', partielle: 'Partielle', inconnu: 'Inconnu' };
+    var ORIGINE_LBL      = { fantaisie: 'Fantaisie', science_fiction: 'Science-fiction', imaginaire: 'Imaginaire', autre: 'Autre' };
+    var FAMILLE_ZOO_LBL  = { canide: 'Canid\u00e9', equide: '\u00c9quid\u00e9', felin: 'F\u00e9lin', bovin: 'Bovin', reptile: 'Reptile', aviaire: 'Aviaire', cetace: 'C\u00e9tac\u00e9', autre: 'Autre' };
+    var TAILLE_ANIM_LBL  = { petit: 'Petit', egal: '\u00c9gal', grand: 'Grand', tres_grand: 'Tr\u00e8s grand' };
+    var NATURE_ESP_LBL   = { domestique: 'Domestique', sauvage: 'Sauvage', inconnu: 'Inconnu' };
+    var QUAL_LBL         = { faible: 'Faible', modere: 'Mod\u00e9r\u00e9(e)', grand: 'Grand(e)', tres_grand: 'Tr\u00e8s grand(e)' };
+    var VERR_LBL         = { aucun: 'Aucun', noeud: 'N\u0153ud', epines: '\u00c9pines', ventouses: 'Ventouses', partiel: 'Partiel', autre: 'Autre', inconnu: 'Inconnu' };
+    var SENS_LBL         = { pression: 'Pression', remplissage: 'Remplissage', frottement: 'Frottement', elongation: '\u00c9longation', vibration: 'Vibration', chaleur: 'Chaleur', secousse: 'Secousse', autre: 'Autre' };
+    var MILIEU_LBL       = { terrestre: 'Terrestre', aerien: 'A\u00e9rien', aquatique_mer: 'Aquatique (mer)', dulcaquicole: 'Dul\u00e7aquicole', semi_aquatique: 'Semi-aquatique', souterrain: 'Souterrain', inconnu: 'Inconnu' };
+    var STRUCT_LBL       = { monogame: 'Monogame', polygame: 'Polygame', polyandrie: 'Polyandrie', promiscuite: 'Promiscuit\u00e9', sans_lien: 'Sans lien', harem: 'Harem', coloniale: 'Coloniale', saisonniere: 'Saisonni\u00e8re', variable: 'Variable', inconnu: 'Inconnu' };
   %>
 
   <script id="wiki-existing-pages" type="application/json"><%- JSON.stringify(pages.map(function(p){ return { id: p.id, title: p.title, category: p.category, extraCats: p.extraCategories || [], rating: p.rating || 0, date: new Date(p.updatedAt).getTime() }; })) %></script>
@@ -75,22 +95,158 @@
 
       <%# ─ VOLET GAUCHE : métadonnées page (PC) ─ %>
       <aside class="wiki-detail-left">
-        <% if (cat) { %>
-          <a href="/wiki/categorie/<%= page.category %>" class="wiki-left-cat-link"><%= cat.label %></a>
-        <% } %>
+
+        <%# Ligne du haut : catégorie + icône éditoriale en face %>
+        <div class="wiki-left-top-row">
+          <% if (cat) { %>
+            <a href="/wiki/categorie/<%= page.category %>" class="wiki-left-cat-link"><%= cat.label %></a>
+          <% } %>
+          <% if (page.category === 'partenaires' && (pm.sous_cat === 'monstre' || pm.sous_cat === 'animaux')) { %>
+            <details class="wiki-editorial-note">
+              <summary class="wiki-editorial-icon" title="Note &eacute;ditoriale">?</summary>
+              <div class="wiki-editorial-body">
+                <p>La zoophilie comme fantasme n&rsquo;est trait&eacute;e que sur l&rsquo;id&eacute;e femme&ndash;animal, idem pour les monstres, femme&ndash;monstre, sauf cas particulier. C&rsquo;est un choix &eacute;ditorial, et une volont&eacute;.</p>
+                <% if (currentUser) { %>
+                  <p>Le rapport femme&ndash;autre esp&egrave;ce part du postulat o&ugrave; l&rsquo;animal est consentant, ce que le rapport homme&ndash;animal ne permet pas du tout. De plus, c&rsquo;est aussi un choix esth&eacute;tique&nbsp;: le site et sa ligne &eacute;ditoriale ont go&ucirc;t de l&rsquo;&eacute;l&eacute;gance, que ne poss&egrave;derait en rien l&rsquo;homme en ce contexte de fantasme.</p>
+                <% } %>
+              </div>
+            </details>
+          <% } %>
+        </div>
+
         <% if (page.owned) { %>
           <span class="wiki-left-owned">&#9733;&nbsp;Poss&eacute;d&eacute;</span>
         <% } %>
-        <% if (hasMetaRows) { %>
+
+        <%# ─ Partenaires : affichage riche complet ─ %>
+        <% if (page.category === 'partenaires') { %>
+          <div class="wiki-left-part">
+
+            <%# Sous-catégorie badge %>
+            <% if (pm.sous_cat && SOUS_CAT_PART[pm.sous_cat]) { %>
+              <div class="wiki-lp-subcat">
+                <span class="wiki-lp-subcat-badge"><%= SOUS_CAT_PART[pm.sous_cat] %></span>
+              </div>
+            <% } %>
+
+            <%# Communs %>
+            <% var hasCommuns = pm.nature_acte || pm.cadre_legal || pm.risque_physique || pm.risque_mst || pm.accessibilite; %>
+            <% if (hasCommuns) { %>
+              <dl class="wiki-lp-section">
+                <% if (pm.nature_acte && NATURE_ACTE_LBL[pm.nature_acte]) { %>
+                  <div class="wiki-lp-row"><dt>Nature</dt><dd><%= NATURE_ACTE_LBL[pm.nature_acte] %></dd></div>
+                <% } %>
+                <% if (pm.cadre_legal && CADRE_LEGAL_LBL[pm.cadre_legal]) { %>
+                  <div class="wiki-lp-row"><dt>L&eacute;galit&eacute;</dt><dd class="wiki-lp-legal wiki-lp-legal--<%= pm.cadre_legal %>"><%= CADRE_LEGAL_LBL[pm.cadre_legal] %></dd></div>
+                <% } %>
+                <% if (pm.risque_physique && RISQUE_LBL[pm.risque_physique]) { %>
+                  <div class="wiki-lp-row"><dt>Risque physique</dt><dd class="wiki-lp-risk wiki-lp-risk--<%= pm.risque_physique %>"><%= RISQUE_LBL[pm.risque_physique] %></dd></div>
+                <% } %>
+                <% if (pm.risque_mst && RISQUE_LBL[pm.risque_mst]) { %>
+                  <div class="wiki-lp-row"><dt>Risque MST</dt><dd class="wiki-lp-risk wiki-lp-risk--<%= pm.risque_mst %>"><%= RISQUE_LBL[pm.risque_mst] %></dd></div>
+                <% } %>
+                <% if (pm.accessibilite && ACCES_LBL[pm.accessibilite]) { %>
+                  <div class="wiki-lp-row"><dt>Accessibilit&eacute;</dt><dd><%= ACCES_LBL[pm.accessibilite] %></dd></div>
+                <% } %>
+              </dl>
+            <% } %>
+
+            <%# Nombre %>
+            <% if (pm.sous_cat === 'nombre' && (pm.nb_total || pm.nb_feminin || pm.nb_masculin)) { %>
+              <dl class="wiki-lp-section">
+                <% if (pm.nb_total)    { %><div class="wiki-lp-row"><dt>Total</dt><dd><%= pm.nb_total    === '5plus' ? '5+' : pm.nb_total    %></dd></div><% } %>
+                <% if (pm.nb_feminin)  { %><div class="wiki-lp-row"><dt>F&eacute;minin</dt><dd><%= pm.nb_feminin  === '3plus' ? '3+' : pm.nb_feminin  %></dd></div><% } %>
+                <% if (pm.nb_masculin) { %><div class="wiki-lp-row"><dt>Masculin</dt><dd><%= pm.nb_masculin === '3plus' ? '3+' : pm.nb_masculin %></dd></div><% } %>
+              </dl>
+            <% } %>
+
+            <%# Monstre %>
+            <% if (pm.sous_cat === 'monstre') { %>
+              <%
+                var hasMonstre = pm.type_creature || (pm.type_acte_sexuel && pm.type_acte_sexuel.length)
+                  || pm.niveau_intelligence || pm.capacite_parole || pm.compat_anatomique || pm.origine_conceptuelle;
+              %>
+              <% if (hasMonstre) { %>
+                <dl class="wiki-lp-section">
+                  <% if (pm.type_creature && TYPE_CREATURE_LBL[pm.type_creature]) { %>
+                    <div class="wiki-lp-row"><dt>Cr&eacute;ature</dt><dd><%= TYPE_CREATURE_LBL[pm.type_creature] %></dd></div>
+                  <% } %>
+                  <% if (pm.type_acte_sexuel && pm.type_acte_sexuel.length) { %>
+                    <div class="wiki-lp-row"><dt>Acte(s)</dt><dd><%= pm.type_acte_sexuel.map(function(v){ return TYPE_ACTE_LBL[v] || v; }).join(' \u00b7 ') %></dd></div>
+                  <% } %>
+                  <% if (pm.niveau_intelligence && INTEL_LBL[pm.niveau_intelligence]) { %>
+                    <div class="wiki-lp-row"><dt>Intelligence</dt><dd><%= INTEL_LBL[pm.niveau_intelligence] %></dd></div>
+                  <% } %>
+                  <% if (pm.capacite_parole && PAROLE_LBL[pm.capacite_parole]) { %>
+                    <div class="wiki-lp-row"><dt>Parole</dt><dd><%= PAROLE_LBL[pm.capacite_parole] %></dd></div>
+                  <% } %>
+                  <% if (pm.compat_anatomique && COMPAT_LBL[pm.compat_anatomique]) { %>
+                    <div class="wiki-lp-row"><dt>Anatomie</dt><dd><%= COMPAT_LBL[pm.compat_anatomique] %></dd></div>
+                  <% } %>
+                  <% if (pm.origine_conceptuelle && ORIGINE_LBL[pm.origine_conceptuelle]) { %>
+                    <div class="wiki-lp-row"><dt>Origine</dt><dd><%= ORIGINE_LBL[pm.origine_conceptuelle] %></dd></div>
+                  <% } %>
+                </dl>
+              <% } %>
+            <% } %>
+
+            <%# Animal %>
+            <% if (pm.sous_cat === 'animaux' && (pm.famille_zoologique || pm.taille_animal)) { %>
+              <dl class="wiki-lp-section">
+                <% if (pm.famille_zoologique && FAMILLE_ZOO_LBL[pm.famille_zoologique]) { %>
+                  <div class="wiki-lp-row"><dt>Famille</dt><dd><%= FAMILLE_ZOO_LBL[pm.famille_zoologique] %></dd></div>
+                <% } %>
+                <% if (pm.taille_animal && TAILLE_ANIM_LBL[pm.taille_animal]) { %>
+                  <div class="wiki-lp-row"><dt>Taille</dt><dd><%= TAILLE_ANIM_LBL[pm.taille_animal] %></dd></div>
+                <% } %>
+              </dl>
+            <% } %>
+
+            <%# Biologie (Monstre + Animal) %>
+            <% if (pm.sous_cat === 'monstre' || pm.sous_cat === 'animaux') { %>
+              <%
+                var tailleStr = pm.taille_penis_qual ? (QUAL_LBL[pm.taille_penis_qual] || pm.taille_penis_qual) : ((pm.taille_penis_min || pm.taille_penis_max) ? (pm.taille_penis_min || '?') + '\u2013' + (pm.taille_penis_max || '?') + '\u00a0cm' : '');
+                var circStr   = pm.circ_penis_qual   ? (QUAL_LBL[pm.circ_penis_qual]   || pm.circ_penis_qual)   : ((pm.circ_penis_min   || pm.circ_penis_max)   ? (pm.circ_penis_min   || '?') + '\u2013' + (pm.circ_penis_max   || '?') + '\u00a0cm' : '');
+                var ejacStr   = pm.vol_ejac_qual     ? (QUAL_LBL[pm.vol_ejac_qual]     || pm.vol_ejac_qual)     : ((pm.vol_ejac_min     || pm.vol_ejac_max)     ? (pm.vol_ejac_min     || '?') + '\u2013' + (pm.vol_ejac_max     || '?') + '\u00a0ml' : '');
+                var hasSperme = pm.sperme_texture || pm.sperme_odeur || pm.sperme_gout;
+                var hasBioData = pm.nature_espece || tailleStr || circStr || ejacStr || hasSperme
+                  || pm.type_verrouillage || (pm.sensations && pm.sensations.length)
+                  || pm.milieu_vie || pm.structure_sociale;
+              %>
+              <% if (hasBioData) { %>
+                <dl class="wiki-lp-section">
+                  <% if (pm.nature_espece && NATURE_ESP_LBL[pm.nature_espece]) { %>
+                    <div class="wiki-lp-row"><dt>Esp&egrave;ce</dt><dd><%= NATURE_ESP_LBL[pm.nature_espece] %></dd></div>
+                  <% } %>
+                  <% if (tailleStr) { %><div class="wiki-lp-row"><dt>P&eacute;nis</dt><dd><%= tailleStr %></dd></div><% } %>
+                  <% if (circStr)   { %><div class="wiki-lp-row"><dt>Circonf.</dt><dd><%= circStr %></dd></div><% } %>
+                  <% if (ejacStr)   { %><div class="wiki-lp-row"><dt>&Eacute;jaculation</dt><dd><%= ejacStr %></dd></div><% } %>
+                  <% if (hasSperme) { %>
+                    <div class="wiki-lp-row"><dt>Sperme</dt><dd><%= [pm.sperme_texture, pm.sperme_odeur, pm.sperme_gout].filter(Boolean).join(' \u00b7 ') %></dd></div>
+                  <% } %>
+                  <% if (pm.type_verrouillage && VERR_LBL[pm.type_verrouillage]) { %>
+                    <div class="wiki-lp-row"><dt>Verr.</dt><dd><%= VERR_LBL[pm.type_verrouillage] %></dd></div>
+                  <% } %>
+                  <% if (pm.sensations && pm.sensations.length) { %>
+                    <div class="wiki-lp-row"><dt>Sensations</dt><dd><%= pm.sensations.map(function(v){ return SENS_LBL[v] || v; }).join(' \u00b7 ') %></dd></div>
+                  <% } %>
+                  <% if (pm.milieu_vie && MILIEU_LBL[pm.milieu_vie]) { %>
+                    <div class="wiki-lp-row"><dt>Milieu</dt><dd><%= MILIEU_LBL[pm.milieu_vie] %></dd></div>
+                  <% } %>
+                  <% if (pm.structure_sociale && STRUCT_LBL[pm.structure_sociale]) { %>
+                    <div class="wiki-lp-row"><dt>Structure</dt><dd><%= STRUCT_LBL[pm.structure_sociale] %></dd></div>
+                  <% } %>
+                </dl>
+              <% } %>
+            <% } %>
+
+          </div><%# /wiki-left-part %>
+
+        <% } else if (hasMetaRows) { %>
+          <%# Autres catégories : dl existant %>
           <dl class="wiki-left-meta">
             <% if (page.category === 'fantasmes' && pm.sous_cat && FSUBS[pm.sous_cat]) { %>
               <div class="wiki-left-meta-row"><dt>Sous-cat&eacute;gorie</dt><dd><%= FSUBS[pm.sous_cat] %></dd></div>
-            <% } %>
-            <% if (hasPartMeta) { %>
-              <% if (nbTotal) { %><div class="wiki-left-meta-row"><dt>Nombre total</dt><dd><%= nbTotal === 'nombreux' ? 'Nombreux' : nbTotal === 'variable' ? 'Variable' : nbTotal %></dd></div><% } %>
-              <% if (nbFem)   { %><div class="wiki-left-meta-row"><dt>F&eacute;minin</dt><dd><%= nbFem === 'nombreux' ? 'Nombreuses' : nbFem === 'variable' ? 'Variable' : nbFem %></dd></div><% } %>
-              <% if (nbMasc)  { %><div class="wiki-left-meta-row"><dt>Masculin</dt><dd><%= nbMasc === 'nombreux' ? 'Nombreux' : nbMasc === 'variable' ? 'Variable' : nbMasc %></dd></div><% } %>
-              <% if (pmTypes.length) { %><div class="wiki-left-meta-row"><dt>Type</dt><dd><%= pmTypes.map(function(t){ return TYPES_PART[t] || t; }).join(' &middot; ') %></dd></div><% } %>
             <% } %>
             <% if (page.category === 'objets' && pm.type_gode && GODE[pm.type_gode]) { %>
               <div class="wiki-left-meta-row"><dt>Type</dt><dd><%= GODE[pm.type_gode] %></dd></div>
@@ -109,18 +265,7 @@
             <% } %>
           </dl>
         <% } %>
-        <%# ─ Note éditoriale monstre / animal ─ %>
-        <% if (page.category === 'partenaires' && (pm.sous_cat === 'monstre' || pm.sous_cat === 'animaux')) { %>
-          <details class="wiki-editorial-note">
-            <summary class="wiki-editorial-icon" title="Note &eacute;ditoriale">?</summary>
-            <div class="wiki-editorial-body">
-              <p>La zoophilie comme fantasme n&rsquo;est trait&eacute;e que sur l&rsquo;id&eacute;e femme&ndash;animal, idem pour les monstres, femme&ndash;monstre, sauf cas particulier. C&rsquo;est un choix &eacute;ditorial, et une volont&eacute;.</p>
-              <% if (currentUser) { %>
-                <p>Le rapport femme&ndash;autre esp&egrave;ce part du postulat o&ugrave; l&rsquo;animal est consentant, ce que le rapport homme&ndash;animal ne permet pas du tout. De plus, c&rsquo;est aussi un choix esth&eacute;tique&nbsp;: le site et sa ligne &eacute;ditoriale ont go&ucirc;t de l&rsquo;&eacute;l&eacute;gance, que ne poss&egrave;derait en rien l&rsquo;homme en ce contexte de fantasme.</p>
-              <% } %>
-            </div>
-          </details>
-        <% } %>
+
       </aside>
 
       <%# ─ COLONNE GAUCHE : contenu texte ─ %>

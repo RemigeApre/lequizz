@@ -584,6 +584,18 @@
   var editObjetsMeta     = document.querySelector("#wiki-edit-form .wiki-objets-meta");
   var editScenarioField  = document.getElementById("wf-scenario-field");
 
+  // Toggle exact / qualitatif pour les champs de mesure
+  document.querySelectorAll(".wf-measure-toggle").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      var target = btn.dataset.target;
+      var field = document.getElementById("wf-" + target + "-field");
+      if (!field) return;
+      var isExact = field.dataset.mode === "exact";
+      field.dataset.mode = isExact ? "qual" : "exact";
+      btn.textContent = isExact ? "Valeurs exactes" : "Qualitatif";
+    });
+  });
+
   // Sous-panneaux partenaires selon le type sélectionné
   function syncPartSubs() {
     if (!editPartParams) return;
