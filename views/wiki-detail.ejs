@@ -330,7 +330,13 @@
         <%# Scénario (partenaires) ─ %>
         <% if (page.category === 'partenaires' && pm.scenario) { %>
           <details class="wiki-pos-section wiki-pos-nouvelles wiki-scenario-details">
-            <summary class="wiki-pos-section-heading wiki-scenario-summary">Sc&eacute;nario</summary>
+            <summary class="wiki-pos-section-heading wiki-scenario-summary">
+              Sc&eacute;nario
+              <span class="wiki-scenario-info" title="Les sc&eacute;narios sont &eacute;crits en premier jet par une IA, corrig&eacute;s et am&eacute;lior&eacute;s &agrave; la main. Le choix de l&rsquo;IA est pour illustrer litt&eacute;rairement chaque page du wiki.&#10;&#10;Pour du contenu original parfaitement humain, cela se passera dans une future page d&eacute;di&eacute;e.">!</span>
+            </summary>
+            <% if (pm.scenario_image) { %>
+              <img src="<%= pm.scenario_image %>" alt="" class="wiki-scenario-img" loading="lazy" />
+            <% } %>
             <div class="wiki-pos-nouvelles-text"><%= pm.scenario %></div>
           </details>
         <% } %>

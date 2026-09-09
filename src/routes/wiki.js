@@ -193,6 +193,7 @@ function parseMeta(category, body) {
       risque_mst:          oneof(body.meta_risque_mst,      ["inconnu","nul","faible","modere","eleve","extreme"]),
       accessibilite:       oneof(body.meta_accessibilite,   ["tres_rare","rare","occasionnel","frequent","inconnu"]),
       scenario:            str(body.meta_scenario, 5000),
+      scenario_image:      String(body.meta_scenario_image || "").startsWith("/uploads/") ? String(body.meta_scenario_image).slice(0, 500) : "",
       // Nombre
       nb_total:            oneof(body.meta_nb_total,   ["2","3","4","5plus"]),
       nb_feminin:          oneof(body.meta_nb_feminin,  ["0","1","2","3plus"]),
@@ -495,6 +496,8 @@ function buildWikiRouter(config) {
     const { imagePaths, secondary_image_paths, positional_images } = parseImagesMeta(req.body, [], newImgFiles);
     meta.secondary_image_paths = secondary_image_paths;
     meta.positional_images     = positional_images;
+    const scenImgFile = files.find((f) => f.fieldname === "scenario_image");
+    if (scenImgFile) meta.scenario_image = `/uploads/wiki/${scenImgFile.filename}`;
     const enrichedTags = autoEnrichTags(tags, title, meta.termes_derives || []);
 
     const newId = insertWikiPage({ title, category, content, tags: enrichedTags, imagePaths, owned, meta, extraCategories });
@@ -617,6 +620,8 @@ function buildWikiRouter(config) {
       parseImagesMeta(req.body, existing.imagePaths, newImgFiles);
     meta.secondary_image_paths = secondary_image_paths;
     meta.positional_images     = positional_images;
+    const scenImgFile = files.find((f) => f.fieldname === "scenario_image");
+    if (scenImgFile) meta.scenario_image = `/uploads/wiki/${scenImgFile.filename}`;
     const extraCategories = arr(req.body.extra_categories).filter((k) => CATEGORY_KEYS.includes(k) && k !== category);
     const enrichedTags = autoEnrichTags(tags, title, meta.termes_derives || []);
     updateWikiPage(id, { title, category, content, tags: enrichedTags, imagePaths, owned, meta, extraCategories });

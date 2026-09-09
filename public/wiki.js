@@ -4433,6 +4433,47 @@
   })();
 
   // ══════════════════════════════════════════════════
+  // 25. IMAGE SCÉNARIO — upload + prévisualisation
+  // ══════════════════════════════════════════════════
+  (function () {
+    var input   = document.getElementById("wf-scenario-img-input");
+    var preview = document.getElementById("wf-scenario-img-preview");
+    var pathEl  = document.getElementById("wf-scenario-img-path");
+    var removeBtn = document.getElementById("wf-scenario-img-remove");
+    if (!input || !preview || !pathEl) return;
+
+    input.addEventListener("change", function () {
+      var file = input.files && input.files[0];
+      if (!file) return;
+      var url = URL.createObjectURL(file);
+      preview.innerHTML = "";
+      var img = document.createElement("img");
+      img.src = url;
+      img.alt = "";
+      img.className = "wf-scenario-thumb";
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "wf-scenario-img-remove";
+      btn.title = "Retirer l\u2019image";
+      btn.innerHTML = "\u00D7";
+      btn.addEventListener("click", clearScenarioImg);
+      preview.appendChild(img);
+      preview.appendChild(btn);
+      preview.hidden = false;
+      pathEl.value = "";
+    });
+
+    function clearScenarioImg() {
+      preview.hidden = true;
+      preview.innerHTML = "";
+      pathEl.value = "";
+      input.value = "";
+    }
+
+    if (removeBtn) removeBtn.addEventListener("click", clearScenarioImg);
+  })();
+
+  // ══════════════════════════════════════════════════
   // 24. AGE GATE (non connectés)
   // ══════════════════════════════════════════════════
   (function() {

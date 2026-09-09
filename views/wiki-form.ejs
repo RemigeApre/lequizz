@@ -159,7 +159,10 @@
 
     <%# ── Scénario (partenaires seulement) ── %>
     <div id="wf-scenario-field" <%= page.category === 'partenaires' ? '' : 'hidden' %>>
-      <div class="wf-section-title">Sc&eacute;nario</div>
+      <div class="wf-section-title">
+        Sc&eacute;nario
+        <span class="wiki-scenario-info" title="Les sc&eacute;narios sont &eacute;crits en premier jet par une IA, corrig&eacute;s et am&eacute;lior&eacute;s &agrave; la main. Le choix de l&rsquo;IA est pour illustrer litt&eacute;rairement chaque page du wiki.&#10;&#10;Pour du contenu original parfaitement humain, cela se passera dans une future page d&eacute;di&eacute;e.">!</span>
+      </div>
       <div class="wiki-editor">
         <div class="md-toolbar">
           <button type="button" class="md-btn" data-md="bold"><strong>B</strong></button>
@@ -175,6 +178,23 @@
         </div>
         <textarea name="meta_scenario" class="wiki-textarea wiki-pos-textarea" rows="6" placeholder="Une courte histoire, un contexte&hellip;"><%= pm.scenario || '' %></textarea>
         <div class="wiki-md-preview wiki-md" hidden></div>
+      </div>
+
+      <%# ── Image d'illustration du scénario ── %>
+      <div class="wf-scenario-img-section">
+        <% if (pm.scenario_image) { %>
+          <div class="wf-scenario-img-preview" id="wf-scenario-img-preview">
+            <img src="<%= pm.scenario_image %>" alt="Illustration sc&eacute;nario" class="wf-scenario-thumb" />
+            <button type="button" class="wf-scenario-img-remove" id="wf-scenario-img-remove" title="Retirer l&rsquo;image">&#215;</button>
+          </div>
+        <% } else { %>
+          <div class="wf-scenario-img-preview" id="wf-scenario-img-preview" hidden></div>
+        <% } %>
+        <input type="hidden" name="meta_scenario_image" id="wf-scenario-img-path" value="<%= pm.scenario_image || '' %>" />
+        <label class="wf-scenario-img-label">
+          <input type="file" name="scenario_image" id="wf-scenario-img-input" accept="image/*" style="display:none" />
+          <span class="wf-scenario-img-btn">&#128444; Ajouter une image d&rsquo;illustration</span>
+        </label>
       </div>
     </div>
 
