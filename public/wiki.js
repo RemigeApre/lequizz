@@ -107,7 +107,7 @@
       var raw = el.querySelector(".wiki-md-raw");
       if (!raw) return;
       var content = raw.textContent || raw.innerText;
-      if (/^\s*<[a-zA-Z]/.test(content)) {
+      if (/^\s*<[a-zA-Z]/.test(content) || /<(?:h[1-6]|p|div|ul|ol|li|strong|em|a\s|hr|br)\b/i.test(content)) {
         el.innerHTML = content;
         processH2Accordions(el);
       } else {
@@ -2522,7 +2522,7 @@
       // Charge le contenu existant
       var raw = (typeof window._wikiEditContent !== "undefined") ? window._wikiEditContent : "";
       if (raw) {
-        if (/^\s*<[a-zA-Z]/.test(raw)) {
+        if (/^\s*<[a-zA-Z]/.test(raw) || /<(?:h[1-6]|p|div|ul|ol|li|strong|em|a\s|hr|br)\b/i.test(raw)) {
           // HTML : déplie les éventuels accordéons pour que l'éditeur
           // ait des <h2> plats et puisse correctement insérer des H3 dedans.
           editor.innerHTML = unwrapAccordions(raw);
@@ -2532,6 +2532,9 @@
         }
       }
       hidden.value = editor.innerHTML;
+
+      // Assure que Enter crée des <p> et pas des <div> ou du texte brut
+      document.execCommand("defaultParagraphSeparator", false, "p");
 
       // Bloque la navigation sur les liens dans l'éditeur
       editor.addEventListener("click", function (e) {
