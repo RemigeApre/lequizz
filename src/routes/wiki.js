@@ -97,12 +97,32 @@ function autoEnrichTags(tags, title, derivedTerms) {
 }
 
 function syncGalleryRecord(pageId, title, imagePaths, tags) {
-  if (!imagePaths || !imagePaths.length) return;
-  const existing = listGalleryImages().find((g) => g.wikiPageId === pageId);
-  if (existing) {
-    updateGalleryImage(existing.id, { title, imagePaths, tags, wikiPageId: pageId });
-  } else {
-    insertGalleryImage({ imagePaths, title, tags, notes: "", category: "", wikiPageId: pageId });
+  const allLinked = listGalleryImages().filter((g) => g.wikiPageId === pageId);
+
+  // Record primaire : auto-créé depuis les images du wiki (premier trouvé)
+  let primaryId = null;
+  if (imagePaths && imagePaths.length) {
+    const existing = allLinked[0];
+    if (existing) {
+      primaryId = existing.id;
+      updateGalleryImage(existing.id, { title, imagePaths, tags, wikiPageId: pageId });
+    } else {
+      primaryId = insertGalleryImage({ imagePaths, title, tags, notes: "", category: "", wikiPageId: pageId });
+    }
+  }
+
+  // Propager les tags du wiki à tous les autres records liés manuellement
+  // (merge : on ajoute les tags manquants sans toucher aux tags indépendants)
+  for (const img of allLinked) {
+    if (img.id === primaryId) continue;
+    const missingTags = tags.filter((t) => !img.tags.includes(t));
+    if (!missingTags.length) continue;
+    const merged = [...img.tags, ...missingTags];
+    updateGalleryImage(img.id, {
+      title: img.title, category: img.category, tags: merged,
+      notes: img.notes, imagePaths: img.imagePaths, wikiPageId: img.wikiPageId,
+      author: img.author, parody: img.parody, contentType: img.contentType,
+    });
   }
 }
 
