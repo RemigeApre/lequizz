@@ -2202,7 +2202,7 @@
   // 10. ÉDITEUR RICHE (description wiki)
   // ══════════════════════════════════════════════════
   (function () {
-    // ── Pages disponibles ──────────────────────────
+    // ── Pages disponibles (index titre → id) ──────
     var _pages = null;
     function getWikiPages() {
       if (_pages) return _pages;
@@ -2212,100 +2212,146 @@
       return _pages;
     }
 
-    // ── Dropdown autocomplete lien wiki ───────────
-    var drop = document.createElement("div");
-    drop.className = "wikilink-suggest";
-    drop.hidden = true;
-    document.body.appendChild(drop);
-    var dropIdx = -1;
-    var wikilinkCtx = null; // { node, offset, openAt, query } | { toolbar:true, editor }
+    // ── Picker lien wiki : modal avec champ recherche ─
+    var picker = document.createElement("div");
+    picker.className = "wikilink-picker";
+    picker.hidden = true;
+    picker.innerHTML =
+      '<input class="wikilink-picker-input" type="text" placeholder="Rechercher une page\u2026" autocomplete="off" />' +
+      '<div class="wikilink-picker-results"></div>';
+    document.body.appendChild(picker);
 
-    function openDrop(query, ax, ay) {
+    var pickerInput   = picker.querySelector(".wikilink-picker-input");
+    var pickerResults = picker.querySelector(".wikilink-picker-results");
+    var savedRange    = null; // sélection sauvegardée dans l'éditeur
+    var activeEditor  = null;
+    var dropIdx = -1;
+    var wikilinkCtx = null; // conservé pour compat
+
+    // ── Rendu du picker ────────────────────────────
+    function renderPickerResults(q) {
       dropIdx = -1;
-      drop.innerHTML = "";
-      var q = (query || "").toLowerCase();
-      var hits = getWikiPages().filter(function (p) {
-        return !q || p.title.toLowerCase().indexOf(q) !== -1;
-      }).slice(0, 12);
+      pickerResults.innerHTML = "";
+      var all  = getWikiPages();
+      var ql   = (q || "").toLowerCase().trim();
+      var hits = ql
+        ? all.filter(function (p) { return p.title.toLowerCase().indexOf(ql) !== -1; })
+        : all.slice();
+      hits = hits.slice(0, 15);
 
       if (!hits.length) {
-        var em = document.createElement("div");
-        em.className = "wikilink-suggest-empty";
-        em.textContent = "Aucune page";
-        drop.appendChild(em);
-      } else {
-        hits.forEach(function (p) {
-          var btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "wikilink-suggest-item";
-          btn.textContent = p.title;
-          btn.dataset.title = p.title;
-          btn.dataset.id = String(p.id);
-          btn.addEventListener("mousedown", function (e) {
-            e.preventDefault();
-            insertWikilink(p.title, p.id);
-          });
-          drop.appendChild(btn);
-        });
+        pickerResults.innerHTML = '<div class="wikilink-suggest-empty">Aucune page trouvée</div>';
+        return;
       }
-      var dw = 280;
-      var left = Math.min(ax, window.innerWidth - dw - 8); if (left < 8) left = 8;
-      var top  = ay;
-      if (top + 230 > window.innerHeight - 8) top = ay - 240;
-      drop.style.left = left + "px";
-      drop.style.top  = top  + "px";
-      drop.hidden = false;
+      hits.forEach(function (p) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "wikilink-suggest-item";
+        btn.textContent = p.title;
+        btn.addEventListener("mousedown", function (e) {
+          e.preventDefault();
+          pickWikiPage(p.title, p.id);
+        });
+        pickerResults.appendChild(btn);
+      });
     }
 
-    function closeDrop() { drop.hidden = true; dropIdx = -1; wikilinkCtx = null; }
+    function openPicker(editor, anchorRect) {
+      activeEditor = editor;
+      // Sauvegarde la sélection courante AVANT que l'éditeur perde le focus
+      var sel = window.getSelection();
+      if (sel.rangeCount && editor.contains(sel.getRangeAt(0).commonAncestorContainer)) {
+        savedRange = sel.getRangeAt(0).cloneRange();
+      } else {
+        // Aucune sélection dans l'éditeur : on ira en fin de contenu
+        savedRange = null;
+      }
+      pickerInput.value = "";
+      renderPickerResults("");
+      // Positionnement sous le bouton
+      var pw = 280;
+      var left = Math.min(anchorRect.left, window.innerWidth - pw - 8);
+      if (left < 8) left = 8;
+      var top = anchorRect.bottom + 4;
+      if (top + 260 > window.innerHeight - 8) top = anchorRect.top - 264;
+      picker.style.left = left + "px";
+      picker.style.top  = top  + "px";
+      picker.hidden = false;
+      pickerInput.focus();
+    }
 
-    function highlightDrop(i) {
-      var items = drop.querySelectorAll(".wikilink-suggest-item");
+    function closePicker() {
+      picker.hidden = true;
+      savedRange = null;
+      activeEditor = null;
+      dropIdx = -1;
+    }
+
+    function highlightPickerItem(i) {
+      var items = pickerResults.querySelectorAll(".wikilink-suggest-item");
       items.forEach(function (it, j) { it.classList.toggle("active", j === i); });
       if (items[i]) items[i].scrollIntoView({ block: "nearest" });
     }
 
-    // ── Insertion lien wiki dans contenteditable ───
-    function insertLinkAtRange(range, title, pageId) {
+    function pickWikiPage(title, pageId) {
+      if (!activeEditor) { closePicker(); return; }
+      var editor = activeEditor;
+      closePicker();
+      editor.focus();
+
+      // Restaure la sélection sauvegardée ou positionne en fin d'éditeur
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      if (savedRange) {
+        sel.addRange(savedRange);
+        savedRange = null;
+      } else {
+        var r = document.createRange();
+        r.selectNodeContents(editor);
+        r.collapse(false);
+        sel.addRange(r);
+      }
+
+      // Insère le lien
+      var range = sel.getRangeAt(0);
       range.deleteContents();
       var link = document.createElement("a");
       link.className = "wiki-inline-link";
       link.href = "/wiki/" + pageId;
+      link.dataset.pageId = String(pageId);
       link.textContent = title;
       link.contentEditable = "false";
       range.insertNode(link);
-      // Espace après le lien, curseur positionné après
+      // Curseur après le lien
       var sp = document.createTextNode("\u00a0");
-      link.after ? link.after(sp) : link.parentNode.insertBefore(sp, link.nextSibling);
+      if (link.nextSibling) {
+        link.parentNode.insertBefore(sp, link.nextSibling);
+      } else {
+        link.parentNode.appendChild(sp);
+      }
       var r2 = document.createRange();
       r2.setStart(sp, 1); r2.collapse(true);
-      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r2);
-    }
+      sel.removeAllRanges(); sel.addRange(r2);
 
-    function insertWikilink(title, pageId) {
-      var ctx = wikilinkCtx;
-      closeDrop();
-      if (!ctx) return;
-      var editor = ctx.toolbar ? ctx.editor : ctx.node.ownerDocument.querySelector(".wiki-richtext");
-      if (ctx.toolbar) {
-        editor.focus();
-        var sel = window.getSelection();
-        var range;
-        if (sel.rangeCount && editor.contains(sel.getRangeAt(0).commonAncestorContainer)) {
-          range = sel.getRangeAt(0);
-        } else {
-          range = document.createRange(); range.selectNodeContents(editor); range.collapse(false);
-        }
-        insertLinkAtRange(range, title, pageId);
-      } else {
-        var range = document.createRange();
-        range.setStart(ctx.node, ctx.openAt);
-        range.setEnd(ctx.node, ctx.offset);
-        insertLinkAtRange(range, title, pageId);
-      }
       syncHidden(editor);
     }
 
+    // Recherche live dans le picker
+    pickerInput.addEventListener("input", function () {
+      renderPickerResults(pickerInput.value);
+    });
+    pickerInput.addEventListener("keydown", function (e) {
+      var items = pickerResults.querySelectorAll(".wikilink-suggest-item");
+      if (e.key === "ArrowDown")  { e.preventDefault(); dropIdx = Math.min(dropIdx + 1, items.length - 1); highlightPickerItem(dropIdx); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); dropIdx = Math.max(dropIdx - 1, 0); highlightPickerItem(dropIdx); }
+      else if (e.key === "Enter") {
+        e.preventDefault();
+        var it = items[dropIdx >= 0 ? dropIdx : 0];
+        if (it) it.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      } else if (e.key === "Escape") { closePicker(); }
+    });
+
+    // ── Sync champ caché ──────────────────────────
     function syncHidden(editor) {
       if (!editor) return;
       var c = editor.closest(".wiki-editor[data-rich]");
@@ -2313,46 +2359,35 @@
       if (h) h.value = editor.innerHTML;
     }
 
-    // ── Détection [[ dans le texte tapé ───────────
-    function getCaretTrigger(editor) {
-      var sel = window.getSelection();
-      if (!sel.rangeCount) return null;
-      var range = sel.getRangeAt(0);
-      if (!editor.contains(range.startContainer)) return null;
-      var node = range.startContainer;
-      if (node.nodeType !== 3) return null;
-      var text = node.textContent, offset = range.startOffset;
-      var before = text.slice(0, offset);
-      var openAt = before.lastIndexOf("[[");
-      if (openAt === -1 || before.indexOf("]]", openAt) !== -1) return null;
-      return { node: node, offset: offset, openAt: openAt, query: before.slice(openAt + 2) };
-    }
-
     // ── Lien externe ──────────────────────────────
     function insertExtLink(editor) {
       var sel = window.getSelection();
-      var selectedText = sel.rangeCount ? sel.getRangeAt(0).toString() : "";
-      var url = window.prompt("URL du lien :");
+      var selText = (sel.rangeCount && editor.contains(sel.getRangeAt(0).commonAncestorContainer))
+        ? sel.getRangeAt(0).toString() : "";
+      var savedR = (sel.rangeCount && editor.contains(sel.getRangeAt(0).commonAncestorContainer))
+        ? sel.getRangeAt(0).cloneRange() : null;
+
+      var url = window.prompt("URL du lien externe :");
       if (!url) return;
       if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+
+      var label = selText || window.prompt("Texte à afficher :", url);
+      if (label === null) return;
+      if (!label) label = url;
+
       editor.focus();
-      if (selectedText) {
-        document.execCommand("createLink", false, url);
-        var a = editor.querySelector("a:not(.wiki-inline-link)");
-        if (a) { a.target = "_blank"; a.rel = "noopener noreferrer"; }
-      } else {
-        var label = window.prompt("Texte du lien :", url);
-        if (label === null) return;
-        if (!label) label = url;
-        var a = document.createElement("a");
-        a.href = url; a.textContent = label; a.target = "_blank"; a.rel = "noopener noreferrer";
-        var range;
-        if (sel.rangeCount) { range = sel.getRangeAt(0); }
-        else { range = document.createRange(); range.selectNodeContents(editor); range.collapse(false); }
-        range.deleteContents(); range.insertNode(a);
-        var r2 = document.createRange(); r2.setStartAfter(a); r2.collapse(true);
-        sel.removeAllRanges(); sel.addRange(r2);
-      }
+      sel.removeAllRanges();
+      var range;
+      if (savedR) { sel.addRange(savedR); range = savedR; }
+      else { range = document.createRange(); range.selectNodeContents(editor); range.collapse(false); sel.addRange(range); }
+
+      range.deleteContents();
+      var a = document.createElement("a");
+      a.href = url; a.textContent = label;
+      a.target = "_blank"; a.rel = "noopener noreferrer";
+      range.insertNode(a);
+      var r2 = document.createRange(); r2.setStartAfter(a); r2.collapse(true);
+      sel.removeAllRanges(); sel.addRange(r2);
       syncHidden(editor);
     }
 
@@ -2363,57 +2398,46 @@
       var toolbar = container.querySelector(".md-toolbar");
       if (!editor || !hidden) return;
 
-      // Charge le contenu (markdown existant → converti en HTML ; HTML → direct)
+      // Charge le contenu existant
       var raw = (typeof window._wikiEditContent !== "undefined") ? window._wikiEditContent : "";
       if (raw) {
         editor.innerHTML = /^\s*<[a-zA-Z]/.test(raw) ? raw : renderMarkdown(raw);
       }
       hidden.value = editor.innerHTML;
 
-      // Empêche la navigation sur les liens de l'éditeur
+      // Bloque la navigation sur les liens dans l'éditeur
       editor.addEventListener("click", function (e) {
-        var a = e.target.closest("a");
-        if (a && editor.contains(a)) e.preventDefault();
+        if (e.target.closest("a")) e.preventDefault();
       });
 
-      // Sync + détection [[
+      // Sync à chaque frappe
       editor.addEventListener("input", function () {
         hidden.value = editor.innerHTML;
-        var ctx = getCaretTrigger(editor);
-        if (ctx) {
-          wikilinkCtx = ctx;
-          var sel = window.getSelection();
-          if (sel.rangeCount) {
-            var r = sel.getRangeAt(0).getBoundingClientRect();
-            if (r && (r.top || r.left)) {
-              openDrop(ctx.query, r.left, r.bottom + 4);
-              return;
-            }
-          }
-        }
-        if (!drop.hidden && (!wikilinkCtx || !wikilinkCtx.toolbar)) closeDrop();
       });
 
-      // Navigation clavier dropdown + raccourcis
+      // Raccourcis clavier
       editor.addEventListener("keydown", function (e) {
-        if (!drop.hidden) {
-          var items = drop.querySelectorAll(".wikilink-suggest-item");
-          if (e.key === "ArrowDown") { e.preventDefault(); dropIdx = Math.min(dropIdx + 1, items.length - 1); highlightDrop(dropIdx); return; }
-          if (e.key === "ArrowUp")   { e.preventDefault(); dropIdx = Math.max(dropIdx - 1, 0); highlightDrop(dropIdx); return; }
-          if (e.key === "Enter" && dropIdx >= 0) { e.preventDefault(); var it = items[dropIdx]; if (it) insertWikilink(it.dataset.title, it.dataset.id); return; }
-          if (e.key === "Escape") { closeDrop(); return; }
-        }
         if (!e.ctrlKey && !e.metaKey) return;
-        if (e.key === "b") { e.preventDefault(); document.execCommand("bold"); hidden.value = editor.innerHTML; }
+        if (e.key === "b") { e.preventDefault(); document.execCommand("bold");   hidden.value = editor.innerHTML; }
         if (e.key === "i") { e.preventDefault(); document.execCommand("italic"); hidden.value = editor.innerHTML; }
       });
 
       // Toolbar
       toolbar.querySelectorAll("[data-cmd]").forEach(function (btn) {
         btn.addEventListener("mousedown", function (e) {
-          e.preventDefault();
-          editor.focus();
+          e.preventDefault(); // conserve la sélection dans l'éditeur
           var cmd = btn.dataset.cmd, val = btn.dataset.val;
+
+          if (cmd === "wikilink") {
+            openPicker(editor, btn.getBoundingClientRect());
+            return;
+          }
+          if (cmd === "extlink") {
+            insertExtLink(editor);
+            return;
+          }
+
+          editor.focus();
           switch (cmd) {
             case "bold":   document.execCommand("bold");   break;
             case "italic": document.execCommand("italic"); break;
@@ -2425,14 +2449,6 @@
               document.execCommand("styleWithCSS", false, true);
               document.execCommand("foreColor", false, val || getComputedStyle(editor).color);
               break;
-            case "wikilink":
-              wikilinkCtx = { toolbar: true, editor: editor };
-              var r = btn.getBoundingClientRect();
-              openDrop("", r.left, r.bottom + 4);
-              return;
-            case "extlink":
-              insertExtLink(editor);
-              return;
           }
           hidden.value = editor.innerHTML;
         });
@@ -2441,8 +2457,9 @@
 
     document.querySelectorAll(".wiki-editor[data-rich]").forEach(initRichEditor);
 
+    // Ferme le picker si on clique en dehors
     document.addEventListener("mousedown", function (e) {
-      if (!drop.contains(e.target)) closeDrop();
+      if (!picker.contains(e.target)) closePicker();
     });
   })();
 
