@@ -125,11 +125,13 @@
     if (!hero) return;
     var mainMd = document.querySelector(".wiki-detail-body .wiki-md");
     if (!mainMd) return;
-    var firstSection = mainMd.querySelector("details.wiki-section");
+    // :scope > garantit que firstSection est un enfant direct de mainMd
+    // (insertBefore échoue silencieusement sinon et tue tout le script)
+    var firstSection = mainMd.querySelector(":scope > details.wiki-section");
     if (firstSection) {
       mainMd.insertBefore(hero, firstSection);
     } else {
-      // Pas de section ## : on place l'image après tout le texte intro
+      // Pas de section ## directe : on place l'image après tout le texte intro
       mainMd.appendChild(hero);
     }
   })();
