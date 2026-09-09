@@ -52,6 +52,13 @@
         </div>
       <% } %>
       <div class="pc-nav-actions">
+        <details class="pc-consent-details">
+          <summary class="pc-icon-btn pc-consent-btn" title="Rappel consentement" aria-label="Rappel sur le consentement">?</summary>
+          <div class="pc-consent-panel">
+            <p class="pc-consent-title">Consentement</p>
+            <p>Un fantasme n&rsquo;est pas un accord. Une discussion n&rsquo;est pas un accord. Le consentement se donne librement, clairement, et il est r&eacute;vocable &agrave; tout moment par chacun des partenaires.</p>
+          </div>
+        </details>
         <button type="button" class="pc-icon-btn" id="pc-search-btn" aria-label="Rechercher sur tout le site">&#128269;</button>
         <% if (currentUser) { %>
           <div class="pc-nav-item pc-has-drop">
@@ -117,6 +124,13 @@
       </details>
     <% } %>
   </nav>
+
+  <details class="nav-consent-details">
+    <summary class="nav-consent-summary">? Consentement</summary>
+    <div class="nav-consent-body">
+      <p>Un fantasme n&rsquo;est pas un accord. Une discussion n&rsquo;est pas un accord. Le consentement se donne librement, clairement, et il est r&eacute;vocable &agrave; tout moment par chacun des partenaires.</p>
+    </div>
+  </details>
 
   <div class="nav-drawer-footer">
     <% if (currentUser) { %>

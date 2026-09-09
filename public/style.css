@@ -274,6 +274,34 @@ body.nav-drawer-locked {
   user-select: none;
 }
 
+/* ── Bulle consentement — drawer mobile ─────────────── */
+.nav-consent-details {
+  border-top: 1px solid var(--border);
+}
+.nav-consent-summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--fg-muted, rgba(255,255,255,0.45));
+  cursor: pointer;
+  user-select: none;
+  letter-spacing: 0.03em;
+}
+.nav-consent-summary:hover { color: var(--fg); }
+.nav-consent-body {
+  padding: 0 1.25rem 1rem;
+}
+.nav-consent-body p {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--fg-muted, rgba(255,255,255,0.55));
+}
+
 .nav-drawer-footer {
   display: flex;
   justify-content: center;
@@ -7193,6 +7221,43 @@ a.wiki-ql-label:hover .wiki-ql-text {
     color: var(--accent);
     background: var(--bg);
   }
+}
+
+/* ── Bulle consentement — desktop ───────────────────────────────────────── */
+.pc-consent-details {
+  position: relative;
+}
+.pc-consent-details > summary {
+  list-style: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.pc-consent-details > summary::-webkit-details-marker { display: none; }
+.pc-consent-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.6rem);
+  width: 22rem;
+  background: var(--surface, #1e1e2e);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  z-index: 300;
+}
+.pc-consent-panel .pc-consent-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+.pc-consent-panel p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--fg);
 }
 
 /* ── Overlay de recherche globale ────────────────────────────────────────── */
