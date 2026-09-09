@@ -356,6 +356,11 @@
           var secImages = (pm.secondary_image_paths && pm.secondary_image_paths.length)
             ? pm.secondary_image_paths
             : page.imagePaths.slice(1);
+          // Ajoute les images positionnelles (intégrées dans le texte) si pas déjà présentes
+          var posPaths = (pm.positional_images || []).map(function(pi){ return pi.path; });
+          posPaths.forEach(function(p) {
+            if (secImages.indexOf(p) === -1) secImages.push(p);
+          });
           var secDisplay = secImages.slice(0, 16);   // affiche jusqu'à 16
           var isCollapsible = secImages.length > 8;  // collapse si > 8
           var hasMoreSec = secImages.length > 16;    // galerie si > 16

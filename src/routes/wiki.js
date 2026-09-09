@@ -271,12 +271,12 @@ function parseImagesMeta(body, existingPaths, newFiles) {
     imagePaths = [cover, ...imagePaths.filter((p) => p !== cover)];
   }
 
-  // Images secondaires (max 5, hors couverture)
+  // Images secondaires (max 16, hors couverture)
   const coverPath = imagePaths[0] || "";
   const secondary_image_paths = secondary
     .map(resolve)
     .filter((p) => p && imagePaths.includes(p) && p !== coverPath)
-    .slice(0, 5);
+    .slice(0, 16);
 
   // Images positionnelles
   const positional_images = Object.entries(sections)

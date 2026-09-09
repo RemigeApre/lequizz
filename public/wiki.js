@@ -3892,20 +3892,26 @@
     var posImages;
     try { posImages = JSON.parse(dataEl.textContent); } catch (_) { return; }
     if (!posImages || !posImages.length) return;
+    console.info("[wiki-pos] Images positionnelles :", posImages);
 
     // Attend que le rendu wiki-md soit terminé (il est synchrone, donc on peut lancer directement)
     var containers = document.querySelectorAll(".wiki-md, .wiki-section-body");
     var isMobile = window.innerWidth <= 640;
 
+    // Normalise un titre : minuscules, espaces collapsés, sans ponctuation de fin
+    function normTitle(t) {
+      return t.trim().toLowerCase().replace(/\s+/g, " ").replace(/[.!?:]+$/, "");
+    }
+
     posImages.forEach(function (pi) {
       if (!pi.path || !pi.section) return;
-      var needle = pi.section.trim().toLowerCase();
+      var needle = normTitle(pi.section);
 
       // ── Cherche un H3 correspondant ──
       var found = null, foundType = null;
 
       document.querySelectorAll(".wiki-md h3, .wiki-section-body h3").forEach(function (h3) {
-        if (h3.textContent.trim().toLowerCase() === needle && !found) {
+        if (!found && normTitle(h3.textContent) === needle) {
           found = h3; foundType = "h3";
         }
       });
@@ -3914,13 +3920,16 @@
       if (!found) {
         document.querySelectorAll("details.wiki-section").forEach(function (det) {
           var sum = det.querySelector(":scope > .wiki-section-summary");
-          if (sum && sum.textContent.trim().toLowerCase() === needle && !found) {
+          if (!found && sum && normTitle(sum.textContent) === needle) {
             found = det; foundType = "h2";
           }
         });
       }
 
-      if (!found) return;
+      if (!found) {
+        console.warn("[wiki-pos] Section introuvable pour :", pi.section, "| needle:", needle);
+        return;
+      }
 
       // ── Crée la figure ──
       var fig = document.createElement("figure");
