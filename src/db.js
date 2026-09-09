@@ -1003,6 +1003,16 @@ function renameTagEverywhere(oldTag, newTag) {
   }
 }
 
+function syncFlameFavoritesForUser(userId) {
+  const pages = db.prepare("SELECT id FROM wiki_pages WHERE flame = 1").all();
+  const stmt  = db.prepare(
+    "INSERT OR IGNORE INTO favorites (user_id, item_type, item_id, created_at) VALUES (?, 'wiki', ?, ?)"
+  );
+  const now = new Date().toISOString();
+  db.transaction(() => { pages.forEach((p) => stmt.run(userId, p.id, now)); })();
+  return pages.length;
+}
+
 module.exports = {
   db,
   insertSubmission,
@@ -1069,6 +1079,7 @@ module.exports = {
   renameTagEverywhere,
   deleteUser,
   getUserFavoritesWithDetails,
+  syncFlameFavoritesForUser,
   logConnection,
   listConnectionLogs,
   setGalleryImageFeatured,

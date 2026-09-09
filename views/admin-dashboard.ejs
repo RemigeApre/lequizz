@@ -26,6 +26,11 @@
       <p class="admin-error-msg"><%= adminError %></p>
     <% } %>
 
+    <form method="POST" action="/admin/sync-flames-all" style="margin-bottom:1rem"
+          onsubmit="return confirm('Synchroniser les J\u2019adore wiki pour tous les utilisateurs ?')">
+      <button type="submit" class="admin-btn-sm">&#128293; Sync J&rsquo;adore &rarr; Favoris (tous)</button>
+    </form>
+
     <details class="admin-create-panel">
       <summary class="admin-create-summary">+ Cr&eacute;er un utilisateur</summary>
       <form method="POST" action="/admin/profils" class="admin-create-form">

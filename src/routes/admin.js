@@ -20,6 +20,7 @@ const {
   getWikiKPIs,
   getGalleryKPIs,
   getUserDetail,
+  syncFlameFavoritesForUser,
 } = require("../db");
 const { verifyLogin, requireAdmin, tokenForUser } = require("../auth");
 const { hashPassword } = require("../passwords");
@@ -176,6 +177,18 @@ function buildAdminRouter(config) {
     const liveScores = attempt ? computeScores(config, attempt.data) : null;
     const matrixSections = config.sections.filter((s) => s.type === "matrix");
     res.render("admin-user-detail", { config, detail, attempt, liveScores, matrixSections });
+  });
+
+  router.post("/sync-flames-all", requireAdmin, (req, res) => {
+    const users = listUsers();
+    for (const u of users) syncFlameFavoritesForUser(u.id);
+    res.redirect("/admin#tab-utilisateurs");
+  });
+
+  router.post("/utilisateur/:id/sync-flames", requireAdmin, (req, res) => {
+    const id = Number(req.params.id);
+    if (Number.isInteger(id)) syncFlameFavoritesForUser(id);
+    res.redirect("/admin/utilisateur/" + id);
   });
 
   router.get("/:id", requireAdmin, (req, res) => {

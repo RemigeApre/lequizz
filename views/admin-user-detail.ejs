@@ -54,9 +54,9 @@
     var favWiki    = detail.favorites.filter(function(f){ return f.itemType === 'wiki'; });
     var favGallery = detail.favorites.filter(function(f){ return f.itemType === 'gallery'; });
   %>
-  <% if (favWiki.length) { %>
   <div class="aud-section">
     <h2 class="aud-section-title">&#128293;&nbsp;Wiki J&rsquo;adore (<%= favWiki.length %>)</h2>
+    <% if (favWiki.length) { %>
     <div class="aud-fav-rail">
       <% favWiki.forEach(function(f) { %>
       <a href="/wiki/<%= f.itemId %>" class="aud-fav-card">
@@ -69,12 +69,14 @@
       </a>
       <% }) %>
     </div>
+    <% } else { %>
+      <p class="admin-muted">Aucun favori wiki.</p>
+    <% } %>
   </div>
-  <% } %>
 
-  <% if (favGallery.length) { %>
   <div class="aud-section">
     <h2 class="aud-section-title">&#128293;&nbsp;Images J&rsquo;adore (<%= favGallery.length %>)</h2>
+    <% if (favGallery.length) { %>
     <div class="aud-fav-rail">
       <% favGallery.forEach(function(f) { %>
       <a href="/galerie/<%= f.itemId %>/edit" class="aud-fav-card aud-fav-card--img">
@@ -87,15 +89,10 @@
       </a>
       <% }) %>
     </div>
+    <% } else { %>
+      <p class="admin-muted">Aucun favori galerie.</p>
+    <% } %>
   </div>
-  <% } %>
-
-  <% if (!favWiki.length && !favGallery.length) { %>
-  <div class="aud-section">
-    <h2 class="aud-section-title">Favoris</h2>
-    <p class="admin-muted">Aucun favori.</p>
-  </div>
-  <% } %>
 
   <%# ── Notes sur les pages wiki ── %>
   <div class="aud-section">

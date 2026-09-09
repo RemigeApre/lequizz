@@ -4824,6 +4824,18 @@ a.wiki-ql-label:hover .wiki-ql-text {
 }
 .admin-btn-link:hover { text-decoration: underline; }
 
+.admin-btn-sm {
+  font-size: 0.78rem;
+  padding: 0.3rem 0.7rem;
+  background: var(--surface2, #1e1e2e);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.admin-btn-sm:hover { background: var(--surface3, #2a2a3e); }
+
 /* User cards */
 .admin-user-card {
   border: 1px solid var(--border);
