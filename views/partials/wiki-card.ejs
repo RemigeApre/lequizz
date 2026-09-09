@@ -81,7 +81,8 @@
     }
   %>
   data-extra-cats="<%= (page.extraCategories || []).join('|') %>"
-  data-maturity="<%= page.maturity || 0 %>">
+  data-maturity="<%= page.maturity || 0 %>"
+  data-sous-cat="<%= (page.meta && page.meta.sous_cat) || '' %>">
 
   <% if (page.imagePaths && page.imagePaths.length && currentUser) { %>
     <%# ── Carte AVEC image ───────────────────────────────────────────── %>

@@ -57,6 +57,7 @@ const OBJETS_SUBCATS = [
   { key: "gode",      label: "Gode" },
   { key: "bdsm",      label: "BDSM" },
   { key: "fantaisie", label: "Fantaisie" },
+  { key: "tatouage",  label: "Tatouage" },
   { key: "autre",     label: "Autre" },
 ];
 const CATEGORY_KEYS = CATEGORIES.map((c) => c.key);

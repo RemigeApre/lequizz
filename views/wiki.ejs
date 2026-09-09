@@ -70,6 +70,17 @@
               return categories.find(function(c) { return c.key === ec; });
             }).filter(Boolean);
           %>
+          <% if (lockedCategory.key === 'objets' && objetsSubs && objetsSubs.length) { %>
+            <div class="wiki-filter-section">
+              <span class="wiki-filter-label">Sous-cat&eacute;gorie</span>
+              <div class="wiki-sous-cat-filter" id="wiki-sous-cat-filter">
+                <% objetsSubs.forEach(function(s) { %>
+                  <button type="button" class="tag-chip wiki-sous-cat-chip" data-sous-cat="<%= s.key %>"><%= s.label %></button>
+                <% }); %>
+              </div>
+            </div>
+          <% } %>
+
           <% if (availExtraCatObjs.length) { %>
             <div class="wiki-filter-section">
               <span class="wiki-filter-label">Cat&eacute;gories li&eacute;es</span>

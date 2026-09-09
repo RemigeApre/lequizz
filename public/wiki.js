@@ -775,6 +775,7 @@
   var activeMaturityFilter = Number(localStorage.getItem("wiki-filter-maturity") || "-1"); // -1 = pas de filtre
   var includedExtraCats = new Set();
   var excludedExtraCats = new Set();
+  var activeSousCat   = localStorage.getItem("wiki-filter-sous-cat") || "";
   var currentPage     = 1;
   var _paginationNavigation = false;
 
@@ -1004,12 +1005,13 @@
       var okFlame      = propStates["flame"]      === 0 ? true : (propStates["flame"]      === 1 ? card.dataset.flame === "1"      : card.dataset.flame !== "1");
       var okInterested = propStates["interested"] === 0 ? true : (propStates["interested"] === 1 ? card.dataset.interested === "1" : card.dataset.interested !== "1");
       var okMaturity   = activeMaturityFilter < 0 || Number(card.dataset.maturity || 0) === activeMaturityFilter;
+      var okSousCat    = !activeSousCat || (card.dataset.sousCat || "") === activeSousCat;
 
       // Track which cards pass all non-tag filters (for smart tag chip visibility)
-      var okNonTag = okCat && okUltra && okIrrealiste && okSpecial && okExtraCat && okSearch && okRating && okNotRated && okOwned && okFlame && okInterested && okMaturity;
+      var okNonTag = okCat && okUltra && okIrrealiste && okSpecial && okExtraCat && okSearch && okRating && okNotRated && okOwned && okFlame && okInterested && okMaturity && okSousCat;
       card._passesNonTag = okNonTag;
       // Track which cards pass all filters except the category (for 9/27 chip counts)
-      card._passesNonCat = okUltra && okIrrealiste && okSpecial && okExtraCat && okSearch && okRating && okNotRated && okOwned && okFlame && okInterested && okMaturity && okTag;
+      card._passesNonCat = okUltra && okIrrealiste && okSpecial && okExtraCat && okSearch && okRating && okNotRated && okOwned && okFlame && okInterested && okMaturity && okSousCat && okTag;
       card.hidden = !(okNonTag && okTag);
     });
 
@@ -1322,6 +1324,31 @@
     });
   }
 
+  // Filtre sous-catégorie (objets)
+  var sousCatFilterWrap = document.getElementById("wiki-sous-cat-filter");
+  if (sousCatFilterWrap) {
+    if (activeSousCat) {
+      var restoredSCBtn = sousCatFilterWrap.querySelector('[data-sous-cat="' + activeSousCat + '"]');
+      if (restoredSCBtn) restoredSCBtn.classList.add("active");
+    }
+    sousCatFilterWrap.querySelectorAll(".wiki-sous-cat-chip").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var sc = btn.dataset.sousCat || "";
+        if (activeSousCat === sc) {
+          activeSousCat = "";
+          localStorage.removeItem("wiki-filter-sous-cat");
+          sousCatFilterWrap.querySelectorAll(".wiki-sous-cat-chip").forEach(function(b) { b.classList.remove("active"); });
+        } else {
+          activeSousCat = sc;
+          localStorage.setItem("wiki-filter-sous-cat", sc);
+          sousCatFilterWrap.querySelectorAll(".wiki-sous-cat-chip").forEach(function(b) { b.classList.remove("active"); });
+          btn.classList.add("active");
+        }
+        applyFilters();
+      });
+    });
+  }
+
   if (categoryFilter) {
     categoryFilter.querySelectorAll(".tag-chip").forEach(function (chip) {
       chip.addEventListener("click", function () {
@@ -1525,6 +1552,12 @@
       localStorage.setItem("wiki-filter-search", "");
       if (searchInput) { searchInput.value = ""; }
       if (searchClear) searchClear.hidden = true;
+      // Sous-catégorie
+      activeSousCat = "";
+      localStorage.removeItem("wiki-filter-sous-cat");
+      if (sousCatFilterWrap) {
+        sousCatFilterWrap.querySelectorAll(".wiki-sous-cat-chip").forEach(function(b) { b.classList.remove("active"); });
+      }
       applyFilters();
       applyChapterStripFilters();
     });
