@@ -341,6 +341,18 @@
           </details>
         <% } %>
 
+        <%# Orce (toutes catégories) ─ %>
+        <% if (pm.orce_content) { %>
+          <details class="wiki-pos-section wiki-orce-section">
+            <summary class="wiki-pos-section-heading wiki-orce-summary">
+              <span class="wiki-orce-logo">Orce</span>
+            </summary>
+            <p class="wiki-orce-pastille">Orce est un univers de fiction, de dark fantasy. Les cr&eacute;atures list&eacute;es ont leurs pendants, avec des noms l&eacute;g&egrave;rement diff&eacute;rents, et des caract&eacute;ristiques diff&eacute;rentes. Nous int&eacute;grons ici alors le contenu descriptif li&eacute;.</p>
+            <% if (pm.orce_name) { %><p class="wiki-orce-name">Nom en Orce&nbsp;: <strong><%= pm.orce_name %></strong></p><% } %>
+            <div class="wiki-md wiki-orce-content"><span class="wiki-md-raw" hidden><%= pm.orce_content %></span></div>
+          </details>
+        <% } %>
+
         <%# Informations utiles (positions) ─ %>
         <% if (page.category === 'position' && pm.infos_utiles) { %>
           <div class="wiki-pos-section wiki-pos-infos">

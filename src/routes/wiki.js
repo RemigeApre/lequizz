@@ -130,6 +130,8 @@ function parseMeta(category, body) {
   // Champs transversaux (toutes catégories)
   const base = {
     termes_derives: parseDerivedTerms(body.meta_termes_derives || ""),
+    orce_name:    String(body.meta_orce_name    || "").slice(0, 200).trim(),
+    orce_content: String(body.meta_orce_content || "").slice(0, 10000).trim(),
   };
 
   let specific = {};
@@ -485,7 +487,7 @@ function buildWikiRouter(config) {
 
     const category        = normalizeCategory(req.body.category);
     const content         = String(req.body.content || "").trim();
-    const tags            = parseTags(req.body.tags);
+    let tags              = parseTags(req.body.tags);
     const owned           = OWNED_CATEGORIES.includes(category) && req.body.owned === "on";
     const extraCategories = arr(req.body.extra_categories).filter((k) => CATEGORY_KEYS.includes(k) && k !== category);
 
@@ -498,6 +500,7 @@ function buildWikiRouter(config) {
     meta.positional_images     = positional_images;
     const scenImgFile = files.find((f) => f.fieldname === "scenario_image");
     if (scenImgFile) meta.scenario_image = `/uploads/wiki/${scenImgFile.filename}`;
+    if (meta.orce_name) tags = [...new Set([...tags, meta.orce_name])];
     const enrichedTags = autoEnrichTags(tags, title, meta.termes_derives || []);
 
     const newId = insertWikiPage({ title, category, content, tags: enrichedTags, imagePaths, owned, meta, extraCategories });
@@ -609,7 +612,7 @@ function buildWikiRouter(config) {
     const title    = String(req.body.title || "").trim() || existing.title;
     const category = normalizeCategory(req.body.category);
     const content  = String(req.body.content || "").trim();
-    const tags     = parseTags(req.body.tags);
+    let tags       = parseTags(req.body.tags);
     const owned    = OWNED_CATEGORIES.includes(category) && req.body.owned === "on";
 
     const files = req.files || [];
@@ -622,6 +625,7 @@ function buildWikiRouter(config) {
     meta.positional_images     = positional_images;
     const scenImgFile = files.find((f) => f.fieldname === "scenario_image");
     if (scenImgFile) meta.scenario_image = `/uploads/wiki/${scenImgFile.filename}`;
+    if (meta.orce_name) tags = [...new Set([...tags, meta.orce_name])];
     const extraCategories = arr(req.body.extra_categories).filter((k) => CATEGORY_KEYS.includes(k) && k !== category);
     const enrichedTags = autoEnrichTags(tags, title, meta.termes_derives || []);
     updateWikiPage(id, { title, category, content, tags: enrichedTags, imagePaths, owned, meta, extraCategories });

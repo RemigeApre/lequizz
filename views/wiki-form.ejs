@@ -198,6 +198,21 @@
       </div>
     </div>
 
+    <%# ── Orce ── %>
+    <div class="wf-section-title wf-orce-title">Orce <span class="wf-orce-badge">univers</span></div>
+    <div class="wf-orce-section">
+      <input type="text"
+             name="meta_orce_name"
+             class="wf-orce-name-input"
+             placeholder="Nom en Orce (ajout&eacute; automatiquement en tag)&hellip;"
+             value="<%= pm.orce_name || '' %>"
+             maxlength="200" />
+      <textarea name="meta_orce_content"
+                class="wf-orce-content-input wf-md-input"
+                rows="6"
+                placeholder="Description Orce (laisser vide si non applicable)&hellip;"><%= pm.orce_content || '' %></textarea>
+    </div>
+
     <%# ── Tags ── %>
     <div class="wf-section-title">Tags</div>
     <div class="wf-tags-unified">

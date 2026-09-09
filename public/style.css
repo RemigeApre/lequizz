@@ -6828,6 +6828,97 @@ a.wiki-ql-label:hover .wiki-ql-text {
 }
 .wf-scenario-img-btn:hover { border-color: var(--accent); color: var(--accent); }
 
+/* ── Orce — form ───────────────────────────────────────── */
+.wf-orce-title { display: flex; align-items: center; gap: 8px; }
+.wf-orce-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #2a0a3c, #4b1169);
+  color: #d4a8ff;
+  border: 1px solid #7c3aad55;
+}
+.wf-orce-section { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.wf-orce-name-input {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #7c3aad55;
+  background: #1a0a2a;
+  color: #d4a8ff;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+.wf-orce-name-input::placeholder { color: #7c5aaa88; }
+.wf-orce-name-input:focus { outline: none; border-color: #9b59d0; }
+.wf-orce-content-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #7c3aad55;
+  background: #1a0a2a;
+  color: #e0c8ff;
+  font-size: 0.9rem;
+  resize: vertical;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.wf-orce-content-input::placeholder { color: #7c5aaa88; }
+.wf-orce-content-input:focus { outline: none; border-color: #9b59d0; }
+
+/* ── Orce — viewer ─────────────────────────────────────── */
+.wiki-orce-section {
+  border: 1px solid #7c3aad44;
+  border-radius: 12px;
+  background: linear-gradient(160deg, #110720 0%, #1c0b2e 100%);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.wiki-orce-summary {
+  padding: 12px 16px;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(90deg, #2a0a3c88, transparent);
+}
+.wiki-orce-summary::-webkit-details-marker { display: none; }
+.wiki-orce-logo {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #d4a8ff, #9b59d0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.wiki-orce-pastille {
+  margin: 0 16px 8px;
+  padding: 10px 14px;
+  border-left: 3px solid #7c3aad;
+  font-size: 0.8rem;
+  color: #b088dd;
+  font-style: italic;
+  background: #2a0a3c55;
+  border-radius: 0 8px 8px 0;
+}
+.wiki-orce-name {
+  margin: 4px 16px 8px;
+  font-size: 0.9rem;
+  color: #d4a8ff;
+}
+.wiki-orce-content {
+  padding: 0 16px 14px;
+  color: #e0c8ff;
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
 /* ── Age gate overlay ───────────────────────────────────── */
 .age-gate {
   position: fixed;
